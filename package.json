@@ -45,7 +45,7 @@
       "@types/pg": "^8.15.6",
       "drizzle-kit": "^0.31.6",
       "tsx": "^4.20.6",
-      "env-var": "^7.5.0"
+  
     }
   },
   "lint-staged": {
