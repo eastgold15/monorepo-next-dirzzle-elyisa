@@ -1,10 +1,8 @@
+import { eq, inArray } from "drizzle-orm";
+import { Elysia } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
 import { rolePermissionsTable, usersTable } from "@/server/db/schema";
 import { auth } from "@/server/lib/auth";
-import { eq, inArray } from "drizzle-orm";
-import { Elysia } from "elysia";
-
-
 
 // 用户中间件（计算用户和会话并传递给路由）
 export const betterAuthPlugin = new Elysia({ name: "better-auth" })
@@ -56,8 +54,8 @@ export const betterAuthPlugin = new Elysia({ name: "better-auth" })
             },
           })
         )
-          .flatMap((rp) => rp.permissions.map(p => p.name)) // → string[]
-          .filter((name): name is string => !!name);        // 过滤 null/undefined
+          .flatMap((rp) => rp.permissions.map((p) => p.name)) // → string[]
+          .filter((name): name is string => !!name); // 过滤 null/undefined
 
         // 如果需要去重（推荐）：
         const uniquePermissions = [...new Set(permissions)];

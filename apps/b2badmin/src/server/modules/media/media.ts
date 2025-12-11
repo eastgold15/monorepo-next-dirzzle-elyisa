@@ -7,10 +7,9 @@
 import { FILE_TYPE, MediaModel } from "@repo/contract";
 import { Elysia, t } from "elysia";
 import { z } from "zod/v4";
-
-import MediaService from "./media.service";
 import { dbPlugin } from "@/server/db/connection";
 import { commonRes } from "@/server/utils/Res";
+import MediaService from "./media.service";
 
 /**
  * 媒体文件管理控制器

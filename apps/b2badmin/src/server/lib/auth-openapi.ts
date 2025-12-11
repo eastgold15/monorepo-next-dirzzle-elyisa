@@ -1,6 +1,5 @@
 import { auth } from "./auth";
 
-
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;
 const getSchema = async () => {
   if (!_schema) {

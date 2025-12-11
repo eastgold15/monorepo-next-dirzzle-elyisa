@@ -1,7 +1,6 @@
-import { envConfig } from "@/server/config/config";
 import type { Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
-
+import { envConfig } from "@/server/config/config";
 
 class EmailService {
   private readonly transporter: Transporter | null;

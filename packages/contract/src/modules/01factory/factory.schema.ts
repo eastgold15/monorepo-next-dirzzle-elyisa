@@ -30,7 +30,9 @@ export const factoriesTable = pgTable("factories", {
   description: text("description"), // 工厂描述
   website: varchar("website", { length: 500 }).notNull(), // 官网地址
   address: text("address").notNull(), // 详细地址
-  categoryId: uuid("category_id").references(() => categoriesTable.id).notNull(),
+  categoryId: uuid("category_id")
+    .references(() => categoriesTable.id)
+    .notNull(),
   contactPhone: integer("contact_phone").notNull(),
   logo: varchar("logo", { length: 500 }), // 工厂Logo URL
 

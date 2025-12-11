@@ -4,7 +4,14 @@
  */
 
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgTable,
+  primaryKey,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { usersTable } from "../01auth/auth.schema";
 import { categoriesTable } from "../category/category.schema";
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
@@ -38,20 +45,21 @@ export const salespersonsTable = pgTable("salespersons", {
   lastAssignedAt: timestamp("last_assigned_at"),
 });
 
-
 // 业务员关系定义
-export const salespersonRelations = relations(salespersonsTable, ({ one, many }) => ({
-  factory: one(factoriesTable, {
-    fields: [salespersonsTable.factoryId],
-    references: [factoriesTable.id],
-  }),
-  user: one(usersTable, {
-    fields: [salespersonsTable.userId],
-    references: [usersTable.id],
-  }),
-  assignedCategories: many(salespersonCategoriesTable),
-}));
-
+export const salespersonRelations = relations(
+  salespersonsTable,
+  ({ one, many }) => ({
+    factory: one(factoriesTable, {
+      fields: [salespersonsTable.factoryId],
+      references: [factoriesTable.id],
+    }),
+    user: one(usersTable, {
+      fields: [salespersonsTable.userId],
+      references: [usersTable.id],
+    }),
+    assignedCategories: many(salespersonCategoriesTable),
+  })
+);
 
 export const salespersonCategoriesTable = pgTable(
   "salesperson_categories",
@@ -63,20 +71,18 @@ export const salespersonCategoriesTable = pgTable(
       .notNull()
       .references(() => categoriesTable.id, { onDelete: "cascade" }),
   },
-  (t) => ([
-    primaryKey({ columns: [t.salespersonId, t.categoryId] }),
-  ])
+  (t) => [primaryKey({ columns: [t.salespersonId, t.categoryId] })]
 );
-export const salespersonCategoriesRelations = relations(salespersonCategoriesTable, ({ one }) => ({
-  salesperson: one(salespersonsTable, {
-    fields: [salespersonCategoriesTable.salespersonId],
-    references: [salespersonsTable.id],
-  }),
-  category: one(categoriesTable, {
-    fields: [salespersonCategoriesTable.categoryId],
-    references: [categoriesTable.id],
-  }),
-}));
-
-
-
+export const salespersonCategoriesRelations = relations(
+  salespersonCategoriesTable,
+  ({ one }) => ({
+    salesperson: one(salespersonsTable, {
+      fields: [salespersonCategoriesTable.salespersonId],
+      references: [salespersonsTable.id],
+    }),
+    category: one(categoriesTable, {
+      fields: [salespersonCategoriesTable.categoryId],
+      references: [categoriesTable.id],
+    }),
+  })
+);

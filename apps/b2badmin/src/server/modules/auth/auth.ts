@@ -1,6 +1,6 @@
+import { randomUUIDv7 } from "bun";
 import { db } from "@/server/db/connection";
 import { usersTable } from "@/server/db/schema";
-import { randomUUIDv7 } from "bun";
 
 class AuthService {
   // 检查用户是否存在

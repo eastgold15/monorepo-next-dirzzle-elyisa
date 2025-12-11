@@ -127,12 +127,15 @@ export const permissionTable = pgTable("permissions", {
   description: text("description"),
 });
 
-export const permissionRelations = relations(permissionTable, ({ many, one }) => ({
-  rolePermissions: one(rolePermissionsTable, {
-    fields: [permissionTable.id],
-    references: [rolePermissionsTable.roleId],
+export const permissionRelations = relations(
+  permissionTable,
+  ({ many, one }) => ({
+    rolePermissions: one(rolePermissionsTable, {
+      fields: [permissionTable.id],
+      references: [rolePermissionsTable.roleId],
+    }),
   })
-}));
+);
 //  用户角色权限关联表
 export const rolePermissionsTable = pgTable(
   "role_permissions",
@@ -147,10 +150,12 @@ export const rolePermissionsTable = pgTable(
   (t) => [primaryKey({ columns: [t.roleId, t.permissionId] })]
 );
 
-
-export const rolePermissionRelations = relations(rolePermissionsTable, ({ many }) => ({
-  permissions: many(permissionTable),
-}));
+export const rolePermissionRelations = relations(
+  rolePermissionsTable,
+  ({ many }) => ({
+    permissions: many(permissionTable),
+  })
+);
 
 export const userResourceRolesTable = pgTable(
   "user_resource_roles",

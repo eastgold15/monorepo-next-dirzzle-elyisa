@@ -1,7 +1,6 @@
 import { Elysia, t } from "elysia";
-
-import { ProductStatisticsService } from "./product-statistics.service";
 import { commonRes } from "@/server/utils/Res";
+import { ProductStatisticsService } from "./product-statistics.service";
 
 /**
  * 商品统计控制器

@@ -1,7 +1,6 @@
-import { envConfig } from "@/lib/env/server/config";
 import { Elysia } from "elysia";
 import logixlysia from "logixlysia";
-
+import { envConfig } from "@/lib/env/server/config";
 
 export const logPlugin = new Elysia({
   name: "Logixlysia",

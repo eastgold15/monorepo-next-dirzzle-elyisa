@@ -376,10 +376,7 @@ export const MediaService = {
   /**
    * 批量删除媒体文件
    */
-  async deleteBatchWithFiles(
-    ids: string[],
-    storageType?: StorageType
-  ) {
+  async deleteBatchWithFiles(ids: string[], storageType?: StorageType) {
     // 获取所有媒体文件信息
     const mediaList = await this.getDetailByIds(ids);
     const storage = this.getStorage(storageType);

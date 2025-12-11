@@ -1,7 +1,14 @@
 // 首页展示卡片表 - 存储首页展示的营销卡片信息
 
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  pgTable,
+  text,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
 import { mediaTable } from "../media/media.schema";
 

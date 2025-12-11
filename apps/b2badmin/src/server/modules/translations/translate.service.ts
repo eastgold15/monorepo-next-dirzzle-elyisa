@@ -1,10 +1,9 @@
 import type { CategoryModel } from "@repo/contract";
-
+import type { SupportedLocale } from "@/server/plugins/locale";
 import { DictManagerService } from "./dict-manager.service";
 import { AliyunTranslateProvider } from "./providers/aliyun.provider";
 import { LRUCache } from "./providers/cache.provider";
 import { DictionaryTranslationProvider } from "./providers/dictionary.provider";
-import { SupportedLocale } from "@/server/plugins/locale";
 
 // 主翻译服务
 export class TranslateService {
@@ -106,10 +105,10 @@ export class TranslateService {
     const hitRate =
       this.stats.totalTranslations > 0
         ? (
-          ((this.stats.cacheHits + this.stats.databaseHits) /
-            this.stats.totalTranslations) *
-          100
-        ).toFixed(2)
+            ((this.stats.cacheHits + this.stats.databaseHits) /
+              this.stats.totalTranslations) *
+            100
+          ).toFixed(2)
         : "0";
 
     return {

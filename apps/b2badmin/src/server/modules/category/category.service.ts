@@ -1,12 +1,11 @@
 import type { CategoryModel, TreeNode } from "@repo/contract";
 import { asc, eq, inArray } from "drizzle-orm";
-
+import { HttpError } from "elysia-http-problem-json";
+import { db } from "@/server/db/connection";
+import { categoriesTable } from "@/server/db/schema";
 import type { SupportedLocale } from "../../plugins/locale";
 import { buildTree } from "../../utils/buildTree";
 import { translateService } from "../translations/translate.service";
-import { db } from "@/server/db/connection";
-import { categoriesTable } from "@/server/db/schema";
-import { HttpError } from "elysia-http-problem-json";
 /**
  * 分类服务类
  * 处理分类相关的业务逻辑

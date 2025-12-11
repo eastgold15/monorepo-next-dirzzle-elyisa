@@ -36,12 +36,9 @@ const ListQuery = t.Object({
   ...SortParams.properties,
 });
 
-const Entity = Select
+const Entity = Select;
 
-const EntityWithUser = t.Intersect([
-  Select,
-  AuthTModel.Entity,
-]);
+const EntityWithUser = t.Intersect([Select, AuthTModel.Entity]);
 
 // === 1. 运行时 Schema 集合（值）===
 export const SalesPersonTModel = {
@@ -53,7 +50,7 @@ export const SalesPersonTModel = {
   ListQuery,
   Entity,
   BusinessQuery,
-  EntityWithUser
+  EntityWithUser,
 } as const;
 
 // === 2. 编译时类型集合（类型）===

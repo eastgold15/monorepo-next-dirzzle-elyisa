@@ -1,8 +1,7 @@
 import type { Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
-
-import type { EmailRequest, EmailResult } from "./email.types";
 import { envConfig } from "@/server/config/config";
+import type { EmailRequest, EmailResult } from "./email.types";
 
 /**
  * 邮件发送服务

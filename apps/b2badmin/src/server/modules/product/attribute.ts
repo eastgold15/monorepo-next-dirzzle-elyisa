@@ -1,7 +1,3 @@
-import { dbPlugin } from "@/server/db/connection";
-import { attributeTemplateTable, attributeTable, attributeValueTable } from "@/server/db/schema";
-import { commonRes, CommonRes, PageData } from "@/server/utils/Res";
-import { paginate, buildPageMeta } from "@/server/utils/services";
 import {
   AttributeModel,
   AttributeTemplateModel,
@@ -9,8 +5,16 @@ import {
 } from "@repo/contract";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import z from "zod/v4";
 import { HttpError } from "elysia-http-problem-json";
+import z from "zod/v4";
+import { dbPlugin } from "@/server/db/connection";
+import {
+  attributeTable,
+  attributeTemplateTable,
+  attributeValueTable,
+} from "@/server/db/schema";
+import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
+import { buildPageMeta, paginate } from "@/server/utils/services";
 
 /**
  * 属性模板管理接口

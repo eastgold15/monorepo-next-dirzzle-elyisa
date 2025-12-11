@@ -1,11 +1,10 @@
-import { dbPlugin } from "@/server/db/connection";
-import { translationDictTable } from "@/server/db/schema";
-import { CommonRes, PageData, commonRes } from "@/server/utils/Res";
 import { TranslationDictModel } from "@repo/contract";
 import { and, eq, ilike, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-
+import { dbPlugin } from "@/server/db/connection";
+import { translationDictTable } from "@/server/db/schema";
+import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
 
 /**
  * 翻译管理路由

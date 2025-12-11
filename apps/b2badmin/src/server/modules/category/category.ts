@@ -1,10 +1,9 @@
 import { CategoryModel } from "@repo/contract";
 import { Elysia, t } from "elysia";
 import { z } from "zod/v4";
-
-import { CategoriesService } from "./category.service";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
+import { CategoriesService } from "./category.service";
 
 /**
  * 分类控制器

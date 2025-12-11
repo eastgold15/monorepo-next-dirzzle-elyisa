@@ -1,8 +1,8 @@
 import { AdsModel } from "@repo/contract";
 import { Elysia } from "elysia";
 import { z } from "zod/v4";
-import { AdsService } from "./ads.service";
 import { commonRes } from "@/server/utils/Res";
+import { AdsService } from "./ads.service";
 
 /**
  * 广告控制器

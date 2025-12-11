@@ -1,6 +1,10 @@
-import { db } from "@/server/db/connection";
-import { productsTable, mediaTable, productMediaTable } from "@/server/db/schema";
 import { count, desc, eq, sql } from "drizzle-orm";
+import { db } from "@/server/db/connection";
+import {
+  mediaTable,
+  productMediaTable,
+  productsTable,
+} from "@/server/db/schema";
 
 /**
  * 商品统计服务类

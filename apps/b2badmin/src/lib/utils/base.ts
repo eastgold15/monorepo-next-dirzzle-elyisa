@@ -23,13 +23,13 @@ export declare class EdenFetchError<
 export function handleEden<T, E = unknown>(
   response: (
     | {
-      data: T;
-      error: null;
-    }
+        data: T;
+        error: null;
+      }
     | {
-      data: null;
-      error: EdenFetchError<number, E>;
-    }
+        data: null;
+        error: EdenFetchError<number, E>;
+      }
   ) & {
     status: number;
     response: Record<number, unknown>;

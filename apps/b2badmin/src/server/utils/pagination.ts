@@ -1,9 +1,8 @@
 import { and, asc, desc, type SQL } from "drizzle-orm";
 import type { PgSelectQueryBuilder } from "drizzle-orm/pg-core";
-import { PaginationOptionsType } from "./Res";
-import { createSoftDeleteCondition, QueryScopeEnum } from "./soft-delete";
 import { db } from "../db/connection";
-
+import type { PaginationOptionsType } from "./Res";
+import { createSoftDeleteCondition, QueryScopeEnum } from "./soft-delete";
 
 /**
  * 执行分页查询（使用 $count() 方法的优化版本）

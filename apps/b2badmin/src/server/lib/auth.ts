@@ -1,13 +1,19 @@
-import { envConfig } from "@/lib/env/server/config";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
-import { accountTable, sessionTable, usersTable, verificationTable } from "../db/schema";
+import { envConfig } from "@/lib/env/server/config";
 import { db } from "../db/connection";
-import { createEmailVerificationTemplate, createPasswordResetTemplate } from "../modules/auth/auth.templates";
+import {
+  accountTable,
+  sessionTable,
+  usersTable,
+  verificationTable,
+} from "../db/schema";
+import {
+  createEmailVerificationTemplate,
+  createPasswordResetTemplate,
+} from "../modules/auth/auth.templates";
 import { sendEmail } from "../modules/email/email";
-
-
 
 // 将正则表达式移到顶层以提高性能
 const URL_REPLACE_REGEX = /^(\w+:\/\/[^/]+)(\/.*)$/;
@@ -16,9 +22,7 @@ export const auth = betterAuth({
   basePath: "/auth",
   baseURL: envConfig.BETTER_AUTH_URL,
   secret: envConfig.BETTER_AUTH_SECRET, // 加密密钥
-  plugins: [
-    openAPI(),
-  ],
+  plugins: [openAPI()],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -58,7 +62,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       // 增加`/api/` 才能访问后端
       const newUrls = url.replace(URL_REPLACE_REGEX, "$1/api$2");
-      console.log('newUrls:', newUrls)
+      console.log("newUrls:", newUrls);
       // 使用新的邮件模板系统
       const template = createEmailVerificationTemplate(user.email, newUrls);
       await sendEmail({

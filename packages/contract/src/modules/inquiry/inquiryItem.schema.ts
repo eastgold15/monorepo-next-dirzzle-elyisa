@@ -4,7 +4,14 @@
  */
 
 import { relations } from "drizzle-orm";
-import { decimal, integer, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  decimal,
+  integer,
+  pgTable,
+  text,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
 import { skusTable } from "../product/sku.schema";

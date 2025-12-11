@@ -1,9 +1,8 @@
 // 用户信息控制器
 
 import { Elysia } from "elysia";
-
-import { betterAuthPlugin } from "../auth/auth.plugin";
 import { commonRes } from "@/server/utils/Res";
+import { betterAuthPlugin } from "../auth/auth.plugin";
 
 export const userRoute = new Elysia({
   prefix: "/user",
@@ -32,5 +31,4 @@ export const userRoute = new Elysia({
         tags: ["User"],
       },
     }
-  )
-
+  );

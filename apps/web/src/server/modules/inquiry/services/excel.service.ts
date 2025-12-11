@@ -138,9 +138,7 @@ export async function generateQuotationExcel(quotationData: QuotationData) {
     });
   });
 
-
-  // 
-
+  //
 
   // === 第二步：处理图片 ===
   if (quotationData.photoForRefer) {
@@ -172,12 +170,11 @@ export async function generateQuotationExcel(quotationData: QuotationData) {
       },
       ext: {
         width: Number(worksheet.getCell(targetCellAddr).col),
-        height: Number(worksheet.getCell(targetCellAddr).row)
+        height: Number(worksheet.getCell(targetCellAddr).row),
       },
       editAs: "oneCell", // 图片随单元格移动/缩放
     });
   }
-
 
   // 4. 生成并返回 Buffer（注意：这必须在 all rows 处理完之后！）
   const buffer = await workbook.xlsx.writeBuffer();

@@ -1,9 +1,8 @@
 import { SiteConfigModel } from "@repo/contract";
 import { Elysia, t } from "elysia";
-
-import { SiteConfigsService } from "./site-config.service";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
+import { SiteConfigsService } from "./site-config.service";
 
 /**
  * 网站配置控制器

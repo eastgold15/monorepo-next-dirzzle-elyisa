@@ -34,9 +34,7 @@ const ListQuery = t.Object({
   ...SortParams.properties,
 });
 
-const Entity = t.Omit(Select, ["password", 'id', 'createdAt', 'updatedAt']); // 不返回密码字段
-
-
+const Entity = t.Omit(Select, ["password", "id", "createdAt", "updatedAt"]); // 不返回密码字段
 
 // === 1. 运行时 Schema 集合（值）===
 export const AuthTModel = {

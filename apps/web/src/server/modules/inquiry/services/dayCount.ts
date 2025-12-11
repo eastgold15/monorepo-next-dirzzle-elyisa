@@ -14,8 +14,7 @@ function getYYMMDD(date: Date = new Date()): string {
  */
 export async function generateInquiryNumber(): Promise<string> {
   const today = new Date();
-  const dateKey = getYYMMDD(today)
-
+  const dateKey = getYYMMDD(today);
 
   // 🔁 使用 upsert（PostgreSQL: ON CONFLICT / MySQL: ON DUPLICATE KEY）
   // 先尝试插入 count=1，如果存在则 count = count + 1

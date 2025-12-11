@@ -1,10 +1,9 @@
 import { HeroCardsModel } from "@repo/contract";
 import { Elysia } from "elysia";
 import { z } from "zod/v4";
-
-import { HeroCardsService } from "./hero-cards.service";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
+import { HeroCardsService } from "./hero-cards.service";
 /**
  * 首页展示卡片控制器
  * 处理首页展示卡片相关的HTTP请求

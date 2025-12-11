@@ -79,7 +79,7 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
 
         // === 2. 创建询价主记录 ===
 
-        const inquiry_id = await generateInquiryNumber()
+        const inquiry_id = await generateInquiryNumber();
 
         const [newInquiry] = await db
           .insert(inquiryTable)
@@ -214,10 +214,10 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
           // 图片
           photoForRefer: photoBuffer
             ? {
-              buffer: photoBuffer,
-              mimeType,
-              name: `product-${productId}-${Date.now()}`,
-            }
+                buffer: photoBuffer,
+                mimeType,
+                name: `product-${productId}-${Date.now()}`,
+              }
             : null,
 
           // 商品行

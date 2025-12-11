@@ -136,7 +136,7 @@ export const quotationDefaultData: QuotationData = {
   // === Signed By ===
   exporterBehalf: "Michael Tse", // 来自 SELLER -> ON BEHALF OF
   date: "2025-12-08",
-  timeNo: '25_120_801',
+  timeNo: "25_120_801",
   clientAddr: "guangzou",
   payWay: "Payment Method: Cash on Delivery",
 } as const;

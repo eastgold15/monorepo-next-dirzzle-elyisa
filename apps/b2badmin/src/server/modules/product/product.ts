@@ -1,13 +1,19 @@
-import { dbPlugin } from "@/server/db/connection";
-import { productsTable, productTemplateTable, productCategoriesTable, productMediaTable, skusTable } from "@/server/db/schema";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes, CommonRes, PageData } from "@/server/utils/Res";
-import { paginate, buildPageMeta } from "@/server/utils/services";
 import { ProductModel } from "@repo/contract";
 import { and, count, desc, eq, inArray, like, max, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { translateService } from "../translations/translate.service";
 import { HttpError } from "elysia-http-problem-json";
+import { dbPlugin } from "@/server/db/connection";
+import {
+  productCategoriesTable,
+  productMediaTable,
+  productsTable,
+  productTemplateTable,
+  skusTable,
+} from "@/server/db/schema";
+import { localeMiddleware } from "@/server/plugins/locale";
+import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
+import { buildPageMeta, paginate } from "@/server/utils/services";
+import { translateService } from "../translations/translate.service";
 
 /**
  * 商品管理接口

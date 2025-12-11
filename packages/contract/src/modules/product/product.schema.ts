@@ -51,8 +51,12 @@ export const productsRelations = relations(productsTable, ({ many, one }) => ({
 
 // 6. 商品分类关联表 - 处理商品与分类的多对多关系
 export const productCategoriesTable = pgTable("product_categories", {
-  productId: uuid("product_id").references(() => productsTable.id).notNull(), // 商品ID
-  categoryId: uuid("category_id").references(() => categoriesTable.id).notNull(), // 分类ID
+  productId: uuid("product_id")
+    .references(() => productsTable.id)
+    .notNull(), // 商品ID
+  categoryId: uuid("category_id")
+    .references(() => categoriesTable.id)
+    .notNull(), // 分类ID
 });
 
 export const productCategoriesRelations = relations(

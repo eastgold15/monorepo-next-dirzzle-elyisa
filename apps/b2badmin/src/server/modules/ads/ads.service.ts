@@ -1,10 +1,10 @@
-import { db } from "@/server/db/connection";
-import { adsTable, mediaTable } from "@/server/db/schema";
-import { PageData } from "@/server/utils/Res";
-import { paginate, buildPageMeta } from "@/server/utils/services";
 import type { AdsModel } from "@repo/contract";
 import { and, eq, getTableColumns, inArray, like, or } from "drizzle-orm";
-import { HttpError } from 'elysia-http-problem-json'
+import { HttpError } from "elysia-http-problem-json";
+import { db } from "@/server/db/connection";
+import { adsTable, mediaTable } from "@/server/db/schema";
+import type { PageData } from "@/server/utils/Res";
+import { buildPageMeta, paginate } from "@/server/utils/services";
 
 /**
  * 广告服务抽象类
@@ -127,7 +127,6 @@ export const AdsService = {
    */
 
   async createAdvertisement(data: AdsModel["Create"]) {
-
     if (!data.image_id || data.image_id.length === 0) {
       throw new HttpError.BadRequest("请上传图片");
     }

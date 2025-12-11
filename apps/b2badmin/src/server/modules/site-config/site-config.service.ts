@@ -1,21 +1,20 @@
-import { db } from "@/server/db/connection";
-import { siteConfigTable } from "@/server/db/schema";
-import { SupportedLocale } from "@/server/plugins/locale";
 import type { SiteConfigModel } from "@repo/contract";
 import {
   and,
   asc,
   count,
+  desc,
   eq,
   getTableColumns,
   inArray,
   like,
   or,
-  desc
 } from "drizzle-orm";
-import { TranslateService } from "../translations/translate.service";
+import { db } from "@/server/db/connection";
+import { siteConfigTable } from "@/server/db/schema";
+import type { SupportedLocale } from "@/server/plugins/locale";
 import { HttpError } from "@/server/utils/err";
-
+import { TranslateService } from "../translations/translate.service";
 
 /**
  * 网站配置服务对象
@@ -102,9 +101,14 @@ export const SiteConfigsService = {
       query.where(and(...conditions));
     }
 
-    query.limit(limit).offset((page - 1) * limit).orderBy(sortOrder === "desc" ? desc(siteConfigTable[safeSort]) : asc(siteConfigTable[safeSort]))
-
-
+    query
+      .limit(limit)
+      .offset((page - 1) * limit)
+      .orderBy(
+        sortOrder === "desc"
+          ? desc(siteConfigTable[safeSort])
+          : asc(siteConfigTable[safeSort])
+      );
 
     // 执行查询
     const [data, totalResult] = await Promise.all([

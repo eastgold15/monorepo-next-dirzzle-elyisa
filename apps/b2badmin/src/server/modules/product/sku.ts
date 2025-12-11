@@ -1,12 +1,18 @@
-import { dbPlugin } from "@/server/db/connection";
-import { productTemplateTable, attributeTable, attributeValueTable, skusTable, mediaTable } from "@/server/db/schema";
-import { commonRes, CommonRes, PageData } from "@/server/utils/Res";
-import { paginate, buildPageMeta } from "@/server/utils/services";
 import { SkuModel } from "@repo/contract";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import z from "zod/v4";
 import { HttpError } from "elysia-http-problem-json";
+import z from "zod/v4";
+import { dbPlugin } from "@/server/db/connection";
+import {
+  attributeTable,
+  attributeValueTable,
+  mediaTable,
+  productTemplateTable,
+  skusTable,
+} from "@/server/db/schema";
+import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
+import { buildPageMeta, paginate } from "@/server/utils/services";
 
 export const skuRoute = new Elysia({ name: "sku", prefix: "/v2/sku" })
   .use(dbPlugin)
@@ -312,12 +318,12 @@ export const skuRoute = new Elysia({ name: "sku", prefix: "/v2/sku" })
           imageId: media ? [media.id] : [], // 始终返回数组
           specJson:
             typeof skus_table.specJson === "object" &&
-              skus_table.specJson !== null
+            skus_table.specJson !== null
               ? (skus_table.specJson as Record<string, string>)
               : {},
           extraAttributes:
             typeof skus_table.extraAttributes === "object" &&
-              skus_table.extraAttributes !== null
+            skus_table.extraAttributes !== null
               ? (skus_table.extraAttributes as Record<string, any>)
               : {},
         };
