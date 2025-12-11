@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
-import { envConfig } from "@/lib/env/server/config";
+import { envConfig } from "@/lib/env/server";
 import { db } from "../db/connection";
 import {
   accountTable,

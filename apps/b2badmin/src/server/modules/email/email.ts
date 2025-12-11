@@ -1,6 +1,6 @@
 import type { Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
-import { envConfig } from "@/server/config/config";
+import { envConfig } from "@/lib/env/server";
 import type { EmailRequest, EmailResult } from "./email.types";
 
 /**

@@ -1,11 +1,11 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Elysia } from "elysia";
-import { serverEnv } from "@/lib/env/server";
+import { envConfig } from "@/lib/env/server";
 import * as dbTable from "./schema";
 // You can specify any property from the node-postgres connection options
 export const db = drizzle({
   connection: {
-    connectionString: serverEnv.DATABASE_URL,
+    connectionString: envConfig.DATABASE_URL,
   },
   schema: dbTable,
 });

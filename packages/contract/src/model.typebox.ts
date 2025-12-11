@@ -5,7 +5,7 @@ export * from "./modules/01factory/sales_person.t.model";
 export * from "./modules/ads/ads.t.model";
 export * from "./modules/category/category.t.model";
 export * from "./modules/helper/schemaHelper.schema";
-export * from "./modules/hero-cards/hero-cards.model";
+export * from "./modules/hero-cards/hero-cards.t.model";
 export * from "./modules/inquiry/inquiry.schema";
 export * from "./modules/inquiry/inquiry.t.model";
 export * from "./modules/inquiry/inquiryItem.t.model";

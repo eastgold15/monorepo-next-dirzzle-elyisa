@@ -15,7 +15,7 @@ export { CategoryTModel as CategoryModel } from "./modules/category/category.t.m
 export { ClientTModel as ClientModel } from "./modules/customer/customer.t.model";
 export * from "./modules/helper/constant";
 export * from "./modules/helper/query-types.t.model";
-export * from "./modules/helper/utils";
+
 export * from "./modules/helper/utils.types";
 export { HeroCardsTModel as HeroCardsModel } from "./modules/hero-cards/hero-cards.t.model";
 export { ImageTModel as ImageModel } from "./modules/image/images.t.model";

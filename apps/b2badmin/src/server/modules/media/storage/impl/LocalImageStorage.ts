@@ -6,7 +6,7 @@
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { basename, extname, join } from "node:path";
-import { IMAGE_MIME_TYPE_MAP } from "~/utils/constant";
+
 import { AbstractImageStorage } from "../ImageStorage";
 
 type LocalStorageConfig = {

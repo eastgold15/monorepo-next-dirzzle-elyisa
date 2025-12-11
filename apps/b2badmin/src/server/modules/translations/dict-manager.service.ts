@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db } from "~/lib/db/connection";
-import { translationDictTable } from "~/lib/db/schema";
+import { db } from "@/server/db/connection";
+import { translationDictTable } from "@/server/db/schema";
 
 /**
  * 翻译字典管理服务

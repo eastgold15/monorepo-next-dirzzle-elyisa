@@ -81,3 +81,16 @@ apps/backend/index.exe
 apps/frontend/components.d.ts
 apps/frontend/tsconfig.app.tsbuildinfo
 apps/frontend/tsconfig.app.tsbuildinfo
+minio/data/.minio.sys/format.json
+minio/data/.minio.sys/buckets/.bloomcycle.bin/xl.meta
+minio/data/.minio.sys/buckets/.usage-cache.bin/xl.meta
+minio/data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta
+minio/data/.minio.sys/buckets/.usage.json/xl.meta
+minio/data/.minio.sys/buckets/buy4/.metadata.bin/xl.meta
+minio/data/.minio.sys/buckets/buy4/.usage-cache.bin/xl.meta
+minio/data/.minio.sys/buckets/buy4/.usage-cache.bin.bkp/xl.meta
+minio/data/.minio.sys/config/config.json/xl.meta
+minio/data/.minio.sys/config/iam/format.json/xl.meta
+minio/data/.minio.sys/config/iam/sts/BIIFWDQG3H0K6P4UKLUU/identity.json/xl.meta
+minio/data/.minio.sys/pool.bin/xl.meta
+minio/data/.minio.sys/tmp/2180dc45-b79c-4f6c-ae17-d99fd603c824

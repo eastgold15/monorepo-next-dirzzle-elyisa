@@ -1,13 +1,14 @@
 // providers/dictionary.provider.ts
+
+import { translationDictTable } from "@repo/contract/table";
 import { eq } from "drizzle-orm";
-import { db } from "~/lib/db/connection";
-import { translationDictTable } from "~/lib/db/schema";
+import { db } from "@/server/db/connection";
 import type { TranslateProvider } from "../interfaces/translation-provider.interface";
 
 export class DictionaryTranslationProvider implements TranslateProvider {
   readonly name = "DatabaseDictionary";
 
-  private constructor() {}
+  private constructor() { }
 
   static create() {
     return new DictionaryTranslationProvider();
