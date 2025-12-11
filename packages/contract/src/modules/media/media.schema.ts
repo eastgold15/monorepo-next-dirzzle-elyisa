@@ -3,64 +3,57 @@
  * 合并了原 images 表的功能，支持多种类型的媒体文件
  */
 
-import { boolean, integer, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm/relations";
+import { usersTable } from "../01auth/auth.schema";
 import { adsTable } from "../ads/ads.schema";
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
 import { productMediaTable } from "../product/product.schema";
-
-/**
- * 媒体文件表 - 存储系统中的所有媒体文件信息
- * 支持多种用途的媒体管理（产品图片、广告图片、文档、视频等）
- */
-export const mediaTable = pgTable("media", {
-  id: idUuid, // 媒体文件唯一标识
+export const mediaStatusEnum = pgEnum("media_status", ["active", "deleted"]);
+export const mediaTable = pgTable("file", {
+  id: idUuid, // 文件唯一标识
   createdAt,
   updatedAt,
+  storage_key: varchar("storage_key", { length: 255 }).notNull(), // 存储后端键（相对路径或对象键）
+  bucket_name: varchar("bucket_name", { length: 255 }).notNull(),
+  user_id: varchar("user_id", { length: 255 }).references(() => usersTable.id, {
+    onDelete: "cascade",
+  }), // 上传用户ID
+  original_name: varchar("original_name", { length: 255 }).notNull(),
+  mime_type: varchar("mime_type", { length: 100 }).notNull(), // 文件MIME类型
+  file_hash: varchar("file_hash", { length: 255 }).notNull(),
+  status: boolean("status").notNull().default(true), // 文件状态（是否可用）
+  is_public: boolean("is_public").notNull().default(false), // 是否公开文件（默认不公开）
+});
 
-  // 文件基本信息
-  fileName: varchar("file_name", { length: 255 }).notNull(), // 存储文件名
-  originalName: varchar("original_name", { length: 255 }).notNull(), // 原始文件名
-  url: text("url").notNull().unique(), // 媒体文件访问URL - 添加唯一约束用于外键引用
-  key: text("key").notNull(), // 存储后端内部标识（相对路径或对象键）
-
-  // 文件分类和类型
-  category: varchar("category", { length: 50 }).notNull().default("general"), // 文件分类
-  folder: varchar("folder", { length: 100 }).notNull().default("uploads"), // 存储文件夹
-  fileType: varchar("file_type", { length: 50 }).notNull().default("image"), // 文件类型：image, video, document, audio, other
-  mimeType: varchar("mime_type", { length: 100 }).notNull(), // 文件MIME类型
-
-  // 文件属性
-  fileSize: integer("file_size").notNull(), // 文件大小(字节)
+export const mediaMetadataTable = pgTable("media_metadata", {
+  id: idUuid, // 媒体文件元数据唯一标识
+  file_id: idUuid
+    .references(() => mediaTable.id, { onDelete: "cascade" })
+    .notNull(), // 关联文件ID
+  media_type: varchar("media_type", { length: 50 }).notNull(), // 媒体类型（image, video, document, audio, other）
   width: integer("width"), // 宽度（图片/视频）
   height: integer("height"), // 高度（图片/视频）
   duration: integer("duration"), // 时长（视频/音频，秒）
-
-  // 内容描述
-  alt: text("alt").default(""), // ALT文本（图片）
-  description: text("description").default(""), // 文件描述
-  tags: text("tags").default(""), // 标签（逗号分隔）
-
-  // 存储信息
-  storageProvider: varchar("storage_provider", { length: 50 })
-    .notNull()
-    .default("local"), // 存储提供者：local, oss, s3等
-  storageConfig: text("storage_config").default(""), // 存储配置（JSON格式）
-
-  // 状态和元数据
-  isPublic: boolean("is_public").default(true), // 是否公开访问
-  metadata: text("metadata").default(""), // 其他元数据（JSON格式）
-
-  // 关联信息（可选）
-  entityType: varchar("entity_type", { length: 50 }).default(""), // 关联实体类型
-  entityId: varchar("entity_id", { length: 50 }).default(""), // 关联实体ID
-  sortIndex: integer("sort_index").default(0), // 排序索引
+  metadata_json: text("metadata_json").default(""), // 元数据（JSON格式）
+  thumbnail_key: varchar("thumbnail_key", { length: 255 }), // 缩略图键（图片）
 });
+
+
+
+
 
 // 创建关联关系
 export const mediaRelations = relations(mediaTable, ({ many }) => ({
   // 媒体文件可以被多个广告使用 - 外键在advertisements表中
   ads: many(adsTable),
   // 媒体文件可以被多个商品使用(通过中间表)
-  productImages: many(productMediaTable),
+  productMedia: many(productMediaTable),
 }));

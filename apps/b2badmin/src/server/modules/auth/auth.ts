@@ -12,7 +12,7 @@ class AuthService {
   }
 
   // 使用邮箱注册用户
-  async signUpWithEmail(email: string) {
+  async signUpWithEmail(email: string, name: string, image?: string) {
     // 先检查用户是否存在
     const exists = await this.userExists(email);
     if (exists) {
@@ -24,9 +24,10 @@ class AuthService {
 
     const user = await db.insert(usersTable).values({
       id,
-      name: email,
+      name: name || email,
       email,
-      emailVerified: true,
+      emailVerified: false, // 不需要验证
+      image: image || null,
     });
 
     console.log("User created:", user);

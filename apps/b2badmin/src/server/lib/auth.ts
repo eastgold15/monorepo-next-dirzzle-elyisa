@@ -41,7 +41,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
       // 使用新的邮件模板系统
       const template = createPasswordResetTemplate(user.email, url);
@@ -57,8 +57,8 @@ export const auth = betterAuth({
   },
   // 基础邮箱验证
   emailVerification: {
-    sendOnSignUp: true,
-    requireEmailVerification: true,
+    sendOnSignUp: false,
+    requireEmailVerification: false,
     sendVerificationEmail: async ({ user, url }) => {
       // 增加`/api/` 才能访问后端
       const newUrls = url.replace(URL_REPLACE_REGEX, "$1/api$2");

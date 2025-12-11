@@ -6,6 +6,7 @@
 
 import { Elysia } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
+import { MediaModel } from "@repo/contract";
 
 /**
  * 媒体文件管理控制器
@@ -14,24 +15,27 @@ import { dbPlugin } from "@/server/db/connection";
 export const mediaRoute = new Elysia({
   prefix: "/media",
   tags: ["Media"],
-}).use(dbPlugin);
-// ========================= 上传相关 =========================
-// 单文件上传
-// .post(
-//   "/upload",
-//   async ({ body }) => {
-//     const { file, ...options } = body;
-//     const result = await MediaService.uploadFromFile(file, options);
-//     return commonRes(result);
-//   },
-//   {
-//     body: MediaModel.UploadFileDto,
-//     detail: {
-//       summary: "上传单个媒体文件",
-//       description: "上传单个媒体文件到指定文件夹，支持多种文件类型",
-//     },
-//   }
-// );
+}).use(dbPlugin)
+  // ========================= 上传相关 =========================
+  // 单文件上传
+  .post(
+    "/upload",
+    async ({ body }) => {
+      const { file, ...options } = body;
+      
+
+      const result =null
+
+      return commonRes(result);
+    },
+    {
+      body: MediaModel,
+      detail: {
+        summary: "上传单个媒体文件",
+        description: "上传单个媒体文件到指定文件夹，支持多种文件类型",
+      },
+    }
+  );
 
 // // 批量文件上传
 // .post(

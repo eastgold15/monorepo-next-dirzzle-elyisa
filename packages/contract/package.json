@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "drizzle-orm": "catalog:",
-    "drizzle-typebox": "^0.3.3",
+    "drizzle-typebox": "catalog:",
     "elysia": "catalog:"
   },
   "devDependencies": {
