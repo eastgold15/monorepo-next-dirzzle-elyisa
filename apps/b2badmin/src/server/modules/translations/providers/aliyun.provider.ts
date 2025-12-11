@@ -1,7 +1,7 @@
 // This file is auto-generated, don't edit it
 import alimt20181012, * as $alimt20181012 from "@alicloud/alimt20181012";
 import * as $OpenApi from "@alicloud/openapi-client";
-import { envConfig } from "~/configs/config";
+import { envConfig } from "@/lib/env/server";
 import type { TranslateProvider } from "../interfaces/translation-provider.interface";
 export class AliyunTranslateProvider implements TranslateProvider {
   readonly name = "aliyun";

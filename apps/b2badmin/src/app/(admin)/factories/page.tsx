@@ -2,9 +2,9 @@
 
 import { Edit, MapPin, Plus, Trash2, User } from "lucide-react";
 import { useState } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
-import { INITIAL_FACTORIES } from "../../../mockData";
-import type { Factory } from "../../../types";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { INITIAL_FACTORIES } from "@/mockData";
+import type { Factory } from "@/types";
 
 export default function FactoryManager() {
   const [factories, setFactories] = useState<Factory[]>(INITIAL_FACTORIES);

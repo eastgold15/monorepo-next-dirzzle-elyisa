@@ -2,17 +2,51 @@
 
 import { Filter, Search, Tag, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
-import { INITIAL_MEDIA } from "../../../mockData";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { MediaUpload } from "@/components/MediaUpload";
+import { Button } from "@/components/ui/button";
+import { INITIAL_MEDIA } from "@/mockData";
+
+interface UploadFile {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  type: string;
+  preview?: string;
+  progress: number;
+  status: "pending" | "uploading" | "success" | "error";
+  error?: string;
+}
 
 export default function MediaLibrary() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [media, setMedia] = useState(INITIAL_MEDIA);
 
-  const filteredMedia = INITIAL_MEDIA.filter(
+  const filteredMedia = media.filter(
     (m) =>
       m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.tags.some((t) => t.includes(searchTerm.toLowerCase()))
   );
+
+  const handleUploadComplete = (uploadedFiles: UploadFile[]) => {
+    // 将新上传的文件添加到媒体列表
+    const newMediaItems = uploadedFiles.map((file) => ({
+      id: file.id,
+      name: file.name,
+      url: file.preview || "/placeholder-image.jpg",
+      type: file.type.startsWith("image/") ? "image" : "video",
+      tags: ["新上传"],
+      createdAt: new Date().toISOString(),
+    }));
+
+    setMedia((prev) => [...newMediaItems, ...prev]);
+  };
+
+  const handleUploadError = (error: string) => {
+    console.error("Upload error:", error);
+    // 这里可以添加错误提示，比如使用 toast
+  };
 
   return (
     <AdminLayout>
@@ -24,10 +58,15 @@ export default function MediaLibrary() {
               Manage product images and videos.
             </p>
           </div>
-          <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-indigo-700">
-            <Upload size={18} />
-            <span>Upload Assets</span>
-          </button>
+          <MediaUpload
+            onError={handleUploadError}
+            onUploadComplete={handleUploadComplete}
+          >
+            <Button className="bg-indigo-600 hover:bg-indigo-700">
+              <Upload className="mr-2" size={18} />
+              上传资源
+            </Button>
+          </MediaUpload>
         </div>
 
         <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">

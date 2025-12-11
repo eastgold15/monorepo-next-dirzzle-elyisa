@@ -61,37 +61,21 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({
           <div className="px-4 py-2 font-semibold text-slate-400 text-xs uppercase tracking-wider">
             Overview
           </div>
-          <SidebarItem href="/admin" icon={LayoutDashboard} label="Dashboard" />
-          <SidebarItem
-            href="/admin/products"
-            icon={ShoppingBag}
-            label="Products"
-          />
+          <SidebarItem href="" icon={LayoutDashboard} label="Dashboard" />
+          <SidebarItem href="/products" icon={ShoppingBag} label="Products" />
 
           <div className="mt-4 px-4 py-2 font-semibold text-slate-400 text-xs uppercase tracking-wider">
             Management
           </div>
-          <SidebarItem
-            href="/admin/categories"
-            icon={Tags}
-            label="Categories"
-          />
-          <SidebarItem
-            href="/admin/factories"
-            icon={Building2}
-            label="Factories"
-          />
-          <SidebarItem
-            href="/admin/templates"
-            icon={FileBox}
-            label="Templates"
-          />
-          <SidebarItem href="/admin/media" icon={Image} label="Media Library" />
+          <SidebarItem href="/categories" icon={Tags} label="Categories" />
+          <SidebarItem href="/factories" icon={Building2} label="Factories" />
+          <SidebarItem href="/templates" icon={FileBox} label="Templates" />
+          <SidebarItem href="/media" icon={Image} label="Media Library" />
 
           <div className="mt-4 px-4 py-2 font-semibold text-slate-400 text-xs uppercase tracking-wider">
             System
           </div>
-          <SidebarItem href="/admin/users" icon={Settings} label="Settings" />
+          <SidebarItem href="/users" icon={Settings} label="Settings" />
         </nav>
 
         <div className="border-slate-100 border-t p-4">

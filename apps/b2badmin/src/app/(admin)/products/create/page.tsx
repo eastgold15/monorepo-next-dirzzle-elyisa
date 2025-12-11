@@ -3,14 +3,14 @@
 import { ArrowLeft, ChevronRight, Package, Save, Upload } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AdminLayout } from "../../../../components/admin/AdminLayout";
-import { MediaPicker } from "../../../../components/admin/MediaPicker";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { MediaPicker } from "@/components/admin/MediaPicker";
 import {
   INITIAL_CATEGORIES,
   INITIAL_FACTORIES,
   INITIAL_TEMPLATES,
-} from "../../../../mockData";
-import type { SkuVariant } from "../../../../types";
+} from "@/mockData";
+import type { SkuVariant } from "@/types";
 
 const steps = [
   "Select Template",
@@ -164,7 +164,7 @@ export default function ProductCreator() {
 
     console.log("Publishing Product:", productPayload);
     alert("Product Created Successfully! (Check console for payload)");
-    window.location.href = "/admin/products";
+    window.location.href = "/products";
   };
 
   return (
@@ -182,7 +182,7 @@ export default function ProductCreator() {
       <div className="mb-8">
         <Link
           className="mb-2 flex items-center gap-2 text-slate-500 text-sm hover:text-slate-800"
-          href="/admin/products"
+          href="/products"
         >
           <ArrowLeft size={16} /> Back to Products
         </Link>

@@ -61,7 +61,7 @@ export default function ProductList() {
           </div>
           <Link
             className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-indigo-700"
-            href="/admin/products/create"
+            href="/products/create"
           >
             <Plus size={18} />
             <span>Create Product</span>

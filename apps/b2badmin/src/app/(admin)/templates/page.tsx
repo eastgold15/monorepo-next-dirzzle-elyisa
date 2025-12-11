@@ -2,8 +2,8 @@
 
 import { List, Plus, Save, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
-import { INITIAL_TEMPLATES } from "../../../mockData";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { INITIAL_TEMPLATES } from "@/mockData";
 import type { FieldType, ProductTemplate, TemplateField } from "../../../types";
 
 export default function TemplateManager() {

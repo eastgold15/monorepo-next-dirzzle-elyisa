@@ -14,7 +14,7 @@ export const categoriesController = new Elysia({
 })
   .use(localeMiddleware)
   .get(
-    "/admin/tree",
+    "/tree",
     async () => {
       const result = await CategoriesService.getAdminCategoryTree();
       return commonRes(result, 200, "获取管理端分类树形列表成功");

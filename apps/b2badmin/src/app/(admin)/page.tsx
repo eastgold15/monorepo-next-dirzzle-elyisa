@@ -111,13 +111,13 @@ export default function Dashboard() {
             <h3 className="mb-4 font-semibold text-lg">System Notifications</h3>
             <div className="space-y-4">
               <div className="flex gap-3 text-sm">
-                <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
                 <p className="text-slate-600">
                   New template "Summer Sandals" needs approval.
                 </p>
               </div>
               <div className="flex gap-3 text-sm">
-                <div className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
+                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
                 <p className="text-slate-600">
                   Low stock alert for SKU-001 (SpeedDemon 2025).
                 </p>
