@@ -146,3 +146,4 @@ apps/b2badmin/src/server/
 3. **错误处理**：使用 `elysia-http-problem-json` 插件统一错误响应格式
 4. **日志记录**：集成 `logixlysia` 插件进行请求日志记录
 5. **CORS 配置**：已配置允许前端开发服务器跨域访问
+- b2bAdmin 是后台管理端， web是面向用户的网站

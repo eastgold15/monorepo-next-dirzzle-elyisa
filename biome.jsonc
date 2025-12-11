@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core", "ultracite/vue", "ultracite/react"],
+  "extends": [
+    "ultracite/core",
+    "ultracite/react"
+  ],
   "files": {
     "ignoreUnknown": false,
     "includes": [
@@ -62,7 +65,8 @@
         "noUndeclaredVariables": "off",
         "noUnknownPseudoClass": "off",
         "noUnusedFunctionParameters": "off",
-        "noUnusedPrivateClassMembers": "off"
+        "noUnusedPrivateClassMembers": "off",
+        "useImageSize": "off"
       }
     }
   },
@@ -73,7 +77,11 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.svelte", "**/*.astro", "**/*.vue"],
+      "includes": [
+        "**/*.svelte",
+        "**/*.astro",
+        "**/*.vue"
+      ],
       "linter": {
         "rules": {
           "style": {
