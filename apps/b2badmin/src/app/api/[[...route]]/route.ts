@@ -1,3 +1,8 @@
+import { cors } from "@elysiajs/cors";
+import { fromTypes, openapi } from "@elysiajs/openapi";
+import { Elysia, redirect } from "elysia";
+import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
+import { z } from "zod/v4";
 import { dbPlugin } from "@/server/db/connection";
 import { auth } from "@/server/lib/auth";
 import { OpenAPI } from "@/server/lib/auth-openapi";
@@ -15,17 +20,13 @@ import { translateRoute } from "@/server/modules/translations/translate";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { logPlugin } from "@/server/plugins/logger";
 import { errorPlugin } from "@/server/utils/err/err.plugin";
-import { Elysia, redirect } from "elysia";
-import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
-
 export const dynamic = "force-dynamic";
 
 /**
  * 在模块加载时验证邮件配置
  * 这是应用启动时的初始化检查
  */
-let emailCheckPromise: Promise<void> | null = null;
-
+const emailCheckPromise: Promise<void> | null = null;
 
 /**
  * Main API router
@@ -91,7 +92,7 @@ const app = new Elysia({ prefix: "/api" })
   .use(errorPlugin)
   // 添加 HTTP Problem JSON 插件 会直接return  所以后面是接受不到错误
   .use(httpProblemJsonPlugin())
-  .get("/favicon", ({ locale }) => {
+  .get("/favicon", () => {
     throw new HttpError.NotFound("favicon.ico");
     // if (locale === "zh-CN") {
     //   throw new HttpError.BadRequest("sssss");
@@ -110,11 +111,6 @@ const app = new Elysia({ prefix: "/api" })
   .use(skuRoute)
   .use(translateRoute)
   .use(userRoute);
-
-
-
-
-
 
 /**
  * Export the app type for use with RPC clients (e.g., edenTreaty)
