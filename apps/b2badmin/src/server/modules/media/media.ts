@@ -6,7 +6,6 @@
 
 import { FILE_TYPE, MediaModel } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { z } from "zod/v4";
 import { dbPlugin } from "@/server/db/connection";
 import { commonRes } from "@/server/utils/Res";
 import MediaService from "./media.service";
@@ -359,8 +358,8 @@ export const mediaRoute = new Elysia({
       return commonRes(result);
     },
     {
-      query: z.object({
-        ids: z.array(z.string()),
+      query: t.Object({
+        ids: t.Array(t.String()),
       }),
       detail: {
         summary: "批量获取媒体文件详情",

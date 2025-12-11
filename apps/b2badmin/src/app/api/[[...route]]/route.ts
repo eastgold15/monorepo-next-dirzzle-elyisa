@@ -2,7 +2,6 @@ import { cors } from "@elysiajs/cors";
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia, redirect } from "elysia";
 import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
-import { z } from "zod/v4";
 import { dbPlugin } from "@/server/db/connection";
 import { auth } from "@/server/lib/auth";
 import { OpenAPI } from "@/server/lib/auth-openapi";
@@ -73,9 +72,6 @@ const app = new Elysia({ prefix: "/api" })
           { name: "Hero Cards", description: "首页展示卡片管理" },
           { name: "Site Config", description: "站点配置" },
         ],
-      },
-      mapJsonSchema: {
-        zod: z.toJSONSchema,
       },
       references: fromTypes(
         process.env.NODE_ENV === "production"

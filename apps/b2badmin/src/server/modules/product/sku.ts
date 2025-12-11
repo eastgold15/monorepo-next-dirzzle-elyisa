@@ -2,7 +2,6 @@ import { SkuModel } from "@repo/contract";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import z from "zod/v4";
 import { dbPlugin } from "@/server/db/connection";
 import {
   attributeTable,
@@ -139,8 +138,8 @@ export const skuRoute = new Elysia({ name: "sku", prefix: "/v2/sku" })
       return commonRes(inserted);
     },
     {
-      params: z.object({
-        productId: z.string(),
+      params: t.Object({
+        productId: t.String(),
       }),
       body: SkuModel.BatchCreate,
       detail: {
@@ -440,11 +439,11 @@ export const skuRoute = new Elysia({ name: "sku", prefix: "/v2/sku" })
         description: "获取指定商品的所有SKU",
         tags: ["SKU管理"],
       },
-      params: z.object({
-        productId: z.string(),
+      params: t.Object({
+        productId: t.String(),
       }),
-      query: z.object({
-        status: z.optional(z.coerce.number()),
+      query: t.Object({
+        status: t.Optional(t.String()), // Elysia 会自动转换字符串到数字
       }),
     }
   );

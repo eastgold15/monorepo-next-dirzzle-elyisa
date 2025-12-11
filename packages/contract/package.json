@@ -29,9 +29,7 @@
   "dependencies": {
     "drizzle-orm": "catalog:",
     "drizzle-typebox": "^0.3.3",
-    "drizzle-zod": "catalog:",
-    "elysia": "catalog:",
-    "zod": "catalog:"
+    "elysia": "catalog:"
   },
   "devDependencies": {
     "@repo/tsconfig": "*",

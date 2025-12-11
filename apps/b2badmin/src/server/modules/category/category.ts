@@ -1,6 +1,5 @@
 import { CategoryModel } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { z } from "zod/v4";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
 import { CategoriesService } from "./category.service";
@@ -37,8 +36,8 @@ export const categoriesController = new Elysia({
       return commonRes(category, 200, "根据slug获取分类详情成功");
     },
     {
-      params: z.object({
-        slug: z.string(),
+      params: t.Object({
+        slug: t.String(),
       }),
       detail: {
         tags: ["Categories"],
@@ -75,8 +74,8 @@ export const categoriesController = new Elysia({
       return commonRes(category, 200, "获取分类详情成功");
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       detail: {
         tags: ["Categories"],
@@ -113,8 +112,8 @@ export const categoriesController = new Elysia({
       return commonRes(_res, 204, "分类删除成功");
     },
     {
-      body: z.object({
-        ids: z.array(z.string()),
+      body: t.Object({
+        ids: t.Array(t.String()),
       }),
       detail: {
         tags: ["Categories"],

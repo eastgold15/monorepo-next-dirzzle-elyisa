@@ -7,31 +7,27 @@
  * 3. 类型安全：全程 TypeScript 类型推导，零运行时错误
  */
 
-import { z } from "zod";
+import { t } from "elysia";
 
 // ==================== 基础系统参数 ====================
 
 // 1. 排序参数（通用，可复用）
-export const SortParams = z.object({
-  sort: z.string().optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
+export const SortParams = t.Object({
+  sort: t.Optional(t.String()),
+  sortOrder: t.UnionEnum([t.Literal("asc"), t.Literal("desc")]),
 });
-export type SortParams = z.infer<typeof SortParams>;
 
 // 2. 分页参数（仅用于分页场景）
-export const PaginationParams = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(1000).default(10),
+export const PaginationParams = t.Object({
+  page: t.Number({ default: 1 }),
+  limit: t.Number({ minimum: 1, maximum: 1000, default: 10 }),
 });
-export type PaginationParams = z.infer<typeof PaginationParams>;
 
 // 3. 基础查询参数（搜索、字段选择等）
-export const BaseQueryParams = z.object({
-  search: z.string().optional(),
-  fields: z.string().optional(),
+export const BaseQueryParams = t.Object({
+  search: t.Optional(t.String()),
+  fields: t.Optional(t.String()),
 });
-
-export type BaseQueryParams = z.infer<typeof BaseQueryParams>;
 
 // ==================== 类型工具函数 ====================
 
@@ -65,10 +61,10 @@ export type ExtractBaseQueryParams<T> = Pick<
  */
 export function splitListQuery<T extends Record<string, any>>(query: T) {
   // 提取分页参数
-  const { page, limit } = PaginationParams.parse(query);
+  const { page = 1, limit = 10 } = query;
 
   // 提取排序参数
-  const { sort, sortOrder } = SortParams.parse(query);
+  const { sort, sortOrder } = query;
 
   // 其余的作为业务查询参数
   const {
@@ -81,20 +77,20 @@ export function splitListQuery<T extends Record<string, any>>(query: T) {
 
   return {
     business: business as ExtractBusinessQuery<T>,
-    pagination: { page, limit } as PaginationParams,
-    sort: { sort, sortOrder } as SortParams,
+    pagination: { page, limit },
+    sort: { sort, sortOrder },
   };
 }
 
 export function splitListQueryNoPage<T extends Record<string, any>>(query: T) {
   // 提取排序参数
-  const { sort, sortOrder } = SortParams.parse(query);
+  const { sort, sortOrder } = query;
 
   // 其余的作为业务查询参数
   const { sort: _sort, sortOrder: _sortOrder, ...business } = query;
 
   return {
     business: business as ExtractBusinessQuery<T>,
-    sort: { sort, sortOrder } as SortParams,
+    sort: { sort, sortOrder },
   };
 }

@@ -9,7 +9,6 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { z } from "zod";
 import { PaginationParams, SortParams } from "../helper/query-types";
 import { inquiryItemsTable } from "./inquiryItem.schema";
 
@@ -36,18 +35,19 @@ const Patch = UpdateBase;
 // ===== 第三层：查询 Schema（查询层） =====
 
 // BusinessQuery: 业务查询参数
-const BusinessQuery = z.object({
-  inquiryId: z.string().optional(), // 询价ID
-  productId: z.string().optional(), // 商品ID
-  quantity: z.string().optional(), // 数量筛选
-  minPrice: z.string().min(0).optional(), // 最低价格
-  maxPrice: z.string().min(0).optional(), // 最高价格
+const BusinessQuery = t.Object({
+  inquiryId: t.Optional(t.String()), // 询价ID
+  productId: t.Optional(t.String()), // 商品ID
+  quantity: t.Optional(t.String()), // 数量筛选
+  minPrice: t.Optional(t.String()), // 最低价格
+  maxPrice: t.Optional(t.String()), // 最高价格
 });
 
 // ListQuery: 列表查询 Schema，包含分页和排序
-const ListQuery = BusinessQuery.extend(PaginationParams.shape).extend(
-  SortParams.shape
-);
+const ListQuery = t.Intersect([
+  t.Intersect([BusinessQuery, PaginationParams]),
+  SortParams,
+]);
 
 // ===== 第四层：视图 Schema（展示层） =====
 

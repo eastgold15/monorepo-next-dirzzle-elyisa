@@ -1,48 +1,44 @@
 /**
  * @repo/contract 主入口文件
  *
- * 契约层 - 统一的 Zod Schema 和类型管理系统
+ * 契约层 - 统一的 TypeBox Schema 和类型管理系统
  */
 
-export { AuthModel } from "./modules/01auth/auth.model";
+export { AuthTModel as AuthModel } from "./modules/01auth/auth.t.model";
 // 新增模块导出
-export { ExporterModel } from "./modules/01exporter/exporter.model";
-export { FactoryModel } from "./modules/01factory/factory.model";
-export { SalespersonModel } from "./modules/01factory/sales_person.model";
+export { ExporterTModel as ExporterModel } from "./modules/01exporter/Exporter.t.model";
+export { FactoryTModel as FactoryModel } from "./modules/01factory/factory.t.model";
+export { SalesPersonTModel as SalespersonModel } from "./modules/01factory/sales_person.t.model";
 // ==================== Model 导出 ====================
-export { AdsModel } from "./modules/ads/ads.model";
-export { CategoryModel } from "./modules/category/category.model";
-export { ClientModel } from "./modules/customer/customer.model";
+export { AdsTModel as AdsModel } from "./modules/ads/ads.t.model";
+export { CategoryTModel as CategoryModel } from "./modules/category/category.t.model";
+export { ClientTModel as ClientModel } from "./modules/customer/customer.t.model";
 export * from "./modules/helper/constant";
-export * from "./modules/helper/query-types";
+export * from "./modules/helper/query-types.t.model";
 export * from "./modules/helper/utils";
 export * from "./modules/helper/utils.types";
-export { HeroCardsModel } from "./modules/hero-cards/hero-cards.model";
-export { ImageModel } from "./modules/image/images.model";
-export { InquiryModel } from "./modules/inquiry/inquiry.model";
-export { InquiryItemModel } from "./modules/inquiry/inquiryItem.model";
-export { OssModel } from "./modules/oss/oss.model";
+export { HeroCardsTModel as HeroCardsModel } from "./modules/hero-cards/hero-cards.t.model";
+export { ImageTModel as ImageModel } from "./modules/image/images.t.model";
+export { InquiryTModel as InquiryModel } from "./modules/inquiry/inquiry.t.model";
+export { InquiryItemTModel as InquiryItemModel } from "./modules/inquiry/inquiryItem.t.model";
+export { OssTModel as OssModel } from "./modules/oss/oss.t.model";
 export {
-  AttributeModel,
-  AttributeTemplateModel,
-  AttributeValueModel,
-} from "./modules/product/attribute.model";
-export {
-  ProductImagesModel,
-  ProductModel,
-  ProductTemplateModel,
-} from "./modules/product/product.model";
-export { SkuModel } from "./modules/product/sku.model";
-export { ProductStatisticsModel } from "./modules/product-statistics/product-statistics.model";
-export { QuotationModel } from "./modules/quotation/quotation.model";
-export { QuotationItemModel } from "./modules/quotation/quotation_item.model";
-export { SiteConfigModel } from "./modules/site-config/site-config.model";
-export { TranslationDictModel } from "./modules/translations/translate.model";
-export { UploadModel } from "./modules/upload/upload.model";
+  AttributeTemplateTModel as AttributeTemplateModel,
+  AttributeTModel as AttributeModel,
+  AttributeValueTModel as AttributeValueModel,
+} from "./modules/product/attribute.t.model";
+export { ProductTModel as ProductModel } from "./modules/product/product.t.model";
+export { SkuTModel as SkuModel } from "./modules/product/sku.t.model";
+export { ProductStatisticsTModel as ProductStatisticsModel } from "./modules/product-statistics/product-statistics.t.model";
+export { QuotationTModel as QuotationModel } from "./modules/quotation/quotation.t.model";
+export { QuotationItemTModel as QuotationItemModel } from "./modules/quotation/quotation_item.t.model";
+export { SiteConfigTModel as SiteConfigModel } from "./modules/site-config/site-config.t.model";
+export { TranslationDictTModel as TranslationDictModel } from "./modules/translations/translate.t.model";
+export { UploadTModel as UploadModel } from "./modules/upload/upload.t.model";
 // ==================== 工具导出 ====================
 
 export {
   FileType,
-  MediaModel,
+  MediaTModel as MediaModel,
   StorageProvider,
-} from "./modules/media/media.model";
+} from "./modules/media/media.t.model";

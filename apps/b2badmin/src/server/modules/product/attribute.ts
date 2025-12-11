@@ -6,7 +6,6 @@ import {
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import z from "zod/v4";
 import { dbPlugin } from "@/server/db/connection";
 import {
   attributeTable,
@@ -87,8 +86,8 @@ export const templateRoute = new Elysia({
         description: "根据ID更新属性模板信息，支持部分更新",
         tags: ["属性模板管理"],
       },
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       body: AttributeTemplateModel.Update,
     }
@@ -288,10 +287,10 @@ export const attributeRoute = new Elysia({ name: "attr", prefix: "/attribute" })
         description: "根据ID更新属性信息，支持部分更新",
         tags: ["属性管理"],
       },
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
-      body: AttributeModel.Create.omit({ templateId: true }).partial(),
+      body: AttributeModel.Update, // 使用 Model 中定义的 Update 类型
     }
   )
   .delete(
@@ -393,8 +392,8 @@ export const attributeRoute = new Elysia({ name: "attr", prefix: "/attribute" })
           "用于 SKU 创建表单，返回 isSaleAttr=true 的属性及其所有 valueCode",
         tags: ["属性管理"],
       },
-      query: z.object({
-        templateId: z.string(),
+      query: t.Object({
+        templateId: t.String(),
       }),
     }
   )
@@ -428,8 +427,8 @@ export const attributeRoute = new Elysia({ name: "attr", prefix: "/attribute" })
         description: "根据ID获取属性详情，包含该属性的所有可选值",
         tags: ["属性管理"],
       },
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
     }
   );

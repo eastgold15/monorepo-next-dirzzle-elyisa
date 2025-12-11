@@ -1,6 +1,5 @@
 import { AdsModel } from "@repo/contract";
-import { Elysia } from "elysia";
-import { z } from "zod/v4";
+import { Elysia, t } from "elysia";
 import { commonRes } from "@/server/utils/Res";
 import { AdsService } from "./ads.service";
 
@@ -38,8 +37,8 @@ export const AdsController = new Elysia({
       return commonRes(advertisement);
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       detail: {
         summary: "获取广告详情",
@@ -74,8 +73,8 @@ export const AdsController = new Elysia({
       return commonRes(advertisement);
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       body: AdsModel.Update,
       detail: {
@@ -94,8 +93,8 @@ export const AdsController = new Elysia({
       return commonRes(advertisement);
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       detail: {
         summary: "删除广告",
@@ -112,8 +111,8 @@ export const AdsController = new Elysia({
       return commonRes(advertisement);
     },
     {
-      body: z.object({
-        ids: z.array(z.string()),
+      body: t.Object({
+        ids: t.Array(t.String()),
       }),
       detail: {
         summary: "批量删除广告",

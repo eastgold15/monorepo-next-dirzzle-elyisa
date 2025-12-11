@@ -1,6 +1,5 @@
 import { HeroCardsModel } from "@repo/contract";
-import { Elysia } from "elysia";
-import { z } from "zod/v4";
+import { Elysia, t } from "elysia";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
 import { HeroCardsService } from "./hero-cards.service";
@@ -56,8 +55,8 @@ export const HeroCardsController = new Elysia({
       return commonRes(heroCard);
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       detail: {
         summary: "获取首页展示卡片详情",
@@ -92,8 +91,8 @@ export const HeroCardsController = new Elysia({
       return commonRes(heroCard);
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       body: HeroCardsModel.Update,
       detail: {
@@ -112,8 +111,8 @@ export const HeroCardsController = new Elysia({
       return commonRes(heroCard);
     },
     {
-      params: z.object({
-        id: z.string(),
+      params: t.Object({
+        id: t.String(),
       }),
       detail: {
         summary: "删除首页展示卡片",
