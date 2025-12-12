@@ -3,12 +3,12 @@
  * Unified media file management including images, videos, documents, etc.
  */
 
+import { Type as t } from "@sinclair/typebox";
 import {
   createInsertSchema,
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-typebox";
-import { t } from "elysia";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import { mediaTable } from "./media.schema";
 
@@ -20,6 +20,7 @@ export const FileType = t.Union([
   t.Literal("audio"),
   t.Literal("other"),
 ]);
+
 export type FileType = typeof FileType.static;
 
 export const StorageProvider = t.Union([
@@ -34,8 +35,10 @@ const Insert = createInsertSchema(mediaTable);
 const UpdateBase = createUpdateSchema(mediaTable);
 const Select = createSelectSchema(mediaTable);
 
+import { MediaMetaTModel } from "./meta.t.model";
+
 // === 业务 Schema ===
-const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]); // 文件上传时会自动生成的字段不需要手动提供
+const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt", "bucket_name"]); // 文件上传时会自动生成的字段不需要手动提供
 
 const BusinessQuery = t.Object({
   filename: t.Optional(t.String()),
@@ -53,24 +56,28 @@ const ListQuery = t.Object({
 const Entity = Select;
 
 const FileUpload = t.Object({
-  file: t.File(), // 文件上传
-  folder: t.Optional(t.String()),
-  provider: t.Optional(StorageProvider),
-});
+  media: Create,
+  meta: MediaMetaTModel.Create,
+})
+
+const PresignUrlQuery = t.Object({
+  mimeType: t.String(),
+  fileNameHash: t.String(),
+})
+
 
 // === 1. 运行时 Schema 集合（值）===
 export const MediaTModel = {
   Insert,
-
   Select,
   Create,
-
   ListQuery,
   Entity,
   BusinessQuery,
   FileUpload,
   FileType,
   StorageProvider,
+  PresignUrlQuery
 } as const;
 
 // === 2. 编译时类型集合（类型）===
@@ -86,4 +93,5 @@ export type MediaTModel = {
   FileUpload: typeof FileUpload.static;
   FileType: FileType;
   StorageProvider: StorageProvider;
+  PresignUrlQuery: typeof PresignUrlQuery.static;
 };

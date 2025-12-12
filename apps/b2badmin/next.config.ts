@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
   },
   // 解决 rimraf 包的警告
   serverExternalPackages: ["rimraf"],
-
 };
 
 export default nextConfig;

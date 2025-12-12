@@ -7,7 +7,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest",
     "check": "npx ultracite check",
     "fix": "npx ultracite fix"
   },
@@ -37,6 +36,7 @@
     "@repo/contract": "*",
     "@tanstack/react-query": "5.90.11",
     "@types/bcryptjs": "^3.0.0",
+    "@types/spark-md5": "^3.0.5",
     "bcryptjs": "^3.0.3",
     "better-auth": "catalog:",
     "chalk": "^5.6.2",
@@ -57,6 +57,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.68.0",
+    "spark-md5": "^3.0.2",
     "tailwind-merge": "^3.4.0",
     "ws": "8.18.3",
     "zustand": "^5.0.9"

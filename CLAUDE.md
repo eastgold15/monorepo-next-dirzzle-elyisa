@@ -8,10 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 开发环境设置
 
-### 1. 安装依赖
-```bash
-bun i
-```
+
 
 ### 2. 环境变量配置
 复制并配置相应的环境变量文件（需要阿里云OSS服务和翻译服务的密钥）。
@@ -147,3 +144,4 @@ apps/b2badmin/src/server/
 4. **日志记录**：集成 `logixlysia` 插件进行请求日志记录
 5. **CORS 配置**：已配置允许前端开发服务器跨域访问
 - b2bAdmin 是后台管理端， web是面向用户的网站
+- 开发流程，现在契约层的schema文件，知道数据库长什么样，在看契约层model文件，前后端的类型都从这里来，然后看前端页面需要什么数据，开始后端书写前端需要的接口

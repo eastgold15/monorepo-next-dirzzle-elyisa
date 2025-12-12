@@ -13,7 +13,6 @@ const clientSchemaChecker = TypeCompiler.Compile(clientSchema);
 
 const clientEnvResult = safeParse(clientSchemaChecker, {
   URL: process.env.NEXT_PUBLIC_URL,
-
 });
 
 if (!clientEnvResult.success) {

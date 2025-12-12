@@ -4,10 +4,22 @@
  * 整合了原upload和image控制器的功能
  */
 
-import { Elysia } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
 import { MediaModel } from "@repo/contract";
+import { Elysia } from "elysia";
+import { db, dbPlugin } from "@/server/db/connection";
+import { mediaMetadataTable, mediaTable } from "@/server/db/schema";
+import { commonRes } from "@/server/utils/Res";
+import minio from "./buns3";
 
+function randomString(length: number) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0;i < length;i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 /**
  * 媒体文件管理控制器
  * 提供完整的媒体文件管理API，包括上传、删除、查询等功能
@@ -15,24 +27,72 @@ import { MediaModel } from "@repo/contract";
 export const mediaRoute = new Elysia({
   prefix: "/media",
   tags: ["Media"],
-}).use(dbPlugin)
+})
+  .use(dbPlugin)
   // ========================= 上传相关 =========================
-  // 单文件上传
-  .post(
-    "/upload",
-    async ({ body }) => {
-      const { file, ...options } = body;
-      
+  // 预签名
 
-      const result =null
-
-      return commonRes(result);
+  .get(
+    "/upload/pre-sign",
+    ({ query }) => {
+      const { mimeType, fileNameHash } = query;
+      const storageKey = `${mimeType}/${fileNameHash}`;
+      const url = minio.presign(storageKey, {
+        method: "PUT",
+        expiresIn: 3600,
+        acl: "public-read",
+      });
+      return commonRes({ url, storageKey });
     },
     {
-      body: MediaModel,
+      query: MediaModel.PresignUrlQuery,
       detail: {
-        summary: "上传单个媒体文件",
-        description: "上传单个媒体文件到指定文件夹，支持多种文件类型",
+        summary: "获取上传文件的预签名URL",
+        description: "获取上传文件的预签名URL，用于上传文件",
+      },
+    }
+  )
+  .post(
+    "/upload",
+    async ({
+      body: { media, meta },
+    }) => {
+      try {
+        // 记录到数据库
+        const [result] = await db
+          .insert(mediaTable)
+          .values({
+            storageKey: media.storageKey,
+            userId: media.userId,
+            originalName: media.originalName,
+            mimeType: media.mimeType,
+            isPublic: true,
+          })
+          .returning({ id: mediaTable.id });
+
+        const [mediaMeta] = await db
+          .insert(mediaMetadataTable)
+          .values({
+            fileId: result.id,
+            mediaType: meta.mediaType,
+          })
+          .returning();
+
+        return commonRes({
+          ...result,
+          ...mediaMeta,
+        });
+      } catch (error) {
+        console.error("记录上传文件失败:", error);
+        throw error;
+      }
+    },
+    {
+      auth: true,
+      body: MediaModel.FileUpload,
+      detail: {
+        summary: "记录上传媒体文件",
+        description: "将已上传的文件信息记录到数据库",
       },
     }
   );

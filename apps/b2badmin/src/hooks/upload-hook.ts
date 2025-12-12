@@ -1,47 +1,56 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+// hooks/usePresignedUrl.ts
+import { useMutation, useQuery } from "@tanstack/react-query";
+import SparkMD5 from "spark-md5";
+import { queryKeys } from "@/lib/query/query-keys";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 import type { CommonRes } from "@/server/utils/Res";
 
 type ExtractDataType<T> = T extends CommonRes<infer D> ? D : never;
+
+interface PresignedUrlParams {
+  mimeType: string;
+  fileName: string;
+}
+
 /**
- * 上传
+ * 获取单个文件的预签名上传 URL
  */
-export function useProductListQuery(
-  params?: {
-    page?: number;
-    limit?: number;
-    categoryId?: number;
-    name?: string;
-  },
-  options?: { enabled?: boolean }
-) {
+export function usePresignedUrlQuery(params: PresignedUrlParams) {
+  const { mimeType, fileName } = params;
+
+  // 计算字符串的 MD5
+  const filenameHash = SparkMD5.hash(fileName);
   return useQuery({
-    queryKey: ["products", params],
+    queryKey: queryKeys.uploads.presignedUrlByHash(filenameHash),
     queryFn: async () => {
-      // 确保必需的参数有默认值
-      const queryParams = {
-        page: params?.page || 1,
-        limit: params?.limit || 10,
-        categoryId: params?.categoryId,
-        name: params?.name,
-      };
-      Object.keys(queryParams).forEach((key) => {
-        if (queryParams[key as keyof typeof queryParams] === undefined) {
-          delete queryParams[key as keyof typeof queryParams];
-        }
-      });
-      const response = await rpc.api.product.get({
-        $query: queryParams,
-      });
-      return response.data;
+      // 调用你的 EdenRPC 接口（假设你有 /api/upload/presign.get）
+      const result = handleEden(
+        await rpc.api.media.upload["pre-sign"].get({
+          $query: {
+            fileNameHash: filenameHash,
+            mimeType,
+          },
+        })
+      );
+      // 假设返回 { url: string; key: string }
+      return result;
     },
-    enabled: options?.enabled ?? true,
-    staleTime: 5 * 60 * 1000, // 5分钟缓存
-    retry: 2,
+    enabled: !!filenameHash && !!mimeType, // 防止空参数请求
+    staleTime: 30_000, // 预签名 URL 通常 5-30 分钟有效，这里缓存 30 秒足够
+    retry: 1,
     refetchOnWindowFocus: false,
   });
 }
-type ComProductList = Awaited<ReturnType<typeof useProductListQuery>>["data"];
-export type BackendProductList = ExtractDataType<ComProductList>;
+
+// 文件件信息传入数据库
+export function useUploadMutation() {
+  return useMutation({
+    mutationFn: async (args: Parameters<typeof rpc.api.media.upload.post>[0]) =>
+      handleEden(await rpc.api.media.upload.post(args)),
+  });
+}
+
+// type ComProductList = Awaited<ReturnType<typeof useProductListQuery>>["data"];
+// export type BackendProductList = ExtractDataType<ComProductList>;

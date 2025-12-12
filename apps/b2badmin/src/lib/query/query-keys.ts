@@ -30,4 +30,11 @@ export const queryKeys = {
     url: (id: number) => ["media", "url", id] as const,
     urls: (ids: number[]) => ["media", "urls", ids] as const,
   },
+
+  uploads: {
+    presignedUrl: (filename: string, contentType: string) =>
+      ["uploads", "presigned-url", filename, contentType] as const,
+    // 或更安全：用 MD5 代替 filename
+    presignedUrlByHash: (hash: string) => ["uploads", "presigned-url", hash] as const,
+  },
 };

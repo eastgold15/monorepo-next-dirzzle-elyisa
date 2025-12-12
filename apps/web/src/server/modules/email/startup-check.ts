@@ -3,7 +3,6 @@
  * 在应用启动时验证邮件配置是否正确
  */
 
-
 import { envConfig } from "@/lib/env/server";
 import { verifyEmailConnection } from "./email";
 

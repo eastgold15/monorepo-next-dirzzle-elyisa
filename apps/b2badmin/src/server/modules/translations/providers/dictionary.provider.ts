@@ -8,7 +8,7 @@ import type { TranslateProvider } from "../interfaces/translation-provider.inter
 export class DictionaryTranslationProvider implements TranslateProvider {
   readonly name = "DatabaseDictionary";
 
-  private constructor() { }
+  private constructor() {}
 
   static create() {
     return new DictionaryTranslationProvider();

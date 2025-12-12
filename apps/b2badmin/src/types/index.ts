@@ -1,4 +1,9 @@
-export type FieldType = 'text' | 'number' | 'select' | 'multiselect' | 'richtext';
+export type FieldType =
+  | "text"
+  | "number"
+  | "select"
+  | "multiselect"
+  | "richtext";
 
 export interface TemplateField {
   id: string;
@@ -22,7 +27,7 @@ export interface MediaAsset {
   id: string;
   url: string;
   name: string;
-  type: 'image' | 'video';
+  type: "image" | "video";
   tags: string[];
 }
 
@@ -57,13 +62,13 @@ export interface Product {
   factoryId: string;
   baseData: Record<string, any>; // Non-SKU fields
   skus: SkuVariant[];
-  status: 'draft' | 'pending_review' | 'published';
+  status: "draft" | "pending_review" | "published";
   createdAt: string;
 }
 
 export interface User {
   id: string;
   name: string;
-  role: 'admin' | 'factory_admin' | 'sales';
+  role: "admin" | "factory_admin" | "sales";
   avatar: string;
 }
