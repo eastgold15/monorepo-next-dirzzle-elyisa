@@ -9,7 +9,7 @@ export const queryKeys = {
   // Categories
   categories: {
     all: () => ["categories"] as const,
-    desc: (id: number) => ["categories", id] as const,
+    desc: (id: string) => ["categories", id] as const,
     list: () => ["categories", "list"] as const,
     tree: () => ["categories", "tree"] as const,
   },
@@ -27,7 +27,7 @@ export const queryKeys = {
   },
 
   media: {
-    url: (id: number) => ["media", "url", id] as const,
-    urls: (ids: number[]) => ["media", "urls", ids] as const,
+    url: (id: string) => ["media", "url", id] as const,
+    urls: (ids: string[]) => ["media", "urls", ids] as const,
   },
 };

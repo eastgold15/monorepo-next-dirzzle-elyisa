@@ -32,7 +32,7 @@ const AdImage: React.FC<{
   // 只有当 imageId 是有效数字时才真正查询，否则使用一个不会导致网络请求的默认值
   const shouldFetch = imageId !== null && imageId !== undefined;
   const { data: mediaResponse, isLoading } = useCurrentMediaQuery(
-    shouldFetch ? imageId : 0 // 当不应该获取时传递 0
+    shouldFetch ? String(imageId) : "0" // 确保传递的是字符串类型
   );
 
   // 如果没有有效的 imageId，则直接返回默认图像

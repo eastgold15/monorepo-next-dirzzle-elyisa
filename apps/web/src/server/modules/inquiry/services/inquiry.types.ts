@@ -5,9 +5,9 @@
 
 // 询价商品项类型（简化版）
 export interface InquiryItem {
-  id: number;
-  inquiryId: number;
-  productId: number;
+  id: string;
+  inquiryid: string;
+  productid: string;
   productName: string;
   productDescription?: string;
   productImage?: string;
@@ -22,7 +22,7 @@ export interface InquiryEmailResult {
   salesEmailSent: boolean;
   inquiryNumber: string;
   merchantInfo: {
-    id: number;
+    id: string;
     name: string;
     code: string;
   };

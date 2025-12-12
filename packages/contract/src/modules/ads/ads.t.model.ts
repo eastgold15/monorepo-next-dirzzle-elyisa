@@ -21,7 +21,7 @@ const Select = createSelectSchema(adsTable);
 const Create = t.Intersect([
   t.Omit(Insert, ["id", "createdAt", "updatedAt", "image_id"]),
   t.Object({
-    image_id: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
+    image_id: t.Array(t.String({ minimum: 1 }), { minItems: 1 }),
   }),
 ]);
 
@@ -36,7 +36,7 @@ const Update = t.Intersect([
     "endDate",
   ]),
   t.Object({
-    image_id: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
+    image_id: t.Array(t.String({ minimum: 1 })),
     startDate: t.String({ format: "date-time" }),
     endDate: t.String({ format: "date-time" }),
   }),
@@ -53,7 +53,7 @@ const Patch = t.Intersect([
     "endDate",
   ]),
   t.Object({
-    image_id: t.Optional(t.Array(t.Number({ minimum: 1 }), { minItems: 1 })),
+    image_id: t.Optional(t.Array(t.String({ minimum: 1 }))),
     startDate: t.Optional(t.String({ format: "date-time" })),
     endDate: t.Optional(t.String({ format: "date-time" })),
   }),
@@ -84,7 +84,7 @@ const Entity = t.Intersect([
 
 // BatchStatusUpdate - 批量状态更新
 const BatchStatusUpdate = t.Object({
-  ids: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
+  ids: t.Array(t.String({ minimum: 1 })),
   isActive: t.Boolean(),
 });
 

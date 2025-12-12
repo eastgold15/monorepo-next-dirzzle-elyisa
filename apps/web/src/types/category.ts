@@ -10,7 +10,7 @@ export type CategoryNode = CategoryTModel["TreeEntity"];
  */
 export interface CategoryLinkProps {
   category: CategoryNode;
-  onNavigate?: (slug: string, id: number) => void;
+  onNavigate?: (slug: string, id: string) => void;
   className?: string;
   isSubcategory?: boolean;
 }
@@ -20,7 +20,7 @@ export interface CategoryLinkProps {
  */
 export interface NavDropdownProps {
   category: CategoryNode;
-  onNavigate?: (slug: string, id: number) => void;
+  onNavigate?: (slug: string, id: string) => void;
   className?: string;
   isOpen?: boolean;
   onToggle?: () => void;

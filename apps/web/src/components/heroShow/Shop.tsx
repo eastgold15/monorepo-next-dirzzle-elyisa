@@ -55,7 +55,7 @@ const Shop: React.FC<ShopProps> = ({ onProductSelect }) => {
     return null;
   }
 
-  const handleProductClick = (productId: number) => {
+  const handleProductClick = (productId: string) => {
     router.push(`/product/${productId}`);
   };
 

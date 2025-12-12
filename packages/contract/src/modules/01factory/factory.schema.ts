@@ -33,7 +33,7 @@ export const factoriesTable = pgTable("factories", {
   categoryId: uuid("category_id")
     .references(() => categoriesTable.id)
     .notNull(),
-  contactPhone: integer("contact_phone").notNull(),
+  contactPhone: varchar("contact_phone", { length: 50 }).notNull(),
   logo: varchar("logo", { length: 500 }), // 工厂Logo URL
 
   // 出口商关联

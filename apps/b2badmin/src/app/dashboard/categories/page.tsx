@@ -2,7 +2,13 @@
 
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { INITIAL_CATEGORIES } from "../../../mockData";
 import type { Category } from "../../../types";
 
@@ -29,8 +35,18 @@ export default function CategoryManager() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <nav className="font-medium text-sm">Categories</nav>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-bold text-2xl text-slate-900">Categories</h1>
@@ -130,6 +146,8 @@ export default function CategoryManager() {
           </table>
         </div>
       </div>
-    </AdminLayout>
+    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

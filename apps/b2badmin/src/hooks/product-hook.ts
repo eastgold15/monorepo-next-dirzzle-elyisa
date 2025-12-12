@@ -49,7 +49,7 @@ export type BackendProductList = ExtractDataType<ComProductList>;
 /**
  * 获取单个商品详情
  */
-export function useProductQuery(id: number) {
+export function useProductQuery(id: string) {
   return useQuery({
     queryKey: ["product", id],
     queryFn: async () => {

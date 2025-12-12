@@ -25,7 +25,7 @@ export function useCategoryQuery() {
 // }
 
 export function useCategoryDescQuery(
-  id: number,
+  id: string,
   options?: { enabled?: boolean }
 ) {
   return useQuery({

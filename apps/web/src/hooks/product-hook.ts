@@ -12,7 +12,7 @@ export function useProductListQuery(
   params?: {
     page?: number;
     limit?: number;
-    categoryId?: number;
+    categoryId?: string;
     name?: string;
   },
   options?: { enabled?: boolean }
@@ -49,14 +49,15 @@ export type BackendProductList = ExtractDataType<ComProductList>;
 /**
  * 获取单个商品详情
  */
-export function useProductQuery(id: number) {
+export function useProductQuery(id: string) {
   return useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
+      if (!id) throw new Error("Product ID is required");
       const result = handleEden(await rpc.api.product[id].get());
       return result;
     },
-    enabled: !!id && id > 0,
+    enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
     retry: 2,
   });

@@ -22,7 +22,7 @@ const Patch = t.Omit(UpdateBase, ["id", "createdAt", "updatedAt"]);
 
 const BusinessQuery = t.Object({
   search: t.Optional(t.String()),
-  productId: t.Optional(t.Number()),
+  productId: t.Optional(t.String()),
   status: t.Optional(t.Number()),
   skuCode: t.Optional(t.String()),
 });

@@ -9,6 +9,7 @@ import {
 import { t } from "elysia";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import { usersTable } from "./auth.schema";
+import type { UserRole, DataScope } from "../auth/permissions.t.model";
 
 // === 基础 Schema ===
 const Insert = createInsertSchema(usersTable);
@@ -36,6 +37,23 @@ const ListQuery = t.Object({
 
 const Entity = t.Omit(Select, ["password", "id", "createdAt", "updatedAt"]); // 不返回密码字段
 
+// 扩展用户实体，包含权限信息
+const EntityWithPermissions = t.Composite([
+  Entity,
+  t.Object({
+    role: t.Union([t.Literal('exporter_admin'), t.Literal('factory_admin'), t.Literal('salesperson')]),
+    exporterId: t.Optional(t.String()),
+    factoryId: t.Optional(t.String()),
+    salespersonId: t.Optional(t.String()),
+    dataScope: t.Object({
+      products: t.Union([t.Literal('all'), t.Literal('factory'), t.Literal('own')]),
+      users: t.Union([t.Literal('all'), t.Literal('factory'), t.Literal('own')]),
+      factories: t.Union([t.Literal('all'), t.Literal('own')]),
+      orders: t.Union([t.Literal('all'), t.Literal('factory'), t.Literal('own')]),
+    }),
+  }),
+]);
+
 // === 1. 运行时 Schema 集合（值）===
 export const AuthTModel = {
   Insert,
@@ -45,6 +63,7 @@ export const AuthTModel = {
   Patch,
   ListQuery,
   Entity,
+  EntityWithPermissions,
   BusinessQuery,
 } as const;
 
@@ -57,5 +76,9 @@ export type AuthTModel = {
   Patch: typeof Patch.static;
   ListQuery: typeof ListQuery.static;
   Entity: typeof Entity.static;
+  EntityWithPermissions: typeof EntityWithPermissions.static;
   BusinessQuery: typeof BusinessQuery.static;
 };
+
+// 导出扩展的用户类型
+export type UserWithPermissions = AuthTModel["EntityWithPermissions"];

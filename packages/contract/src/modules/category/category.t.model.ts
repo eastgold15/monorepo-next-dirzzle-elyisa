@@ -25,7 +25,7 @@ const Patch = t.Partial(Update);
 
 const BusinessQuery = t.Object({
   search: t.Optional(t.String()),
-  parentId: t.Optional(t.Number()),
+  parentId: t.Optional(t.String()),
   isVisible: t.Optional(t.Boolean()),
 });
 

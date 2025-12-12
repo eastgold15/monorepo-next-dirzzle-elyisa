@@ -26,7 +26,7 @@ const Patch = t.Partial(Update);
 const BusinessQuery = t.Object({
   name: t.Optional(t.String()),
   email: t.Optional(t.String({ format: "email" })),
-  factoryId: t.Optional(t.Number()),
+  factoryId: t.Optional(t.String()),
   isActive: t.Optional(t.Boolean()),
 });
 

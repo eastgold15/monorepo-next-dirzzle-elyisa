@@ -22,7 +22,7 @@ export const useCategoryNavigation = () => {
    * @param onClose - 可选的关闭回调（用于移动端菜单）
    */
   const handleNavigate = useCallback(
-    (slug: string, id: number, onClose?: () => void) => {
+    (slug: string, id: string, onClose?: () => void) => {
       // 关闭移动端菜单（如果有）
       onClose?.();
       // 滚动到顶部
@@ -41,8 +41,8 @@ export const useCategoryNavigation = () => {
   const handleNavigateWithCallback = useCallback(
     (
       slug: string,
-      id: number,
-      onNavigate?: (slug: string, id: number) => void,
+      id: string,
+      onNavigate?: (slug: string, id: string) => void,
       onClose?: () => void
     ) => {
       // 调用外部导航回调

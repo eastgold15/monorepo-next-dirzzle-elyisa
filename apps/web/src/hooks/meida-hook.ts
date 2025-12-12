@@ -3,7 +3,7 @@ import { queryKeys } from "@/lib/query/query-keys";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
-export function useCurrentMediaQuery(id: number) {
+export function useCurrentMediaQuery(id: string) {
   return useQuery({
     queryKey: queryKeys.media.url(id),
     queryFn: async () => {

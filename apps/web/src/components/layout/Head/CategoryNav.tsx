@@ -4,7 +4,7 @@ import { CategoryLink } from "./CategoryLink";
 import { NavDropdown } from "./NavDropdown";
 
 interface CategoryNavProps {
-  onNavigate?: (slug: string, id: number) => void;
+  onNavigate?: (slug: string, id: string) => void;
   /**
    * 自定义样式类名
    */

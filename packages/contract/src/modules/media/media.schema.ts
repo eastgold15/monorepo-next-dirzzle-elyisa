@@ -9,6 +9,7 @@ import {
   pgEnum,
   pgTable,
   text,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm/relations";
@@ -17,13 +18,13 @@ import { adsTable } from "../ads/ads.schema";
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
 import { productMediaTable } from "../product/product.schema";
 export const mediaStatusEnum = pgEnum("media_status", ["active", "deleted"]);
-export const mediaTable = pgTable("file", {
+export const mediaTable = pgTable("media", {
   id: idUuid, // 文件唯一标识
   createdAt,
   updatedAt,
   storageKey: varchar("storage_key", { length: 255 }).notNull(), // 存储后端键（相对路径或对象键）hash值
   category: varchar("category").notNull(),
-  userId: varchar("user_id", { length: 255 }).references(() => usersTable.id, {
+  userId: uuid("user_id").references(() => usersTable.id, {
     onDelete: "cascade",
   }), // 上传用户ID
   originalName: varchar("original_name", { length: 255 }).notNull(),
@@ -41,7 +42,7 @@ export const mediaTypeEnum = pgEnum("media_type", [
 ]);
 export const mediaMetadataTable = pgTable("media_metadata", {
   id: idUuid, // 媒体文件元数据唯一标识
-  fileId: varchar("file_id", { length: 255 })
+  fileId: uuid("file_id")
     .references(() => mediaTable.id, { onDelete: "cascade" })
     .notNull(), // 关联文件ID
   mediaType: mediaTypeEnum("media_type").notNull(), // 媒体类型（image, video, document, audio, other）
@@ -58,4 +59,5 @@ export const mediaRelations = relations(mediaTable, ({ many }) => ({
   ads: many(adsTable),
   // 媒体文件可以被多个商品使用(通过中间表)
   productMedia: many(productMediaTable),
+
 }));

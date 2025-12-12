@@ -6,7 +6,6 @@ import { auth } from "@/server/lib/auth";
 
 // 用户中间件（计算用户和会话并传递给路由）
 export const betterAuthPlugin = new Elysia({ name: "better-auth" })
-  .mount(auth.handler)
   .use(dbPlugin)
   .macro({
     auth: {

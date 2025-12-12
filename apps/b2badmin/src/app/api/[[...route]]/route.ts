@@ -1,6 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { fromTypes, openapi } from "@elysiajs/openapi";
-import { Elysia, redirect } from "elysia";
+import { Elysia } from "elysia";
 import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { dbPlugin } from "@/server/db/connection";
 import { auth } from "@/server/lib/auth";
@@ -8,6 +8,7 @@ import { OpenAPI } from "@/server/lib/auth-openapi";
 import { userRoute } from "@/server/modules/01auth/user";
 import { AdsController } from "@/server/modules/ads/ads";
 import { betterAuthPlugin } from "@/server/modules/auth/auth.plugin";
+import { meRoute } from "@/server/modules/auth/me";
 import { categoriesController } from "@/server/modules/category/category";
 import { HeroCardsController } from "@/server/modules/hero-cards/hero-cards";
 import { mediaRoute } from "@/server/modules/media/media";
@@ -47,13 +48,8 @@ const app = new Elysia({ prefix: "/api" })
       credentials: true,
     })
   )
-  .mount("/api", auth.handler) // 使用 Better Auth 认证中间件
-  .get("/openapi", () => openapi.definitions, {
-      detail: {
-        summary: "OpenAPI Documentation",
-        description: "获取API文档",
-      },
-    })
+  .mount(auth.handler) // 使用 Better Auth 认证中间件
+  .use(betterAuthPlugin)
   .use(
     openapi({
       documentation: {
@@ -97,7 +93,7 @@ const app = new Elysia({ prefix: "/api" })
   })
 
   .use(dbPlugin)
-  .use(betterAuthPlugin)
+
   .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
   .use(categoriesController)
   .use(AdsController)
@@ -107,7 +103,8 @@ const app = new Elysia({ prefix: "/api" })
   .use(product2Route)
   .use(skuRoute)
   .use(translateRoute)
-  .use(userRoute);
+  .use(userRoute)
+  .use(meRoute);
 
 /**
  * Export the app type for use with RPC clients (e.g., edenTreaty)

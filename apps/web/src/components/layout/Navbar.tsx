@@ -190,7 +190,7 @@ const Navbar: React.FC = () => {
         <div className="hidden items-center justify-center py-3 md:flex">
           <CategoryNav
             className="px-4 py-1 text-sm uppercase tracking-wider hover:text-gray-500"
-            onNavigate={(slug: string, id: number) => {
+            onNavigate={(slug: string, id: string) => {
               // 使用 Next.js 路由进行跳转，保持SEO友好
               router.push(`/category/${slug}?id=${id}`);
               navigateWithScroll();

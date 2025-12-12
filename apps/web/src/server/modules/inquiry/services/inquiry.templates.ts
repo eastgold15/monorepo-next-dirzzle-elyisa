@@ -11,7 +11,7 @@ import type { EmailAttachment, EmailTemplate } from "../../email/email.types";
  */
 export function createCustomerInquiryTemplate(
   inquiryData: {
-    id: number;
+    id: string;
     customerName: string;
     companyName?: string;
     email: string;

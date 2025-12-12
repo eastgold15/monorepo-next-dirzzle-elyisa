@@ -9,8 +9,6 @@ const nextConfig: NextConfig = {
       { hostname: "img.poripori.top" },
     ],
   },
-  // 解决 rimraf 包的警告
-  serverExternalPackages: ["rimraf"],
 };
 
 export default nextConfig;

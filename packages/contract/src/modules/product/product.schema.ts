@@ -28,11 +28,9 @@ export const productsTable = pgTable("products_table", {
   name: varchar("name", { length: 255 }).notNull(), // 商品名称
   description: text("description"), // 商品详细描述
   status: integer("status").notNull().default(1), // 1:上架, 0:下架
-
   factoryId: uuid("factory_id").references(() => factoriesTable.id, {
     onDelete: "restrict",
   }), // 所属工厂ID（可选）
-
   // 商品单位
   units: varchar("units", { length: 20 }), // 单位（如 PCS）
 });

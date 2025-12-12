@@ -23,10 +23,10 @@ interface ProductDetailProps {
 }
 
 type MediaList = {
-  id: number;
+  id: string;
   url: string;
   mimeType: string;
-  skuId: number | null;
+  skuId: string | null;
 };
 
 const PAYMENT_METHODS = [

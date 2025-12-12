@@ -41,7 +41,7 @@ const Entity = t.Intersect([
 ]);
 
 const BatchStatusUpdate = t.Object({
-  ids: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
+  ids: t.Array(t.String({ minimum: 1 })),
   isActive: t.Boolean(),
 });
 

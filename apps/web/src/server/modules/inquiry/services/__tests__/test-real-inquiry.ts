@@ -43,7 +43,7 @@ const mockInquiryId = 12_345;
 // 生成Excel数据
 function createQuotationData(
   inquiryData: typeof mockInquiryData,
-  inquiryId: number
+  inquiryid: string
 ): QuotationData {
   return {
     ...quotationDefaultData,

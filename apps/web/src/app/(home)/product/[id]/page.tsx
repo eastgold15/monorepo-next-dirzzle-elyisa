@@ -6,15 +6,13 @@ import Navbar from "@/components/layout/Navbar";
 import ProductDetail from "@/components/product/ProductDetail";
 import { useProductQuery } from "@/hooks/product-hook";
 
-interface ProductPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
   const { id } = useParams();
-  const { data, isLoading, error } = useProductQuery(id);
+
+  // 确保 id 是字符串类型
+  const productId = Array.isArray(id) ? id[0] : id;
+
+  const { data, isLoading, error } = useProductQuery(productId || "");
 
   // 调试信息
   console.log("Error:", error);
@@ -56,7 +54,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               </div>
             )}
             <div className="mt-4 text-gray-400 text-sm">
-              <p>Product ID: {id}</p>
+              <p>Product ID: {productId}</p>
               <p>Data: {JSON.stringify(data)}</p>
             </div>
           </div>

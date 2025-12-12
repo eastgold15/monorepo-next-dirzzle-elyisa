@@ -17,7 +17,7 @@ import { db } from "@/server/db/connection";
 /**
  * 获取工厂的商品列表（业务员只能看到自己工厂的商品）
  */
-export async function getFactoryProducts(factoryId: number) {
+export async function getFactoryProducts(factoryId: string) {
   const products = await db
     .select()
     .from(productsTable)
@@ -38,7 +38,7 @@ export async function getFactoryProducts(factoryId: number) {
 /**
  * 获取工厂的业务员列表
  */
-export async function getFactorySalespersons(factoryId: number) {
+export async function getFactorySalespersons(factoryId: string) {
   const salespersons = await db
     .select()
     .from(salespersonsTable)
@@ -55,7 +55,7 @@ export async function getFactorySalespersons(factoryId: number) {
 /**
  * 获取工厂的询价列表
  */
-export async function getFactoryInquiries(factoryId: number) {
+export async function getFactoryInquiries(factoryId: string) {
   // 通过商品关联找到工厂的询价
   const inquiries = await db
     .select({
@@ -93,7 +93,7 @@ export async function getFactoryInquiries(factoryId: number) {
 /**
  * 获取工厂的媒体文件列表
  */
-export async function getFactoryMedia(factoryId: number) {
+export async function getFactoryMedia(factoryId: string) {
   // 通过产品关联找到工厂的媒体文件
   const media = await db
     .select()
@@ -111,8 +111,8 @@ export async function getFactoryMedia(factoryId: number) {
  * 检查用户是否有权限访问该工厂
  */
 export async function checkFactoryAccess(
-  userId: number,
-  factoryId: number
+  userId: string,
+  factoryId: string
 ): Promise<boolean> {
   // 检查用户是否是该工厂的业务员
   const [user] = await db
@@ -133,7 +133,7 @@ export async function checkFactoryAccess(
 /**
  * 获取用户的工厂信息
  */
-export async function getUserFactory(userId: number) {
+export async function getUserFactory(userId: string) {
   const [user] = await db
     .select({
       factoryId: factoriesTable.id,

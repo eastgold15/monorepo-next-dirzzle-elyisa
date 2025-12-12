@@ -4,6 +4,9 @@
  * 契约层 - 统一的 TypeBox Schema 和类型管理系统
  */
 
+// 权限系统导出
+export type { UserRole, Permission, DataScope, UserPermission } from "./modules/auth/permissions.t.model";
+
 export { AuthTModel as AuthModel } from "./modules/01auth/auth.t.model";
 // 新增模块导出
 export { ExporterTModel as ExporterModel } from "./modules/01exporter/Exporter.t.model";

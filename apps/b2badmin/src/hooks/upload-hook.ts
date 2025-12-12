@@ -12,13 +12,14 @@ type ExtractDataType<T> = T extends CommonRes<infer D> ? D : never;
 interface PresignedUrlParams {
   mimeType: string;
   fileName: string;
+  category?: string;
 }
 
 /**
  * 获取单个文件的预签名上传 URL
  */
 export function usePresignedUrlQuery(params: PresignedUrlParams) {
-  const { mimeType, fileName } = params;
+  const { mimeType, fileName, category } = params;
 
   // 计算字符串的 MD5
   const filenameHash = SparkMD5.hash(fileName);
@@ -31,6 +32,7 @@ export function usePresignedUrlQuery(params: PresignedUrlParams) {
           $query: {
             fileNameHash: filenameHash,
             mimeType,
+            category,
           },
         })
       );

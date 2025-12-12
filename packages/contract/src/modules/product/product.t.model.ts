@@ -19,37 +19,37 @@ const Select = createSelectSchema(productsTable);
 const Create = t.Intersect([
   t.Omit(Insert, ["id", "createdAt", "updatedAt"]),
   t.Object({
-    templateId: t.Number(),
-    categoryIds: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
-    imageIds: t.Array(t.Number({ minimum: 1 })),
-    mainImageId: t.Optional(t.Number({ minimum: 1 })),
+    templateId: t.String(),
+    categoryIds: t.Array(t.String({ minimum: 1 }), { minItems: 1 }),
+    imageIds: t.Array(t.String({ minimum: 1 })),
+    mainImageId: t.Optional(t.String({ minimum: 1 })),
   }),
 ]);
 
 const Update = t.Intersect([
   t.Omit(UpdateBase, ["id", "createdAt", "updatedAt"]),
   t.Object({
-    templateId: t.Number(),
-    categoryIds: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
-    imageIds: t.Array(t.Number({ minimum: 1 })),
-    mainImageId: t.Optional(t.Number({ minimum: 1 })),
+    templateId: t.String(),
+    categoryIds: t.Array(t.String({ minimum: 1 }), { minItems: 1 }),
+    imageIds: t.Array(t.String({ minimum: 1 })),
+    mainImageId: t.Optional(t.String({ minimum: 1 })),
   }),
 ]);
 
 const Patch = t.Intersect([
   t.Omit(UpdateBase, ["id", "createdAt", "updatedAt"]),
   t.Object({
-    templateId: t.Optional(t.Number({ minimum: 1 })),
-    categoryIds: t.Optional(t.Array(t.Number({ minimum: 1 }), { minItems: 1 })),
-    imageIds: t.Optional(t.Array(t.Number({ minimum: 1 }))),
-    mainImageId: t.Optional(t.Number({ minimum: 1 })),
+    templateId: t.Optional(t.String({ minimum: 1 })),
+    categoryIds: t.Optional(t.Array(t.String({ minimum: 1 }), { minItems: 1 })),
+    imageIds: t.Optional(t.Array(t.String({ minimum: 1 }))),
+    mainImageId: t.Optional(t.String({ minimum: 1 })),
   }),
 ]);
 
 const BusinessQuery = t.Object({
   name: t.Optional(t.String()),
-  categoryId: t.Optional(t.Number()),
-  templateId: t.Optional(t.Number()),
+  categoryId: t.Optional(t.String()),
+  templateId: t.Optional(t.String()),
   isActive: t.Optional(t.Boolean()),
 });
 
@@ -65,11 +65,13 @@ const Entity = t.Intersect([
     images: t.Array(t.Any()),
     categories: t.Array(t.Any()),
     template: t.Optional(t.Any()),
+    productMedia: t.Array(t.Any()),
+    skus: t.Array(t.Any()),
   }),
 ]);
 
 const BatchStatusUpdate = t.Object({
-  ids: t.Array(t.Number({ minimum: 1 }), { minItems: 1 }),
+  ids: t.Array(t.String({ minimum: 1 })),
   isActive: t.Boolean(),
 });
 

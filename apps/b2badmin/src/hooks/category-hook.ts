@@ -7,7 +7,7 @@ export function useCategoryQuery() {
   return useQuery({
     queryKey: queryKeys.categories.list(),
     queryFn: async () => {
-      const result = handleEden(await rpc.api.category.get());
+      const result = handleEden(await rpc.api.categories.list.get());
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -25,7 +25,7 @@ export function useCategoryQuery() {
 // }
 
 export function useCategoryDescQuery(
-  id: number,
+  id: string,
   options?: { enabled?: boolean }
 ) {
   return useQuery({

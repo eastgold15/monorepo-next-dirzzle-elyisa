@@ -25,7 +25,7 @@ export default function CategoryPage() {
     data: descRes,
     error: err,
     isLoading: descLoading,
-  } = useCategoryDescQuery(id, { enabled: isMounted && !!id });
+  } = useCategoryDescQuery(id!, { enabled: isMounted && !!id });
 
   const {
     data: products,
@@ -33,7 +33,7 @@ export default function CategoryPage() {
     isLoading: productLoading,
   } = useProductListQuery(
     {
-      categoryId: id,
+      categoryId: id!,
     },
     { enabled: isMounted && !!id }
   );

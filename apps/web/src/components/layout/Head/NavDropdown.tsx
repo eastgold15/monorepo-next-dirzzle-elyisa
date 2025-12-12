@@ -36,7 +36,7 @@ const NavDropdownComponent: React.FC<NavDropdownProps> = ({
     }, 150); // 延迟150ms隐藏，避免意外关闭
   };
 
-  const handleCategoryClick = (slug: string, id: number) => {
+  const handleCategoryClick = (slug: string, id: string) => {
     handleNavigate(slug, id);
     setIsOpen(false);
   };

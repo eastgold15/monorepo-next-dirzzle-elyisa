@@ -10,7 +10,7 @@ interface MobileCategoryNavProps {
    * @param slug - 分类的 slug
    * @param id - 分类的 id
    */
-  onNavigate?: (slug: string, id: number) => void;
+  onNavigate?: (slug: string, id: string) => void;
   /**
    * 点击后关闭菜单的回调
    */
@@ -33,7 +33,7 @@ const MobileCategoryNavComponent: React.FC<MobileCategoryNavProps> = ({
   const { handleNavigateWithCallback, categories } = useCategoryNavigation();
 
   // 处理分类点击事件
-  const handleCategoryNavigate = (slug: string, categoryId: number) => {
+  const handleCategoryNavigate = (slug: string, categoryId: string) => {
     handleNavigateWithCallback(slug, categoryId, onNavigate, onClose);
   };
 

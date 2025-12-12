@@ -18,17 +18,6 @@ export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类�
         .from(categoriesTable)
         .orderBy(asc(categoriesTable.sortOrder));
 
-      // // 并行翻译所有节点
-      // const translatedCategories = await Promise.all(
-      //   categories.map(async (cat) => {
-      //     const translated = await translateService.translateCategory(
-      //       cat,
-      //       locale
-      //     );
-      //     return translated;
-      //   })
-      // );
-
       return commonRes(
         buildTree(categories, "id", "parentId"),
         200,
@@ -56,7 +45,7 @@ export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类�
     },
     {
       params: t.Object({
-        id: t.Number(),
+        id: t.String(),
       }),
     }
   );

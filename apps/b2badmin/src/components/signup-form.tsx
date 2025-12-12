@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+// import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -70,30 +70,22 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.message || "注册失败，请重试");
+        let errorData: any = null;
+        try {
+          const responseText = await response.text();
+          console.log("Error response text:", responseText);
+          if (responseText) {
+            errorData = JSON.parse(responseText);
+          }
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
+        }
+        setError(errorData?.message || `注册失败 (${response.status})，请重试`);
         return;
       }
 
-      // 注册成功，自动登录
-      const loginResponse = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      if (loginResponse.ok) {
-        // 登录成功，跳转到首页
-        router.push("/dashboard");
-      } else {
-        // 注册成功但登录失败，跳转到登录页
-        router.push("/login?message=注册成功，请登录");
-      }
+      // 注册成功，直接跳转到dashboard（Better Auth 配置了 autoSignIn）
+      router.push("/dashboard");
     } catch (err) {
       console.error("Registration error:", err);
       setError("网络错误，请稍后重试");
@@ -120,18 +112,17 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel>头像（可选）</FieldLabel>
               <div className="flex items-center gap-4">
                 {avatarPreview ? (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     alt="Avatar preview"
                     className="h-16 w-16 rounded-full object-cover"
-                    height={64}
                     src={avatarPreview}
-                    width={64}
                   />
                 ) : (
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
@@ -181,17 +172,24 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <Input id="confirm-password" required type="password" />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
-            <FieldGroup>
-              <Field>
-                <Button type="submit">Create Account</Button>
-                <Button type="button" variant="outline">
-                  Sign up with Google
-                </Button>
-                <FieldDescription className="px-6 text-center">
-                  Already have an account? <a href="#">Sign in</a>
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
+            {error && (
+              <FieldDescription className="text-red-500 text-sm">
+                {error}
+              </FieldDescription>
+            )}
+            <Field>
+              <Button className="w-full" disabled={isLoading} type="submit">
+                {isLoading ? "Creating Account..." : "Create Account"}
+              </Button>
+            </Field>
+            <Field>
+              <Button className="w-full" type="button" variant="outline">
+                Sign up with Google
+              </Button>
+            </Field>
+            <FieldDescription className="px-6 text-center">
+              Already have an account? <a href="/login">Sign in</a>
+            </FieldDescription>
           </FieldGroup>
         </form>
 

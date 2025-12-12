@@ -12,9 +12,8 @@ const IDImage: React.FC<{
   const defaultImage =
     "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012&auto=format&fit=crop";
 
-  // 将 hook 调用移到顶层，避免条件性调用
   const { data: mediaResponse, isLoading } = useCurrentMediaQuery(
-    imageId ?? null
+    imageId ?? "0"
   );
 
   if (!imageId) {

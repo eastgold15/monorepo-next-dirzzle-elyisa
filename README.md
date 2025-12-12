@@ -15,3 +15,6 @@ cd  apps/backend && docker-compose up  -d
 
 5. bun dev
 启动项目
+
+
+

@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bunx next dev",
+    "dev": "bunx next dev -p 4000",
     "build": "bunx next build",
     "start": "bunx next start",
     "check": "npx ultracite check",

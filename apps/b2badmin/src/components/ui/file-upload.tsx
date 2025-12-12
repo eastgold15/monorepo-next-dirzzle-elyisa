@@ -41,8 +41,9 @@ export function FileUpload({
         ? {
             fileName: files[0].name,
             mimeType: files[0].type,
+            category: config.category,
           }
-        : { fileName: "", mimeType: "" }
+        : { fileName: "", mimeType: "", category: config.category }
     );
 
   const formatFileSize = (bytes: number) => {
@@ -170,19 +171,18 @@ export function FileUpload({
         const recordData = await recordMutation.mutateAsync({
           media: {
             storageKey,
-            userId: "temp-user", // TODO: 从认证状态获取实际用户ID
+            userId: null, // 头像上传不需要用户ID
             originalName: pendingFile.name,
             mimeType: pendingFile.type,
             category: config.category,
           },
           meta: {
             mediaType: config.mediaType,
-            fileId: pendingFile.id,
           },
         });
 
         uploadedFiles.push({
-          url: uploadUrl.split("?")[0],
+          url: recordData?.data?.url || uploadUrl.split("?")[0],
           data: recordData?.data,
         });
 

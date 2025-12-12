@@ -9,7 +9,7 @@ type Product = {
   status: number;
   createdAt: Date;
   updatedAt: Date;
-  categoryId: number | null;
+  categoryId: string | null;
   imageUrl: string | null;
   additionalImages?: string[];
   isNew?: boolean;

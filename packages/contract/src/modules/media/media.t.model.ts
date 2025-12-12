@@ -57,12 +57,13 @@ const Entity = Select;
 
 const FileUpload = t.Object({
   media: Create,
-  meta: MediaMetaTModel.Create,
+  meta: MediaMetaTModel.UploadCreate,
 })
 
 const PresignUrlQuery = t.Object({
   mimeType: t.String(),
   fileNameHash: t.String(),
+  category: t.Optional(t.String()),
 })
 
 

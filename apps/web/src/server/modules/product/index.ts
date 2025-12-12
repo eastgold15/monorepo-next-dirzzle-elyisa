@@ -135,9 +135,8 @@ export const productRoute = new Elysia({ prefix: "product" })
               media: {
                 columns: {
                   id: true,
-                  url: true,
                   mimeType: true,
-                  category: true,
+                  category: true
                 },
               },
             },
@@ -180,7 +179,7 @@ export const productRoute = new Elysia({ prefix: "product" })
     },
     {
       params: t.Object({
-        id: t.Number(),
+        id: t.String(),
       }),
       detail: {
         tags: ["Products"],

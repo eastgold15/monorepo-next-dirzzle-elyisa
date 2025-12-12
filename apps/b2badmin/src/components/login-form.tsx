@@ -52,12 +52,16 @@ export function LoginForm({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.message || "登录失败，请检查邮箱和密码");
+        try {
+          const errorData = await response.json();
+          setError(errorData.message || "登录失败，请检查邮箱和密码");
+        } catch {
+          setError("登录失败，请检查邮箱和密码");
+        }
         return;
       }
 
-      // 登录成功，跳转到首页
+      // 登录成功，跳转到dashboard
       router.push("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
@@ -118,7 +122,7 @@ export function LoginForm({
               </Field>
               <FieldDescription className="text-center">
                 还没有账户？{" "}
-                <a className="text-blue-600 hover:underline" href="/register">
+                <a className="text-blue-600 hover:underline" href="/signup">
                   立即注册
                 </a>
               </FieldDescription>

@@ -10,16 +10,7 @@ import { db, dbPlugin } from "@/server/db/connection";
 import { mediaMetadataTable, mediaTable } from "@/server/db/schema";
 import { commonRes } from "@/server/utils/Res";
 import minio from "./buns3";
-
-function randomString(length: number) {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0;i < length;i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
+import { envConfig } from "@/lib/env/server";
 /**
  * 媒体文件管理控制器
  * 提供完整的媒体文件管理API，包括上传、删除、查询等功能
@@ -36,8 +27,8 @@ export const mediaRoute = new Elysia({
     "/upload/pre-sign",
     async ({ query }) => {
       try {
-        const { mimeType, fileNameHash } = query;
-        const storageKey = `${mimeType}/${fileNameHash}`;
+        const { mimeType, fileNameHash, category = "general" } = query;
+        const storageKey = `${category}/${mimeType}/${fileNameHash}`;
         const url = await minio.presign(storageKey, {
           method: "PUT",
           expiresIn: 3600,
@@ -66,6 +57,7 @@ export const mediaRoute = new Elysia({
     async ({
       body: { media, meta },
     }) => {
+      console.log("Upload request received:", { media, meta });
       try {
         // 记录到数据库
         const [result] = await db
@@ -75,6 +67,7 @@ export const mediaRoute = new Elysia({
             userId: media.userId,
             originalName: media.originalName,
             mimeType: media.mimeType,
+            category: media.category,
             isPublic: true,
           })
           .returning({ id: mediaTable.id });
@@ -87,9 +80,13 @@ export const mediaRoute = new Elysia({
           })
           .returning();
 
+        // 生成可访问的 URL
+        const publicUrl = `${envConfig.S3_ENDPOINT}/${media.storageKey}`;
+
         return commonRes({
           ...result,
           ...mediaMeta,
+          url: publicUrl, // 添加可访问的 URL
         });
       } catch (error) {
         console.error("记录上传文件失败:", error);
@@ -97,7 +94,6 @@ export const mediaRoute = new Elysia({
       }
     },
     {
-      auth: true,
       body: MediaModel.FileUpload,
       detail: {
         summary: "记录上传媒体文件",

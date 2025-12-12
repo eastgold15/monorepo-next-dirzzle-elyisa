@@ -1,19 +1,20 @@
 "use client";
 
 import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
+  BarChart3,
+  Building2,
+  FileBox,
   Frame,
-  GalleryVerticalEnd,
+  Image,
+  // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
   Map,
   PieChart,
-  Settings2,
+  ShoppingBag,
   SquareTerminal,
+  Tags,
+  Users,
 } from "lucide-react";
 import type * as React from "react";
-
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
@@ -25,149 +26,115 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
+import { usePermissions } from "@/hooks/use-permissions";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { role } = usePermissions();
+
+  // 根据角色动态生成导航菜单
+  const getNavMainItems = () => {
+    const items = [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: SquareTerminal,
+        isActive: true,
+      },
+      {
+        title: "Products",
+        url: "/dashboard/products",
+        icon: ShoppingBag,
+      },
+      {
+        title: "Categories",
+        url: "/dashboard/categories",
+        icon: Tags,
+      },
+    ];
+
+    // 根据权限添加菜单项
+    if (role === "exporter_admin" || role === "factory_admin") {
+      items.push({
+        title: "Factories",
+        url: "/dashboard/factories",
+        icon: Building2,
+      });
+    }
+
+    items.push({
+      title: "Templates",
+      url: "/dashboard/templates",
+      icon: FileBox,
+    });
+
+    items.push({
+      title: "Media Library",
+      url: "/dashboard/media",
+      icon: Image,
+    });
+
+    if (role === "exporter_admin") {
+      items.push({
+        title: "Users",
+        url: "/dashboard/users",
+        icon: Users,
+      });
+    }
+
+    return items;
+  };
+
+  const getProjectItems = () => {
+    const items = [];
+
+    // Hero Cards - 所有角色都可以访问
+    items.push({
+      name: "Hero Cards",
+      url: "/dashboard/hero-cards",
+      icon: Frame,
+    });
+
+    // Analytics - 管理员可以访问
+    if (role === "exporter_admin" || role === "factory_admin") {
+      items.push({
+        name: "Analytics",
+        url: "/dashboard/analytics",
+        icon: BarChart3,
+      });
+    }
+
+    // Advertisements - 出口商管理员可以访问
+    if (role === "exporter_admin") {
+      items.push({
+        name: "Advertisements",
+        url: "/dashboard/ads",
+        icon: PieChart,
+      });
+    }
+
+    // Site Config - 出口商管理员可以访问
+    if (role === "exporter_admin") {
+      items.push({
+        name: "Site Config",
+        url: "/dashboard/site-config",
+        icon: Map,
+      });
+    }
+
+    return items;
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={[]} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavMain items={getNavMainItems()} />
+        <NavProjects projects={getProjectItems()} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
