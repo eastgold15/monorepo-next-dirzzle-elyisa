@@ -48,11 +48,12 @@ const app = new Elysia({ prefix: "/api" })
     })
   )
   .mount("/api", auth.handler) // 使用 Better Auth 认证中间件
-  .get("/", redirect("/openapi"), {
-    detail: {
-      hide: true,
-    },
-  })
+  .get("/openapi", () => openapi.definitions, {
+      detail: {
+        summary: "OpenAPI Documentation",
+        description: "获取API文档",
+      },
+    })
   .use(
     openapi({
       documentation: {

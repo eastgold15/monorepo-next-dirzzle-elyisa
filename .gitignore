@@ -97,4 +97,5 @@ minio/data/.minio.sys/tmp/2180dc45-b79c-4f6c-ae17-d99fd603c824
 minio/data/.minio.sys/buckets/.usage-cache.bin/73138f69-f83d-467b-8244-c2db2b771ba2/xl.meta.bkp
 minio/data/.minio.sys/buckets/.usage-cache.bin.bkp/7c3be5a9-e487-46d3-963b-43da949f4336/xl.meta.bkp
 minio/data/.minio.sys/buckets/.usage.json/563418c1-4100-4c02-add3-38a0d13a7a38/xl.meta.bkp
-minio/data/.minio.sys/buckets/.usage.json/d612623a-3534-4214-93a4-62692a5a6ecd/xl.meta.bkp
+minio/*
+

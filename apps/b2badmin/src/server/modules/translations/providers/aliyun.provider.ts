@@ -15,7 +15,7 @@ export class AliyunTranslateProvider implements TranslateProvider {
     config.endpoint = "mt.cn-hangzhou.aliyuncs.com";
 
     if (process.env.NODE_ENV === "development") {
-      console.log("NODE_ENV:", import.meta.env.NODE_ENV);
+      console.log("NODE_ENV:", process.env.NODE_ENV);
       this.client = new alimt20181012(config);
       return;
     }

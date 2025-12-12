@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "bunx next dev",
+    "build": "bunx next build",
+    "start": "bunx next start",
     "check": "npx ultracite check",
     "fix": "npx ultracite fix"
   },

@@ -34,15 +34,24 @@ export const mediaRoute = new Elysia({
 
   .get(
     "/upload/pre-sign",
-    ({ query }) => {
-      const { mimeType, fileNameHash } = query;
-      const storageKey = `${mimeType}/${fileNameHash}`;
-      const url = minio.presign(storageKey, {
-        method: "PUT",
-        expiresIn: 3600,
-        acl: "public-read",
-      });
-      return commonRes({ url, storageKey });
+    async ({ query }) => {
+      try {
+        const { mimeType, fileNameHash } = query;
+        const storageKey = `${mimeType}/${fileNameHash}`;
+        const url = await minio.presign(storageKey, {
+          method: "PUT",
+          expiresIn: 3600,
+          acl: "public-read",
+        });
+        return commonRes({ url, storageKey });
+      } catch (error) {
+        console.error("获取预签名URL失败:", error);
+        return commonRes(
+          { error: "获取预签名URL失败" },
+          500,
+          "Internal Server Error"
+        );
+      }
     },
     {
       query: MediaModel.PresignUrlQuery,
