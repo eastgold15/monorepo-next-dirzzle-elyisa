@@ -2,7 +2,7 @@
 
 import { Check, ChevronDown, X } from "lucide-react";
 import { useState } from "react";
-import { flattenCategories, useCategories } from "@/hooks/use-categories";
+import { flattenCategories, useCategoriesTree } from "@/hooks/api";
 
 interface CategoryMultiSelectorProps {
   value?: string[];
@@ -22,7 +22,7 @@ export function CategoryMultiSelector({
   maxSelected = 5,
 }: CategoryMultiSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: categories, isLoading } = useCategories();
+  const { data: categories, isLoading } = useCategoriesTree();
   const [searchQuery, setSearchQuery] = useState("");
 
   const options = categories ? flattenCategories(categories) : [];

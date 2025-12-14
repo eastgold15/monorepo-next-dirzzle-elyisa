@@ -60,8 +60,25 @@ function saveCategoriesToCache(categories: Category[]): void {
   }
 }
 
-// 获取分类树的hook
+// 获取分类列表（用于下拉选择）- 简单版本
 export function useCategories() {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await rpc.api.category.get({
+        query: { limit: 1000 }, // 获取所有分类
+      });
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+      return res.data?.items || [];
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+// 获取分类树的hook - 带缓存版本
+export function useCategoriesTree() {
   return useQuery({
     queryKey: ["categories", "tree"],
     queryFn: async () => {
@@ -84,6 +101,21 @@ export function useCategories() {
       return data as unknown as Category[];
     },
     staleTime: 1000 * 60 * 30, // 30分钟缓存
+  });
+}
+
+// 获取分类详情
+export function useCategory(id: string, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["category", id],
+    queryFn: async () => {
+      const result = handleEden(await rpc.api.category[id].get());
+      return result;
+    },
+    enabled: options?.enabled ?? true,
+    staleTime: 5 * 60 * 1000, // 5分钟
+    retry: 2,
+    refetchOnWindowFocus: false,
   });
 }
 

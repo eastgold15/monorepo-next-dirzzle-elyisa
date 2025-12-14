@@ -11,7 +11,7 @@ import { categoriesTable } from "../category/category.schema";
 import { createdAt, idUuid } from "../helper/schemaHelper.schema";
 import { productTemplateTable } from "./product.schema";
 
-export const InputTypeEnum = pgEnum("input_type", ["select", "text", "number"]);
+export const InputTypeEnum = pgEnum("input_type", ["select", "text", "number", "multiselect", "richtext"]);
 
 // 1. 属性模板表
 export const attributeTemplateTable = pgTable("attribute_templates", {

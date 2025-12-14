@@ -1,6 +1,6 @@
 "use client";
 
-import { usePermissions } from "@/hooks/use-user";
+import { usePermissions } from "@/hooks/api/user";
 
 interface FactorySelectorProps {
   value?: string;

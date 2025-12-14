@@ -1,7 +1,7 @@
 "use client";
 
-import { List, Plus, Save, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Edit2, List, Plus, Save, Trash2 } from "lucide-react";
+import React, { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -9,17 +9,51 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { INITIAL_TEMPLATES } from "@/mockData";
-import type { FieldType, ProductTemplate, TemplateField } from "../../../types";
+import { useCategories } from "@/hooks/api";
+import {
+  useCreateTemplate,
+  useDeleteTemplates,
+  useTemplate,
+  useTemplates,
+  useUpdateTemplate,
+} from "@/hooks/api/template-api";
+import type { FieldType, TemplateField } from "@/types";
+
 export default function TemplateManager() {
-  const [view, setView] = useState<"list" | "create">("list");
-  const [templates, setTemplates] =
-    useState<ProductTemplate[]>(INITIAL_TEMPLATES);
+  const [view, setView] = useState<"list" | "create" | "edit">("list");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // 获取模板列表
+  const { data: templatesData, isLoading, refetch } = useTemplates();
+
+  const templates = templatesData?.data?.items || [];
+
+  // 获取分类列表
+  const { data: categories } = useCategories();
+
+  // 创建模板
+  const createTemplateMutation = useCreateTemplate();
+  const updateTemplateMutation = useUpdateTemplate();
+  const deleteTemplateMutation = useDeleteTemplates();
+
+  // 获取编辑的模板
+  const { data: editingTemplate } = useTemplate(editingId || "");
 
   // Builder State
   const [newTemplateName, setNewTemplateName] = useState("");
   const [newTemplateDesc, setNewTemplateDesc] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [newFields, setNewFields] = useState<TemplateField[]>([]);
+
+  // 初始化编辑数据
+  React.useEffect(() => {
+    if (view === "edit" && editingTemplate) {
+      setNewTemplateName(editingTemplate?.data?.name || "");
+      setNewTemplateDesc(editingTemplate?.data?.description || "");
+      setSelectedCategoryId(editingTemplate?.data?.categoryId || "");
+      setNewFields(editingTemplate?.data?.fields || []);
+    }
+  }, [view, editingTemplate]);
 
   const addField = () => {
     const id = Date.now().toString();
@@ -31,6 +65,7 @@ export default function TemplateManager() {
         code: `field_${id}`,
         type: "text",
         isSkuSpec: false,
+        required: true,
         options: [],
       },
     ]);
@@ -46,21 +81,75 @@ export default function TemplateManager() {
     setNewFields(newFields.filter((f) => f.id !== id));
   };
 
-  const saveTemplate = () => {
-    if (!newTemplateName) return alert("Please enter a template name");
-    const template: ProductTemplate = {
-      id: Date.now().toString(),
-      name: newTemplateName,
-      description: newTemplateDesc,
-      fields: newFields,
-      createdAt: new Date().toISOString(),
-    };
-    setTemplates([...templates, template]);
-    setView("list");
-    setNewTemplateName("");
-    setNewTemplateDesc("");
-    setNewFields([]);
+  const saveTemplate = async () => {
+    if (!newTemplateName) return alert("请输入模板名称");
+    if (!selectedCategoryId) return alert("请选择分类");
+
+    try {
+      if (view === "create") {
+        await createTemplateMutation.mutateAsync({
+          name: newTemplateName,
+          description: newTemplateDesc,
+          categoryId: selectedCategoryId,
+          fields: newFields,
+        });
+      } else if (view === "edit" && editingId) {
+        await updateTemplateMutation.mutateAsync({
+          id: editingId,
+          data: {
+            name: newTemplateName,
+            description: newTemplateDesc,
+            categoryId: selectedCategoryId,
+            fields: newFields,
+          },
+        });
+      }
+
+      // 重置状态
+      setView("list");
+      setEditingId(null);
+      setNewTemplateName("");
+      setNewTemplateDesc("");
+      setSelectedCategoryId("");
+      setNewFields([]);
+      refetch();
+    } catch (error: any) {
+      alert(error.message || "保存失败");
+    }
   };
+
+  const handleEdit = (template: any) => {
+    setEditingId(template.id);
+    setNewTemplateName(template.name);
+    setNewTemplateDesc(template.description || "");
+    setSelectedCategoryId(template.categoryId);
+    setNewFields(template.fields);
+    setView("edit");
+  };
+
+  const handleDelete = async (ids: string[]) => {
+    if (!confirm("确定要删除选中的模板吗？")) return;
+
+    try {
+      await deleteTemplateMutation.mutateAsync(ids);
+      refetch();
+    } catch (error: any) {
+      alert(error.message || "删除失败");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <div className="flex h-96 items-center justify-center">
+            <div className="text-lg">加载中...</div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -71,7 +160,11 @@ export default function TemplateManager() {
             <SidebarTrigger className="-ml-1" />
             <Separator className="mr-2 h-4" orientation="vertical" />
             <nav className="font-medium text-sm">
-              {view === "list" ? "Product Templates" : "Create New Template"}
+              {view === "list"
+                ? "Product Templates"
+                : view === "create"
+                  ? "Create New Template"
+                  : "Edit Template"}
             </nav>
           </div>
         </header>
@@ -82,7 +175,9 @@ export default function TemplateManager() {
                 <h1 className="font-bold text-2xl text-slate-900">
                   {view === "list"
                     ? "Product Templates"
-                    : "Create New Template"}
+                    : view === "create"
+                      ? "Create New Template"
+                      : "Edit Template"}
                 </h1>
                 <p className="mt-1 text-slate-500">
                   Define data structures for different product categories.
@@ -97,10 +192,13 @@ export default function TemplateManager() {
                   <span>New Template</span>
                 </button>
               )}
-              {view === "create" && (
+              {(view === "create" || view === "edit") && (
                 <button
                   className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
-                  onClick={() => setView("list")}
+                  onClick={() => {
+                    setView("list");
+                    setEditingId(null);
+                  }}
                 >
                   <List size={18} />
                   <span>Back to List</span>
@@ -114,13 +212,14 @@ export default function TemplateManager() {
                   <thead className="border-slate-200 border-b bg-slate-50 font-semibold text-slate-500 text-xs uppercase">
                     <tr>
                       <th className="px-6 py-4">Template Name</th>
+                      <th className="px-6 py-4">Category</th>
                       <th className="px-6 py-4">Fields</th>
                       <th className="px-6 py-4">Created</th>
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {templates.map((t) => (
+                    {templates.map((t: any) => (
                       <tr className="hover:bg-slate-50" key={t.id}>
                         <td className="px-6 py-4">
                           <div className="font-medium text-slate-900">
@@ -131,18 +230,28 @@ export default function TemplateManager() {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-slate-600 text-sm">
+                          {t.categoryName}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600 text-sm">
                           {t.fields.length} fields (
-                          {t.fields.filter((f) => f.isSkuSpec).length} specs)
+                          {t.fields.filter((f: any) => f.isSkuSpec).length}{" "}
+                          specs)
                         </td>
                         <td className="px-6 py-4 text-slate-600 text-sm">
                           {new Date(t.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button className="mr-3 font-medium text-indigo-600 text-sm hover:text-indigo-800">
-                            Edit
+                          <button
+                            className="mr-3 font-medium text-indigo-600 text-sm hover:text-indigo-800"
+                            onClick={() => handleEdit(t)}
+                          >
+                            <Edit2 className="inline" size={16} /> Edit
                           </button>
-                          <button className="font-medium text-red-500 text-sm hover:text-red-700">
-                            Delete
+                          <button
+                            className="font-medium text-red-500 text-sm hover:text-red-700"
+                            onClick={() => handleDelete([t.id])}
+                          >
+                            <Trash2 className="inline" size={16} /> Delete
                           </button>
                         </td>
                       </tr>
@@ -172,15 +281,22 @@ export default function TemplateManager() {
                       </div>
                       <div>
                         <label className="mb-1 block font-medium text-slate-700 text-sm">
-                          Description
+                          Category
                         </label>
-                        <input
+                        <select
                           className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                          onChange={(e) => setNewTemplateDesc(e.target.value)}
-                          placeholder="Brief description"
-                          type="text"
-                          value={newTemplateDesc}
-                        />
+                          onChange={(e) =>
+                            setSelectedCategoryId(e.target.value)
+                          }
+                          value={selectedCategoryId}
+                        >
+                          <option value="">Select a category</option>
+                          {categories?.map((cat: any) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -279,24 +395,46 @@ export default function TemplateManager() {
                                   <option value="richtext">Rich Text</option>
                                 </select>
                               </div>
-                              <div className="flex items-center gap-2 pt-6">
-                                <input
-                                  checked={field.isSkuSpec}
-                                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                  id={`sku-${field.id}`}
-                                  onChange={(e) =>
-                                    updateField(field.id, {
-                                      isSkuSpec: e.target.checked,
-                                    })
-                                  }
-                                  type="checkbox"
-                                />
-                                <label
-                                  className="font-medium text-slate-700 text-sm"
-                                  htmlFor={`sku-${field.id}`}
-                                >
-                                  Is SKU Spec?
-                                </label>
+                              <div className="space-y-2 pt-6">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    checked={field.isSkuSpec}
+                                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    id={`sku-${field.id}`}
+                                    onChange={(e) =>
+                                      updateField(field.id, {
+                                        isSkuSpec: e.target.checked,
+                                      })
+                                    }
+                                    type="checkbox"
+                                  />
+                                  <label
+                                    className="font-medium text-slate-700 text-sm"
+                                    htmlFor={`sku-${field.id}`}
+                                  >
+                                    Is SKU Spec?
+                                  </label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    checked={field.required ?? true}
+                                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    defaultChecked={true}
+                                    id={`required-${field.id}`}
+                                    onChange={(e) =>
+                                      updateField(field.id, {
+                                        required: e.target.checked,
+                                      })
+                                    }
+                                    type="checkbox"
+                                  />
+                                  <label
+                                    className="font-medium text-slate-700 text-sm"
+                                    htmlFor={`required-${field.id}`}
+                                  >
+                                    Required
+                                  </label>
+                                </div>
                               </div>
                             </div>
 
@@ -347,6 +485,13 @@ export default function TemplateManager() {
                         </span>
                       </li>
                       <li className="flex justify-between">
+                        <span>Category:</span>{" "}
+                        <span className="font-medium text-slate-900">
+                          {categories?.find((c) => c.id === selectedCategoryId)
+                            ?.name || "-"}
+                        </span>
+                      </li>
+                      <li className="flex justify-between">
                         <span>Total Fields:</span>{" "}
                         <span className="font-medium text-slate-900">
                           {newFields.length}
@@ -361,7 +506,11 @@ export default function TemplateManager() {
                     </ul>
                     <button
                       className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-3 font-bold text-white shadow-indigo-200 shadow-lg transition-colors hover:bg-indigo-700 disabled:opacity-50 disabled:shadow-none"
-                      disabled={newFields.length === 0 || !newTemplateName}
+                      disabled={
+                        newFields.length === 0 ||
+                        !newTemplateName ||
+                        !selectedCategoryId
+                      }
                       onClick={saveTemplate}
                     >
                       <Save size={18} /> Save Template

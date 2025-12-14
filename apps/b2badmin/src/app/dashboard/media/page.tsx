@@ -1,6 +1,6 @@
 "use client";
 
-import { Filter, Search, Tag, Trash2, Upload } from "lucide-react";
+import { Filter, Search, Tag, Upload } from "lucide-react";
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MediaUpload } from "@/components/MediaUpload";
@@ -11,7 +11,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { INITIAL_MEDIA } from "@/mockData";
+import { useMediaList } from "@/hooks/api";
 
 interface UploadFile {
   id: string;
@@ -27,26 +27,29 @@ interface UploadFile {
 
 export default function MediaLibrary() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [media, setMedia] = useState(INITIAL_MEDIA);
+  const [category, setCategory] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
 
-  const filteredMedia = media.filter(
-    (m) =>
-      m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.tags.some((t) => t.includes(searchTerm.toLowerCase()))
-  );
+  // 使用 API 获取媒体数据
+  const {
+    data: mediaData,
+    isLoading,
+    error,
+    refetch,
+  } = useMediaList({
+    page,
+    limit,
+    category,
+    search: searchTerm,
+  });
+
+  const media = mediaData?.files || [];
+  const pagination = mediaData?.pagination;
 
   const handleUploadComplete = (uploadedFiles: UploadFile[]) => {
-    // 将新上传的文件添加到媒体列表
-    const newMediaItems = uploadedFiles.map((file) => ({
-      id: file.id,
-      name: file.name,
-      url: file.preview || "/placeholder-image.jpg",
-      type: file.type.startsWith("image/") ? "image" : "video",
-      tags: ["新上传"],
-      createdAt: new Date().toISOString(),
-    }));
-
-    setMedia((prev) => [...newMediaItems, ...prev]);
+    // 重新获取媒体列表
+    refetch();
   };
 
   const handleUploadError = (error: string) => {
@@ -108,40 +111,57 @@ export default function MediaLibrary() {
             </div>
 
             <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {filteredMedia.map((asset) => (
-                <div
-                  className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-                  key={asset.id}
-                >
-                  <div className="relative aspect-square bg-slate-100">
-                    <img
-                      alt={asset.name}
-                      className="h-full w-full object-cover"
-                      src={asset.url}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                      <button className="rounded-full bg-white/90 p-2 text-red-600 hover:bg-white">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <h4 className="truncate font-medium text-slate-900 text-sm">
-                      {asset.name}
-                    </h4>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {asset.tags.map((tag) => (
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-[10px] text-slate-600"
-                          key={tag}
-                        >
-                          <Tag size={10} /> {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+              {isLoading ? (
+                <div className="col-span-full py-8 text-center">加载中...</div>
+              ) : error ? (
+                <div className="col-span-full py-8 text-center text-red-500">
+                  加载失败: {error.message}
                 </div>
-              ))}
+              ) : media.length === 0 ? (
+                <div className="col-span-full py-8 text-center text-slate-500">
+                  暂无媒体文件
+                </div>
+              ) : (
+                media.map((asset) => (
+                  <div
+                    className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    key={asset.id}
+                  >
+                    <div className="relative aspect-square bg-slate-100">
+                      {asset.url && asset.mimeType.startsWith("image/") ? (
+                        <img
+                          alt={asset.originalName}
+                          className="h-full w-full object-cover"
+                          src={asset.url}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <div className="text-center">
+                            <div className="mb-2 text-4xl">📄</div>
+                            <p className="text-slate-500 text-sm">
+                              {asset.mimeType.split("/")[1]?.toUpperCase() ||
+                                "FILE"}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h4 className="truncate font-medium text-slate-900 text-sm">
+                        {asset.originalName}
+                      </h4>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-[10px] text-slate-600">
+                          <Tag size={10} /> {asset.category}
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 font-medium text-[10px] text-blue-600">
+                          {asset.mediaType}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

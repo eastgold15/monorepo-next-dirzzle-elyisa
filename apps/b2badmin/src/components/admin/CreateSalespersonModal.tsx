@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { usePermissions } from "@/hooks/use-user";
+import { usePermissions } from "@/hooks/api/user";
 
 interface CreateSalespersonModalProps {
   open: boolean;

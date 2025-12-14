@@ -20,7 +20,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePermissions } from "@/hooks/use-user";
+import { usePermissions } from "@/hooks/api/user";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 

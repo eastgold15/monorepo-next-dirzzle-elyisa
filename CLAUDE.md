@@ -159,3 +159,8 @@ export const [xxx]Route = new Elysia({
   )
 ```
 这样一个接口描述好了，再去完成里面的逻辑
+
+
+- 以后创建新的 API hooks 时，应该放在 /hooks/api/ 文件夹中
+- 文件名应该与 server/modules 中的模块名对应
+- UI 相关的 hooks 放在 /hooks/ui/ 文件夹中

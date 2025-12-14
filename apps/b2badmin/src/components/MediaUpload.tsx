@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Upload } from "@/components/ui/upload";
+import { useMediaUpload } from "@/hooks/api";
 
 interface UploadFile {
   id: string;
@@ -47,6 +48,7 @@ export function MediaUpload({
 }: MediaUploadProps) {
   const [open, setOpen] = React.useState(false);
   const [uploadedFiles, setUploadedFiles] = React.useState<UploadFile[]>([]);
+  const uploadMutation = useMediaUpload();
 
   const handleUploadSuccess = (files: UploadFile[]) => {
     setUploadedFiles(files);
@@ -90,12 +92,27 @@ export function MediaUpload({
             onError={handleError}
             onSuccess={handleUploadSuccess}
             onUpload={async (files) => {
-              // 这里实现实际的上传逻辑
-              // 可以调用后端 API 进行文件上传
-              console.log("Uploading files:", files);
+              // 实际的上传逻辑
+              try {
+                const uploadPromises = files.map(async (uploadFile) => {
+                  // 使用 mutation 上传文件
+                  const result = await uploadMutation.mutateAsync({
+                    file: uploadFile.file,
+                    category: "general",
+                  });
 
-              // 模拟 API 调用
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+                  return {
+                    ...uploadFile,
+                    status: "success" as const,
+                    url: result.url,
+                  };
+                });
+
+                const results = await Promise.all(uploadPromises);
+                onUploadComplete?.(results);
+              } catch (error) {
+                onError?.(error instanceof Error ? error.message : "上传失败");
+              }
             }}
           />
         </div>

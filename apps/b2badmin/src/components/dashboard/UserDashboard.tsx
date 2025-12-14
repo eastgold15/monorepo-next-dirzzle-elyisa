@@ -8,7 +8,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useOrganization, usePermissions, useTeam } from "@/hooks/use-user";
+import { useOrganization, usePermissions, useTeam } from "@/hooks/api/user";
 
 // 统计卡片组件
 const StatCard = ({

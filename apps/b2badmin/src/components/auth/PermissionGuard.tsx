@@ -2,7 +2,7 @@
 
 import type { Permission } from "@repo/contract";
 import type { ReactNode } from "react";
-import { usePermissions } from "@/hooks/use-user";
+import { usePermissions } from "@/hooks/api/user";
 
 interface PermissionGuardProps {
   children: ReactNode;

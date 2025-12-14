@@ -6,7 +6,7 @@ import {
   FileBox,
   Frame,
   Image,
-  // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
+  // biome-ignore lint/suspicious/noShadowRestrictedNames: Map is a valid name in this context
   Map,
   PieChart,
   ShoppingBag,
@@ -15,8 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import type * as React from "react";
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
+import { NavGroup } from "@/components/nav-group";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -26,20 +25,24 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { usePermissions } from "@/hooks/use-user";
+import { usePermissions } from "@/hooks/api/user";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { role } = usePermissions();
 
-  // 根据角色动态生成导航菜单
-  const getNavMainItems = () => {
+  // Dashboard - 始终显示在最前面
+  const getDashboardItems = () => [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: SquareTerminal,
+      isActive: true,
+    },
+  ];
+
+  // 业务管理相关菜单
+  const getBusinessItems = () => {
     const items = [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: SquareTerminal,
-        isActive: true,
-      },
       {
         title: "Products",
         url: "/dashboard/products",
@@ -50,9 +53,58 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/dashboard/categories",
         icon: Tags,
       },
+      {
+        title: "Media Library",
+        url: "/dashboard/media",
+        icon: Image,
+      },
+      {
+        title: "Templates",
+        url: "/dashboard/templates",
+        icon: FileBox,
+      },
     ];
 
-    // 根据权限添加菜单项
+    // Advertisements - 出口商管理员可以访问
+    if (role === "exporter_admin") {
+      items.push({
+        title: "Advertisements",
+        url: "/dashboard/ads",
+        icon: PieChart,
+      });
+    }
+
+    // Hero Cards - 所有角色都可以访问
+    items.push({
+      title: "Hero Cards",
+      url: "/dashboard/hero-cards",
+      icon: Frame,
+    });
+
+    return items;
+  };
+
+  // 系统管理相关菜单
+  const getSystemItems = () => {
+    const items = [];
+
+    // Site Config - 出口商管理员可以访问
+    if (role === "exporter_admin") {
+      items.push({
+        title: "Site Config",
+        url: "/dashboard/site-config",
+        icon: Map,
+      });
+    }
+
+    return items;
+  };
+
+  // 审计管理相关菜单
+  const getAuditItems = () => {
+    const items = [];
+
+    // Factories - 出口商管理员和工厂管理员可以访问
     if (role === "exporter_admin" || role === "factory_admin") {
       items.push({
         title: "Factories",
@@ -61,18 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       });
     }
 
-    items.push({
-      title: "Templates",
-      url: "/dashboard/templates",
-      icon: FileBox,
-    });
-
-    items.push({
-      title: "Media Library",
-      url: "/dashboard/media",
-      icon: Image,
-    });
-
+    // Users - 出口商管理员可以访问
     if (role === "exporter_admin") {
       items.push({
         title: "Users",
@@ -81,43 +122,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       });
     }
 
-    return items;
-  };
-
-  const getProjectItems = () => {
-    const items = [];
-
-    // Hero Cards - 所有角色都可以访问
-    items.push({
-      name: "Hero Cards",
-      url: "/dashboard/hero-cards",
-      icon: Frame,
-    });
-
     // Analytics - 管理员可以访问
     if (role === "exporter_admin" || role === "factory_admin") {
       items.push({
-        name: "Analytics",
+        title: "Analytics",
         url: "/dashboard/analytics",
         icon: BarChart3,
-      });
-    }
-
-    // Advertisements - 出口商管理员可以访问
-    if (role === "exporter_admin") {
-      items.push({
-        name: "Advertisements",
-        url: "/dashboard/ads",
-        icon: PieChart,
-      });
-    }
-
-    // Site Config - 出口商管理员可以访问
-    if (role === "exporter_admin") {
-      items.push({
-        name: "Site Config",
-        url: "/dashboard/site-config",
-        icon: Map,
       });
     }
 
@@ -130,8 +140,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={getNavMainItems()} />
-        <NavProjects projects={getProjectItems()} />
+        <NavGroup items={getDashboardItems()} title="Overview" />
+        <NavGroup items={getBusinessItems()} title="业务管理" />
+        <NavGroup items={getSystemItems()} title="系统管理" />
+        <NavGroup items={getAuditItems()} title="审计管理" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

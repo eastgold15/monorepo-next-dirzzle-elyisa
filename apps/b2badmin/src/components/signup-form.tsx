@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useRegisterMutation } from "@/hooks/auth-hook";
+import { useRegisterMutation } from "@/hooks/api/auth";
 import { AvatarUploadNew } from "./ui/avatar-upload-new";
 import {
   FormControl,

@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useOrganization, usePermissions } from "@/hooks/use-user";
+import { useOrganization, usePermissions } from "@/hooks/api/user";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();

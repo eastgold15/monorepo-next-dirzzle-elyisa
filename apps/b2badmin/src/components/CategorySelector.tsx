@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { flattenCategories, useCategories } from "@/hooks/use-categories";
+import { flattenCategories, useCategories } from "@/hooks/api";
 
 interface CategorySelectorProps {
   value?: string;

@@ -25,7 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useUser } from "@/hooks/use-user";
+import { useUser } from "@/hooks/api/user";
 
 export function NavUser() {
   const { data, isLoading } = useUser();

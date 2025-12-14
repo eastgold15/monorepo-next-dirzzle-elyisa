@@ -90,7 +90,7 @@ const BusinessQuery = t.Object({
   templateId: t.Optional(t.String()),
   name: t.Optional(t.String()),
   search: t.Optional(t.String()),
-  inputType: t.Optional(t.UnionEnum(["select", "text", "number"])),
+  inputType: t.Optional(t.UnionEnum(["select", "text", "number", "multiselect", "richtext"])),
 });
 
 const ListQuery = t.Object({

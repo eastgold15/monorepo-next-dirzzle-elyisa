@@ -11,9 +11,9 @@ import { categoriesController } from "@/server/modules/category/category";
 import { factoryRoute } from "@/server/modules/factory/factory";
 import { HeroCardsController } from "@/server/modules/hero-cards/hero-cards";
 import { mediaRoute } from "@/server/modules/media/media";
-import { v2AttributeRoute } from "@/server/modules/product/attribute";
 import { product2Route } from "@/server/modules/product/product";
 import { skuRoute } from "@/server/modules/product/sku";
+import { productTemplateRoute } from "@/server/modules/product/template";
 import { siteConfigsController } from "@/server/modules/site-config/site-config";
 import { translateRoute } from "@/server/modules/translations/translate";
 import { userRoute } from "@/server/modules/user/user";
@@ -95,8 +95,8 @@ export const server = new Elysia({ name: "server" })
   .use(AdsController)
   .use(HeroCardsController) // 添加首页展示卡片控制器
   .use(siteConfigsController)
-  .use(v2AttributeRoute)
   .use(product2Route)
+  .use(productTemplateRoute)
   .use(skuRoute)
   .use(translateRoute)
   .use(userRoute)
