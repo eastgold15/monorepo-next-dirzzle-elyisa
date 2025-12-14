@@ -182,7 +182,7 @@ export const productTemplateRoute = new Elysia({
     }
   )
   .put(
-    "/:id",
+    "/update/:id",
     async ({ params: { id }, body, db }) => {
       const { name, description, categoryId, fields } = body;
 
@@ -375,7 +375,7 @@ export const productTemplateRoute = new Elysia({
     }
   )
   .get(
-    "/:id",
+    "/detail/:id",
     async ({ params: { id }, db }) => {
       // 获取模板详情
       const template = await db.query.attributeTemplateTable.findFirst({

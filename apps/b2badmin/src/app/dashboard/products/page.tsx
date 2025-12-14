@@ -10,7 +10,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePermissions } from "@/hooks/use-permissions";
+import { usePermissions } from "@/hooks/api/user";
 
 // Mock data - in real app, this would fetch from API
 const INITIAL_PRODUCTS = [

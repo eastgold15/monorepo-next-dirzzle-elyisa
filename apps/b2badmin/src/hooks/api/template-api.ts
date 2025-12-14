@@ -23,7 +23,7 @@ export function useTemplate(id: string) {
   return useQuery({
     queryKey: ["template", id],
     queryFn: async () => {
-      const res = await rpc.api.product.template[":id"].get();
+      const res = await rpc.api.product.template.detail[":id"].get();
       if (res.error) {
         throw new Error(res.error.message);
       }
@@ -52,9 +52,7 @@ export function useCreateTemplate() {
         sortOrder?: number;
       }>;
     }) => {
-      const res = await rpc.api.product.template.post({
-        data,
-      });
+      const res = await rpc.api.product.template.post(data);
       if (res.error) {
         throw new Error(res.error.message);
       }
@@ -92,9 +90,7 @@ export function useUpdateTemplate() {
         }>;
       };
     }) => {
-      const res = await rpc.api.product.template[":id"].put({
-        data,
-      });
+      const res = await rpc.api.product.template.update[":id"].put(data);
       if (res.error) {
         throw new Error(res.error.message);
       }
