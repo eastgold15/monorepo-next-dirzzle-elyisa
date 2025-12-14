@@ -12,9 +12,10 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { categoriesTable, productsTable } from "../../table";
+import { productsTable } from "../../table";
 import { exportersTable } from "../01exporter/exporter.schema";
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
+import { factoryCategoryTable } from "./factory-category.schema";
 
 // 工厂表
 export const factoriesTable = pgTable("factories", {
@@ -30,9 +31,6 @@ export const factoriesTable = pgTable("factories", {
   description: text("description"), // 工厂描述
   website: varchar("website", { length: 500 }).notNull(), // 官网地址
   address: text("address").notNull(), // 详细地址
-  categoryId: uuid("category_id")
-    .references(() => categoriesTable.id)
-    .notNull(),
   contactPhone: varchar("contact_phone", { length: 50 }).notNull(),
   logo: varchar("logo", { length: 500 }), // 工厂Logo URL
 
@@ -57,4 +55,5 @@ export const factoryRelations = relations(factoriesTable, ({ one, many }) => ({
     references: [exportersTable.id],
   }),
   products: many(productsTable),
+  categories: many(factoryCategoryTable),
 }));

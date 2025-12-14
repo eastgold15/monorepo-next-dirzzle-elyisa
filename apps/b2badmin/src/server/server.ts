@@ -8,6 +8,7 @@ import { OpenAPI } from "@/server/lib/auth-openapi";
 import { AdsController } from "@/server/modules/ads/ads";
 import { betterAuthPlugin } from "@/server/modules/auth/auth.plugin";
 import { categoriesController } from "@/server/modules/category/category";
+import { factoryRoute } from "@/server/modules/factory/factory";
 import { HeroCardsController } from "@/server/modules/hero-cards/hero-cards";
 import { mediaRoute } from "@/server/modules/media/media";
 import { v2AttributeRoute } from "@/server/modules/product/attribute";
@@ -56,6 +57,7 @@ export const server = new Elysia({ name: "server" })
         tags: [
           { name: "Product V2", description: "商品管理 V2" },
           { name: "Categories", description: "分类管理" },
+          { name: "Factory", description: "工厂管理" },
           { name: "Media", description: "媒体文件管理" }, // 新的媒体管理标签
           { name: "Partners", description: "合作伙伴管理" },
           { name: "Advertisements", description: "广告管理" },
@@ -97,4 +99,5 @@ export const server = new Elysia({ name: "server" })
   .use(product2Route)
   .use(skuRoute)
   .use(translateRoute)
-  .use(userRoute);
+  .use(userRoute)
+  .use(factoryRoute);

@@ -49,7 +49,8 @@
         "noEmptySource": "off",
         "noShadow": "off",
         "noIncrementDecrement": "off",
-        "noSyncScripts": "off"
+        "noSyncScripts": "off",
+        "noLeakedRender": "off"
       },
       "style": {
         "noMagicNumbers": "off",

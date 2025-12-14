@@ -189,7 +189,7 @@ export const userResourceRolesTable = pgTable(
       .references(() => roleTable.id, { onDelete: "cascade" }),
 
     resourceType: text("resource_type").notNull(), // 'factory' | 'exporter'
-    resourceId: text("resource_id").notNull(), // 存 factories.id 或 exporters.id（都转成 text）
+    resourceId: uuid("resource_id").notNull(), // 存 factories.id 或 exporters.id
 
     isPrimary: boolean("is_primary").default(false),
   },

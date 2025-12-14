@@ -2,6 +2,7 @@
 
 import type { DataScope, Permission, UserRole } from "@repo/contract";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
@@ -103,6 +104,7 @@ export interface UserMeResponse {
 
 // 主要的 useUser hook
 export function useUser() {
+  const router = useRouter();
   return useQuery({
     queryKey: ["user", "me"],
     queryFn: async () => {
@@ -110,10 +112,11 @@ export function useUser() {
       const { data } = handleEden(response);
 
       if (!data) {
+        router.push("/login");
         return null;
       }
 
-      return data as UserMeResponse;
+      return data as unknown as UserMeResponse;
     },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes

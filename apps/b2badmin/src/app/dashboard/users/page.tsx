@@ -38,10 +38,9 @@ import {
   useUserManagement,
   useUsersWithSearch,
 } from "@/hooks/api/use-user-api";
-import { usePermissions } from "@/hooks/use-permissions";
 
 export default function UsersPage() {
-  const { role } = usePermissions();
+  // const { role } = usePermissions();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -265,7 +264,10 @@ export default function UsersPage() {
                                         : "text-green-600"
                                     }`}
                                     onClick={() =>
-                                      handleToggleUserStatus(user.id, user.isActive)
+                                      handleToggleUserStatus(
+                                        user.id,
+                                        user.isActive
+                                      )
                                     }
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -304,7 +306,7 @@ export default function UsersPage() {
                   <div>
                     <p className="text-slate-500 text-sm">总用户数</p>
                     <p className="font-bold text-2xl text-slate-900">
-                      {pagination.total}
+                      {/* {pagination.total} */}
                     </p>
                   </div>
                   <Users className="h-8 w-8 text-slate-400" />

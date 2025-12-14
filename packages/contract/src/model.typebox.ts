@@ -18,3 +18,4 @@ export * from "./modules/product-statistics/product-statistics.schema";
 export * from "./modules/site-config/site-config.t.model";
 export * from "./modules/translations/translate.schema";
 export * from "./modules/upload/upload.t.model";
+export * from "./modules/user/user.t.model";

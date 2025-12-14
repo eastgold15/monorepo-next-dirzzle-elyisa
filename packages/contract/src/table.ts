@@ -3,6 +3,7 @@
 export * from "./modules/01auth/auth.schema";
 export * from "./modules/01exporter/exporter.schema";
 export * from "./modules/01factory/factory.schema";
+export * from "./modules/01factory/factory-category.schema";
 export * from "./modules/01factory/sales_person.schema";
 export * from "./modules/ads/ads.schema";
 export * from "./modules/category/category.schema";

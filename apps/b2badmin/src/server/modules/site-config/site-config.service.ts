@@ -10,10 +10,10 @@ import {
   like,
   or,
 } from "drizzle-orm";
+import { HttpError } from "elysia-http-problem-json";
 import { db } from "@/server/db/connection";
 import { siteConfigTable } from "@/server/db/schema";
 import type { SupportedLocale } from "@/server/plugins/locale";
-import { HttpError } from "@/server/utils/err";
 import { TranslateService } from "../translations/translate.service";
 
 /**

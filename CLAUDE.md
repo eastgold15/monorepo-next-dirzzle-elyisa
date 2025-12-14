@@ -5,39 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 项目概述
 
 这是一个基于 Bun + Turborepo 的现代化全栈电商项目，采用 Elysia 后端框架和 Next.js 前端框架。
-
-## 开发环境设置
-
-
-
-### 2. 环境变量配置
-复制并配置相应的环境变量文件（需要阿里云OSS服务和翻译服务的密钥）。
-
-### 3. 启动数据库容器
-```bash
-cd apps/backend && docker-compose up -d
-```
-
-### 4. 启动开发服务器
-```bash
-bun dev
-```
-
 ## 常用命令
 
 ### 根目录命令
 - `bun dev` - 启动所有应用的开发服务器
 - `bun build` - 构建所有应用
-- `bun check` - 使用 Ultracite 检查代码问题
-- `bun fix` - 使用 Ultracite 自动修复代码问题
-- `bun check-type` - 类型检查
-- `bun clean` - 清理构建文件
 
 ### 数据库命令（在 packages/contract 目录）
-- `bun db:generate` - 生成数据库迁移文件
-- `bun db:migrate` - 执行数据库迁移
 - `bun db:push` - 推送 schema 到数据库
-- `bun db:studio` - 启动数据库管理界面
+
 
 ## 项目架构
 
@@ -97,7 +73,6 @@ apps/b2badmin/src/server/
 `packages/contract` 包是整个项目的核心，提供：
 - 统一的数据库 Schema 定义（Drizzle）
 - 共享的 TypeScript 类型
-- Zod 验证 Schema
 - 前后端类型安全保障
 
 #### Schema 命名规范
@@ -110,23 +85,13 @@ apps/b2badmin/src/server/
 ### 认证系统（Better Auth）
 - 邮箱密码登录，支持邮箱验证
 - GitHub OAuth 集成
-- 会话管理：7天过期，24小时更新
-- 受信任的来源：localhost:9012, 9013, 3000
 
 ### 数据库配置
 - 使用 PostgreSQL
 - 通过 Drizzle Kit 管理 Schema 迁移
 - 数据库连接通过环境变量配置
 
-### 文件存储
-- 支持本地存储和阿里云 OSS
-- 通过 StorageFactory 模式实现存储策略切换
-- 图片处理包含缩略图生成
 
-### 国际化支持
-- 支持多语言切换
-- 集成阿里云翻译服务
-- 使用 locale 中间件处理语言偏好
 
 ## 代码规范
 
@@ -166,3 +131,31 @@ userResourceRolesTable - 用户资源角色关联表
 ```
 
 - 更多实体信息请看 [实体关系图](./docs/实体.md)
+
+- 当前项目状态 请看 [项目状态](./docs/status.md)
+
+# 最重要的部分
+- 项目开发方式，先看 `packages\contract\src\modules` 目录下的文件，这里定义了数据库的 schema，以及前后端的类型定义，再去 `apps\b2badmin\src\server\modules` 完成elysia的逻辑，先写 
+```ts
+export const [xxx]Route = new Elysia({
+  prefix: "[xxx]",
+  tags: ["[xxx]"],
+})
+  .use(dbPlugin)
+  .use(betterAuthPlugin)
+  .post(
+    "[/xxx]",
+    async ({ body, userInfo, db }) => {
+    
+    },
+    {
+      auth: true,
+      body: [来自契约层的类型],
+      detail: {
+        summary: "[xxx]",
+        description: "[xxx]",
+      },
+    }
+  )
+```
+这样一个接口描述好了，再去完成里面的逻辑

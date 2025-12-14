@@ -2,7 +2,7 @@
 
 import type { Permission } from "@repo/contract";
 import type { ReactNode } from "react";
-import { usePermissions } from "@/hooks/use-permissions";
+import { usePermissions } from "@/hooks/use-user";
 
 interface PermissionGuardProps {
   children: ReactNode;
@@ -46,7 +46,7 @@ export function PermissionGuard({
     }
   }
 
-  return hasRequiredPermission ? <>{children}</> : <>{fallback}</>;
+  return hasRequiredPermission ? children : fallback;
 }
 
 // 便捷的高阶函数组件
