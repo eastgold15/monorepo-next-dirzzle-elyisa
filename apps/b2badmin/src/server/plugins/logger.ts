@@ -1,41 +1,26 @@
+// src/lib/logger.ts
+
 import { Elysia } from "elysia";
 import logixlysia from "logixlysia";
-import { envConfig } from "@/lib/env/server";
 
-export const logPlugin = new Elysia({
-  name: "Logixlysia",
-})
-  // .onTransform(function log({ body, params, path, request: { method } }) {
-  //   console.log(`${method} ${path}`, {
-  //     body,
-  //     params,
-  //   });
-  // })
+
+export const loggerPlugin = new Elysia({ name: "loggerPlugin" })
   .use(
     logixlysia({
       config: {
         showStartupMessage: true,
         startupMessageFormat: "simple",
-        timestamp: {
-          translateTime: "yyyy-mm-dd HH:MM:ss",
-        },
-        ip: true,
-        logFilePath: "./logs/example.log",
-        logRotation: {
-          maxSize: "10m",
-          interval: "1d",
-          maxFiles: "7d",
-          compress: true,
-        },
+        timestamp: { translateTime: "yyyy-mm-dd HH:MM:ss" },
+
         customLogFormat:
-          "🦊 {now} {level} {pathname} {duration} {method}    {status} {message} {ip}",
+          "🦊 {now} {level} {duration} {method} {pathname} {status} {message} {ip}",
+        ip: true,
+        logFilePath: "./logs/app.log",
         logFilter: {
-          level:
-            envConfig.NODE_ENV === "development"
-              ? undefined
-              : ["ERROR", "WARNING"],
+          level: ["ERROR", "WARNING", "INFO"],
         },
       },
-    })
+    }),
   )
-  .as("global");
+
+

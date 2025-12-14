@@ -18,7 +18,7 @@ export const CustomerTable = pgTable("customer", {
   // 联系信息  k
   email: varchar("email", { length: 255 }), // 邮箱
   whatsapp: varchar("whatsapp", { length: 50 }), // WhatsApp
-  phone: integer("phone"), // 电话
+  phone: varchar("phone", { length: 20 }), // 电话
   address: text("address"), // 详细地址
 });
 

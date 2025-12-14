@@ -8,7 +8,7 @@ import {
   LogOut,
   User,
 } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -26,10 +26,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useUser } from "@/hooks/use-user";
-import { useRouter } from "next/navigation";
 
 export function NavUser() {
-  const { data: user, isLoading } = useUser();
+  const { data, isLoading } = useUser();
+  const user = data?.userInfo;
   const { isMobile } = useSidebar();
   const router = useRouter();
 
@@ -76,7 +76,9 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage alt={user.name} src={user.image} />
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -95,7 +97,9 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage alt={user.name} src={user.image} />
-                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -119,11 +123,13 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => {
-              fetch("/api/auth/sign-out", { method: "POST" }).then(() => {
-                router.push("/login");
-              });
-            }}>
+            <DropdownMenuItem
+              onClick={() => {
+                fetch("/api/auth/sign-out", { method: "POST" }).then(() => {
+                  router.push("/login");
+                });
+              }}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -1,7 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,64 +16,79 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+
+// 定义表单验证 Schema
+const loginFormSchema = z.object({
+  email: z.string().email({ message: "请输入有效的邮箱地址" }),
+  password: z.string().min(1, { message: "密码不能为空" }),
+});
+
+// 推导表单值类型
+type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  // 初始化 react-hook-form
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  // 处理表单提交
+  const onSubmit = async (values: LoginFormValues) => {
+    setIsLoading(true);
 
     try {
       // 调用登录 API
-      const response = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+
+      const { data, error } = await authClient.signIn.email({
+        email: values.email,
+        password: values.password,
       });
 
-      if (!response.ok) {
-        try {
-          const errorData = await response.json();
-          setError(errorData.message || "登录失败，请检查邮箱和密码");
-        } catch {
-          setError("登录失败，请检查邮箱和密码");
-        }
-        return;
+      if (!data) {
+        return null;
       }
 
       // 登录成功，跳转到dashboard
       router.push("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
-      setError("网络错误，请稍后重试");
+      form.setError("root", { message: "网络错误，请稍后重试" });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 处理邮箱变化（重置密码和错误）
+  const handleEmailChange = (value: string) => {
+    // 更新邮箱值
+    form.setValue("email", value);
+    // 重置密码
+    form.setValue("password", "");
+    // 清除所有错误
+    form.clearErrors();
   };
 
   return (
@@ -84,53 +104,108 @@ export function LoginForm({
               {message}
             </div>
           )}
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">邮箱</FieldLabel>
-                <Input
-                  id="email"
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="space-y-4">
+                {/* 邮箱字段 */}
+                <FormField
+                  control={form.control}
                   name="email"
-                  placeholder="m@example.com"
-                  required
-                  type="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="email">邮箱</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="email"
+                          placeholder="m@example.com"
+                          type="email"
+                          {...field}
+                          onChange={(e) => handleEmailChange(e.target.value)}
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">密码</FieldLabel>
-                  <a
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                    href="/forgot-password"
+
+                {/* 密码字段 */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center">
+                        <FormLabel htmlFor="password">密码</FormLabel>
+                        <a
+                          className="ml-auto text-sm underline-offset-4 hover:underline"
+                          href="/forgot-password"
+                        >
+                          忘记密码？
+                        </a>
+                      </div>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            {...field}
+                            required
+                          />
+                          <Button
+                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                            size="sm"
+                            type="button"
+                            variant="ghost"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* 全局错误提示 - 替换为普通 div */}
+                {form.formState.errors.root && (
+                  <div className="text-red-500 text-sm">
+                    {form.formState.errors.root.message}
+                  </div>
+                )}
+
+                {/* 登录按钮 */}
+                <div>
+                  <Button
+                    className="w-full"
+                    disabled={isLoading || !form.formState.isValid}
+                    type="submit"
                   >
-                    忘记密码？
+                    {isLoading ? "登录中..." : "登录"}
+                  </Button>
+                </div>
+
+                {/* 注册引导 - 替换为普通 div */}
+                <div className="text-center text-muted-foreground text-sm">
+                  还没有账户？{" "}
+                  <a className="text-blue-600 hover:underline" href="/signup">
+                    立即注册
                   </a>
                 </div>
-                <Input id="password" name="password" required type="password" />
-              </Field>
-
-              {error && (
-                <FieldDescription className="text-red-500 text-sm">
-                  {error}
-                </FieldDescription>
-              )}
-
-              <Field>
-                <Button className="w-full" disabled={isLoading} type="submit">
-                  {isLoading ? "登录中..." : "登录"}
-                </Button>
-              </Field>
-              <FieldDescription className="text-center">
-                还没有账户？{" "}
-                <a className="text-blue-600 hover:underline" href="/signup">
-                  立即注册
-                </a>
-              </FieldDescription>
-            </FieldGroup>
-          </form>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
+
+      {/* 服务条款 - 替换为普通 div */}
+      <div className="px-6 text-center text-muted-foreground text-sm">
         登录即表示您同意我们的{" "}
         <a className="hover:underline" href="#">
           服务条款
@@ -140,7 +215,7 @@ export function LoginForm({
           隐私政策
         </a>
         。
-      </FieldDescription>
+      </div>
     </div>
   );
 }

@@ -133,8 +133,6 @@ apps/b2badmin/src/server/
 - 使用 **Ultracite**（基于 Biome）进行代码格式化和检查
 - 严格遵循 TypeScript 类型安全
 - 模块化设计，清晰分离关注点
-- 使用 Zod 进行运行时类型验证
-- 在需要忽略 `noArrayIndexKey` 规则的地方，使用正确的 Biome 忽略语法：`// biome-ignore lint/suspicious/noArrayIndexKey: [具体原因]`
 
 ## 开发注意事项
 
@@ -148,3 +146,23 @@ apps/b2badmin/src/server/
 
 - 数据库改变，只准运行bun db:push，有问题就重置数据库
 - 数据库使用远程数据库
+
+
+- 前后端的类型都定义到契约层，这是必须！！！！！
+
+
+```
+实体关系图 出口商 (exportersTable)
+    ↓ (1:N)
+工厂 (factoriesTable) - 每个工厂属于一个出口商
+    ↓
+用户 (usersTable) - 通过 userResourceRolesTable 关联
+
+用户 (usersTable)
+    ↓ (1:N)
+userResourceRolesTable - 用户资源角色关联表
+    ↓ (N:1)
+角色 (roleTable)
+```
+
+- 更多实体信息请看 [实体关系图](./docs/实体.md)

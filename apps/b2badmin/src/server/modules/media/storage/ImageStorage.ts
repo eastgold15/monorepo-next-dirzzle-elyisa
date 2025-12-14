@@ -132,6 +132,27 @@ export abstract class AbstractImageStorage {
   abstract fileExists(fileOrUrl: string): Promise<boolean>;
 
   /**
+   * 获取预签名 URL
+   * @param key 对象键
+   * @param options 选项
+   * @returns 预签名 URL
+   */
+  abstract getPresignedUrl(
+    key: string,
+    options: {
+      method: "GET" | "PUT";
+      expiresIn?: number;
+    }
+  ): Promise<string>;
+
+  /**
+   * 获取公开访问 URL
+   * @param key 对象键
+   * @returns 公开访问 URL
+   */
+  abstract getPublicUrl(key: string): string;
+
+  /**
    * 获取文件信息
    * @param fileOrUrl 文件URL或存储后端标识
    */

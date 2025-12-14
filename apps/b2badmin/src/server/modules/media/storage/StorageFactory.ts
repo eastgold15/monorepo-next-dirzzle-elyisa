@@ -5,11 +5,10 @@
  */
 
 import type { AbstractImageStorage } from "./ImageStorage";
-import { type BunS3Config, BunS3Storage } from "./impl/BunS3Storage";
 import { LocalImageStorage } from "./impl/LocalImageStorage";
 import { type OSSConfig, OSSImageStorage } from "./impl/OSSImageStorage";
 
-export type StorageType = "oss" | "local" | "bun-s3";
+export type StorageType = "oss" | "local";
 
 type StorageConfig = {
   type: StorageType;
@@ -47,15 +46,6 @@ class StorageFactory {
           finalConfig = StorageFactory.getOSSConfigFromEnv();
         }
         storage = new OSSImageStorage(finalConfig as OSSConfig);
-        break;
-      }
-
-      case "bun-s3": {
-        if (!finalConfig) {
-          // 尝试从环境变量读取 Bun S3 配置
-          finalConfig = StorageFactory.getBunS3ConfigFromEnv();
-        }
-        storage = new BunS3Storage(finalConfig as BunS3Config);
         break;
       }
 
@@ -120,42 +110,13 @@ class StorageFactory {
       return "oss";
     }
 
-    if (envStorageType === "bun-s3") {
-      return "bun-s3";
-    }
-
-    // 自动检测：优先使用 Bun S3，然后是 OSS，最后是本地存储
-    if (StorageFactory.hasBunS3Config()) {
-      return "bun-s3";
-    }
-
+    // 自动检测：优先使用 OSS，然后是本地存储
     if (StorageFactory.hasOSSConfig()) {
       return "oss";
     }
 
     // 默认使用本地存储
     return "local";
-  }
-
-  /**
-   * 检查是否配置了 Bun S3
-   */
-  private static hasBunS3Config(): boolean {
-    const requiredEnvVars = [
-      "S3_ACCESS_KEY_ID",
-      "S3_SECRET_ACCESS_KEY",
-      "S3_BUCKET",
-    ];
-
-    // 如果配置了 S3 专用环境变量
-    if (requiredEnvVars.every((varName) => !!process.env[varName])) {
-      return true;
-    }
-
-    // 退回到 OSS 配置（因为 Bun S3 也使用相同的基本配置）
-    const requiredEnvVars2 = ["ACCESS_KEY_ID", "SECRET_ACCESS_KEY", "BUCKET"];
-
-    return requiredEnvVars2.every((varName) => !!process.env[varName]);
   }
 
   /**
@@ -170,41 +131,6 @@ class StorageFactory {
     ];
 
     return requiredEnvVars.every((varName) => !!process.env[varName]);
-  }
-
-  /**
-   * 从环境变量获取 Bun S3 配置
-   */
-  private static getBunS3ConfigFromEnv() {
-    // 优先使用 S3 专用的环境变量
-    let accessKeyId = process.env.S3_ACCESS_KEY_ID;
-    let secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
-    let bucket = process.env.S3_BUCKET;
-    const region = process.env.S3_REGION || process.env.REGION;
-    const endpoint = process.env.S3_ENDPOINT || process.env.ENDPOINT;
-    const domain = process.env.S3_DOMAIN || process.env.DOMAIN;
-    const acl = process.env.S3_ACL;
-
-    // 如果没有 S3 专用变量，使用通用变量
-    if (!accessKeyId) accessKeyId = process.env.ACCESS_KEY_ID;
-    if (!secretAccessKey) secretAccessKey = process.env.SECRET_ACCESS_KEY;
-    if (!bucket) bucket = process.env.BUCKET;
-
-    if (!(accessKeyId && secretAccessKey && bucket)) {
-      throw new Error(
-        "Bun S3 配置缺失：请检查环境变量 S3_ACCESS_KEY_ID (或 ACCESS_KEY_ID), S3_SECRET_ACCESS_KEY (或 SECRET_ACCESS_KEY), S3_BUCKET (或 BUCKET)"
-      );
-    }
-
-    return {
-      accessKeyId,
-      secretAccessKey,
-      bucket,
-      region,
-      endpoint,
-      domain,
-      acl,
-    };
   }
 
   /**

@@ -9,7 +9,6 @@ import {
 import { t } from "elysia";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import { usersTable } from "./auth.schema";
-import type { UserRole, DataScope } from "../auth/permissions.t.model";
 
 // === 基础 Schema ===
 const Insert = createInsertSchema(usersTable);
@@ -41,15 +40,31 @@ const Entity = t.Omit(Select, ["password", "id", "createdAt", "updatedAt"]); // 
 const EntityWithPermissions = t.Composite([
   Entity,
   t.Object({
-    role: t.Union([t.Literal('exporter_admin'), t.Literal('factory_admin'), t.Literal('salesperson')]),
+    role: t.Union([
+      t.Literal("exporter_admin"),
+      t.Literal("factory_admin"),
+      t.Literal("salesperson"),
+    ]),
     exporterId: t.Optional(t.String()),
     factoryId: t.Optional(t.String()),
     salespersonId: t.Optional(t.String()),
     dataScope: t.Object({
-      products: t.Union([t.Literal('all'), t.Literal('factory'), t.Literal('own')]),
-      users: t.Union([t.Literal('all'), t.Literal('factory'), t.Literal('own')]),
-      factories: t.Union([t.Literal('all'), t.Literal('own')]),
-      orders: t.Union([t.Literal('all'), t.Literal('factory'), t.Literal('own')]),
+      products: t.Union([
+        t.Literal("all"),
+        t.Literal("factory"),
+        t.Literal("own"),
+      ]),
+      users: t.Union([
+        t.Literal("all"),
+        t.Literal("factory"),
+        t.Literal("own"),
+      ]),
+      factories: t.Union([t.Literal("all"), t.Literal("own")]),
+      orders: t.Union([
+        t.Literal("all"),
+        t.Literal("factory"),
+        t.Literal("own"),
+      ]),
     }),
   }),
 ]);

@@ -32,6 +32,37 @@ const UploadImages = t.Object({
   isPublic: t.Boolean({ default: true }),
 });
 
+const UploadConfig = t.Object({
+  category: t.String(), // 文件分类（如：avatar, product, document等）
+  mediaType: t.Union([
+    t.Literal("image"),
+    t.Literal("video"),
+    t.Literal("document"),
+    t.Literal("audio"),
+  ]), // 媒体类型
+  multiple: t.Optional(t.Boolean()), // 是否允许多文件
+  maxSize: t.Optional(t.Number()), // 最大文件大小（字节）
+  maxFiles: t.Optional(t.Number()), // 最大文件数量
+  accept: t.Optional(t.String()), // 接受的文件类型
+});
+
+const UploadFile = t.Object({
+  id: t.String(),
+  file: t.Unknown(), // File 对象
+  name: t.String(),
+  size: t.Number(),
+  type: t.String(),
+  preview: t.Optional(t.String()),
+  progress: t.Number(),
+  status: t.Union([
+    t.Literal("pending"), // 等待上传
+    t.Literal("uploading"), // 上传中
+    t.Literal("success"), // 上传成功
+    t.Literal("error"), // 上传失败
+  ]),
+  error: t.Optional(t.String()),
+});
+
 const UploadResponse = t.Object({
   url: t.String(),
   filename: t.String(),
@@ -45,6 +76,8 @@ const UploadResponse = t.Object({
 export const UploadTModel = {
   UploadImage,
   UploadImages,
+  UploadConfig,
+  UploadFile,
   UploadResponse,
   FolderType,
 } as const;
@@ -53,6 +86,8 @@ export const UploadTModel = {
 export type UploadTModel = {
   UploadImage: typeof UploadImage.static;
   UploadImages: typeof UploadImages.static;
+  UploadConfig: typeof UploadConfig.static;
+  UploadFile: typeof UploadFile.static;
   UploadResponse: typeof UploadResponse.static;
   FolderType: typeof FolderType.static;
 };

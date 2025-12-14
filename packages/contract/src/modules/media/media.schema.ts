@@ -13,7 +13,9 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm/relations";
+
 import { usersTable } from "../01auth/auth.schema";
+import { factoriesTable } from "../01factory/factory.schema";
 import { adsTable } from "../ads/ads.schema";
 import { createdAt, idUuid, updatedAt } from "../helper/schemaHelper.schema";
 import { productMediaTable } from "../product/product.schema";
@@ -26,12 +28,38 @@ export const mediaTable = pgTable("media", {
   category: varchar("category").notNull(),
   userId: uuid("user_id").references(() => usersTable.id, {
     onDelete: "cascade",
-  }), // 上传用户ID
+  }), // 上传用户ID（可选）
+  factoryId: uuid("factory_id").references(() => factoriesTable.id, {
+    onDelete: "cascade",
+  }), // 所属工厂ID（可选，用于权限控制）
   originalName: varchar("original_name", { length: 255 }).notNull(),
   mimeType: varchar("mime_type", { length: 100 }).notNull(), // 文件MIME类型
   status: boolean("status").notNull().default(true), // 文件状态（是否可用）
   isPublic: boolean("is_public").notNull().default(false), // 是否公开文件（默认不公开）
 });
+
+
+// 假设您的 mediaTable 和 mediaMetadataTable 如下定义:
+// mediaTable: id (Primary Key)
+// mediaMetadataTable: fileId (Foreign Key -> mediaTable.id)
+
+// 假设文件和元数据是一对一关系，外键在 mediaMetadataTable 上。
+export const mediaRelations = relations(mediaTable, ({ many, one }) => ({
+  // 1. 媒体文件与媒体元数据的一对一关系 (mediaTable -> mediaMetadataTable)
+  // fields: mediaTable 中作为引用的字段
+  // references: mediaMetadataTable 中被引用的字段
+  metadata: one(mediaMetadataTable, {
+    fields: [mediaTable.id],
+    references: [mediaMetadataTable.fileId],
+  }),
+
+  // 2. 媒体文件被多个广告使用 (外键在 adsTable 上)
+  ads: many(adsTable),
+
+  // 3. 媒体文件被多个商品使用 (通过中间表 productMediaTable)
+  productMedia: many(productMediaTable),
+}));
+
 
 export const mediaTypeEnum = pgEnum("media_type", [
   "image",
@@ -53,11 +81,4 @@ export const mediaMetadataTable = pgTable("media_metadata", {
   thumbnailKey: varchar("thumbnail_key", { length: 255 }), // 缩略图键（图片）
 });
 
-// 创建关联关系
-export const mediaRelations = relations(mediaTable, ({ many }) => ({
-  // 媒体文件可以被多个广告使用 - 外键在advertisements表中
-  ads: many(adsTable),
-  // 媒体文件可以被多个商品使用(通过中间表)
-  productMedia: many(productMediaTable),
 
-}));

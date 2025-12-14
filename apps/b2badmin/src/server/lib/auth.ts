@@ -45,15 +45,11 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       // 使用新的邮件模板系统
       const template = createPasswordResetTemplate(user.email, url);
-
       await sendEmail({
         to: user.email,
         template,
       });
     },
-    // onPasswordReset: ({ user }) => {
-    //   console.log(`用户 ${user.email} 的密码已重置`);
-    // },
   },
   // 基础邮箱验证
   emailVerification: {
@@ -87,6 +83,6 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:9012",
     "http://localhost:9013", // 前端开发服务器
-    "http://localhost:3000", // 标准前端端口
+    "http://localhost:4000", // 标准前端端口
   ],
 });

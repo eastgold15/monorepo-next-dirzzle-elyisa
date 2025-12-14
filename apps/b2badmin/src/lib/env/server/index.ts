@@ -86,35 +86,35 @@ const envSchema = t.Object({
     error: "SECRET 服务器密钥是必需的",
   }),
 
-  // S3 / MinIO 配置（可选）
-  S3_ACCESS_KEY_ID: t.Optional(
+  // OSS 配置（可选）
+  ACCESS_KEY_ID: t.Optional(
     t.String({
-      error: "S3_ACCESS_KEY_ID 必须是字符串",
+      error: "ACCESS_KEY_ID 必须是字符串",
     })
   ),
-  S3_SECRET_ACCESS_KEY: t.Optional(
+  SECRET_ACCESS_KEY: t.Optional(
     t.String({
-      error: "S3_SECRET_ACCESS_KEY 必须是字符串",
+      error: "SECRET_ACCESS_KEY 必须是字符串",
     })
   ),
-  S3_REGION: t.Optional(
+  BUCKET: t.Optional(
     t.String({
-      error: "S3_REGION 必须是字符串",
+      error: "BUCKET 必须是字符串",
     })
   ),
-  S3_ENDPOINT: t.Optional(
+  REGION: t.Optional(
     t.String({
-      error: "S3_ENDPOINT 必须是字符串",
+      error: "REGION 必须是字符串",
     })
   ),
-  S3_BUCKET: t.Optional(
+  ENDPOINT: t.Optional(
     t.String({
-      error: "S3_BUCKET 必须是字符串",
+      error: "ENDPOINT 必须是字符串",
     })
   ),
-  S3_SESSION_TOKEN: t.Optional(
+  DOMAIN: t.Optional(
     t.String({
-      error: "S3_SESSION_TOKEN 必须是字符串",
+      error: "DOMAIN 必须是字符串",
     })
   ),
 });
@@ -149,12 +149,12 @@ const rawEnv = {
   ALIBABA_CLOUD_ACCESS_KEY_SECRET:
     process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || "dddd",
   SECRET: process.env.SECRET || "km12poik3mokpaxnjcojsandfoj1nbjt",
-  S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || "minioadmin",
-  S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || "minioadmin",
-  S3_REGION: process.env.S3_REGION || "oss-cn-hongkong",
-  S3_ENDPOINT: process.env.S3_ENDPOINT || "http://localhost:9010",
-  S3_BUCKET: process.env.S3_BUCKET || "buy4",
-  S3_SESSION_TOKEN: process.env.S3_SESSION_TOKEN || "11111",
+  ACCESS_KEY_ID: process.env.ACCESS_KEY_ID,
+  SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY,
+  BUCKET: process.env.BUCKET,
+  REGION: process.env.REGION,
+  ENDPOINT: process.env.ENDPOINT,
+  DOMAIN: process.env.DOMAIN,
 };
 
 // 安全校验

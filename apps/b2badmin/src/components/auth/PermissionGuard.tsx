@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
-import { usePermissions } from "@/hooks/use-permissions";
 import type { Permission } from "@repo/contract";
+import type { ReactNode } from "react";
+import { usePermissions } from "@/hooks/use-permissions";
 
 interface PermissionGuardProps {
   children: ReactNode;
@@ -21,7 +21,12 @@ export function PermissionGuard({
   fallback = null,
   role,
 }: PermissionGuardProps) {
-  const { hasPermission, hasAnyPermission, hasAllPermissions, role: userRole } = usePermissions();
+  const {
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
+    role: userRole,
+  } = usePermissions();
 
   // 检查角色
   if (role && userRole !== role) {
@@ -45,100 +50,189 @@ export function PermissionGuard({
 }
 
 // 便捷的高阶函数组件
-export function CanViewUsers({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanViewUsers({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="view_users" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="view_users">
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanCreateUsers({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanCreateUsers({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="create_users" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="create_users">
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanManageFactories({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <PermissionGuard permissions={["view_factories", "edit_factories"]} fallback={fallback}>
-      {children}
-    </PermissionGuard>
-  );
-}
-
-export function CanManageProducts({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanManageFactories({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
     <PermissionGuard
-      permissions={["view_products", "create_products", "edit_products"]}
       fallback={fallback}
+      permissions={["view_factories", "edit_factories"]}
     >
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanCreateProducts({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanManageProducts({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="create_products" fallback={fallback}>
+    <PermissionGuard
+      fallback={fallback}
+      permissions={["view_products", "create_products", "edit_products"]}
+    >
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanEditProducts({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanCreateProducts({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="edit_products" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="create_products">
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanUploadMedia({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanEditProducts({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="upload_media" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="edit_products">
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanViewAnalytics({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanUploadMedia({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="view_analytics" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="upload_media">
       {children}
     </PermissionGuard>
   );
 }
 
-export function CanEditSiteConfig({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanViewAnalytics({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard permission="edit_site_config" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="view_analytics">
       {children}
     </PermissionGuard>
   );
 }
 
-export function IsExporterAdmin({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function CanEditSiteConfig({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard role="exporter_admin" fallback={fallback}>
+    <PermissionGuard fallback={fallback} permission="edit_site_config">
       {children}
     </PermissionGuard>
   );
 }
 
-export function IsFactoryAdmin({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function IsExporterAdmin({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard role="factory_admin" fallback={fallback}>
+    <PermissionGuard fallback={fallback} role="exporter_admin">
       {children}
     </PermissionGuard>
   );
 }
 
-export function IsSalesperson({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export function IsFactoryAdmin({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
-    <PermissionGuard role="salesperson" fallback={fallback}>
+    <PermissionGuard fallback={fallback} role="factory_admin">
+      {children}
+    </PermissionGuard>
+  );
+}
+
+export function IsSalesperson({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
+  return (
+    <PermissionGuard fallback={fallback} role="salesperson">
+      {children}
+    </PermissionGuard>
+  );
+}
+
+export function CanEditUsers({
+  children,
+  fallback,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
+  return (
+    <PermissionGuard fallback={fallback} permission="edit_users">
       {children}
     </PermissionGuard>
   );

@@ -26,14 +26,21 @@ export const usersTable = pgTable("user_table", {
 });
 
 export const usersRelations = relations(usersTable, ({ one, many }) => ({
-  userprofile: one(userprofileTable, {
+  userProfile: one(userProfilesTable, {
     fields: [usersTable.id],
-    references: [userprofileTable.userId],
+    references: [userProfilesTable.userId],
   }),
-  userRoles: many(userRoleTable, {
+  userRoles: many(userRolesTable, {
     relationName: "user_roles",
   }),
+  userResourceRoles: many(userResourceRolesTable, {
+    relationName: "user_resource_roles",
+  }),
+  accounts: many(accountTable),
+  sessions: many(sessionTable),
 }));
+
+
 
 /**
  * BetterAuth 账户表定义
@@ -85,7 +92,7 @@ export const verificationTable = pgTable("verification", {
 });
 
 // userprofile 表定义·
-export const userprofileTable = pgTable("userprofile", {
+export const userProfilesTable = pgTable("userprofile", {
   userId: uuid("user_id")
     .primaryKey()
     .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -101,7 +108,7 @@ export const roleTable = pgTable("roles", {
   description: text("description"),
 });
 // 用户角色关联表
-export const userRoleTable = pgTable("user_roles", {
+export const userRolesTable = pgTable("user_roles", {
   id: idUuid,
   userId: uuid("user_id")
     .notNull()
@@ -111,10 +118,17 @@ export const userRoleTable = pgTable("user_roles", {
     .references(() => roleTable.id, { onDelete: "cascade" }),
 });
 
-export const userRolesrelations = relations(userRoleTable, ({ one }) => ({
+export const userRolesrelations = relations(userRolesTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [userRolesTable.userId],
+    references: [usersTable.id],
+    relationName: "user_roles", // 关键！必须和 usersRelations 中的 userRoles 关系名一致
+  }),
   role: one(roleTable, {
-    fields: [userRoleTable.roleId],
+    fields: [userRolesTable.roleId],
     references: [roleTable.id],
+    // 可选：给 role 关系也命名，避免后续推断问题
+    relationName: "user_roles_role",
   }),
 }));
 
@@ -157,6 +171,9 @@ export const rolePermissionRelations = relations(
   })
 );
 
+
+
+
 export const userResourceRolesTable = pgTable(
   "user_resource_roles",
   {
@@ -185,3 +202,35 @@ export const userResourceRolesTable = pgTable(
     ),
   ]
 );
+
+
+// 4. 用户资源角色表关系（同理，补全 relationName）
+export const userResourceRolesRelations = relations(userResourceRolesTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [userResourceRolesTable.userId],
+    references: [usersTable.id],
+    relationName: "user_resource_roles", // 和 usersRelations 中的 userResourceRoles 一致
+  }),
+  role: one(roleTable, {
+    fields: [userResourceRolesTable.roleId],
+    references: [roleTable.id],
+    relationName: "user_resource_roles_role", // 唯一命名
+  }),
+}));
+
+
+
+
+
+// 更新 roleTable 的关系
+export const roleRelations = relations(roleTable, ({ many }) => ({
+  userRoles: many(userRolesTable, {
+    relationName: "user_roles",
+  }),
+  rolePermissions: many(rolePermissionsTable, {
+    relationName: "role_permissions",
+  }),
+  userResourceRoles: many(userResourceRolesTable, {
+    relationName: "user_resource_roles",
+  }),
+}));

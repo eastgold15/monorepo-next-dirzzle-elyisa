@@ -4,10 +4,14 @@
  * 契约层 - 统一的 TypeBox Schema 和类型管理系统
  */
 
-// 权限系统导出
-export type { UserRole, Permission, DataScope, UserPermission } from "./modules/auth/permissions.t.model";
-
 export { AuthTModel as AuthModel } from "./modules/01auth/auth.t.model";
+// 权限系统导出
+export type {
+  DataScope,
+  Permission,
+  UserPermission,
+  UserRole,
+} from "./modules/01auth/permissions.t.model";
 // 新增模块导出
 export { ExporterTModel as ExporterModel } from "./modules/01exporter/Exporter.t.model";
 export { FactoryTModel as FactoryModel } from "./modules/01factory/factory.t.model";
@@ -38,6 +42,17 @@ export { QuotationItemTModel as QuotationItemModel } from "./modules/quotation/q
 export { SiteConfigTModel as SiteConfigModel } from "./modules/site-config/site-config.t.model";
 export { TranslationDictTModel as TranslationDictModel } from "./modules/translations/translate.t.model";
 export { UploadTModel as UploadModel } from "./modules/upload/upload.t.model";
+export type {
+  CreateSalespersonData,
+  Factory,
+  UpdateUserData,
+  UpdateUserStatusData,
+  User,
+  UserList,
+  UserListQuery,
+} from "./modules/user/user.t.model";
+export { UserTModel as UserModel } from "./modules/user/user.t.model";
+export { UserTeamTModel as UserTeamModel } from "./modules/user/user-team.t.model";
 // ==================== 工具导出 ====================
 
 export {

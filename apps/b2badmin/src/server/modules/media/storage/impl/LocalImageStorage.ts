@@ -6,7 +6,7 @@
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { basename, extname, join } from "node:path";
-
+import { IMAGE_MIME_TYPE_MAP } from "@repo/contract";
 import { AbstractImageStorage } from "../ImageStorage";
 
 type LocalStorageConfig = {
@@ -121,6 +121,32 @@ export class LocalImageStorage extends AbstractImageStorage {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * 获取预签名 URL（本地存储不支持预签名，返回公开 URL）
+   * @param key 文件路径
+   * @param options 选项
+   * @returns 公开 URL
+   */
+  async getPresignedUrl(
+    key: string,
+    options: {
+      method: "GET" | "PUT";
+      expiresIn?: number;
+    }
+  ): Promise<string> {
+    // 本地存储不支持预签名，直接返回公开 URL
+    return this.getPublicUrl(key);
+  }
+
+  /**
+   * 获取公开访问 URL
+   * @param key 文件路径
+   * @returns 公开 URL
+   */
+  getPublicUrl(key: string): string {
+    return `${this.baseUrl}/${key}`;
   }
 
   async getFileInfo(fileOrUrl: string): Promise<{

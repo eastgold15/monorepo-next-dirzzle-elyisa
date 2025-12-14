@@ -40,21 +40,29 @@ export const betterAuthPlugin = new Elysia({ name: "better-auth" })
           throw new Error("用户角色不存在");
         }
 
+        // 获取用户的角色ID
+        const roleIds = userInfoWithRoles.userRoles
+          .map((ur) => ur.roleId)
+          .filter((id): id is string => !!id);
+
         // 查询权限名称（扁平化为一维数组）
-        const permissions = (
-          await db.query.rolePermissionsTable.findMany({
-            where: inArray(rolePermissionsTable.roleId, roles),
-            with: {
-              permissions: {
-                columns: {
-                  name: true,
+        const permissions =
+          roleIds.length > 0
+            ? (
+              await db.query.rolePermissionsTable.findMany({
+                where: inArray(rolePermissionsTable.roleId, roleIds),
+                with: {
+                  permissions: {
+                    columns: {
+                      name: true,
+                    },
+                  },
                 },
-              },
-            },
-          })
-        )
-          .flatMap((rp) => rp.permissions.map((p) => p.name)) // → string[]
-          .filter((name): name is string => !!name); // 过滤 null/undefined
+              })
+            )
+              .flatMap((rp) => rp.permissions?.map((p) => p.name) || []) // → string[]
+              .filter((name): name is string => !!name)
+            : []; // 过滤 null/undefined
 
         // 如果需要去重（推荐）：
         const uniquePermissions = [...new Set(permissions)];

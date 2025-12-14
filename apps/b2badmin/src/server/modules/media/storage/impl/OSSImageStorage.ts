@@ -5,12 +5,14 @@
 
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { IMAGE_MIME_TYPE_MAP } from "~/utils/constant";
-import { HttpError } from "~/utils/err";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { IMAGE_MIME_TYPE_MAP } from "@repo/contract";
+import { HttpError } from "elysia-http-problem-json";
 import { AbstractImageStorage } from "../ImageStorage";
 
 // 顶层正则表达式常量，提升性能
@@ -154,6 +156,51 @@ export class OSSImageStorage extends AbstractImageStorage {
     }
   }
 
+  /**
+   * 获取预签名 URL
+   * @param key 对象键
+   * @param options 选项
+   * @returns 预签名 URL
+   */
+  async getPresignedUrl(
+    key: string,
+    options: {
+      method: "GET" | "PUT";
+      expiresIn?: number;
+    }
+  ): Promise<string> {
+    try {
+      const expiresIn = options.expiresIn || 3600; // 默认 1 小时
+
+      let command;
+      switch (options.method) {
+        case "PUT":
+          command = new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+          });
+          break;
+        case "GET":
+        default:
+          command = new GetObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+          });
+          break;
+      }
+
+      const url = await getSignedUrl(this.getClient(), command, {
+        expiresIn,
+      });
+
+      return url;
+    } catch (error) {
+      throw new Error(
+        `获取预签名URL失败: ${error instanceof Error ? error.message : "未知错误"}`
+      );
+    }
+  }
+
   async getFileInfo(fileOrUrl: string): Promise<{
     url: string;
     fileName: string;
@@ -180,7 +227,7 @@ export class OSSImageStorage extends AbstractImageStorage {
     }
   }
 
-  private getPublicUrl(key: string): string {
+  getPublicUrl(key: string): string {
     // 优先使用自定义域名
     if (this.config.domain) {
       return `${this.config.domain}/${key}`;

@@ -10,8 +10,8 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { IMAGE_MIME_TYPE_MAP } from "~/utils/constant";
-import { HttpError } from "~/utils/err";
+import { IMAGE_MIME_TYPE_MAP } from "@repo/contract";
+import { HttpError } from "elysia-http-problem-json";
 import { AbstractStorage } from "./AbstractStorage";
 
 // 顶层正则表达式常量，提升性能

@@ -1,58 +1,66 @@
 "use client";
-// hooks/usePresignedUrl.ts
-import { useMutation, useQuery } from "@tanstack/react-query";
-import SparkMD5 from "spark-md5";
-import { queryKeys } from "@/lib/query/query-keys";
+
+import { useMutation } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 import type { CommonRes } from "@/server/utils/Res";
 
 type ExtractDataType<T> = T extends CommonRes<infer D> ? D : never;
 
-interface PresignedUrlParams {
-  mimeType: string;
-  fileName: string;
+interface UploadArgs {
+  file: File;
+  category: string;
+  // ... 其他必要的字符串参数
+}
+/**
+ * 直接上传文件到后端（后端会上传到 OSS）
+ */
+
+// 假设您的后端需要一个包含 File 和 category 的 FormData
+
+// 1. 定义输入的类型，确保它是结构化的，包含 File 对象
+// 这是您的 mutationFn 接收的参数类型
+interface UploadArgs {
+  file: File;
   category?: string;
+  userId?: string;
 }
 
 /**
- * 获取单个文件的预签名上传 URL
+ * 直接上传文件到后端（后端会上传到 OSS/MinIO）
  */
-export function usePresignedUrlQuery(params: PresignedUrlParams) {
-  const { mimeType, fileName, category } = params;
-
-  // 计算字符串的 MD5
-  const filenameHash = SparkMD5.hash(fileName);
-  return useQuery({
-    queryKey: queryKeys.uploads.presignedUrlByHash(filenameHash),
-    queryFn: async () => {
-      // 调用你的 EdenRPC 接口（假设你有 /api/upload/presign.get）
-      const result = handleEden(
-        await rpc.api.media.upload["pre-sign"].get({
-          $query: {
-            fileNameHash: filenameHash,
-            mimeType,
-            category,
-          },
-        })
-      );
-      // 假设返回 { url: string; key: string }
-      return result;
-    },
-    enabled: !!filenameHash && !!mimeType, // 防止空参数请求
-    staleTime: 30_000, // 预签名 URL 通常 5-30 分钟有效，这里缓存 30 秒足够
-    retry: 1,
-    refetchOnWindowFocus: false,
-  });
-}
-
-// 文件件信息传入数据库
-export function useUploadMutation() {
+/**
+ * 直接上传文件到后端（后端会上传到 OSS/MinIO）
+ * - 保持外部调用简洁，内部构造 FormData
+ */
+export function useDirectUploadMutation() {
   return useMutation({
-    mutationFn: async (args: Parameters<typeof rpc.api.media.upload.post>[0]) =>
-      handleEden(await rpc.api.media.upload.post(args)),
+    // 接收结构化的参数对象
+    mutationFn: async (args: UploadArgs) => {
+      // 关键：在发送请求前，构造 multipart/form-data
+      const formData = new FormData();
+
+      // 1. 必传的文件字段
+      // 字段名 'file' 必须与后端 t.Object({ file: t.File() }) 中的键名完全匹配
+      formData.append('file', args.file);
+
+      // 2. 可选的字符串字段
+      if (args.category) {
+        formData.append('category', args.category);
+      }
+      if (args.userId) {
+        formData.append('userId', args.userId);
+      }
+
+      // rpc.api.media.upload.post 的类型可能需要调整，以匹配 edenArgs 的结构
+      // 但在运行时，这正是它所需要的。
+      const response = await rpc.api.media.upload.post({
+        file: args.file,
+        category: args.category,
+        userId: args.userId,
+      });
+
+      return handleEden(response);
+    },
   });
 }
-
-// type ComProductList = Awaited<ReturnType<typeof useProductListQuery>>["data"];
-// export type BackendProductList = ExtractDataType<ComProductList>;
