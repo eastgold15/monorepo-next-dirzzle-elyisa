@@ -11,7 +11,7 @@ export * from "./modules/count/dailyCount.schema";
 export * from "./modules/customer/customer.schema";
 export * from "./modules/helper/schemaHelper.schema";
 export * from "./modules/hero-cards/hero-cards.schema";
-export * from "./modules/image/image.schema";
+
 export * from "./modules/inquiry/inquiry.schema";
 export * from "./modules/inquiry/inquiryItem.schema";
 export * from "./modules/media/media.schema";

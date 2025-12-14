@@ -81,6 +81,7 @@ export const mediaRoute = new Elysia({
         const [result] = await db
           .insert(mediaTable)
           .values({
+            url: uploadResult.url || "",
             storageKey: uploadResult.key || uniqueName,
             userId: validUserId,
             originalName: fileName,
@@ -189,6 +190,7 @@ export const mediaRoute = new Elysia({
         const [result] = await db
           .insert(mediaTable)
           .values({
+            url: uploadResult.url || "",
             storageKey: uploadResult.key || uniqueName,
             userId: userInfo.id,
             factoryId: targetFactoryId,

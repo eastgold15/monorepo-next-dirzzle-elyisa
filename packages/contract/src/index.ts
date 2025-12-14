@@ -25,7 +25,7 @@ export * from "./modules/helper/query-types.t.model";
 
 export * from "./modules/helper/utils.types";
 export { HeroCardsTModel as HeroCardsModel } from "./modules/hero-cards/hero-cards.t.model";
-export { ImageTModel as ImageModel } from "./modules/image/images.t.model";
+
 export { InquiryTModel as InquiryModel } from "./modules/inquiry/inquiry.t.model";
 export { InquiryItemTModel as InquiryItemModel } from "./modules/inquiry/inquiryItem.t.model";
 export { OssTModel as OssModel } from "./modules/oss/oss.t.model";

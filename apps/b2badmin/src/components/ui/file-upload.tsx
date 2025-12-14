@@ -4,7 +4,7 @@ import type { UploadTModel } from "@repo/contract/typebox";
 import { Upload as UploadIcon, X } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
-import { useDirectUploadMutation } from "@/hooks/upload-hook";
+import { useDirectUploadMutation } from "@/hooks/api";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Card, CardContent } from "./card";

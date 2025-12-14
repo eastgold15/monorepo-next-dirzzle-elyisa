@@ -16,13 +16,13 @@ export const mediaRoute = new Elysia({ prefix: "media" }) // 获取图片 - 前�
         .select()
         .from(mediaTable)
         .where(eq(mediaTable.id, id))
-        .orderBy(asc(mediaTable.sortIndex));
+        .orderBy(asc(mediaTable.createdAt));
 
       return commonRes(media[0].url, 200, "获取图片url成功");
     },
     {
       params: t.Object({
-        id: t.Number(),
+        id: t.String(),
       }),
     }
   )
@@ -41,7 +41,7 @@ export const mediaRoute = new Elysia({ prefix: "media" }) // 获取图片 - 前�
     },
     {
       query: t.Object({
-        ids: t.Array(t.Number()),
+        ids: t.Array(t.String()),
       }),
     }
   );

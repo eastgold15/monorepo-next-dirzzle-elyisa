@@ -26,6 +26,7 @@ export const mediaTable = pgTable("media", {
   updatedAt,
   storageKey: varchar("storage_key", { length: 255 }).notNull(), // 存储后端键（相对路径或对象键）hash值
   category: varchar("category").notNull(),
+  url: varchar("url", { length: 255 }).notNull(), // 公开访问URL（可选）
   userId: uuid("user_id").references(() => usersTable.id, {
     onDelete: "cascade",
   }), // 上传用户ID（可选）
