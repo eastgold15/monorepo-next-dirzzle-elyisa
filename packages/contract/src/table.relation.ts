@@ -347,6 +347,8 @@ export const relations = defineRelations(
         to: r.attributeTable.templateId,
       }),
       productTemplates: r.many.productTemplateTable({
+        from: r.attributeTemplateTable.id,
+        to: r.productTemplateTable.templateId,
         alias: 'product_templates',
       }),
     },
