@@ -1,3 +1,4 @@
+import { InquiryTModel } from "@repo/contract";
 import {
   CustomerTable,
   factoriesTable,
@@ -7,7 +8,6 @@ import {
   salespersonCategoriesTable,
   salespersonsTable,
 } from "@repo/contract/table";
-import { InquiryTModel } from "@repo/contract/typebox";
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
@@ -214,10 +214,10 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
           // 图片
           photoForRefer: photoBuffer
             ? {
-                buffer: photoBuffer,
-                mimeType,
-                name: `product-${productId}-${Date.now()}`,
-              }
+              buffer: photoBuffer,
+              mimeType,
+              name: `product-${productId}-${Date.now()}`,
+            }
             : null,
 
           // 商品行

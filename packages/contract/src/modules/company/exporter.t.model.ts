@@ -9,7 +9,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { exportersTable } from "~/table.schema";
+import { exportersTable } from "../../table.schema";
 
 
 // === 基础 Schema ===

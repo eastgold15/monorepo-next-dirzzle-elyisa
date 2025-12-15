@@ -10,7 +10,7 @@ import { Elysia, t } from "elysia";
 import { db, dbPlugin } from "@/server/db/connection";
 import { mediaMetadataTable, mediaTable } from "@/server/db/schema";
 import { commonRes } from "@/server/utils/Res";
-import { betterAuthPlugin } from "../auth/auth.plugin";
+import { betterAuthPlugin } from "../../plugins/auth.plugin";
 import { StorageFactory } from "./storage/StorageFactory";
 
 // 工具函数：获取用户可访问的工厂ID列表

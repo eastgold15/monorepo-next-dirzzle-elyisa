@@ -5,4 +5,5 @@ export * from "./auth.t.model";
 export * from "./permission.t.model";
 export * from "./role.t.model";
 export * from "./user.t.model";
+export * from "./user-management.t.model";
 export * from "./user-team.t.model";

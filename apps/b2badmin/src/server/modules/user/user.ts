@@ -1,5 +1,6 @@
 // 用户信息控制器
 
+import { UserManagementTModel } from "@repo/contract";
 import {
   exportersTable,
   factoriesTable,
@@ -8,15 +9,12 @@ import {
   userResourceRolesTable,
   usersTable,
 } from "@repo/contract/table";
-import {
-  CreateSalespersonRequest,
-  UpdateUserStatusRequest,
-} from "@repo/contract/typebox";
-import { and, eq, like, or } from "drizzle-orm";
+
+import { and, count, desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
 import { commonRes } from "@/server/utils/Res";
-import { betterAuthPlugin } from "../auth/auth.plugin";
+import { betterAuthPlugin } from "../../plugins/auth.plugin";
 
 export const userRoute = new Elysia({
   prefix: "/user",
@@ -428,7 +426,7 @@ export const userRoute = new Elysia({
         const offset = (Number(page) - 1) * Number(limit);
 
         // 构建基础查询 - 查询有角色关联的用户
-        let queryBuilder = db
+        const queryBuilder = db
           .select({
             userId: usersTable.id,
             userName: usersTable.name,
@@ -462,6 +460,9 @@ export const userRoute = new Elysia({
           )
           .$dynamic();
 
+        // 构建条件数组
+        const conditions = [];
+
         // 根据角色过滤数据
         if (userRole === "exporter_admin") {
           const primaryExporter = userResources.find(
@@ -469,10 +470,13 @@ export const userRoute = new Elysia({
           );
           console.log("主出口商:", primaryExporter);
           if (primaryExporter) {
-            queryBuilder = queryBuilder.where(
+            conditions.push(
               or(
                 eq(factoriesTable.exporterId, primaryExporter.resourceId),
-                eq(userResourceRolesTable.resourceId, primaryExporter.resourceId)
+                eq(
+                  userResourceRolesTable.resourceId,
+                  primaryExporter.resourceId
+                )
               )
             );
           }
@@ -481,7 +485,7 @@ export const userRoute = new Elysia({
             (r) => r.resourceType === "factory" && r.isPrimary
           );
           if (primaryFactory) {
-            queryBuilder = queryBuilder.where(
+            conditions.push(
               eq(userResourceRolesTable.resourceId, primaryFactory.resourceId)
             );
           } else {
@@ -503,7 +507,7 @@ export const userRoute = new Elysia({
 
         // 应用搜索条件
         if (search) {
-          queryBuilder = queryBuilder.where(
+          conditions.push(
             or(
               like(usersTable.name, `%${search}%`),
               like(usersTable.email, `%${search}%`)
@@ -513,32 +517,54 @@ export const userRoute = new Elysia({
 
         // 应用角色筛选
         if (role) {
-          queryBuilder = queryBuilder.where(eq(roleTable.name, role));
+          conditions.push(eq(roleTable.name, role));
         }
 
         // 应用状态筛选
         if (isActive !== undefined) {
-          queryBuilder = queryBuilder.where(
-            eq(salespersonsTable.isActive, isActive)
-          );
+          conditions.push(eq(salespersonsTable.isActive, isActive));
         }
 
         // 应用工厂筛选
         if (factoryId) {
-          queryBuilder = queryBuilder.where(eq(factoriesTable.id, factoryId));
+          conditions.push(eq(factoriesTable.id, factoryId));
         }
 
         // 获取总数
-        const totalCountQuery = queryBuilder;
-        const usersCount = await totalCountQuery;
+        const countQuery = db
+          .select({ count: count() })
+          .from(usersTable)
+          .innerJoin(
+            userResourceRolesTable,
+            eq(usersTable.id, userResourceRolesTable.userId)
+          )
+          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
+          .leftJoin(
+            salespersonsTable,
+            eq(salespersonsTable.userId, usersTable.id)
+          )
+          .leftJoin(
+            factoriesTable,
+            or(
+              eq(factoriesTable.id, salespersonsTable.factoryId),
+              eq(factoriesTable.id, userResourceRolesTable.resourceId)
+            )
+          );
 
-        console.log("查询到的用户数量:", usersCount.length);
+        if (conditions.length > 0) {
+          countQuery.where(and(...conditions));
+        }
+
+        const [{ count: totalCount }] = await countQuery;
+
+        console.log("查询到的用户数量:", totalCount);
 
         // 获取分页数据
         const users = await queryBuilder
+          .where(and(...conditions))
           .limit(Number(limit))
           .offset(offset)
-          .orderBy(usersTable.createdAt);
+          .orderBy(desc(usersTable.createdAt));
 
         console.log("查询到的用户原始数据:", users);
 
@@ -548,7 +574,9 @@ export const userRoute = new Elysia({
           name: user.userName,
           email: user.userEmail,
           phone: user.userPhone,
-          position: user.userPosition || (user.roleName === 'factory_admin' ? '工厂管理员' : '未设置'),
+          position:
+            user.userPosition ||
+            (user.roleName === "factory_admin" ? "工厂管理员" : "未设置"),
           isActive: user.userIsActive ?? true, // 如果没有 salesperson 记录，默认为活跃
           roleName: user.roleName || "unknown",
           factoryName: user.factoryName,
@@ -561,8 +589,8 @@ export const userRoute = new Elysia({
           pagination: {
             page: Number(page),
             limit: Number(limit),
-            total: usersCount.length,
-            totalPages: Math.ceil(usersCount.length / Number(limit)),
+            total: totalCount,
+            totalPages: Math.ceil(totalCount / Number(limit)),
           },
         });
       } catch (error) {
@@ -731,7 +759,7 @@ export const userRoute = new Elysia({
     },
     {
       auth: true,
-      body: CreateSalespersonRequest,
+      body: UserManagementTModel.CreateSalespersonRequest,
       detail: {
         summary: "创建业务员账号",
         description: "管理员创建新的业务员账号，需要提供基本信息和关联工厂",
@@ -927,7 +955,7 @@ export const userRoute = new Elysia({
           description: "要更新状态的用户ID",
         }),
       }),
-      body: UpdateUserStatusRequest,
+      body: UserManagementTModel.UpdateUserStatusRequest,
       detail: {
         summary: "更新用户状态",
         description: "启用或停用用户账号",

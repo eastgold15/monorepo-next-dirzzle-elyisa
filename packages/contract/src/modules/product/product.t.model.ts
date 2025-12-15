@@ -7,7 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { productsTable } from "~/table.schema";
+import { productsTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // === 基础 Schema ===

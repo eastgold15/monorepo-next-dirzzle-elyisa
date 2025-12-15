@@ -1,6 +1,6 @@
 "use client";
 
-import type { CreateFactoryWithAdminRequest } from "@repo/contract/typebox";
+import type { CreateFactoryWithAdminRequest } from "@repo/contract";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useState } from "react";

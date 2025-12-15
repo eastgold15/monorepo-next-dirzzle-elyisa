@@ -672,7 +672,6 @@ export const userSitePermissionsTable = p.pgTable("user_site_permissions", {
   id: idUuid,
   userId: p.uuid("user_id").references(() => usersTable.id).notNull(),
   siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
-
   role: p.varchar("role", { enum: ["admin", "editor", "viewer"] }).notNull(),
 
   createdAt,

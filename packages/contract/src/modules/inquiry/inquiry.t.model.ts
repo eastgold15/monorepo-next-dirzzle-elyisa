@@ -9,7 +9,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { inquiryTable } from "~/table.schema";
+import { inquiryTable } from "../../table.schema";
 import { SkuTModel } from "../product/sku.t.model";
 import { InquiryItemTModel } from "./inquiryItem.t.model";
 

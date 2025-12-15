@@ -3,7 +3,7 @@
  * 处理询价确认、询价通知等业务相关的邮件模板
  */
 
-import type { InquiryTModel, SalesPersonTModel } from "@repo/contract/typebox";
+import type { InquiryTModel, SalesPersonTModel } from "@repo/contract";
 import type { EmailAttachment, EmailTemplate } from "../../email/email.types";
 
 /**

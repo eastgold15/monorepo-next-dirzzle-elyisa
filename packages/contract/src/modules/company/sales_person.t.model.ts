@@ -7,8 +7,8 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { salespersonsTable } from "~/table.schema";
-import { AuthTModel } from "../../model.typebox";
+import { salespersonsTable } from "../../table.schema";
+import { AuthTModel } from "../auth";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // === 基础 Schema ===

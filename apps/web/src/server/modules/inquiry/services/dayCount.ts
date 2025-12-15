@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/server/db/connection";
-import { dailyCounters } from "@/server/db/schema"; // 你的 schema 路径
+import { dailyInquiryCounterTable } from "@/server/db/schema"; // 你的 schema 路径
 
 function getYYMMDD(date: Date = new Date()): string {
   const y = String(date.getFullYear()).slice(-2);
@@ -19,18 +19,18 @@ export async function generateInquiryNumber(): Promise<string> {
   // 🔁 使用 upsert（PostgreSQL: ON CONFLICT / MySQL: ON DUPLICATE KEY）
   // 先尝试插入 count=1，如果存在则 count = count + 1
   await db
-    .insert(dailyCounters)
+    .insert(dailyInquiryCounterTable)
     .values({ date: dateKey, count: 1 })
     .onConflictDoUpdate({
-      target: dailyCounters.date,
-      set: { count: sql`${dailyCounters.count} + 1` },
+      target: dailyInquiryCounterTable.date,
+      set: { count: sql`${dailyInquiryCounterTable.count} + 1` },
     });
 
   // 获取当前 count
   const [row] = await db
-    .select({ count: dailyCounters.count })
-    .from(dailyCounters)
-    .where(eq(dailyCounters.date, dateKey));
+    .select({ count: dailyInquiryCounterTable.count })
+    .from(dailyInquiryCounterTable)
+    .where(eq(dailyInquiryCounterTable.date, dateKey));
 
   if (!row) {
     throw new Error("Failed to generate inquiry number");

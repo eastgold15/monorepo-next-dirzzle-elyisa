@@ -1,11 +1,10 @@
-import { TranslationDictModel } from "@repo/contract";
+import { TranslationDictTModel } from "@repo/contract";
 import { and, eq, ilike, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "@/server/db/connection";
 import { translationDictTable } from "@/server/db/schema";
 import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
-
 /**
  * 翻译管理路由
  *
@@ -22,7 +21,7 @@ export const translateRoute = new Elysia({ name: "translate" })
     async ({
       db,
       query,
-    }): Promise<CommonRes<PageData<TranslationDictModel["Entity"]>>> => {
+    }): Promise<CommonRes<PageData<TranslationDictTModel["Entity"]>>> => {
       const { page = 1, limit = 20, key, category, isActive } = query;
 
       // 构建查询条件
@@ -80,7 +79,7 @@ export const translateRoute = new Elysia({ name: "translate" })
       });
     },
     {
-      query: TranslationDictModel.ListQuery,
+      query: TranslationDictTModel.ListQuery,
     }
   )
 
@@ -151,7 +150,7 @@ export const translateRoute = new Elysia({ name: "translate" })
       };
     },
     {
-      body: TranslationDictModel.Create,
+      body: TranslationDictTModel.Create,
     }
   )
 
@@ -187,7 +186,7 @@ export const translateRoute = new Elysia({ name: "translate" })
       params: t.Object({
         id: t.String(),
       }),
-      body: TranslationDictModel.Update,
+      body: TranslationDictTModel.Update,
     }
   )
 

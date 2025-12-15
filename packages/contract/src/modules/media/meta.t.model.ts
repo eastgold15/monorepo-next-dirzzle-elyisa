@@ -4,7 +4,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-typebox";
-import { mediaMetadataTable } from "~/table.schema";
+import { mediaMetadataTable } from "../../table.schema";
 
 
 // === 基础 Schema ===

@@ -1,5 +1,5 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
-import { userSitePermissionsTable } from "~/table.schema";
+import { userSitePermissionsTable } from "../../table.schema";
 
 // User Site Permission Model Types
 const Insert = createInsertSchema(userSitePermissionsTable)

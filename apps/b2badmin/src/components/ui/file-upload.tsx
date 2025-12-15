@@ -1,6 +1,6 @@
 "use client";
 
-import type { UploadTModel } from "@repo/contract/typebox";
+import type { UploadTModel } from "@repo/contract";
 import { Upload as UploadIcon, X } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";

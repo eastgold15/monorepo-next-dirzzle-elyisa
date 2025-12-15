@@ -7,7 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { factoriesTable } from "~/table.schema";
+import { factoriesTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // === 基础 Schema（直接复用数据库表结构生成的类型）===

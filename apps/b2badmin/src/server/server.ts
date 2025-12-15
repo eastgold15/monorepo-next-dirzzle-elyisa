@@ -5,18 +5,7 @@ import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { dbPlugin } from "@/server/db/connection";
 import { auth } from "@/server/lib/auth";
 import { OpenAPI } from "@/server/lib/auth-openapi";
-import { AdsController } from "@/server/modules/ads/ads";
-import { betterAuthPlugin } from "@/server/modules/auth/auth.plugin";
-import { categoriesController } from "@/server/modules/category/category";
-import { factoryRoute } from "@/server/modules/factory/factory";
-import { HeroCardsController } from "@/server/modules/hero-cards/hero-cards";
-import { mediaRoute } from "@/server/modules/media/media";
-import { product2Route } from "@/server/modules/product/product";
-import { skuRoute } from "@/server/modules/product/sku";
-import { productTemplateRoute } from "@/server/modules/product/template";
-import { siteConfigsController } from "@/server/modules/site-config/site-config";
-import { translateRoute } from "@/server/modules/translations/translate";
-import { userRoute } from "@/server/modules/user/user";
+import { betterAuthPlugin } from "@/server/plugins/auth.plugin";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { loggerPlugin } from "./plugins/logger";
 import { errorPlugin } from "./utils/err/err.plugin";
@@ -89,15 +78,15 @@ export const server = new Elysia({ name: "server" })
     // }
   })
 
-  .use(dbPlugin)
-  .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
-  .use(categoriesController)
-  .use(AdsController)
-  .use(HeroCardsController) // 添加首页展示卡片控制器
-  .use(siteConfigsController)
-  .use(product2Route)
-  .use(productTemplateRoute)
-  .use(skuRoute)
-  .use(translateRoute)
-  .use(userRoute)
-  .use(factoryRoute);
+  .use(dbPlugin);
+// .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
+// .use(categoriesController)
+// .use(AdsController)
+// .use(HeroCardsController) // 添加首页展示卡片控制器
+// .use(siteConfigsController)
+// .use(product2Route)
+// .use(productTemplateRoute)
+// .use(skuRoute)
+// .use(translateRoute)
+// .use(userRoute)
+// .use(factoryRoute);

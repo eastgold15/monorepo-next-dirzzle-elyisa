@@ -10,15 +10,13 @@ export const relations = defineRelations(
         from: r.usersTable.id,
         to: r.userProfilesTable.userId,
       }),
-      userRoles: r.many.userRolesTable({
-        alias: "user_roles",
+      userRoles: r.many.userRolesTable(),
+      roles: r.many.roleTable({
+        from: r.usersTable.id.through(r.userRolesTable.userId),
+        to: r.roleTable.id.through(r.userRolesTable.roleId),
       }),
-      userResourceRoles: r.many.userResourceRolesTable({
-        alias: "user_resource_roles",
-      }),
-      accounts: r.many.accountTable({
-        alias: "accounts",
-      }),
+      userResourceRoles: r.many.userResourceRolesTable(),
+      accounts: r.many.accountTable(),
       sessions: r.many.sessionTable({
         alias: "sessions",
       }),
@@ -54,6 +52,14 @@ export const relations = defineRelations(
     },
 
     roleTable: {
+      users: r.many.usersTable({
+        from: r.roleTable.id.through(r.userRolesTable.roleId),
+        to: r.usersTable.id.through(r.userRolesTable.userId),
+      }),
+      permissions: r.many.permissionTable({
+        from: r.roleTable.id.through(r.rolePermissionsTable.roleId),
+        to: r.permissionTable.id.through(r.rolePermissionsTable.permissionId),
+      }),
       userRoles: r.many.userRolesTable({
         alias: 'user_roles',
       }),
@@ -77,6 +83,10 @@ export const relations = defineRelations(
       }),
     },
     permissionTable: {
+      roles: r.many.roleTable({
+        from: r.permissionTable.id.through(r.rolePermissionsTable.permissionId),
+        to: r.roleTable.id.through(r.rolePermissionsTable.roleId),
+      }),
       rolePermissions: r.many.rolePermissionsTable({
         alias: 'role_permissions',
       }),
@@ -98,11 +108,16 @@ export const relations = defineRelations(
         to: r.exportersTable.id,
         alias: 'exporter',
       }),
-      categories: r.many.factoryCategoryTable({
-        alias: 'categories',
+      categories: r.many.categoriesTable({
+        from: r.factoriesTable.id.through(r.factoryCategoryTable.factoryId),
+        to: r.categoriesTable.id.through(r.factoryCategoryTable.categoryId),
       }),
       salespersons: r.many.salespersonsTable({
         alias: 'salespersons',
+      }),
+      products: r.many.productsTable({
+        from: r.factoriesTable.id.through(r.productFactoriesTable.factoryId),
+        to: r.productsTable.id.through(r.productFactoriesTable.productId),
       }),
       productsViaFactory: r.many.productFactoriesTable({
         alias: 'products_via_factory',
@@ -137,6 +152,10 @@ export const relations = defineRelations(
         to: r.factoriesTable.id,
         alias: 'factory',
       }),
+      categories: r.many.categoriesTable({
+        from: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
+        to: r.categoriesTable.id.through(r.salespersonCategoriesTable.categoryId),
+      }),
       assignedCategories: r.many.salespersonCategoriesTable({
         alias: 'assigned_categories',
       }),
@@ -163,15 +182,28 @@ export const relations = defineRelations(
         alias: 'parent',
       }),
       children: r.many.categoriesTable({
-        alias: 'children',
+        from: r.categoriesTable.id,
+        to: r.categoriesTable.parentId,
+      }),
+      factories: r.many.factoriesTable({
+        from: r.categoriesTable.id.through(r.factoryCategoryTable.categoryId),
+        to: r.factoriesTable.id.through(r.factoryCategoryTable.factoryId),
       }),
       factoryCategories: r.many.factoryCategoryTable({
         alias: 'factory_categories',
       }),
-      salespersons: r.many.salespersonCategoriesTable({
+      salespersons: r.many.salespersonsTable({
+        from: r.categoriesTable.id.through(r.salespersonCategoriesTable.categoryId),
+        to: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
+      }),
+      salespersonCategories: r.many.salespersonCategoriesTable({
         alias: 'salespersons',
       }),
-      products: r.many.productCategoriesTable({
+      products: r.many.productsTable({
+        from: r.categoriesTable.id.through(r.productCategoriesTable.categoryId),
+        to: r.productsTable.id.through(r.productCategoriesTable.productId),
+      }),
+      productCategories: r.many.productCategoriesTable({
         alias: 'products',
       }),
       attributeTemplates: r.many.attributeTemplateTable({
@@ -236,6 +268,14 @@ export const relations = defineRelations(
 
     // --- Products ---
     productsTable: {
+      categories: r.many.categoriesTable({
+        from: r.productsTable.id.through(r.productCategoriesTable.productId),
+        to: r.categoriesTable.id.through(r.productCategoriesTable.categoryId),
+      }),
+      factories: r.many.factoriesTable({
+        from: r.productsTable.id.through(r.productFactoriesTable.productId),
+        to: r.factoriesTable.id.through(r.productFactoriesTable.factoryId),
+      }),
       productMedia: r.many.productMediaTable({
         alias: 'product_media',
       }),
@@ -303,7 +343,8 @@ export const relations = defineRelations(
         to: r.categoriesTable.id,
       }),
       attributes: r.many.attributeTable({
-        alias: 'attributes',
+        from: r.attributeTemplateTable.id,
+        to: r.attributeTable.templateId,
       }),
       productTemplates: r.many.productTemplateTable({
         alias: 'product_templates',
@@ -316,7 +357,8 @@ export const relations = defineRelations(
         to: r.attributeTemplateTable.id,
       }),
       values: r.many.attributeValueTable({
-        alias: 'values',
+        from: r.attributeTable.id,
+        to: r.attributeValueTable.attributeId,
       }),
     },
 
@@ -382,7 +424,6 @@ export const relations = defineRelations(
         to: r.exportersTable.id,
       }),
       items: r.many.quotationItemsTable({
-        alias: 'items',
       }),
     },
 
@@ -403,9 +444,7 @@ export const relations = defineRelations(
 
     // --- Others ---
     CustomerTable: {
-      quotations: r.many.quotationsTable({
-        alias: 'quotations',
-      }),
+      quotations: r.many.quotationsTable(),
     },
 
     accountTable: {
@@ -422,21 +461,10 @@ export const relations = defineRelations(
       }),
     },
 
-    // --- Sites ---奇怪
+    // --- Sites ---
     sitesTable: {
-      entity: r.many.sitesTable({
-        from: r.sitesTable.entityId,
-        to: [r.factoriesTable.id, r.exportersTable.id],
-      }),
-      siteCategories: r.many.siteCategoriesTable({
-        alias: 'site_categories',
-      }),
-      siteProducts: r.many.siteProductsTable({
-        alias: 'site_products',
-      }),
-      userPermissions: r.many.userSitePermissionsTable({
-        alias: 'user_permissions',
-      }),
+      siteCategories: r.many.siteCategoriesTable(),
+      siteProducts: r.many.siteProductsTable(),
     },
 
     siteCategoriesTable: {
@@ -458,9 +486,7 @@ export const relations = defineRelations(
         to: r.categoriesTable.id,
         alias: 'global_category',
       }),
-      siteProducts: r.many.siteProductsTable({
-        alias: 'site_products',
-      }),
+      siteProducts: r.many.siteProductsTable(),
     },
 
     siteProductsTable: {

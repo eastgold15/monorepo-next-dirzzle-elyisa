@@ -1,4 +1,4 @@
-import { ProductTModel } from "@repo/contract/typebox";
+import { ProductTModel } from "@repo/contract";
 import { and, count, eq, exists, like, type SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { dbPlugin } from "@/server/db/connection";

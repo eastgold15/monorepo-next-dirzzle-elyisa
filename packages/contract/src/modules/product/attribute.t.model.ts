@@ -11,7 +11,7 @@ import {
   attributeTable,
   attributeTemplateTable,
   attributeValueTable,
-} from "~/table.schema";
+} from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // ============================================================================

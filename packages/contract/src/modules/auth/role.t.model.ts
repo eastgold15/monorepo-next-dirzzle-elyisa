@@ -7,7 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { roleTable } from "~/table.schema";
+import { roleTable } from "../../table.schema";
 
 // === 基础 Schema ===
 const Insert = createInsertSchema(roleTable);

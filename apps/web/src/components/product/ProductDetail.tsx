@@ -1,4 +1,4 @@
-import type { InquiryTModel } from "@repo/contract/typebox";
+import type { InquiryTModel } from "@repo/contract";
 import {
   ArrowRight,
   Check,

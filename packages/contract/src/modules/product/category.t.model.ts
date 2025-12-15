@@ -7,7 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { categoriesTable } from "~/table.schema";
+import { categoriesTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import type { TreeNode } from "../helper/utils.types";
 

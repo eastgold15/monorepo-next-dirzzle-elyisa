@@ -7,13 +7,13 @@ import {
   userResourceRolesTable,
   usersTable,
 } from "@repo/contract/table";
-import { CreateFactoryWithAdminRequest } from "@repo/contract/typebox";
+
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { authClient } from "@/lib/auth-client";
 import { dbPlugin } from "@/server/db/connection";
 import { commonRes } from "@/server/utils/Res";
-import { betterAuthPlugin } from "../auth/auth.plugin";
+import { betterAuthPlugin } from "../../plugins/auth.plugin";
 
 export const factoryRoute = new Elysia({
   prefix: "/factory",

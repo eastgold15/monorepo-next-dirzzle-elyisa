@@ -1,4 +1,4 @@
-import type { CategoryTModel } from "@repo/contract/typebox";
+import type { CategoryTModel } from "@repo/contract";
 
 /**
  * 分类节点类型，包含树形结构的子分类

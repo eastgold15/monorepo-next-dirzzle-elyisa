@@ -12,7 +12,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { quotationItemsTable } from "~/table.schema";
+import { quotationItemsTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // === 基础 Schema ===

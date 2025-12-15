@@ -1,11 +1,9 @@
-import type { HeroCardsModel } from "@repo/contract";
 import { and, eq, getTableColumns, inArray, like, or } from "drizzle-orm";
 import { HttpError } from "elysia-http-problem-json";
 import { db } from "@/server/db/connection";
 import { heroCardsTable, mediaTable } from "@/server/db/schema";
 import type { SupportedLocale } from "@/server/plugins/locale";
 import type { PageData } from "@/server/utils/Res";
-import { buildPageMeta, paginate } from "@/server/utils/services/pagination";
 import { translateService } from "../translations/translate.service";
 
 /**
@@ -158,24 +156,24 @@ export const HeroCardsService = {
             await Promise.all([
               card.title
                 ? translateService.translate(
-                    card.title,
-                    "zh-CN",
-                    locale === "en-US" ? "en-US" : "zh-CN"
-                  )
+                  card.title,
+                  "zh-CN",
+                  locale === "en-US" ? "en-US" : "zh-CN"
+                )
                 : Promise.resolve(card.title),
               card.description
                 ? translateService.translate(
-                    card.description,
-                    "zh-CN",
-                    locale === "en-US" ? "en-US" : "zh-CN"
-                  )
+                  card.description,
+                  "zh-CN",
+                  locale === "en-US" ? "en-US" : "zh-CN"
+                )
                 : Promise.resolve(card.description),
               card.buttonText
                 ? translateService.translate(
-                    card.buttonText,
-                    "zh-CN",
-                    locale === "en-US" ? "en-US" : "zh-CN"
-                  )
+                  card.buttonText,
+                  "zh-CN",
+                  locale === "en-US" ? "en-US" : "zh-CN"
+                )
                 : Promise.resolve(card.buttonText),
             ]);
 

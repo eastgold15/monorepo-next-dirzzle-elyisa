@@ -1,7 +1,5 @@
-import { inArray } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
-import { rolePermissionsTable } from "@/server/db/schema";
 import { auth } from "@/server/lib/auth";
 
 // 用户中间件（计算用户和会话并传递给路由）
@@ -53,7 +51,9 @@ export const betterAuthPlugin = new Elysia({ name: "better-auth" })
             ? (
               await db.query.rolePermissionsTable.findMany({
                 where: {
-                  roleId: inArray(rolePermissionsTable.roleId, roleIds),
+                  roleId: {
+                    in: roleIds,
+                  },
                 },
                 with: {
                   permission: {

@@ -9,7 +9,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { inquiryItemsTable } from "~/table.schema";
+import { inquiryItemsTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types";
 
 // ===== 第一层：基础 Schema（数据库层） =====
