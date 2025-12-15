@@ -12,8 +12,8 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
+import { quotationItemsTable } from "~/table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
-import { quotationItemsTable } from "./quotation_item.schema";
 
 // === 基础 Schema ===
 const Insert = createInsertSchema(quotationItemsTable);

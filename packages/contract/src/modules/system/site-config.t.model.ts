@@ -1,5 +1,5 @@
-// Client module TypeBox type definitions
-// Customer/Client management
+// Site Config module TypeBox type definitions
+// Website configuration management
 
 import {
   createInsertSchema,
@@ -7,13 +7,13 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { CustomerTable } from "~/table.schema";
+import { siteConfigTable } from "~/table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // === 基础 Schema ===
-const Insert = createInsertSchema(CustomerTable);
-const UpdateBase = createUpdateSchema(CustomerTable);
-const Select = createSelectSchema(CustomerTable);
+const Insert = createInsertSchema(siteConfigTable);
+const UpdateBase = createUpdateSchema(siteConfigTable);
+const Select = createSelectSchema(siteConfigTable);
 
 // === 业务 Schema ===
 const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);
@@ -23,10 +23,8 @@ const Update = t.Omit(UpdateBase, ["id", "createdAt", "updatedAt"]);
 const Patch = t.Partial(Update);
 
 const BusinessQuery = t.Object({
-  name: t.Optional(t.String()),
-  email: t.Optional(t.String({ format: "email" })),
-  phone: t.Optional(t.String()),
-  isActive: t.Optional(t.Boolean()),
+  key: t.Optional(t.String()),
+  category: t.Optional(t.String()),
 });
 
 const ListQuery = t.Object({
@@ -38,7 +36,7 @@ const ListQuery = t.Object({
 const Entity = Select;
 
 // === 1. 运行时 Schema 集合（值）===
-export const ClientTModel = {
+export const SiteConfigTModel = {
   Insert,
   Update,
   Select,
@@ -50,7 +48,7 @@ export const ClientTModel = {
 } as const;
 
 // === 2. 编译时类型集合（类型）===
-export type ClientTModel = {
+export type SiteConfigTModel = {
   Insert: typeof Insert.static;
   Update: typeof Update.static;
   Select: typeof Select.static;

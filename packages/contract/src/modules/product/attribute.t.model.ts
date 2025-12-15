@@ -7,12 +7,12 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import {
   attributeTable,
   attributeTemplateTable,
   attributeValueTable,
-} from "./attribute.schema";
+} from "~/table.schema";
+import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // ============================================================================
 // 属性模板相关 Schema 和类型定义
@@ -90,7 +90,9 @@ const BusinessQuery = t.Object({
   templateId: t.Optional(t.String()),
   name: t.Optional(t.String()),
   search: t.Optional(t.String()),
-  inputType: t.Optional(t.UnionEnum(["select", "text", "number", "multiselect", "richtext"])),
+  inputType: t.Optional(
+    t.UnionEnum(["select", "text", "number", "multiselect", "richtext"])
+  ),
 });
 
 const ListQuery = t.Object({

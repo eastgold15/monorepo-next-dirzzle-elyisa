@@ -6,8 +6,8 @@
   "private": true,
   "exports": {
     "./table": {
-      "types": "./src/table.ts",
-      "import": "./src/table.ts"
+      "types": "./src/table.schema.ts",
+      "import": "./src/table.schema.ts"
     },
     "./typebox": {
       "types": "./src/model.typebox.ts",

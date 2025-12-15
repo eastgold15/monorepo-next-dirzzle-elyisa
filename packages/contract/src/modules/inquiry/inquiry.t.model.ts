@@ -9,8 +9,8 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
+import { inquiryTable } from "~/table.schema";
 import { SkuTModel } from "../product/sku.t.model";
-import { inquiryTable } from "./inquiry.schema";
 import { InquiryItemTModel } from "./inquiryItem.t.model";
 
 // ===== 第一层：基础 Schema（数据库层） =====

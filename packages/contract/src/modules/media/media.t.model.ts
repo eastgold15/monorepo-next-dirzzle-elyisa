@@ -10,7 +10,6 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
-import { mediaTable } from "./media.schema";
 
 // === 枚举 ===
 export const FileType = t.Union([
@@ -35,6 +34,7 @@ const Insert = createInsertSchema(mediaTable);
 const UpdateBase = createUpdateSchema(mediaTable);
 const Select = createSelectSchema(mediaTable);
 
+import { mediaTable } from "~/table.schema";
 import { MediaMetaTModel } from "./meta.t.model";
 
 // === 业务 Schema ===
@@ -58,14 +58,13 @@ const Entity = Select;
 const FileUpload = t.Object({
   media: Create,
   meta: MediaMetaTModel.UploadCreate,
-})
+});
 
 const PresignUrlQuery = t.Object({
   mimeType: t.String(),
   fileNameHash: t.String(),
   category: t.Optional(t.String()),
-})
-
+});
 
 // === 1. 运行时 Schema 集合（值）===
 export const MediaTModel = {
@@ -78,7 +77,7 @@ export const MediaTModel = {
   FileUpload,
   FileType,
   StorageProvider,
-  PresignUrlQuery
+  PresignUrlQuery,
 } as const;
 
 // === 2. 编译时类型集合（类型）===

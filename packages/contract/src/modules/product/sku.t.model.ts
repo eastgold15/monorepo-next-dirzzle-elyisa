@@ -4,9 +4,9 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-typebox";
+import { skusTable } from "~/table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import { MediaTModel } from "../media/media.t.model";
-import { skusTable } from "./sku.schema";
 
 // === 基础 Schema ===
 const Insert = createInsertSchema(skusTable);

@@ -1,5 +1,5 @@
-// Client module TypeBox type definitions
-// Customer/Client management
+// Sales Person module TypeBox type definitions
+// Sales person management
 
 import {
   createInsertSchema,
@@ -7,13 +7,14 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { CustomerTable } from "~/table.schema";
+import { salespersonsTable } from "~/table.schema";
+import { AuthTModel } from "../../model.typebox";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // === 基础 Schema ===
-const Insert = createInsertSchema(CustomerTable);
-const UpdateBase = createUpdateSchema(CustomerTable);
-const Select = createSelectSchema(CustomerTable);
+const Insert = createInsertSchema(salespersonsTable);
+const UpdateBase = createUpdateSchema(salespersonsTable);
+const Select = createSelectSchema(salespersonsTable);
 
 // === 业务 Schema ===
 const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);
@@ -25,7 +26,7 @@ const Patch = t.Partial(Update);
 const BusinessQuery = t.Object({
   name: t.Optional(t.String()),
   email: t.Optional(t.String({ format: "email" })),
-  phone: t.Optional(t.String()),
+  factoryId: t.Optional(t.String()),
   isActive: t.Optional(t.Boolean()),
 });
 
@@ -37,8 +38,10 @@ const ListQuery = t.Object({
 
 const Entity = Select;
 
+const EntityWithUser = t.Intersect([Select, AuthTModel.Entity]);
+
 // === 1. 运行时 Schema 集合（值）===
-export const ClientTModel = {
+export const SalesPersonTModel = {
   Insert,
   Update,
   Select,
@@ -47,10 +50,11 @@ export const ClientTModel = {
   ListQuery,
   Entity,
   BusinessQuery,
+  EntityWithUser,
 } as const;
 
 // === 2. 编译时类型集合（类型）===
-export type ClientTModel = {
+export type SalesPersonTModel = {
   Insert: typeof Insert.static;
   Update: typeof Update.static;
   Select: typeof Select.static;
@@ -59,4 +63,5 @@ export type ClientTModel = {
   ListQuery: typeof ListQuery.static;
   Entity: typeof Entity.static;
   BusinessQuery: typeof BusinessQuery.static;
+  EntityWithUser: typeof EntityWithUser.static;
 };

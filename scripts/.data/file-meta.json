@@ -1,0 +1,23 @@
+[
+  {
+    "path": "D:\\Users\\boer\\Desktop\\gina\\packages\\contract\\src\\table.ts",
+    "entity": "",
+    "tableName": "",
+    "foreignKeys": [
+      "exportersTable.id",
+      "mediaTable.id",
+      "mediaTable.id",
+      "productsTable.id",
+      "categoriesTable.id",
+      "productsTable.id",
+      "mediaTable.id",
+      "categoriesTable.id",
+      "attributeTemplateTable.id",
+      "attributeTable.id",
+      "attributeTemplateTable.id",
+      "mediaTable.id",
+      "skusTable.id"
+    ],
+    "contentPreview": "// schema.ts\n\nimport { sql } from \"drizzle-orm\";\nimport * as p from \"drizzle-orm/pg-core\";\n\n// --- Helper fields ---\nconst idUuid = p.uuid(\"id\").primaryKey().default(sql`gen_random_uuid()`);\nconst createdAt = p\n  .timestamp(\"created_at\", { withTimezone: true })\n  .notNull()\n  .defaultNow();\nconst updatedAt = p\n  .timestamp(\"updated_at\", { withTimezone: true })\n  .notNull()\n  .defaultNow()\n  .$onUpdate(() => new Date());\n\n// --- Enums ---\nexport const adsTypeEnum = p.pgEnum(\"ads_type\", [\"banner\","
+  }
+]
