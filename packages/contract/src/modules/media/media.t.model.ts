@@ -11,17 +11,6 @@ import {
 } from "drizzle-typebox";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
-// === 枚举 ===
-export const FileType = t.Union([
-  t.Literal("image"),
-  t.Literal("video"),
-  t.Literal("document"),
-  t.Literal("audio"),
-  t.Literal("other"),
-]);
-
-export type FileType = typeof FileType.static;
-
 export const StorageProvider = t.Union([
   t.Literal("local"),
   t.Literal("oss"),
@@ -35,6 +24,7 @@ const UpdateBase = createUpdateSchema(mediaTable);
 const Select = createSelectSchema(mediaTable);
 
 import { mediaTable } from "~/table.schema";
+import { FileType } from "../helper/constant";
 import { MediaMetaTModel } from "./meta.t.model";
 
 // === 业务 Schema ===

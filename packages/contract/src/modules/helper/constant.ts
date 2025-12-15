@@ -1,3 +1,5 @@
+import { t } from "elysia";
+
 // 支持的图片类型
 export const SUPPORTED_IMAGE_TYPES = [
   "image/jpeg",
@@ -33,16 +35,19 @@ export const FOLDDER_TYPE = {
 export type Folder_Type = keyof typeof FOLDDER_TYPE;
 export type SUPPORTED_IMAGE_TYPES = (typeof SUPPORTED_IMAGE_TYPES)[number];
 
-// 文件类型枚举
-export const FILE_TYPE = {
-  IMAGE: "image",
-  VIDEO: "video",
-  DOCUMENT: "document",
-  AUDIO: "audio",
-  OTHER: "other",
-} as const;
 
-export type FileType = (typeof FILE_TYPE)[keyof typeof FILE_TYPE];
+
+// === 枚举 ===
+export const FileType = t.Union([
+  t.Literal("image"),
+  t.Literal("video"),
+  t.Literal("document"),
+  t.Literal("audio"),
+  t.Literal("other"),
+]);
+
+
+export type FileType = typeof FileType.static;
 
 // 6. 常量定义
 export const STATISTICS_TYPES = {

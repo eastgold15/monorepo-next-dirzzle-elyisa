@@ -1,7 +1,7 @@
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
-import { rolePermissionsTable, usersTable } from "@/server/db/schema";
+import { rolePermissionsTable } from "@/server/db/schema";
 import { auth } from "@/server/lib/auth";
 
 // 用户中间件（计算用户和会话并传递给路由）
@@ -17,7 +17,9 @@ export const betterAuthPlugin = new Elysia({ name: "better-auth" })
         if (!session) return status(401);
         // 假设这是在 getUser 或 session 回调中
         const userInfoWithRoles = await db.query.usersTable.findFirst({
-          where: eq(usersTable.id, session.user.id),
+          where: {
+            id: session.user.id,
+          },
           with: {
             userRoles: {
               with: {
@@ -50,9 +52,11 @@ export const betterAuthPlugin = new Elysia({ name: "better-auth" })
           roleIds.length > 0
             ? (
               await db.query.rolePermissionsTable.findMany({
-                where: inArray(rolePermissionsTable.roleId, roleIds),
+                where: {
+                  roleId: inArray(rolePermissionsTable.roleId, roleIds),
+                },
                 with: {
-                  permissions: {
+                  permission: {
                     columns: {
                       name: true,
                     },
@@ -60,7 +64,7 @@ export const betterAuthPlugin = new Elysia({ name: "better-auth" })
                 },
               })
             )
-              .flatMap((rp) => rp.permissions?.map((p) => p.name) || []) // → string[]
+              .flatMap((rp) => rp.permission?.name || []) // → string[]
               .filter((name): name is string => !!name)
             : []; // 过滤 null/undefined
 

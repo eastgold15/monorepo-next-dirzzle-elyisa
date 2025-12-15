@@ -22,12 +22,15 @@ const Entity = t.Omit(Select, ["id", "updatedAt"]);
 // === 1. 运行时 Schema 集合（值）===
 export const ExporterTModel = {
   Insert,
+  UpdateBase,
+  Select,
   Entity,
 } as const;
 
 // === 2. 编译时类型集合（类型）===
 export type ExporterTModel = {
   Insert: typeof Insert.static;
+  Select: typeof Select.static;
   UpdateBase: typeof UpdateBase.static;
   Entity: typeof Entity.static;
 };

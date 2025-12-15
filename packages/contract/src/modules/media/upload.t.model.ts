@@ -3,7 +3,6 @@
  */
 
 import { Type as t } from "@sinclair/typebox";
-import { MediaTModel } from "./media.t.model";
 import { MediaMetaTModel } from "./meta.t.model";
 
 // 文件上传状态
@@ -15,18 +14,6 @@ export const UploadStatus = t.Union([
 ]);
 
 export type UploadStatus = typeof UploadStatus.static;
-
-// 上传配置
-export const UploadConfig = t.Object({
-  category: t.String(), // 文件分类（如：avatar, product, document等）
-  mediaType: MediaTModel.FileType, // 媒体类型
-  multiple: t.Optional(t.Boolean()), // 是否允许多文件
-  maxSize: t.Optional(t.Number()), // 最大文件大小（字节）
-  maxFiles: t.Optional(t.Number()), // 最大文件数量
-  accept: t.Optional(t.String()), // 接受的文件类型
-});
-
-export type UploadConfig = typeof UploadConfig.static;
 
 // 上传文件信息
 export const UploadFile = t.Object({
@@ -72,7 +59,7 @@ export type UploadResponse = typeof UploadResponse.static;
 // 导出所有类型
 export const UploadTModel = {
   UploadStatus,
-  UploadConfig,
+
   UploadFile,
   UploadRequest,
   UploadResponse,
@@ -80,7 +67,7 @@ export const UploadTModel = {
 
 export type UploadTModel = {
   UploadStatus: UploadStatus;
-  UploadConfig: UploadConfig;
+
   UploadFile: UploadFile;
   UploadRequest: UploadRequest;
   UploadResponse: UploadResponse;

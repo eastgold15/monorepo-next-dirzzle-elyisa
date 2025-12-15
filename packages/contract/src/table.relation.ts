@@ -421,5 +421,77 @@ export const relations = defineRelations(
         to: r.usersTable.id,
       }),
     },
+
+    // --- Sites ---奇怪
+    sitesTable: {
+      entity: r.many.sitesTable({
+        from: r.sitesTable.entityId,
+        to: [r.factoriesTable.id, r.exportersTable.id],
+      }),
+      siteCategories: r.many.siteCategoriesTable({
+        alias: 'site_categories',
+      }),
+      siteProducts: r.many.siteProductsTable({
+        alias: 'site_products',
+      }),
+      userPermissions: r.many.userSitePermissionsTable({
+        alias: 'user_permissions',
+      }),
+    },
+
+    siteCategoriesTable: {
+      site: r.one.sitesTable({
+        from: r.siteCategoriesTable.siteId,
+        to: r.sitesTable.id,
+        alias: 'site',
+      }),
+      parent: r.one.siteCategoriesTable({
+        from: r.siteCategoriesTable.parentId,
+        to: r.siteCategoriesTable.id,
+        alias: 'parent',
+      }),
+      children: r.many.siteCategoriesTable({
+        alias: 'children',
+      }),
+      globalCategory: r.one.categoriesTable({
+        from: r.siteCategoriesTable.globalCategoryId,
+        to: r.categoriesTable.id,
+        alias: 'global_category',
+      }),
+      siteProducts: r.many.siteProductsTable({
+        alias: 'site_products',
+      }),
+    },
+
+    siteProductsTable: {
+      site: r.one.sitesTable({
+        from: r.siteProductsTable.siteId,
+        to: r.sitesTable.id,
+        alias: 'site',
+      }),
+      product: r.one.productsTable({
+        from: r.siteProductsTable.productId,
+        to: r.productsTable.id,
+        alias: 'product',
+      }),
+      siteCategory: r.one.siteCategoriesTable({
+        from: r.siteProductsTable.siteCategoryId,
+        to: r.siteCategoriesTable.id,
+        alias: 'site_category',
+      }),
+    },
+
+    userSitePermissionsTable: {
+      user: r.one.usersTable({
+        from: r.userSitePermissionsTable.userId,
+        to: r.usersTable.id,
+        alias: 'user',
+      }),
+      site: r.one.sitesTable({
+        from: r.userSitePermissionsTable.siteId,
+        to: r.sitesTable.id,
+        alias: 'site',
+      }),
+    },
   })
 );

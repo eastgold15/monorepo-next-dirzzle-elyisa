@@ -599,5 +599,84 @@ export const translationDictTable = p.pgTable("translation_dict", {
   updatedAt,
 });
 
+// --- Multi-site Support Tables ---
+
+// 站点表 - 核心中的核心
+export const sitesTable = p.pgTable("sites", {
+  id: idUuid,
+  createdAt,
+  updatedAt,
+  name: p.varchar("name", { length: 100 }).notNull(),
+  domain: p.varchar("domain", { length: 255 }).unique().notNull(),
+
+  // 站点类型：factory 或 exporter
+  siteType: p.varchar("site_type", { enum: ["factory", "exporter"] }).notNull(),
+
+  // 关联的业务实体ID
+  entityId: p.uuid("entity_id").notNull(), // factory_id 或 exporter_id
+
+  // 站点配置
+  themeConfig: p.json("theme_config").$type<Record<string, any>>(),
+  featureConfig: p.json("feature_config").$type<Record<string, any>>(),
+
+  isActive: p.boolean("is_active").default(true),
+
+});
+
+// 站点分类表 - 每个站点独立的分类体系
+export const siteCategoriesTable = p.pgTable("site_categories", {
+  id: idUuid,
+  siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
+
+  name: p.varchar("name", { length: 100 }).notNull(),
+  parentId: p.uuid("parent_id"),
+  sortOrder: p.integer("sort_order").default(0),
+
+  // 分类可以关联到全局分类（可选，用于数据聚合）
+  globalCategoryId: p.uuid("global_category_id").references(() => categoriesTable.id),
+
+  createdAt,
+  updatedAt,
+});
+
+// 站点商品关联表 - 每个站点展示的商品
+export const siteProductsTable = p.pgTable("site_products", {
+  id: idUuid,
+  createdAt,
+  updatedAt,
+  siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
+  productId: p.uuid("product_id").references(() => productsTable.id).notNull(),
+
+  // 站点级别的商品配置
+  sitePrice: p.decimal("site_price", { precision: 10, scale: 2 }),
+  siteName: p.varchar("site_name", { length: 200 }), // 站点可以自定义商品名
+  siteDescription: p.text(), // 站点可以自定义商品描述
+
+  // 展示控制
+  isFeatured: p.boolean("is_featured").default(false),
+  sortOrder: p.integer("sort_order").default(0),
+  isVisible: p.boolean("is_visible").default(true),
+
+  // SEO
+  seoTitle: p.varchar("seo_title", { length: 200 }),
+  seoDescription: p.text(),
+
+  // 关联站点分类
+  siteCategoryId: p.uuid("site_category_id").references(() => siteCategoriesTable.id),
+
+
+});
+
+// 用户站点权限表
+export const userSitePermissionsTable = p.pgTable("user_site_permissions", {
+  id: idUuid,
+  userId: p.uuid("user_id").references(() => usersTable.id).notNull(),
+  siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
+
+  role: p.varchar("role", { enum: ["admin", "editor", "viewer"] }).notNull(),
+
+  createdAt,
+  updatedAt,
+});
 
 
