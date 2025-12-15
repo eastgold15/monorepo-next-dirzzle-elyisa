@@ -114,17 +114,20 @@ export const roleTable = p.pgTable("roles", {
   description: p.text("description"),
 });
 
-export const userRolesTable = p.pgTable("user_roles", {
-  id: idUuid,
-  userId: p
-    .uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  roleId: p
-    .uuid("role_id")
-    .notNull()
-    .references(() => roleTable.id, { onDelete: "cascade" }),
-});
+export const userRolesTable = p.pgTable(
+  "user_roles",
+  {
+    userId: p
+      .uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    roleId: p
+      .uuid("role_id")
+      .notNull()
+      .references(() => roleTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [p.primaryKey({ columns: [t.userId, t.roleId] })]
+);
 
 export const permissionTable = p.pgTable("permissions", {
   id: idUuid,
@@ -152,9 +155,6 @@ export const rolePermissionsTable = p.pgTable(
 export const userResourceRolesTable = p.pgTable(
   "user_resource_roles",
   {
-    id: idUuid,
-    createdAt,
-    updatedAt,
     userId: p
       .uuid("user_id")
       .notNull()
@@ -166,8 +166,10 @@ export const userResourceRolesTable = p.pgTable(
     resourceType: p.text("resource_type").notNull(),
     resourceId: p.uuid("resource_id").notNull(),
     isPrimary: p.boolean("is_primary").default(false),
-  }
-  // Unique constraint omitted per your note; can be added via raw SQL migration if needed
+    createdAt,
+    updatedAt,
+  },
+  (t) => [p.primaryKey({ columns: [t.userId, t.resourceType, t.resourceId] })]
 );
 
 export const exportersTable = p.pgTable("exporters", {
@@ -353,28 +355,36 @@ export const productsTable = p.pgTable("products_table", {
   units: p.varchar("units", { length: 20 }),
 });
 
-export const productCategoriesTable = p.pgTable("product_categories", {
-  productId: p
-    .uuid("product_id")
-    .notNull()
-    .references(() => productsTable.id),
-  categoryId: p
-    .uuid("category_id")
-    .notNull()
-    .references(() => categoriesTable.id),
-});
+export const productCategoriesTable = p.pgTable(
+  "product_categories",
+  {
+    productId: p
+      .uuid("product_id")
+      .notNull()
+      .references(() => productsTable.id),
+    categoryId: p
+      .uuid("category_id")
+      .notNull()
+      .references(() => categoriesTable.id),
+  },
+  (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
+);
 
-export const productMediaTable = p.pgTable("product_images", {
-  productId: p
-    .uuid("product_id")
-    .notNull()
-    .references(() => productsTable.id),
-  imageId: p
-    .uuid("image_id")
-    .notNull()
-    .references(() => mediaTable.id),
-  isMain: p.boolean("is_main").default(false),
-});
+export const productMediaTable = p.pgTable(
+  "product_images",
+  {
+    productId: p
+      .uuid("product_id")
+      .notNull()
+      .references(() => productsTable.id),
+    imageId: p
+      .uuid("image_id")
+      .notNull()
+      .references(() => mediaTable.id),
+    isMain: p.boolean("is_main").default(false),
+  },
+  (t) => [p.primaryKey({ columns: [t.productId, t.imageId] })]
+);
 
 export const attributeTemplateTable = p.pgTable("attribute_templates", {
   id: idUuid,
@@ -422,7 +432,6 @@ export const productTemplateTable = p.pgTable("product_template_table", {
     .uuid("template_id")
     .notNull()
     .references(() => attributeTemplateTable.id),
-  createdAt: p.timestamp("created_at").defaultNow(),
 });
 
 export const skusTable = p.pgTable("skus_table", {
@@ -668,14 +677,16 @@ export const siteProductsTable = p.pgTable("site_products", {
 });
 
 // 用户站点权限表
-export const userSitePermissionsTable = p.pgTable("user_site_permissions", {
-  id: idUuid,
-  userId: p.uuid("user_id").references(() => usersTable.id).notNull(),
-  siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
-  role: p.varchar("role", { enum: ["admin", "editor", "viewer"] }).notNull(),
-
-  createdAt,
-  updatedAt,
-});
+export const userSitePermissionsTable = p.pgTable(
+  "user_site_permissions",
+  {
+    userId: p.uuid("user_id").references(() => usersTable.id).notNull(),
+    siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
+    role: p.varchar("role", { enum: ["admin", "editor", "viewer"] }).notNull(),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [p.primaryKey({ columns: [t.userId, t.siteId] })]
+);
 
 

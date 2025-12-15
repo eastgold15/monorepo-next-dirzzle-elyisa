@@ -1,10 +1,11 @@
-import { and, eq, getTableColumns, inArray, like, or } from "drizzle-orm";
+import { and, eq, getColumns, inArray, like, or } from "drizzle-orm";
 import { HttpError } from "elysia-http-problem-json";
 import { db } from "@/server/db/connection";
-import { heroCardsTable, mediaTable } from "@/server/db/schema";
+
 import type { SupportedLocale } from "@/server/plugins/locale";
 import type { PageData } from "@/server/utils/Res";
 import { translateService } from "../translations/translate.service";
+import { heroCardsTable } from "@repo/contract/table";
 
 /**
  * 首页展示卡片服务对象
@@ -31,7 +32,7 @@ export const HeroCardsService = {
     await db.delete(heroCardsTable).where(inArray(heroCardsTable.id, ids));
   },
 
-  columns: getTableColumns(heroCardsTable),
+  columns: getColumns(heroCardsTable),
 
   /**
    * 获取首页展示卡片列表（分页）- 使用统一的分页函数

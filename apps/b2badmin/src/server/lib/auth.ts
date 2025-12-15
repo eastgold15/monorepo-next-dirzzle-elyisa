@@ -1,14 +1,14 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI } from "better-auth/plugins";
-import { envConfig } from "@/lib/env/server";
-import { db } from "../db/connection";
 import {
   accountTable,
   sessionTable,
   usersTable,
   verificationTable,
-} from "../db/schema";
+} from "@repo/contract/table";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { openAPI } from "better-auth/plugins";
+import { envConfig } from "@/lib/env/server";
+import { db } from "../db/connection";
 import {
   createEmailVerificationTemplate,
   createPasswordResetTemplate,

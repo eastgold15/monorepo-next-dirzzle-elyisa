@@ -12,6 +12,7 @@ import { envConfig } from "@/lib/env/server";
 // });
 
 export const db = drizzle(envConfig.DATABASE_URL, { relations });
+
 export const dbPlugin = new Elysia({ name: "db" })
   .decorate("db", db)
   .as("global");

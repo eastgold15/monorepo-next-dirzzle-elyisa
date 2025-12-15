@@ -1,24 +1,22 @@
-import type { AdsModel } from "@repo/contract";
-import { and, eq, getTableColumns, inArray, like, or } from "drizzle-orm";
+import type { AdsTModel } from "@repo/contract";
+import { adsTable, mediaTable } from "@repo/contract/table";
+import { and, eq, getColumns, inArray, like, or } from "drizzle-orm";
 import { HttpError } from "elysia-http-problem-json";
 import { db } from "@/server/db/connection";
-import { adsTable, mediaTable } from "@/server/db/schema";
 import type { PageData } from "@/server/utils/Res";
-import { buildPageMeta, paginate } from "@/server/utils/services";
-
 /**
  * 广告服务抽象类
  * 处理广告相关的业务逻辑，使用静态方法避免类实例化
  */
 export const AdsService = {
-  columns: getTableColumns(adsTable),
+  columns: getColumns(adsTable),
   /**
    * 获取广告列表（分页）- 使用统一的分页函数
    */
 
   async getAdvertisementList(
-    params: AdsModel["ListQuery"]
-  ): Promise<PageData<AdsModel["Entity"]>> {
+    params: AdsTModel["ListQuery"]
+  ): Promise<PageData<AdsTModel["Entity"]>> {
     try {
       const {
         page = 1,
@@ -126,7 +124,7 @@ export const AdsService = {
    * 创建广告
    */
 
-  async createAdvertisement(data: AdsModel["Create"]) {
+  async createAdvertisement(data: AdsTModel["Create"]) {
     if (!data.image_id || data.image_id.length === 0) {
       throw new HttpError.BadRequest("请上传图片");
     }
@@ -153,7 +151,7 @@ export const AdsService = {
    * 更新广告
    */
 
-  async updateAdvertisement(id: string, data: AdsModel["Update"]) {
+  async updateAdvertisement(id: string, data: AdsTModel["Update"]) {
     try {
       // 准备更新数据，添加更新时间
       const updateData: Partial<typeof adsTable.$inferInsert> = {
@@ -187,7 +185,7 @@ export const AdsService = {
   /**
    * 获取当前时间段的轮播图广告
    */
-  async getCurrentCarouselAds(): Promise<AdsModel["Entity"][]> {
+  async getCurrentCarouselAds(): Promise<AdsTModel["Entity"][]> {
     try {
       const now = new Date();
 

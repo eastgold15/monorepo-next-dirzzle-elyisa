@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 
 /**
  * 生成默认头像URL（使用 UI Avatars 服务）
@@ -50,7 +50,7 @@ export function handleAvatarUpload(
   file?: File,
   name?: string
 ): Promise<string> {
-  if (file && file.type.startsWith("image/")) {
+  if (file?.type.startsWith("image/")) {
     // TODO: 实现文件上传逻辑（阿里云OSS或本地存储）
     // 目前暂时返回默认头像
     console.log("Avatar upload not implemented yet, using default avatar");
