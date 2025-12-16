@@ -1,13 +1,13 @@
-import { InquiryTModel } from "@repo/contract";
 import {
   CustomerTable,
   factoriesTable,
+  InquiryTModel,
   inquiryItemsTable,
   inquiryTable,
   productsTable,
   salespersonCategoriesTable,
   salespersonsTable,
-} from "@repo/contract/table";
+} from "@repo/contract";
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
@@ -150,9 +150,10 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
         if (!mainFactory) throw new HttpError.NotFound("主工厂信息缺失");
 
         // 相似工厂（最多2家，凑够3家 total）
+        // 暂时移除按分类筛选的逻辑，因为 factoriesTable 没有 categoryId 字段
         const similarFactories = await db.query.factoriesTable.findMany({
           columns: { address: true, website: true },
-          where: inArray(factoriesTable.categoryId, categoryIds),
+          where: eq(factoriesTable.isActive, true),
           limit: 2,
         });
 

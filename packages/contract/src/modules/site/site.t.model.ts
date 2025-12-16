@@ -104,6 +104,31 @@ const UserSitePermissionCreateBody = t.Object({
   role: t.Union([t.Literal("admin"), t.Literal("editor"), t.Literal("viewer")]),
 });
 
+// Switch Site Types
+const SiteSwitchRequest = t.Object({
+  siteId: t.String(),
+});
+
+const SiteSwitchResponse = t.Object({
+  success: t.Boolean(),
+  currentSite: SiteSelect,
+  allSites: t.Array(SiteEntity),
+});
+
+// Get Accessible Sites Response
+const AccessibleSitesResponse = t.Object({
+  sites: t.Array(t.Composite([
+    SiteEntity,
+    t.Object({
+      role: t.Object({
+        name: t.String(),
+        priority: t.Number(),
+      }),
+      priority: t.Number(),
+    })
+  ])),
+});
+
 // Context Types
 const SiteContext = t.Object({
   site: SiteSelect,
@@ -121,17 +146,19 @@ export const SiteTModel = {
   ListQuery: SiteListQuery,
   Entity: SiteEntity,
 
-
   CategoryCreate: SiteCategoryCreateBody,
   CategoryListQuery: SiteCategoryListQuery,
-
 
   ProductCreate: SiteProductCreateBody,
   ProductListQuery: SiteProductListQuery,
   ProductEntity: SiteProductEntity,
 
-
   PermissionCreate: UserSitePermissionCreateBody,
+
+  // Site switching types
+  SwitchRequest: SiteSwitchRequest,
+  SwitchResponse: SiteSwitchResponse,
+  AccessibleSitesResponse: AccessibleSitesResponse,
 
   // Context type
   Context: SiteContext,
@@ -147,17 +174,19 @@ export type SiteTModel = {
   ListQuery: typeof SiteListQuery.static;
   Entity: typeof SiteEntity.static;
 
-
   CategoryCreate: typeof SiteCategoryCreateBody.static;
   CategoryListQuery: typeof SiteCategoryListQuery.static;
-
 
   ProductCreate: typeof SiteProductCreateBody.static;
   ProductListQuery: typeof SiteProductListQuery.static;
   ProductEntity: typeof SiteProductEntity.static;
 
-
   PermissionCreate: typeof UserSitePermissionCreateBody.static;
+
+  // Site switching types
+  SwitchRequest: typeof SiteSwitchRequest.static;
+  SwitchResponse: typeof SiteSwitchResponse.static;
+  AccessibleSitesResponse: typeof AccessibleSitesResponse.static;
 
   Context: typeof SiteContext.static;
 };

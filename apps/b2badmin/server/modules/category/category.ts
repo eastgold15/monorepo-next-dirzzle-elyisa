@@ -1,30 +1,27 @@
-import { CategoryModel, TreeNode } from "@repo/contract";
-import { categoriesTable } from "@repo/contract/table";
-import { asc, eq, inArray } from "drizzle-orm";
+import { CategoryTModel, type TreeNode } from "@repo/contract";
+import { MasterTable } from "@repo/contract/table";
+import { eq, inArray } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { db, dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes } from "@/server/utils/Res";
-import { buildTree } from "@/server/utils/buildTree";
 import type { SupportedLocale } from "@/server/plugins/locale";
+import { localeMiddleware } from "@/server/plugins/locale";
+import { buildTree } from "@/server/utils/buildTree";
+import { commonRes } from "@/server/utils/Res";
 import { translateService } from "../translations/translate.service";
 
 // 创建分类
-async function createCategory(data: CategoryModel["Create"]) {
-  const [newCategory] = await db
-    .insert(categoriesTable)
-    .values(data)
-    .returning();
+async function createCategory(data: CategoryTModel["Create"]) {
+  const [newCategory] = await db.insert(MasterTable).values(data).returning();
   return newCategory;
 }
 
 // 更新分类
-async function updateCategory(id: string, data: CategoryModel["Update"]) {
+async function updateCategory(id: string, data: CategoryTModel["Update"]) {
   const [updatedCategory] = await db
-    .update(categoriesTable)
+    .update(MasterTable)
     .set(data)
-    .where(eq(categoriesTable.id, id))
+    .where(eq(MasterTable.id, id))
     .returning();
   return updatedCategory;
 }
@@ -32,7 +29,7 @@ async function updateCategory(id: string, data: CategoryModel["Update"]) {
 // 获取分类树形结构（已本地化）
 async function getCategoryTree(
   locale: SupportedLocale = "zh-CN"
-): Promise<TreeNode<CategoryModel["Entity"]>[]> {
+): Promise<TreeNode<CategoryTModel["Entity"]>[]> {
   const categories = await db.query.categoriesTable.findMany({
     orderBy: { sortOrder: "asc" },
   });
@@ -40,10 +37,7 @@ async function getCategoryTree(
   // 并行翻译所有节点
   const translatedCategories = await Promise.all(
     categories.map(async (cat) => {
-      const translated = await translateService.translateCategory(
-        cat,
-        locale
-      );
+      const translated = await translateService.translateCategory(cat, locale);
       return translated;
     })
   );
@@ -60,7 +54,10 @@ async function getAdminCategoryTree() {
 }
 
 // 根据 slug 获取分类详情（已翻译）
-async function getCategoryBySlug(slug: string, locale: SupportedLocale = "zh-CN") {
+async function getCategoryBySlug(
+  slug: string,
+  locale: SupportedLocale = "zh-CN"
+) {
   const category = await db.query.categoriesTable.findFirst({
     where: { slug },
   });
@@ -105,9 +102,7 @@ async function batchDelete(ids: string[]) {
     );
 
     // 2. 过滤出"没有子分类"的 ID
-    const safeToDeleteIds = ids.filter(
-      (id) => !parentIdsWithChildren.has(id)
-    );
+    const safeToDeleteIds = ids.filter((id) => !parentIdsWithChildren.has(id));
 
     if (safeToDeleteIds.length === 0) {
       return []; // 全部都有子分类，一个都不删
@@ -115,8 +110,8 @@ async function batchDelete(ids: string[]) {
 
     // 3. 删除安全的分类
     const deleted = await tx
-      .delete(categoriesTable)
-      .where(inArray(categoriesTable.id, safeToDeleteIds))
+      .delete(MasterTable)
+      .where(inArray(MasterTable.id, safeToDeleteIds))
       .returning();
 
     return deleted;
@@ -216,7 +211,7 @@ export const categoriesController = new Elysia({
       params: t.Object({
         id: t.String(),
       }),
-      body: CategoryModel.Patch,
+      body: CategoryTModel.Patch,
       detail: {
         tags: ["Categories"],
         summary: "更新分类",
@@ -250,7 +245,7 @@ export const categoriesController = new Elysia({
       return commonRes(newCategory, 201, "分类创建成功");
     },
     {
-      body: CategoryModel.Create,
+      body: CategoryTModel.Create,
       detail: {
         tags: ["Categories"],
         summary: "创建分类",

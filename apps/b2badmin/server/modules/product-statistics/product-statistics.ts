@@ -1,8 +1,8 @@
-import { count, desc, eq, sql } from "drizzle-orm";
+import { productsTable } from "@repo/contract/table";
+import { count, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db, dbPlugin } from "@/server/db/connection";
 import { commonRes } from "@/server/utils/Res";
-import { productsTable, mediaTable, productMediaTable, categoriesTable } from "@repo/contract/table";
 
 // 获取商品概览统计数据
 async function getProductOverview() {
@@ -137,7 +137,7 @@ async function getProductStatsByCategory() {
     return categoryStats.map((category) => ({
       categoryName: category.name,
       productCount: category.products.length,
-      activeCount: category.products.filter(p => p.status === 1).length,
+      activeCount: category.products.filter((p) => p.status === 1).length,
     }));
   } catch (error) {
     console.error("获取分类商品统计失败:", error);
@@ -207,9 +207,7 @@ export const productStatisticsController = new Elysia({
   .get(
     "/recent",
     async ({ query }) => {
-      const result = await getRecentProducts(
-        query.limit
-      );
+      const result = await getRecentProducts(query.limit);
       return commonRes(result);
     },
     {

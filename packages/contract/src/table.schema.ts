@@ -61,6 +61,7 @@ export const usersTable = p.pgTable("user_table", {
   image: p.text("image"),
   // 
   isSuperAdmin: p.boolean("is_super_admin").default(false).notNull(),
+  isActive: p.boolean("is_active").default(true).notNull(),
   phone: p.text("phone"),
   address: p.text("address"),
   city: p.text("city"),
@@ -262,20 +263,20 @@ export const salespersonAffiliationsTable = p.pgTable("salesperson_affiliations"
 
 
 
-// export const salespersonCategoriesTable = p.pgTable(
-//   "salesperson_categories",
-//   {
-//     salespersonId: p
-//       .uuid("salesperson_id")
-//       .notNull()
-//       .references(() => salespersonsTable.id, { onDelete: "cascade" }),
-//     categoryId: p
-//       .uuid("category_id")
-//       .notNull()
-//       .references(() => MasterTable.id, { onDelete: "cascade" }),
-//   },
-//   (t) => [p.primaryKey({ columns: [t.salespersonId, t.categoryId] })]
-// );
+export const salespersonCategoriesTable = p.pgTable(
+  "salesperson_categories",
+  {
+    salespersonId: p
+      .uuid("salesperson_id")
+      .notNull()
+      .references(() => salespersonsTable.id, { onDelete: "cascade" }),
+    categoryId: p
+      .uuid("category_id")
+      .notNull()
+      .references(() => MasterTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [p.primaryKey({ columns: [t.salespersonId, t.categoryId] })]
+);
 
 export const mediaTable = p.pgTable("media", {
   id: idUuid,
@@ -364,20 +365,20 @@ export const productsTable = p.pgTable("products_table", {
   }),
 });
 
-// export const productCategoriesTable = p.pgTable(
-//   "product_categories",
-//   {
-//     productId: p
-//       .uuid("product_id")
-//       .notNull()
-//       .references(() => productsTable.id),
-//     categoryId: p
-//       .uuid("category_id")
-//       .notNull()
-//       .references(() => MasterTable.id),
-//   },
-//   (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
-// );
+export const productCategoriesTable = p.pgTable(
+  "product_categories",
+  {
+    productId: p
+      .uuid("product_id")
+      .notNull()
+      .references(() => productsTable.id),
+    categoryId: p
+      .uuid("category_id")
+      .notNull()
+      .references(() => MasterTable.id),
+  },
+  (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
+);
 
 export const productMediaTable = p.pgTable(
   "product_images",
@@ -671,7 +672,7 @@ export const siteProductsTable = p.pgTable("site_products", {
   // 站点级别的商品配置
   sitePrice: p.decimal("site_price", { precision: 10, scale: 2 }),
   siteName: p.varchar("site_name", { length: 200 }), // 站点可以自定义商品名
-  siteDescription: p.text(), // 站点可以自定义商品描述
+  siteDescription: p.text('site_description'), // 站点可以自定义商品描述
 
   // 展示控制
   isFeatured: p.boolean("is_featured").default(false),
@@ -680,7 +681,7 @@ export const siteProductsTable = p.pgTable("site_products", {
 
   // SEO
   seoTitle: p.varchar("seo_title", { length: 200 }),
-  seoDescription: p.text(),
+
 
   // 关联站点分类
   siteCategoryId: p.uuid("site_category_id").references(() => siteCategoriesTable.id),

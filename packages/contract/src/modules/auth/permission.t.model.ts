@@ -4,7 +4,7 @@
 
 import { t } from "elysia";
 
-export type UserRole = "exporter_admin" | "factory_admin" | "salesperson";
+export type UserRole = "super_admin" | "exporter_admin" | "factory_admin" | "salesperson";
 
 export interface UserPermission {
   role: UserRole;

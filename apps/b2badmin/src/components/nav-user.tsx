@@ -9,6 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCurrentUser, useIsUserLoading, useUserStore } from "@/stores/user-store";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -25,11 +26,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useUser } from "@/hooks/api/user";
 
 export function NavUser() {
-  const { data, isLoading } = useUser();
-  const user = data?.userInfo;
+  const user = useCurrentUser();
+  const isLoading = useIsUserLoading();
+  const { clearUser } = useUserStore();
   const { isMobile } = useSidebar();
   const router = useRouter();
 
@@ -125,6 +126,9 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
+                // 清除用户状态
+                clearUser();
+                // 发送登出请求
                 fetch("/api/auth/sign-out", { method: "POST" }).then(() => {
                   router.push("/login");
                 });

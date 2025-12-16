@@ -1,4 +1,4 @@
-import { categoriesTable } from "@repo/contract/table";
+import { MasterTable } from "@repo/contract";
 import { asc, eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
@@ -15,8 +15,8 @@ export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类�
       console.log("获取分类树形列表，当前语言:", locale);
       const categories = await db
         .select()
-        .from(categoriesTable)
-        .orderBy(asc(categoriesTable.sortOrder));
+        .from(MasterTable)
+        .orderBy(asc(MasterTable.sortOrder));
 
       return commonRes(
         buildTree(categories, "id", "parentId"),
@@ -38,9 +38,9 @@ export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类�
     async ({ params: { id }, db }) => {
       // 获取单个分类 - 前端用户使用
       const res = await db
-        .select({ des: categoriesTable.description })
-        .from(categoriesTable)
-        .where(eq(categoriesTable.id, id));
+        .select({ des: MasterTable.description })
+        .from(MasterTable)
+        .where(eq(MasterTable.id, id));
       return commonRes(res[0], 200, "获取分类成功");
     },
     {

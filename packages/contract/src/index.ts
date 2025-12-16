@@ -31,3 +31,4 @@ export * from "./modules/system"
 // ==================== 数据库关系导出 ====================
 export { relations } from "./table.relation";
 
+export * from "./table.schema";

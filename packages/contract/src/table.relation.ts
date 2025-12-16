@@ -12,6 +12,10 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.usersTable.id,
       to: r.salespersonsTable.userId,
     }),
+    userSiteRoles: r.one.userSiteRolesTable({
+      from: r.usersTable.id,
+      to: r.userSiteRolesTable.userId,
+    }),
   },
 
   // 🔥 关键修改 2: 核心权限关联表 (新架构的中心)
@@ -23,10 +27,12 @@ export const relations = defineRelations(schema, (r) => ({
     site: r.one.sitesTable({
       from: [r.userSiteRolesTable.siteId],
       to: [r.sitesTable.id],
+      optional: false
     }),
     role: r.one.roleTable({
       from: [r.userSiteRolesTable.roleId],
       to: [r.roleTable.id],
+      optional: false
     }),
   },
 
@@ -152,14 +158,14 @@ export const relations = defineRelations(schema, (r) => ({
   // --- Sites (新架构的中心) ---
   sitesTable: {
     // 🔥 站点归属: 站点关联到 Factory 或 Exporter (通过 entityId)
-    // exporterOwner: r.one.exportersTable({
-    //   from: r.sitesTable.entityId,
-    //   to: r.exportersTable.id,
-    // }),
-    // factoryOwner: r.one.factoriesTable({
-    //   from: r.sitesTable.entityId,
-    //   to: r.factoriesTable.id,
-    // }),
+    exporterOwner: r.one.exportersTable({
+      from: r.sitesTable.exporterId,
+      to: r.exportersTable.id,
+    }),
+    factoryOwner: r.one.factoriesTable({
+      from: r.sitesTable.factoryId,
+      to: r.factoriesTable.id,
+    }),
 
     // 关联到所有依赖站点的展示/配置数据
     userSiteRoles: r.many.userSiteRolesTable(),
@@ -290,6 +296,12 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.usersTable.id,
       alias: "user",
     }),
+
+    affiliations: r.many.salespersonAffiliationsTable({
+      from: r.salespersonsTable.id,
+      to: r.salespersonAffiliationsTable.salespersonId,
+      alias: "affiliations",
+    }),
     // factory: r.one.factoriesTable({
     //   from: r.salespersonsTable.factoryId,
     //   to: r.factoriesTable.id,
@@ -304,12 +316,24 @@ export const relations = defineRelations(schema, (r) => ({
     // }),
   },
 
-  salespersonCategoriesTable: {
-    // salesperson: r.one.salespersonsTable({
-    //   from: r.salespersonCategoriesTable.salespersonId,
-    //   to: r.salespersonsTable.id,
-    //   alias: 'salesperson',
-    // }),
+
+
+  salespersonAffiliationsTable: {
+    salesperson: r.one.salespersonsTable({
+      from: r.salespersonAffiliationsTable.salespersonId,
+      to: r.salespersonsTable.id,
+      alias: 'salesperson',
+    }),
+    factory: r.one.factoriesTable({
+      from: r.salespersonAffiliationsTable.factoryId,
+      to: r.factoriesTable.id,
+      alias: 'factory',
+    }),
+    exporter: r.one.exportersTable({
+      from: r.salespersonAffiliationsTable.exporterId,
+      to: r.exportersTable.id,
+      alias: 'exporter',
+    }),
     // category: r.one.MasterTable({
     //   from: r.salespersonCategoriesTable.categoryId,
     //   to: r.MasterTable.id,

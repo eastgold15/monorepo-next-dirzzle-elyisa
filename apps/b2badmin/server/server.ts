@@ -1,13 +1,14 @@
 import { cors } from "@elysiajs/cors";
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
-import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
-import { dbPlugin } from "@/server/db/connection";
-import { auth } from "@/server/lib/auth";
-import { OpenAPI } from "@/server/lib/auth-openapi";
-
-import { localeMiddleware } from "@/server/plugins/locale";
+import { httpProblemJsonPlugin } from "elysia-http-problem-json";
+import { dbPlugin } from "./db/connection";
+import { auth } from "./lib/auth";
+import { OpenAPI } from "./lib/auth-openapi";
+import { userRoute } from "./modules/user/user";
+import { userManagementController } from "./modules/user/user-management";
 import { adminAuthPlugin } from "./plugins/admin-auth.plugin";
+import { localeMiddleware } from "./plugins/locale";
 import { loggerPlugin } from "./plugins/logger";
 import { errorPlugin } from "./utils/err/err.plugin";
 
@@ -72,22 +73,16 @@ export const server = new Elysia({ name: "server" })
   .use(errorPlugin)
   // 3. Problem JSON 插件 (将最终的 HttpError 转换为 RFC 7807 响应)
   .use(httpProblemJsonPlugin())
-  .get("/favicon", () => {
-    throw new HttpError.NotFound("favicon.ico");
-    // if (locale === "zh-CN") {
-    //   throw new HttpError.BadRequest("sssss");
-    // }
-  })
-
-  .use(dbPlugin);
-// .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
-// .use(categoriesController)
-// .use(AdsController)
-// .use(HeroCardsController) // 添加首页展示卡片控制器
-// .use(siteConfigsController)
-// .use(product2Route)
-// .use(productTemplateRoute)
-// .use(skuRoute)
-// .use(translateRoute)
-// .use(userRoute)
+  .use(dbPlugin)
+  // .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
+  // .use(categoriesController)
+  // .use(AdsController)
+  // .use(HeroCardsController) // 添加首页展示卡片控制器
+  // .use(siteConfigsController)
+  // .use(product2Route)
+  // .use(productTemplateRoute)
+  // .use(skuRoute)
+  // .use(translateRoute)
+  .use(userRoute)
+  .use(userManagementController);
 // .use(factoryRoute);

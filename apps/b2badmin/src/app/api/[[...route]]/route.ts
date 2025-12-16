@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
+import { server } from "../../../../server/server";
 
-import { server } from "@/server/server";
+
 export const dynamic = "force-dynamic";
 
 

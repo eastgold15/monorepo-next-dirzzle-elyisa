@@ -2,24 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useUserContext } from "@/components/auth/UserProvider";
+import { useUserInfo, useIsUserLoading } from "@/stores/user-store";
 
-interface AuthGuardProps {
+interface AuthProviderProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
-export function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const { user: userData, isLoading } = useUserContext();
-  const user = userData?.userInfo;
+export function AuthProvider({ children, fallback }: AuthProviderProps) {
+  const userInfo = useUserInfo();
+  const isLoading = useIsUserLoading();
   const router = useRouter();
 
   useEffect(() => {
     // 如果加载完成且用户未登录，重定向到登录页
-    if (!(isLoading || user)) {
+    if (!isLoading && !userInfo) {
       router.push("/login");
     }
-  }, [user, isLoading, router]);
+  }, [userInfo, isLoading, router]);
 
   // 如果正在加载，显示加载状态
   if (isLoading) {
@@ -27,7 +27,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
   }
 
   // 如果用户未登录，不渲染内容（等待重定向）
-  if (!user) {
+  if (!userInfo) {
     return fallback || null;
   }
 

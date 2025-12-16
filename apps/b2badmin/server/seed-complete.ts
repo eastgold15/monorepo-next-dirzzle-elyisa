@@ -1,3 +1,4 @@
+import { relations } from "@repo/contract";
 import {
   // Auth相关
   accountTable,
@@ -14,6 +15,7 @@ import {
   // 基础数据
   MasterTable,
   permissionTable,
+  productsTable,
   productTemplateTable,
   rolePermissionsTable,
   roleTable,
@@ -27,7 +29,12 @@ import {
   usersTable,
 } from "@repo/contract/table";
 import { randomUUIDv7 } from "bun";
-import { db } from "./db/connection";
+import { drizzle } from "drizzle-orm/node-postgres";
+
+const db = drizzle(
+  "postgres://gina_user:gina_password@localhost:5432/gina_dev",
+  { relations }
+);
 
 // 预定义密码哈希 (12345678)
 
@@ -657,7 +664,7 @@ const heroCards = [
     buttonText: "LETS SHOPPIN",
     buttonUrl: "",
     backgroundClass: "bg-blue-50",
-    imageId: "8d571a38-521f-4f93-96c1-a4ed5fe72786",
+    imageId: null, // 暂时设为 null，稍后可以添加实际的媒体文件
     sortOrder: 3,
     isActive: true,
   },
@@ -669,7 +676,7 @@ const heroCards = [
     buttonText: "EXPLORE MORE",
     buttonUrl: "",
     backgroundClass: "bg-blue-50",
-    imageId: "7a289920-8bb0-41fe-90e4-b80b1df11838",
+    imageId: null, // 暂时设为 null，稍后可以添加实际的媒体文件
     sortOrder: 1,
     isActive: true,
   },
@@ -680,7 +687,7 @@ const heroCards = [
     buttonText: "DISCOVER MORE",
     buttonUrl: "",
     backgroundClass: "bg-blue-50",
-    imageId: "87ccd3e5-5f77-42b9-af19-0797911f1ed0",
+    imageId: null, // 暂时设为 null，稍后可以添加实际的媒体文件
     sortOrder: 2,
     isActive: true,
   },
@@ -826,9 +833,65 @@ const customers = [
   },
 ];
 
+// 清理数据库的函数
+async function clearDatabase() {
+  console.log("🧹 清理现有数据...");
+
+  // 按照外键依赖顺序删除数据
+  const tables = [
+    // 先删除有外键依赖的表
+    userSiteRolesTable,
+    siteProductsTable,
+    siteCategoriesTable,
+
+    // SKU和商品相关
+    skusTable,
+    productTemplateTable,
+    productsTable,
+    attributeValueTable,
+    attributeTable,
+    attributeTemplateTable,
+
+    // 业务数据
+    factoriesTable,
+    exportersTable,
+
+    // 站点和配置
+    sitesTable,
+    siteConfigTable,
+    heroCardsTable,
+
+    // 其他数据
+    CustomerTable,
+    dailyInquiryCounterTable,
+    translationDictTable,
+
+    // Auth相关
+    rolePermissionsTable,
+    accountTable,
+    usersTable,
+    roleTable,
+    permissionTable,
+
+    // 基础数据
+    MasterTable,
+  ];
+
+  for (const table of tables) {
+    try {
+      await db.delete(table);
+    } catch (error) {
+      // 忽略表不存在的错误
+    }
+  }
+}
+
 async function seedCompleteDatabase() {
   try {
     console.log("🌱 开始完整数据库初始化...");
+
+    // 先清理数据库
+    await clearDatabase();
 
     // 1. 插入角色数据
     console.log("📋 插入角色数据...");

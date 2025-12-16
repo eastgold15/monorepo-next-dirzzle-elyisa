@@ -34,199 +34,212 @@
 └─────────────────────────────────────────────────────┘
 ```
 
+你的权限系统只需要这唯一的一条链路： User -> Site (Context) -> Role -> Permissions
+
 ## 数据库设计
+统一后台管理系统实现计划
 
-### 核心表结构
+ 项目概述
 
-1. **sites 表** - 站点核心信息
-   - 站点名称、域名
-   - 站点类型（factory/exporter）
-   - 关联的业务实体ID
-   - 主题配置、功能开关
+ 实现一个统一的Elysia后台管理系统，支持超级admin、出口商admin、工厂管理员、业务员四种角色，通过站点切换器实现不同身份的
+ 管理功能。
 
-2. **site_categories 表** - 站点分类体系
-   - 每个站点独立的分类树
-   - 可关联到全局分类（用于数据聚合）
+ 核心需求
 
-3. **site_products 表** - 站点商品展示
-   - 站点级别的商品配置
-   - 自定义名称、描述、价格
-   - SEO配置、展示控制
+ 1. 超级管理员：可通过站点切换器访问所有站点，拥有全局管理权限
+ 2. 多角色支持：用户在不同站点可拥有不同角色身份
+ 3. 动态界面：基于当前站点和角色权限动态显示/隐藏界面组件
+ 4. 统一工作台：一个系统支持多种角色，无需重复开发
 
-4. **user_site_permissions 表** - 用户站点权限
-   - 支持用户在不同站点的不同角色
-   - admin/editor/viewer 三级权限
+ 技术架构分析
 
-## API 设计
+ 现有基础设施
 
-### 站点上下文中间件
+ - 数据库：PostgreSQL + Drizzle ORM，已支持用户-站点-角色关联
+ - 认证系统：Better Auth + 自定义认证插件
+ - 权限系统：基于RBAC的权限控制
+ - 前端架构：Next.js + Elysia，类型安全的API调用
 
-通过域名或请求头自动识别站点，提供统一的站点上下文：
+ 关键数据表
 
-```typescript
-// 优先级：
-// 1. 请求头 X-Site-ID
-// 2. 查询参数 site_id
-// 3. 请求头 Host（域名识别）
-// 4. 环境变量 DEFAULT_SITE_ID
-```
+ - usersTable - 用户基础信息，包含isSuperAdmin标识
+ - sitesTable - 站点信息，支持factory和exporter两种类型
+ - userSiteRolesTable - 用户-站点-角色关联表
+ - roleTable - 角色定义，包含优先级和权限
 
-### 数据隔离机制
+ 实施计划
 
-- **工厂站点**：只能展示自己工厂的商品
-- **出口商站点**：可以展示所有下属工厂的商品
-- **站点筛选**：所有API查询自动添加站点ID筛选条件
+ 第一阶段：后端核心功能（优先级：高）
 
-## 前端实现
+ 1.1 站点切换API
 
-### 多站点 RPC 客户端
+ 文件：apps/b2badmin/src/server/modules/site/site.ts
+ - 新增 POST /site/switch 接口，实现站点切换逻辑
+ - 新增 GET /site/accessible 接口，获取用户可访问站点列表
+ - 验证用户在目标站点的访问权限
+ - 更新session中的当前站点信息
 
-```typescript
-// 支持跨站点调用
-export function createSiteRPC(options?: SiteRPCOptions) {
-  const headers: Record<string, string> = {};
-  if (options?.siteId) {
-    headers["X-Site-ID"] = options.siteId;
-  }
-  return edenTreaty<App>(API_URL, { headers });
-}
-```
+ 1.2 增强用户信息接口
 
-### 站点配置系统
+ 文件：apps/b2badmin/src/server/modules/user/user.ts
+ - 修改 /user/me 接口，支持siteId参数
+ - 根据当前站点返回对应的角色和权限信息
+ - 返回完整的组织架构和团队信息
+ - 添加站点相关的统计数据
 
-- 动态主题配置
-- 功能开关控制
-- 站点级别的SEO配置
+ 1.3 认证中间件升级
 
-## 部署方案
+ 文件：apps/b2badmin/src/server/plugins/admin-auth.plugin.ts
+ - 支持从请求头或session获取当前站点ID
+ - 动态加载用户在当前站点的角色权限
+ - 为API路由添加站点权限验证
+ - 优化超级管理员的站点访问逻辑
 
-### 环境变量配置
+ 第二阶段：前端状态管理（优先级：高）
 
-每个站点需要独立的配置：
+ 2.1 站点状态管理
 
-```bash
-# 网站环境变量
-NEXT_PUBLIC_SITE_DOMAIN=factory-a.example.com
-NEXT_PUBLIC_SITE_ID=<site-uuid-1>
-NEXT_PUBLIC_SITE_TYPE=factory
-```
+ 文件：apps/b2badmin/src/stores/site-store.ts（新建）
+ - 使用Zustand创建站点状态管理
+ - 管理当前站点ID和可访问站点列表
+ - 提供站点切换功能
+ - 处理切换后的数据刷新
 
-### Nginx 配置
+ 2.2 用户权限Hooks增强
 
-支持多域名指向同一应用：
+ 文件：apps/b2badmin/src/hooks/api/user.ts
+ - 更新所有hooks支持站点上下文
+ - 添加 useCurrentSite hook获取当前站点信息
+ - 添加 useSitePermissions hook获取站点特定权限
+ - 实现权限检查的便捷方法
 
-```nginx
-server {
-    listen 80;
-    server_name *.example.com;
+ 2.3 站点切换器改造
 
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-    }
-}
-```
+ 文件：apps/b2badmin/src/components/team-switcher.tsx
+ - 添加站点切换交互功能
+ - 显示当前站点和可切换站点列表
+ - 支持站点类型标识（工厂/出口商）
+ - 添加切换确认对话框
 
-## 实施步骤
+ 第三阶段：界面适配（优先级：中）
 
-1. **数据库重构**
-   - ✅ 创建新表结构
-   - ✅ 建立索引和约束
-   - ✅ 推送数据库更新
+ 3.1 工作台动态化
 
-2. **API改造**
-   - ✅ 实现站点上下文中间件
-   - ✅ 创建站点管理API
-   - ⏳ 改造现有业务API
+ 文件：apps/b2badmin/src/components/dashboard/UserDashboard.tsx
+ - 根据当前角色动态显示统计数据
+ - 根据站点类型调整快速操作入口
+ - 添加站点切换提示
+ - 优化超级管理员的数据聚合显示
 
-3. **前端适配**
-   - ⏳ 实现站点识别
-   - ⏳ 创建主题系统
-   - ⏳ 改造数据获取逻辑
+ 3.2 导航菜单权限控制
 
-4. **数据迁移**
-   - ✅ 创建迁移脚本
-   - ✅ 创建种子数据
-   - ⏳ 执行数据迁移
+ 文件：apps/b2badmin/src/components/app-sidebar.tsx
+ - 菜单项根据当前站点和角色动态显示
+ - 超级管理员可看到所有功能模块
+ - 添加站点特定的菜单项
+ - 实现菜单项的权限细粒度控制
 
-## API 端点列表
+ 3.3 权限守卫组件
 
-### 站点管理
+ 文件：apps/b2badmin/src/components/guards/PermissionGuard.tsx（新建）
+ - 创建通用权限守卫组件
+ - 支持角色、权限、站点多维度控制
+ - 提供便捷的权限检查hooks
+ - 实现权限不足时的友好提示
 
-- `GET /site/current` - 获取当前站点信息
-- `POST /site/admin/` - 创建站点（管理员）
-- `GET /site/admin/` - 站点列表（管理员）
-- `PATCH /site/admin/:siteId` - 更新站点（管理员）
-- `DELETE /site/admin/:siteId` - 删除站点（管理员）
+ 第四阶段：优化与完善（优先级：中）
 
-### 站点分类
+ 4.1 API客户端优化
 
-- `POST /site/categories/` - 创建分类
-- `GET /site/categories/tree` - 获取分类树
-- `PATCH /site/categories/:categoryId` - 更新分类
-- `DELETE /site/categories/:categoryId` - 删除分类
+ 文件：apps/b2badmin/src/lib/api.ts
+ - 自动添加当前站点ID到请求头
+ - 处理站点切换时的API缓存失效
+ - 优化错误处理和重试机制
+ - 添加请求级loading状态
 
-### 站点商品
+ 4.2 数据缓存策略
 
-- `POST /site/products/` - 添加商品到站点
-- `GET /site/products/` - 获取站点商品列表
-- `PATCH /site/products/:siteProductId` - 更新站点商品
-- `DELETE /site/products/:siteProductId` - 移除商品
+ - 使用React Query管理站点相关数据
+ - 实现跨站点的数据隔离
+ - 优化站点切换时的数据预加载
+ - 处理缓存失效和更新策略
 
-### 用户权限
+ 4.3 用户体验优化
 
-- `POST /site/permissions/` - 授予权限
-- `GET /site/permissions/` - 权限列表
-- `DELETE /site/permissions/:userId` - 撤销权限
+ - 添加站点切换加载动画
+ - 实现站点切换的历史记录
+ - 优化移动端站点选择器
+ - 添加键盘快捷键支持
 
-## 使用示例
+ 第五阶段：测试与安全（优先级：高）
 
-### 创建工厂站点
+ 5.1 安全加固
 
-```typescript
-POST /api/site/admin/
-{
-  "name": "ABC工厂官方网站",
-  "domain": "abc.example.com",
-  "site_type": "factory",
-  "entity_id": "factory-uuid",
-  "theme_config": {
-    "primaryColor": "#3B82F6",
-    "logo": "/logo.png"
-  }
-}
-```
+ - 验证所有API的站点权限检查
+ - 防止越权访问其他站点数据
+ - 记录站点切换审计日志
+ - 实现会话超时自动跳转
 
-### 添加商品到站点
+ 5.2 全面测试
 
-```typescript
-POST /api/site/products/
-{
-  "site_id": "site-uuid",
-  "product_id": "product-uuid",
-  "site_price": 999.99,
-  "site_category_id": "category-uuid",
-  "is_featured": true
-}
-```
+ - 编写单元测试覆盖核心逻辑
+ - 进行集成测试验证权限隔离
+ - 性能测试确保切换流畅
+ - 用户验收测试
 
-## 注意事项
+ 关键技术点
 
-1. **数据安全**：确保API层面的数据隔离严格，防止跨站点数据泄露
-2. **缓存策略**：不同站点的数据需要分开缓存
-3. **SEO优化**：每个站点需要有独立的SEO配置
-4. **性能考虑**：高频查询的字段（如site_id）需要添加索引
+ 站点切换流程
 
-## 扩展功能
+ sequenceDiagram
+     participant U as User
+     participant F as Frontend
+     participant A as API
+     participant D as Database
 
-1. **站点级别的功能开关**：通过配置控制各站点启用哪些功能模块
-2. **自定义域名**：支持站点绑定自定义域名
-3. **多语言支持**：每个站点可以配置支持的语言
-4. **数据统计**：分站点的访问和业务数据统计
+     U->>F: 选择站点
+     F->>A: POST /site/switch
+     A->>D: 验证用户权限
+     A->>D: 更新session
+     A->>F: 返回成功
+     F->>F: 更新本地状态
+     F->>F: 刷新页面数据
 
-## 后续优化建议
+ 权限检查机制
 
-1. **添加 CDN 支持**：为不同站点的静态资源配置CDN
-2. **实现站点模板**：预设多种站点主题模板，快速创建新站点
-3. **API限流**：按站点维度进行API请求限流
-4. **日志隔离**：按站点分离日志记录，便于问题排查
+ 1. 前端控制：基于当前角色动态显示/隐藏UI组件
+ 2. API验证：每个请求验证用户在当前站点的权限
+ 3. 数据过滤：查询时自动过滤用户可见数据范围
+ 4. 操作限制：关键操作二次验证权限
+
+ 数据安全措施
+
+ - 不在本地存储敏感权限信息
+ - 使用HTTPS传输所有数据
+ - 实现CSRF防护
+ - 定期更新用户权限缓存
+
+ 预期成果
+
+ 完成后，系统将实现：
+ 1. 超级管理员可以一键切换管理任意站点
+ 2. 普通用户在不同站点拥有独立角色和数据访问权限
+ 3. 统一界面根据当前上下文自动调整，无需重复开发
+ 4. 安全隔离严格的数据权限控制和访问验证
+ 5. 良好体验流畅的站点切换和权限过渡
+
+ 风险评估
+
+ 潜在风险
+
+ 1. 站点切换时的数据一致性
+ 2. 权限缓存更新延迟
+ 3. 大量站点的性能问题
+
+ 缓解措施
+
+ 1. 使用事务确保数据一致性
+ 2. 实现增量权限更新
+ 3. 添加站点分页和搜索功能
+
+ 这个实施计划充分利用了现有架构优势，通过渐进式开发实现统一后台管理系统的核心需求，确保系统的稳定性和可维护性。

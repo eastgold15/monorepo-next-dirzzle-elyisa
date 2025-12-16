@@ -6,7 +6,8 @@ import { HttpError } from "elysia-http-problem-json";
 // 它的签名与 BadRequest 一致，但类型是 503 Service Unavailable。
 class ServiceUnavailable extends HttpError.ServiceUnavailable {
   // 强制构造函数支持 extensions
-  constructor(detail: string, public extensions?: Record<string, any>) {
+  // biome-ignore lint/style/noParameterProperties: <explanation>
+  constructor(detail: string, extensions?: Record<string, any>) {
     super(detail);
     // 在 toJSON 方法中，这些 extensions 会被 Problem JSON 库拾取
   }
@@ -14,7 +15,8 @@ class ServiceUnavailable extends HttpError.ServiceUnavailable {
 
 // 同理，创建支持 extensions 的 InternalServerError (500)
 class InternalServerError extends HttpError.InternalServerError {
-  constructor(detail: string, public extensions?: Record<string, any>) {
+  // biome-ignore lint/style/noParameterProperties: <explanation>
+  constructor(detail: string, extensions?: Record<string, any>) {
     super(detail);
   }
 }

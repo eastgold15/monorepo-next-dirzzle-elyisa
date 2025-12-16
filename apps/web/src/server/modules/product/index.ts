@@ -1,14 +1,14 @@
-import { ProductTModel } from "@repo/contract";
-import { and, count, eq, exists, like, type SQL, sql } from "drizzle-orm";
-import { Elysia, t } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
 import {
   mediaTable,
+  ProductTModel,
   productCategoriesTable,
   productMediaTable,
   productsTable,
   skusTable,
-} from "@/server/db/schema";
+} from "@repo/contract";
+import { and, count, eq, exists, like, type SQL, sql } from "drizzle-orm";
+import { Elysia, t } from "elysia";
+import { dbPlugin } from "@/server/db/connection";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
 import { buildPageMeta, paginate } from "@/server/utils/services/pagination";
@@ -136,7 +136,7 @@ export const productRoute = new Elysia({ prefix: "product" })
                 columns: {
                   id: true,
                   mimeType: true,
-                  category: true
+                  category: true,
                 },
               },
             },

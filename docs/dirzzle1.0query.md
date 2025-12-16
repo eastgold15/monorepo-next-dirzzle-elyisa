@@ -9,17 +9,6 @@
 
 安装命令（任选其一）：
 ```bash
-# npm
-npm install drizzle-orm@beta
-npm install -D drizzle-kit@beta
-
-# yarn
-yarn add drizzle-orm@beta
-yarn add -D drizzle-kit@beta
-
-# pnpm
-pnpm add drizzle-orm@beta
-pnpm add -D drizzle-kit@beta
 
 # bun
 bun add drizzle-orm@beta

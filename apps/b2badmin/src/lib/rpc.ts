@@ -1,4 +1,4 @@
-import { edenTreaty } from "@elysiajs/eden";
+import { treaty } from "@elysiajs/eden";
 import type { App } from "@/app/api/[[...route]]/route";
 
 /**
@@ -11,8 +11,13 @@ import type { App } from "@/app/api/[[...route]]/route";
  * - On the server side, it uses localhost with the specified PORT (or 3000 as default)
  * - On the client side, it uses the current window's origin
  */
-export const rpc = edenTreaty<App>(
+const siteId = typeof window !== 'undefined' ? localStorage.getItem("SiteId") : null;
+
+export const rpc = treaty<App>(
   typeof window === "undefined"
     ? `http://localhost:${process.env.PORT || 3000}`
-    : window.location.origin
+    : window.location.origin,
+  {
+    headers: siteId ? { "X-Site-Id": siteId } : {},
+  }
 );
