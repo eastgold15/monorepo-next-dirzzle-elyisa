@@ -18,7 +18,7 @@ export function useMe(siteId?: string) {
         return null;
       }
 
-      localStorage.setItem("SiteId", JSON.stringify(data.tenantId));
+      localStorage.setItem("SiteId", data.currentSite.id);
       return data;
     },
     retry: false,
@@ -42,6 +42,7 @@ export function useManageableUsers(params?: {
       const { data, error } = response;
 
       if (error || !data) {
+        // @ts-expect-error
         throw new Error(error?.message || "获取用户列表失败");
       }
 
@@ -56,20 +57,21 @@ export function useCreateSalesperson() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async (data: {
+    mutationFn: async (body: {
       email: string;
       name: string;
       password: string;
       factoryId: string;
     }) => {
-      const response = await rpc.api.user.management.salesperson.post(data);
-      const { result, error } = response;
+      const response = await rpc.api.user.management.salesperson.post(body);
+      const { data, error } = response;
 
-      if (error || !result) {
+      if (error || !data) {
+        // @ts-expect-error
         throw new Error(error?.message || "创建业务员账号失败");
       }
 
-      return result;
+      return data;
     },
     onSuccess: () => {
       toast.success("业务员账号创建成功");
@@ -86,20 +88,22 @@ export function useCreateFactoryAdmin() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async (data: {
+    mutationFn: async (body: {
       email: string;
       name: string;
       password: string;
       factoryId: string;
     }) => {
-      const response = await rpc.api.user.management.factoryAdmin.post(data);
-      const { result, error } = response;
+      const response =
+        await rpc.api.user.management["factory-admin"].post(body);
+      const { data, error } = response;
 
-      if (error || !result) {
+      if (error || !data) {
+        // @ts-expect-error
         throw new Error(error?.message || "创建工厂管理员账号失败");
       }
 
-      return result;
+      return data;
     },
     onSuccess: () => {
       toast.success("工厂管理员账号创建成功");
@@ -123,16 +127,20 @@ export function useUpdateUserStatus() {
       userId: string;
       isActive: boolean;
     }) => {
-      const response = await rpc.api.user.management[userId].status.patch({
-        isActive,
-      });
-      const { result, error } = response;
+      const response = await rpc.api.user
+        .management({ id: userId })
+        .status.patch({
+          isActive,
+        });
 
-      if (error || !result) {
+      const { data, error } = response;
+
+      if (error || !data) {
+        // @ts-expect-error
         throw new Error(error?.message || "更新用户状态失败");
       }
 
-      return result;
+      return data;
     },
     onSuccess: () => {
       toast.success("用户状态更新成功");
@@ -143,4 +151,3 @@ export function useUpdateUserStatus() {
     },
   });
 }
-

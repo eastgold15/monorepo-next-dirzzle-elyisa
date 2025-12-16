@@ -39,6 +39,7 @@ interface UserState {
   setError: (error: any) => void;
   setAccessibleSites: (sites: SiteInfo[]) => void;
   setCurrentSite: (siteId: string) => void;
+  rehydrateSite: () => void;
   switchSite: (siteId: string) => Promise<boolean>;
   refreshSites: () => Promise<void>;
   clearUser: () => void;
@@ -57,6 +58,17 @@ export const useUserStore = create<UserState>()(
         accessibleSites: [],
         currentSite: null,
 
+        // 从 localStorage 恢复站点信息
+        rehydrateSite: () => {
+          const currentState = get();
+          if (currentState.currentSiteId && currentState.accessibleSites.length > 0 && !currentState.currentSite) {
+            const site = currentState.accessibleSites.find(s => s.site.id === currentState.currentSiteId);
+            if (site) {
+              set({ currentSite: site });
+            }
+          }
+        },
+
         // 设置用户信息
         setUser: (user: any) => {
           set({ userInfo: user, error: null });
@@ -66,8 +78,13 @@ export const useUserStore = create<UserState>()(
             const { setAccessibleSites } = get();
             setAccessibleSites(user.allSites);
 
+            // 尝试恢复站点信息
+            const { rehydrateSite } = get();
+            rehydrateSite();
+
             // 如果当前没有选中站点，使用后端返回的 currentSite
-            if (!get().currentSiteId && user.currentSite) {
+            const currentState = get();
+            if (!currentState.currentSiteId && user.currentSite) {
               const currentSiteInfo = user.allSites.find((site: SiteInfo) => site.site.id === user.currentSite.id);
               if (currentSiteInfo) {
                 set({

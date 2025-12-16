@@ -36,7 +36,7 @@ import {
   useIsFactorySite,
   useIsSalesperson,
   useIsSuperAdmin,
-} from "@/stores/site-store";
+} from "@/stores/user-store";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 站点和角色相关的hooks

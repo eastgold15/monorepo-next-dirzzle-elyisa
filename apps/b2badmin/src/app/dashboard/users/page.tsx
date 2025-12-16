@@ -14,10 +14,6 @@ import {
 import { useState } from "react";
 import { CreateSalespersonModal } from "@/components/admin/CreateSalespersonModal";
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  CanCreateUsers,
-  CanEditUsers,
-} from "@/components/auth/PermissionGuard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,15 +30,25 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
+  useIsExporterAdmin,
+  useIsFactoryAdmin,
+  useIsSuperAdmin,
+} from "@/stores/user-store";
+import {
   useFactoriesQuery,
   useUserManagement,
   useUsersWithSearch,
-} from "@/hooks/api/use-user-api";
+} from "@/hooks/api/use-users-with-search";
+import "@/hooks/api/use-user-api";
 
 export default function UsersPage() {
-  // const { role } = usePermissions();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // 权限检查
+  const isSuperAdmin = useIsSuperAdmin();
+  const isExporterAdmin = useIsExporterAdmin();
+  const isFactoryAdmin = useIsFactoryAdmin();
+  const canCreateUser = isSuperAdmin || isExporterAdmin || isFactoryAdmin;
 
   // 使用自定义hooks
   const {
@@ -52,12 +58,16 @@ export default function UsersPage() {
     error,
     handleSearch,
     refetch,
+    searchQuery,
+    setSearchQuery,
   } = useUsersWithSearch();
 
   const {
     createSalesperson,
+    createFactoryAdmin,
     updateUserStatus,
     isCreatingSalesperson,
+    isCreatingFactoryAdmin,
     isUpdatingStatus,
   } = useUserManagement();
 
@@ -103,15 +113,15 @@ export default function UsersPage() {
                 <h1 className="font-bold text-2xl text-slate-900">用户管理</h1>
                 <p className="mt-1 text-slate-500">管理业务员账号和权限设置</p>
               </div>
-              <CanCreateUsers>
+              {canCreateUser && (
                 <Button
                   className="flex items-center gap-2"
                   onClick={() => setIsCreateModalOpen(true)}
                 >
                   <Plus size={18} />
-                  创建业务员
+                  {isExporterAdmin ? "创建账号" : "创建业务员"}
                 </Button>
-              </CanCreateUsers>
+              )}
             </div>
 
             {/* Search */}
@@ -193,20 +203,38 @@ export default function UsersPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center rounded-full px-2 py-1 font-medium text-xs ${
-                                user.roleName === "factory_admin"
-                                  ? "bg-purple-100 text-purple-700"
-                                  : "bg-blue-100 text-blue-700"
-                              }`}
-                            >
-                              {user.roleName === "factory_admin"
-                                ? "工厂管理员"
-                                : "业务员"}
-                            </span>
+                            <div className="space-y-1">
+                              {user.roles?.map((role, index) => (
+                                <span
+                                  key={index}
+                                  className={`inline-flex items-center rounded-full px-2 py-1 font-medium text-xs mr-1 ${
+                                    role.role.name === "factory_admin"
+                                      ? "bg-purple-100 text-purple-700"
+                                      : role.role.name === "salesperson"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {role.role.name === "factory_admin"
+                                    ? "工厂管理员"
+                                    : role.role.name === "salesperson"
+                                    ? "业务员"
+                                    : role.role.name}
+                                </span>
+                              ))}
+                            </div>
                           </td>
                           <td className="px-6 py-4 text-slate-600 text-sm">
-                            {user.factoryName || "-"}
+                            <div className="space-y-1">
+                              {user.factories?.map((factory, index) => (
+                                <div key={index}>{factory.name}</div>
+                              ))}
+                              {user.exporters?.map((exporter, index) => (
+                                <div key={index}>{exporter.name}</div>
+                              ))}
+                              {(!user.factories || user.factories.length === 0) &&
+                                (!user.exporters || user.exporters.length === 0) && "-"}
+                            </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="space-y-1">
@@ -216,11 +244,9 @@ export default function UsersPage() {
                                   {user.phone}
                                 </div>
                               )}
-                              {user.position && (
-                                <div className="text-slate-500 text-xs">
-                                  {user.position}
-                                </div>
-                              )}
+                              <div className="text-slate-500 text-xs">
+                                {user.email}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -238,7 +264,7 @@ export default function UsersPage() {
                             {user.createdAt}
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <CanEditUsers>
+                            {canCreateUser && (
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
@@ -275,7 +301,7 @@ export default function UsersPage() {
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
-                            </CanEditUsers>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -306,7 +332,7 @@ export default function UsersPage() {
                   <div>
                     <p className="text-slate-500 text-sm">总用户数</p>
                     <p className="font-bold text-2xl text-slate-900">
-                      {/* {pagination.total} */}
+                      {pagination.total}
                     </p>
                   </div>
                   <Users className="h-8 w-8 text-slate-400" />
@@ -332,7 +358,9 @@ export default function UsersPage() {
                   <div>
                     <p className="text-slate-500 text-sm">业务员数量</p>
                     <p className="font-bold text-2xl text-blue-600">
-                      {users.filter((u) => u.roleName === "salesperson").length}
+                      {users.filter((u) =>
+                        u.roles?.some(r => r.role.name === "salesperson")
+                      ).length}
                     </p>
                   </div>
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">

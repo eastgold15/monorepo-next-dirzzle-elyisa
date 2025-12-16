@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { useRoleDisplayName } from "@/hooks/useRoleDisplayName";
 import {
   useCurrentRole,
   useCurrentSite,

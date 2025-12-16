@@ -13,14 +13,14 @@ export const userRoute = new Elysia({
   .use(adminAuthPlugin)
   .get(
     "/me",
-    ({ user, currentSite, tenantId, tenantType, allSites, db, roles }) => {
+    ({ user, currentSite, tenantId, tenantType, allSites, db, role }) => {
       const userData = {
         user,
         currentSite,
         tenantId,
         tenantType,
         allSites,
-        roles,
+        roles: role,
       };
       return userData;
     },

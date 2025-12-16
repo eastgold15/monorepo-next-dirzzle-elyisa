@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { usePermissions } from "@/hooks/api/user";
+import { useCreateSalesperson } from "@/hooks/api/use-user-api";
+import { useIsExporterAdmin } from "@/stores/user-store";
 
 interface CreateSalespersonModalProps {
   open: boolean;
@@ -27,8 +28,8 @@ export function CreateSalespersonModal({
   onOpenChange,
   onSuccess,
 }: CreateSalespersonModalProps) {
-  const { role, getAccessibleFactoryIds } = usePermissions();
-  const [isLoading, setIsLoading] = useState(false);
+  const isExporterAdmin = useIsExporterAdmin();
+  const createSalesperson = useCreateSalesperson();
   const [error, setError] = useState<string | null>(null);
 
   // 表单数据
@@ -52,8 +53,8 @@ export function CreateSalespersonModal({
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError("密码至少需要8个字符");
+    if (formData.password.length < 6) {
+      setError("密码至少需要6个字符");
       return;
     }
 
@@ -62,30 +63,13 @@ export function CreateSalespersonModal({
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      const response = await fetch("/api/user/salesperson", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone,
-          position: formData.position,
-          factoryId: formData.factoryId,
-        }),
+      await createSalesperson.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        factoryId: formData.factoryId,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "创建业务员失败");
-        return;
-      }
 
       // 创建成功
       onOpenChange(false);
@@ -103,9 +87,6 @@ export function CreateSalespersonModal({
       });
     } catch (err) {
       console.error("创建业务员失败:", err);
-      setError("网络错误，请稍后重试");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -115,10 +96,12 @@ export function CreateSalespersonModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            创建业务员账号
+            {isExporterAdmin ? "创建账号" : "创建业务员账号"}
           </DialogTitle>
           <DialogDescription>
-            为您的工厂创建新的业务员账号。业务员将只能管理您分配的商品和分类。
+            {isExporterAdmin
+              ? "创建新的业务员或工厂管理员账号。请选择用户类型和所属工厂。"
+              : "为您的工厂创建新的业务员账号。业务员将只能管理您分配的商品和分类。"}
           </DialogDescription>
         </DialogHeader>
 
@@ -160,7 +143,7 @@ export function CreateSalespersonModal({
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                placeholder="至少8个字符"
+                placeholder="至少6个字符"
                 required
                 type="password"
                 value={formData.password}
@@ -225,15 +208,15 @@ export function CreateSalespersonModal({
 
           <DialogFooter>
             <Button
-              disabled={isLoading}
+              disabled={createSalesperson.isPending}
               onClick={() => onOpenChange(false)}
               type="button"
               variant="outline"
             >
               取消
             </Button>
-            <Button disabled={isLoading} type="submit">
-              {isLoading ? "创建中..." : "创建业务员"}
+            <Button disabled={createSalesperson.isPending} type="submit">
+              {createSalesperson.isPending ? "创建中..." : "创建业务员"}
             </Button>
           </DialogFooter>
         </form>

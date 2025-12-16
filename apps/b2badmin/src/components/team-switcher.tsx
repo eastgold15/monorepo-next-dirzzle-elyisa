@@ -17,16 +17,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-
+import { useRoleDisplayName } from "@/hooks/useRoleDisplayName";
 import { cn } from "@/lib/utils";
 import {
   useAccessibleSites,
   useCurrentRole,
   useCurrentSite,
-  useIsSuperAdmin,
   useUserStore,
 } from "@/stores/user-store";
-import { useRoleDisplayName } from "@/hooks/useRoleDisplayName";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();
@@ -37,14 +35,13 @@ export function TeamSwitcher() {
   const accessibleSites = useAccessibleSites();
   const { switchSite } = useUserStore();
   const currentRole = useCurrentRole();
-  const isSuperAdmin = useIsSuperAdmin();
 
   // 状态管理
   const [isSwitching, setIsSwitching] = useState<string | null>(null);
 
   // 处理站点切换
   const handleSwitchSite = async (siteId: string) => {
-    if (!currentSite || siteId === currentSite.site.id) return;
+    if (!currentSite || siteId === currentSite?.site?.id) return;
 
     setIsSwitching(siteId);
     try {
@@ -125,6 +122,25 @@ export function TeamSwitcher() {
     return site.domain || "";
   };
 
+  // 如果当前站点还未加载，显示加载状态
+  if (!currentSite) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton disabled size="lg">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <Loader2 className="size-4 animate-spin" />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">加载中...</span>
+              <span className="truncate text-xs">正在获取站点信息</span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -183,7 +199,7 @@ export function TeamSwitcher() {
                   </span>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  {currentSite.role.name} · {getSiteCode(currentSite)}
+                  {currentRole || "salesperson"} · {getSiteCode(currentSite)}
                 </p>
               </div>
               <Check className="size-4 text-primary" />
@@ -197,9 +213,9 @@ export function TeamSwitcher() {
                   切换站点 ({accessibleSites.length - 1})
                 </DropdownMenuLabel>
                 {accessibleSites
-                  .filter((site) => site.site.id !== currentSite.site.id)
+                  .filter((site) => site.site?.id !== currentSite?.site?.id)
                   .map((site) => {
-                    const isCurrentlySwitching = isSwitching === site.site.id;
+                    const isCurrentlySwitching = isSwitching === site.site?.id;
                     const Icon = getSiteIcon(site);
 
                     return (
