@@ -1,18 +1,19 @@
 "use client";
 
 import {
+  Building2,
+  ChevronDown,
   Edit,
   Loader2,
   Mail,
   MoreHorizontal,
-  Phone,
   Plus,
   Search,
   Trash2,
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { CreateSalespersonModal } from "@/components/admin/CreateSalespersonModal";
+import { CreateUserModal } from "@/components/admin/CreateUserModal";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -29,20 +30,25 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useFactoriesQuery } from "@/hooks/api/use-factories";
+import {
+  useCreateFactoryAdmin,
+  useCreateSalesperson,
+  useUpdateUserStatus,
+} from "@/hooks/api/use-user-api";
+import { useUsersWithSearch } from "@/hooks/api/use-users-with-search";
 import {
   useIsExporterAdmin,
   useIsFactoryAdmin,
   useIsSuperAdmin,
 } from "@/stores/user-store";
-import {
-  useFactoriesQuery,
-  useUserManagement,
-  useUsersWithSearch,
-} from "@/hooks/api/use-users-with-search";
-import "@/hooks/api/use-user-api";
+
+type CreateModalType = "salesperson" | "factory_admin";
 
 export default function UsersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createModalType, setCreateModalType] =
+    useState<CreateModalType>("salesperson");
 
   // 权限检查
   const isSuperAdmin = useIsSuperAdmin();
@@ -62,14 +68,10 @@ export default function UsersPage() {
     setSearchQuery,
   } = useUsersWithSearch();
 
-  const {
-    createSalesperson,
-    createFactoryAdmin,
-    updateUserStatus,
-    isCreatingSalesperson,
-    isCreatingFactoryAdmin,
-    isUpdatingStatus,
-  } = useUserManagement();
+  // 创建用户的 mutations
+  const createSalesperson = useCreateSalesperson();
+  const createFactoryAdmin = useCreateFactoryAdmin();
+  const updateUserStatusMutation = useUpdateUserStatus();
 
   // 获取工厂列表（用于CreateSalespersonModal）
   const { data: factories } = useFactoriesQuery();
@@ -83,7 +85,10 @@ export default function UsersPage() {
   // 切换用户状态
   const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
     try {
-      await updateUserStatus({ userId, isActive: !isActive });
+      await updateUserStatusMutation.mutateAsync({
+        userId,
+        isActive: !isActive,
+      });
     } catch (error) {
       console.error("切换用户状态失败:", error);
     }
@@ -114,13 +119,37 @@ export default function UsersPage() {
                 <p className="mt-1 text-slate-500">管理业务员账号和权限设置</p>
               </div>
               {canCreateUser && (
-                <Button
-                  className="flex items-center gap-2"
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  <Plus size={18} />
-                  {isExporterAdmin ? "创建账号" : "创建业务员"}
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="flex items-center gap-2">
+                      <Plus size={18} />
+                      {isExporterAdmin ? "创建账号" : "创建业务员"}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setCreateModalType("salesperson");
+                        setIsCreateModalOpen(true);
+                      }}
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      创建业务员
+                    </DropdownMenuItem>
+                    {isExporterAdmin && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setCreateModalType("factory_admin");
+                          setIsCreateModalOpen(true);
+                        }}
+                      >
+                        <Building2 className="mr-2 h-4 w-4" />
+                        创建工厂管理员
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
 
@@ -141,7 +170,7 @@ export default function UsersPage() {
             {error && (
               <Alert className="border-red-200 bg-red-50">
                 <AlertDescription className="text-red-700">
-                  {error}
+                  {typeof error === "string" ? error : "发生错误，请稍后重试"}
                 </AlertDescription>
               </Alert>
             )}
@@ -204,46 +233,43 @@ export default function UsersPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="space-y-1">
-                              {user.roles?.map((role, index) => (
+                              {user.roles?.map((role) => (
                                 <span
-                                  key={index}
-                                  className={`inline-flex items-center rounded-full px-2 py-1 font-medium text-xs mr-1 ${
+                                  className={`mr-1 inline-flex items-center rounded-full px-2 py-1 font-medium text-xs ${
                                     role.role.name === "factory_admin"
                                       ? "bg-purple-100 text-purple-700"
                                       : role.role.name === "salesperson"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-gray-100 text-gray-700"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-gray-100 text-gray-700"
                                   }`}
+                                  key={role.role.id}
                                 >
                                   {role.role.name === "factory_admin"
                                     ? "工厂管理员"
                                     : role.role.name === "salesperson"
-                                    ? "业务员"
-                                    : role.role.name}
+                                      ? "业务员"
+                                      : role.role.name}
                                 </span>
                               ))}
                             </div>
                           </td>
                           <td className="px-6 py-4 text-slate-600 text-sm">
                             <div className="space-y-1">
-                              {user.factories?.map((factory, index) => (
-                                <div key={index}>{factory.name}</div>
+                              {user.factories?.map((factory) => (
+                                <div key={factory.id}>{factory.name}</div>
                               ))}
-                              {user.exporters?.map((exporter, index) => (
-                                <div key={index}>{exporter.name}</div>
+                              {user.exporters?.map((exporter) => (
+                                <div key={exporter.id}>{exporter.name}</div>
                               ))}
-                              {(!user.factories || user.factories.length === 0) &&
-                                (!user.exporters || user.exporters.length === 0) && "-"}
+                              {(!user.factories ||
+                                user.factories.length === 0) &&
+                                (!user.exporters ||
+                                  user.exporters.length === 0) &&
+                                "-"}
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="space-y-1">
-                              {user.phone && (
-                                <div className="flex items-center gap-1 text-slate-600 text-sm">
-                                  <Phone className="h-4 w-4" />
-                                  {user.phone}
-                                </div>
-                              )}
                               <div className="text-slate-500 text-xs">
                                 {user.email}
                               </div>
@@ -261,7 +287,9 @@ export default function UsersPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-slate-600 text-sm">
-                            {user.createdAt}
+                            {new Date(user.createdAt).toLocaleDateString(
+                              "zh-CN"
+                            )}
                           </td>
                           <td className="px-6 py-4 text-right">
                             {canCreateUser && (
@@ -358,9 +386,11 @@ export default function UsersPage() {
                   <div>
                     <p className="text-slate-500 text-sm">业务员数量</p>
                     <p className="font-bold text-2xl text-blue-600">
-                      {users.filter((u) =>
-                        u.roles?.some(r => r.role.name === "salesperson")
-                      ).length}
+                      {
+                        users.filter((u) =>
+                          u.roles?.some((r) => r.role.name === "salesperson")
+                        ).length
+                      }
                     </p>
                   </div>
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
@@ -373,8 +403,9 @@ export default function UsersPage() {
         </div>
       </SidebarInset>
 
-      {/* Create Salesperson Modal */}
-      <CreateSalespersonModal
+      {/* Create User Modal */}
+      <CreateUserModal
+        modalType={createModalType}
         onOpenChange={setIsCreateModalOpen}
         onSuccess={() => {
           // 刷新用户列表

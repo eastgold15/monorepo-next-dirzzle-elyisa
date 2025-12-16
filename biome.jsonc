@@ -41,7 +41,8 @@
         "noImplicitAnyLet": "off",
         "useIterableCallbackReturn": "off",
         "noConfusingVoidType": "off",
-        "noAlert": "off"
+        "noAlert": "off",
+        "noArrayIndexKey": "off"
       },
       //  新特性规则
       "nursery": {

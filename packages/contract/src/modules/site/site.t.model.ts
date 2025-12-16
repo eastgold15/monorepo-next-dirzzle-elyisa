@@ -1,4 +1,8 @@
-import { sitesTable } from "@repo/contract/table";
+import {
+  siteCategoriesTable,
+  siteProductsTable,
+  sitesTable
+} from "@repo/contract/table";
 
 import {
   createInsertSchema,
@@ -9,12 +13,19 @@ import { t } from "elysia";
 import { ExporterTModel, FactoryTModel } from "../company";
 import { ProductTModel } from "../product/product.t.model";
 import { SiteCategoryTModel } from "./siteCategry.t.model";
-import { SiteProductTModel } from "./siteProduct.t.model";
 
-// Site Model Types
+// Site Model Types - 直接使用数据库生成的类型
 const SiteInsert = createInsertSchema(sitesTable);
 const SiteUpdate = createUpdateSchema(sitesTable);
 const SiteSelect = createSelectSchema(sitesTable);
+
+const SiteCategoryInsert = createInsertSchema(siteCategoriesTable);
+const SiteCategoryUpdate = createUpdateSchema(siteCategoriesTable);
+const SiteCategorySelect = createSelectSchema(siteCategoriesTable);
+
+const SiteProductInsert = createInsertSchema(siteProductsTable);
+const SiteProductUpdate = createUpdateSchema(siteProductsTable);
+const SiteProductSelect = createSelectSchema(siteProductsTable);
 
 // Extended Site Entity with relationships
 const SiteEntity = t.Composite([
@@ -27,7 +38,7 @@ const SiteEntity = t.Composite([
 
 // Site Product with product details
 const SiteProductEntity = t.Composite([
-  SiteProductTModel.Select,
+  SiteProductSelect,
   t.Object({
     product: t.Optional(ProductTModel.Entity),
     site_category: t.Optional(SiteCategoryTModel.Entity),
@@ -36,71 +47,32 @@ const SiteProductEntity = t.Composite([
 
 // Query Types
 const SiteListQuery = t.Object({
-  site_type: t.Optional(t.Union([t.Literal("factory"), t.Literal("exporter")])),
-  is_active: t.Optional(t.Boolean()),
-  entity_id: t.Optional(t.String()),
+  siteType: t.Optional(t.Union([t.Literal("factory"), t.Literal("exporter")])),
+  isActive: t.Optional(t.Boolean()),
+  entityId: t.Optional(t.String()),
   limit: t.Optional(t.Number()),
   offset: t.Optional(t.Number()),
 });
 
 const SiteProductListQuery = t.Object({
-  site_id: t.Optional(t.String()),
-  category_id: t.Optional(t.String()),
-  is_visible: t.Optional(t.Boolean()),
-  is_featured: t.Optional(t.Boolean()),
+  siteId: t.Optional(t.String()),
+  categoryId: t.Optional(t.String()),
+  isVisible: t.Optional(t.Boolean()),
+  isFeatured: t.Optional(t.Boolean()),
   limit: t.Optional(t.Number()),
   offset: t.Optional(t.Number()),
 });
 
 const SiteCategoryListQuery = t.Object({
-  site_id: t.Optional(t.String()),
-  parent_id: t.Optional(t.String()),
-  global_category_id: t.Optional(t.String()),
+  siteId: t.Optional(t.String()),
+  parentId: t.Optional(t.String()),
+  masterCategoryId: t.Optional(t.String()),
 });
 
-// Business Types
-const SiteCreateBody = t.Object({
-  name: t.String(),
-  domain: t.String(),
-  site_type: t.Union([t.Literal("factory"), t.Literal("exporter")]),
-  entity_id: t.String(),
-  theme_config: t.Optional(t.Record(t.String(), t.Any())),
-  feature_config: t.Optional(t.Record(t.String(), t.Any())),
-});
-
-const SiteUpdateBody = t.Object({
-  name: t.Optional(t.String()),
-  domain: t.Optional(t.String()),
-  theme_config: t.Optional(t.Record(t.String(), t.Any())),
-  feature_config: t.Optional(t.Record(t.String(), t.Any())),
-  is_active: t.Optional(t.Boolean()),
-});
-
-const SiteCategoryCreateBody = t.Object({
-  site_id: t.String(),
-  name: t.String(),
-  parent_id: t.Optional(t.String()),
-  sort_order: t.Optional(t.Number()),
-  global_category_id: t.Optional(t.String()),
-});
-
-const SiteProductCreateBody = t.Object({
-  site_id: t.String(),
-  product_id: t.String(),
-  site_price: t.Optional(t.Number()),
-  site_name: t.Optional(t.String()),
-  site_description: t.Optional(t.String()),
-  is_featured: t.Optional(t.Boolean()),
-  sort_order: t.Optional(t.Number()),
-  is_visible: t.Optional(t.Boolean()),
-  seo_title: t.Optional(t.String()),
-  seo_description: t.Optional(t.String()),
-  site_category_id: t.Optional(t.String()),
-});
-
+// UserSitePermission types
 const UserSitePermissionCreateBody = t.Object({
-  user_id: t.String(),
-  site_id: t.String(),
+  userId: t.String(),
+  siteId: t.String(),
   role: t.Union([t.Literal("admin"), t.Literal("editor"), t.Literal("viewer")]),
 });
 
@@ -138,18 +110,23 @@ const SiteContext = t.Object({
 });
 
 export const SiteTModel = {
-  // Schema types
+  // Schema types - 直接使用数据库生成的类型
   Insert: SiteInsert,
   Update: SiteUpdate,
   Select: SiteSelect,
-  Create: SiteCreateBody,
   ListQuery: SiteListQuery,
   Entity: SiteEntity,
 
-  CategoryCreate: SiteCategoryCreateBody,
+  // Category types - 使用数据库生成的类型
+  CategoryCreate: SiteCategoryInsert,
+  CategoryUpdate: SiteCategoryUpdate,
+  CategorySelect: SiteCategorySelect,
   CategoryListQuery: SiteCategoryListQuery,
 
-  ProductCreate: SiteProductCreateBody,
+  // Product types - 使用数据库生成的类型
+  ProductCreate: SiteProductInsert,
+  ProductUpdate: SiteProductUpdate,
+  ProductSelect: SiteProductSelect,
   ProductListQuery: SiteProductListQuery,
   ProductEntity: SiteProductEntity,
 
@@ -169,15 +146,18 @@ export type SiteTModel = {
   Insert: typeof SiteInsert.static;
   Update: typeof SiteUpdate.static;
   Select: typeof SiteSelect.static;
-  Create: typeof SiteCreateBody.static;
 
   ListQuery: typeof SiteListQuery.static;
   Entity: typeof SiteEntity.static;
 
-  CategoryCreate: typeof SiteCategoryCreateBody.static;
+  CategoryCreate: typeof SiteCategoryInsert.static;
+  CategoryUpdate: typeof SiteCategoryUpdate.static;
+  CategorySelect: typeof SiteCategorySelect.static;
   CategoryListQuery: typeof SiteCategoryListQuery.static;
 
-  ProductCreate: typeof SiteProductCreateBody.static;
+  ProductCreate: typeof SiteProductInsert.static;
+  ProductUpdate: typeof SiteProductUpdate.static;
+  ProductSelect: typeof SiteProductSelect.static;
   ProductListQuery: typeof SiteProductListQuery.static;
   ProductEntity: typeof SiteProductEntity.static;
 

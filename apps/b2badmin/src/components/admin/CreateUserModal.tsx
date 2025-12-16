@@ -1,7 +1,14 @@
 "use client";
 
-import { UserPlus } from "lucide-react";
-import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@radix-ui/react-select";
+import { Building2, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FactorySelector } from "@/components/auth/FactorySelector";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,23 +21,32 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateSalesperson } from "@/hooks/api/use-user-api";
+import {
+  useCreateFactoryAdmin,
+  useCreateSalesperson,
+} from "@/hooks/api/use-user-api";
 import { useIsExporterAdmin } from "@/stores/user-store";
 
-interface CreateSalespersonModalProps {
+type CreateModalType = "salesperson" | "factory_admin";
+
+interface CreateUserModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  modalType?: CreateModalType;
 }
 
-export function CreateSalespersonModal({
+export function CreateUserModal({
   open,
   onOpenChange,
   onSuccess,
-}: CreateSalespersonModalProps) {
+  modalType = "salesperson",
+}: CreateUserModalProps) {
   const isExporterAdmin = useIsExporterAdmin();
   const createSalesperson = useCreateSalesperson();
+  const createFactoryAdmin = useCreateFactoryAdmin();
   const [error, setError] = useState<string | null>(null);
+  const [userType, setUserType] = useState<CreateModalType>(modalType);
 
   // 表单数据
   const [formData, setFormData] = useState({
@@ -42,6 +58,11 @@ export function CreateSalespersonModal({
     position: "",
     factoryId: "",
   });
+
+  // 当 modalType 改变时更新 userType
+  useEffect(() => {
+    setUserType(modalType);
+  }, [modalType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +85,21 @@ export function CreateSalespersonModal({
     }
 
     try {
-      await createSalesperson.mutateAsync({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        factoryId: formData.factoryId,
-      });
+      if (userType === "salesperson") {
+        await createSalesperson.mutateAsync({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          factoryId: formData.factoryId,
+        });
+      } else {
+        await createFactoryAdmin.mutateAsync({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          factoryId: formData.factoryId,
+        });
+      }
 
       // 创建成功
       onOpenChange(false);
@@ -86,7 +116,10 @@ export function CreateSalespersonModal({
         factoryId: "",
       });
     } catch (err) {
-      console.error("创建业务员失败:", err);
+      console.error(
+        `创建${userType === "salesperson" ? "业务员" : "工厂管理员"}失败:`,
+        err
+      );
     }
   };
 
@@ -95,17 +128,50 @@ export function CreateSalespersonModal({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            {isExporterAdmin ? "创建账号" : "创建业务员账号"}
+            {userType === "factory_admin" ? (
+              <Building2 className="h-5 w-5" />
+            ) : (
+              <UserPlus className="h-5 w-5" />
+            )}
+            {userType === "factory_admin" ? "创建工厂管理员" : "创建业务员"}
           </DialogTitle>
           <DialogDescription>
-            {isExporterAdmin
-              ? "创建新的业务员或工厂管理员账号。请选择用户类型和所属工厂。"
-              : "为您的工厂创建新的业务员账号。业务员将只能管理您分配的商品和分类。"}
+            {userType === "factory_admin"
+              ? "为指定工厂创建新的管理员账号。工厂管理员将拥有该工厂的完整管理权限。"
+              : "为指定工厂创建新的业务员账号。业务员将只能管理您分配的商品和分类。"}
           </DialogDescription>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* 用户类型选择器 - 仅出口商管理员可见 */}
+          {isExporterAdmin && (
+            <div className="space-y-2">
+              <Label>用户类型 *</Label>
+              <Select
+                onValueChange={(value: CreateModalType) => setUserType(value)}
+                value={userType}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="请选择用户类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="salesperson">
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="h-4 w-4" />
+                      业务员
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="factory_admin">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      工厂管理员
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">姓名 *</Label>
@@ -208,15 +274,26 @@ export function CreateSalespersonModal({
 
           <DialogFooter>
             <Button
-              disabled={createSalesperson.isPending}
+              disabled={
+                createSalesperson.isPending || createFactoryAdmin.isPending
+              }
               onClick={() => onOpenChange(false)}
               type="button"
               variant="outline"
             >
               取消
             </Button>
-            <Button disabled={createSalesperson.isPending} type="submit">
-              {createSalesperson.isPending ? "创建中..." : "创建业务员"}
+            <Button
+              disabled={
+                createSalesperson.isPending || createFactoryAdmin.isPending
+              }
+              type="submit"
+            >
+              {createSalesperson.isPending || createFactoryAdmin.isPending
+                ? "创建中..."
+                : userType === "factory_admin"
+                  ? "创建工厂管理员"
+                  : "创建业务员"}
             </Button>
           </DialogFooter>
         </form>
@@ -224,3 +301,6 @@ export function CreateSalespersonModal({
     </Dialog>
   );
 }
+
+// 向后兼容的导出
+export const CreateSalespersonModal = CreateUserModal;

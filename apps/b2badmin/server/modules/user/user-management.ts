@@ -1,6 +1,9 @@
 import {
+  factoriesTable,
+  roleTable,
   salespersonAffiliationsTable,
   salespersonsTable,
+  sitesTable,
   userSiteRolesTable,
   usersTable,
 } from "@repo/contract/table";
@@ -10,8 +13,6 @@ import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "~/db/connection";
 import { auth } from "~/lib/auth";
 import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
-
-import { commonRes } from "~/utils/Res";
 
 // 用户管理路由
 export const userManagementController = new Elysia({
@@ -62,16 +63,32 @@ export const userManagementController = new Elysia({
           throw new Error("业务员角色不存在");
         }
 
-        // 获取工厂对应的站点信息
-        const factorySite = await tx.query.sitesTable.findFirst({
+        // 先检查工厂是否存在
+        const factory = await tx.query.factoriesTable.findFirst({
+          where: { id: body.factoryId },
+        });
+
+        if (!factory) {
+          throw new Error("工厂不存在");
+        }
+
+        // 获取工厂对应的站点信息，如果不存在则创建
+        let factorySite = await tx.query.sitesTable.findFirst({
           where: {
             factoryId: body.factoryId,
-            isActive: true,
           },
         });
 
         if (!factorySite) {
-          throw new Error("工厂站点不存在或已停用");
+          // 为工厂创建站点
+          const [newSite] = await tx.insert(sitesTable).values({
+            name: factory.name,
+            domain: factory.code.toLowerCase(),
+            siteType: "factory",
+            factoryId: body.factoryId,
+            isActive: true,
+          }).returning();
+          factorySite = newSite;
         }
 
         // 创建用户-站点-角色关联
@@ -97,7 +114,7 @@ export const userManagementController = new Elysia({
         });
       });
 
-      return commonRes(newUser, 201);
+      return newUser;
     },
     {
       auth: true,
@@ -147,16 +164,32 @@ export const userManagementController = new Elysia({
           throw new Error("工厂管理员角色不存在");
         }
 
-        // 获取工厂对应的站点信息
-        const factorySite = await tx.query.sitesTable.findFirst({
+        // 先检查工厂是否存在
+        const factory = await tx.query.factoriesTable.findFirst({
+          where: { id: body.factoryId },
+        });
+
+        if (!factory) {
+          throw new Error("工厂不存在");
+        }
+
+        // 获取工厂对应的站点信息，如果不存在则创建
+        let factorySite = await tx.query.sitesTable.findFirst({
           where: {
             factoryId: body.factoryId,
-            isActive: true,
           },
         });
 
         if (!factorySite) {
-          throw new Error("工厂站点不存在或已停用");
+          // 为工厂创建站点
+          const [newSite] = await tx.insert(sitesTable).values({
+            name: factory.name,
+            domain: factory.code.toLowerCase(),
+            siteType: "factory",
+            factoryId: body.factoryId,
+            isActive: true,
+          }).returning();
+          factorySite = newSite;
         }
 
         // 创建用户-站点-角色关联
@@ -182,7 +215,7 @@ export const userManagementController = new Elysia({
         });
       });
 
-      return commonRes(newUser, 201);
+      return newUser;
     },
     {
       auth: true,
@@ -240,17 +273,17 @@ export const userManagementController = new Elysia({
           });
         } else {
           // 如果没有业务员，返回空列表
-          return commonRes({
+          return {
             items: [],
             meta: { total: 0, page, limit, totalPages: 0 },
-          });
+          };
         }
       } else if (role !== "exporter_admin" && role !== "super_admin") {
         // 其他角色没有管理权限
-        return commonRes({
+        return {
           items: [],
           meta: { total: 0, page, limit, totalPages: 0 },
-        });
+        };
       }
 
       // 构建最终的 where 条件
@@ -335,7 +368,7 @@ export const userManagementController = new Elysia({
         })
         .then((res) => res.length);
 
-      return commonRes({
+      return {
         items: formattedUsers,
         meta: {
           total,
@@ -343,7 +376,7 @@ export const userManagementController = new Elysia({
           limit,
           totalPages: Math.ceil(total / limit),
         },
-      });
+      };
     },
     {
       auth: true,
@@ -415,7 +448,7 @@ export const userManagementController = new Elysia({
         .returning()
         .then((res) => res[0]);
 
-      return commonRes(updatedUser);
+      return updatedUser;
     },
     {
       auth: true,

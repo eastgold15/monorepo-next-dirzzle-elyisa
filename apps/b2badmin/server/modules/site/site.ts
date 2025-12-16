@@ -2,14 +2,14 @@ import {
   SiteTModel,
   siteCategoriesTable,
   siteProductsTable,
-  sitesTable,
+  sitesTable
 } from "@repo/contract";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import { db, dbPlugin } from "@/server/db/connection";
-import { adminAuthPlugin } from "@/server/plugins/admin-auth.plugin";
-import { commonRes } from "@/server/utils/Res";
+import { dbPlugin } from "~/db/connection";
+import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
+
 
 export const siteRoute = new Elysia({
   prefix: "/site",
@@ -61,7 +61,7 @@ export const siteRoute = new Elysia({
             priority: 100,
           }));
 
-          return commonRes({ sites: formattedSites });
+          return { sites: formattedSites };
         }
 
         // 普通用户只能访问被分配了角色的站点
@@ -72,14 +72,14 @@ export const siteRoute = new Elysia({
           with: {
             site: {
               with: {
-                factory: {
+                factoryOwner: {
                   columns: {
                     id: true,
                     name: true,
                     code: true,
                   },
                 },
-                exporter: {
+                exporterOwner: {
                   columns: {
                     id: true,
                     name: true,
@@ -119,9 +119,9 @@ export const siteRoute = new Elysia({
           priority: item.role.priority,
         }));
 
-        return commonRes({ sites: formattedSites });
+        return { sites: formattedSites };
       } catch (error) {
-        console.error("获取可访问站点失败:", error);
+        console.error("获取可访问站点失败", error);
         throw new HttpError.InternalServerError("获取可访问站点失败");
       }
     },
@@ -137,7 +137,7 @@ export const siteRoute = new Elysia({
   // 切换当前站点
   .post(
     "/switch",
-    async ({ user, body, db }) => {
+    async ({ body, db, user, currentSite, allSites }) => {
       try {
         const { siteId } = body;
 
@@ -195,108 +195,35 @@ export const siteRoute = new Elysia({
           }
         }
 
-        // 获取更新后的所有站点信息
-        let allSites;
-        if (user.isSuperAdmin) {
-          allSites = await db.query.sitesTable.findMany({
-            where: {
-              isActive: true,
-            },
-            with: {
-              factoryOwner: {
-                columns: {
-                  id: true,
-                  name: true,
-                  code: true,
-                },
-              },
-              exporterOwner: {
-                columns: {
-                  id: true,
-                  name: true,
-                  code: true,
-                },
-              },
-            },
-            orderBy: { createdAt: "desc" },
-          });
+        // 从 adminAuthPlugin 提供的 allSites 中找到切换后的站点信息
+        const switchedSiteInfo = allSites.find(site => site.site.id === siteId);
 
-          allSites = allSites.map((site) => ({
-            site: {
-              ...site,
-              factory: site.factoryOwner,
-              exporter: site.exporterOwner,
-            },
-            role: {
-              name: "SUPER_ADMIN",
-              priority: 100,
-            },
-            priority: 100,
-          }));
-        } else {
-          const userSites = await db.query.userSiteRolesTable.findMany({
-            where: {
-              userId: user.id,
-            },
-            with: {
-              site: {
-                with: {
-                  factoryOwner: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      code: true,
-                    },
-                  },
-                  exporterOwner: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      code: true,
-                    },
-                  },
-                },
-              },
-              role: {
-                columns: {
-                  id: true,
-                  name: true,
-                  priority: true,
-                },
-              },
-            },
-          });
-
-          allSites = userSites
-            .filter((userSite) => userSite.site.isActive)
-            .map((item) => ({
-              site: {
-                ...item.site,
-                factory: item.site.factoryOwner,
-                exporter: item.site.exporterOwner,
-              },
-              role: {
-                name: item.role.name,
-                priority: item.role.priority,
-              },
-              priority: item.role.priority,
-            }));
+        if (!switchedSiteInfo) {
+          throw new HttpError.Forbidden("您没有权限访问该站点");
         }
 
-        return commonRes({
-          success: true,
+        // 返回与 /me 接口相同的数据格式
+        return {
+          user,
           currentSite: {
             ...targetSite,
             factory: targetSite.factoryOwner,
             exporter: targetSite.exporterOwner,
           },
-          allSites,
-        });
+          tenantId: targetSite.siteType === "factory"
+            ? targetSite.factoryId
+            : targetSite.exporterId,
+          tenantType: targetSite.siteType,
+          allSites: allSites,
+          roles: switchedSiteInfo.role.name,
+          permissions: [], // 这里可以根据需要添加权限信息
+          can: () => true, // 临时处理
+        };
       } catch (error) {
-        if (error instanceof HttpError) {
+        if (error && typeof error === 'object' && 'constructor' in error && error.constructor.name === 'HttpError') {
           throw error;
         }
-        console.error("站点切换失败:", error);
+        console.error("站点切换失败", error);
         throw new HttpError.InternalServerError("站点切换失败");
       }
     },
@@ -309,32 +236,32 @@ export const siteRoute = new Elysia({
       },
     }
   )
-  // 站点管理 - 只有超级管理员可以访问
+  // 站点管理 - 超级管理员可以管理所有站点，出口商可以管理旗下工厂站点，工厂管理员可以管理自己的站点
   .group("/admin", (app) =>
+
     app
+      .use(adminAuthPlugin)
       // 创建站点
       .post(
         "/",
-        async ({ body, db }) => {
-          // 验证entityId是否存在
-          let entity;
-          if (body.site_type === "factory") {
-            entity = await db.query.factoriesTable.findFirst({
-              where: {
-                id: body.entity_id,
-              },
-            });
-          } else {
-            entity = await db.query.exportersTable.findFirst({
-              where: {
-                id: body.entity_id,
-              },
-            });
+        async ({ body, db, role, tenantId, tenantType }) => {
+          // 验证权限
+          // 超级管理员可以创建任何类型的站点
+          // 出口商管理员只能创建工厂类型的站点
+          // 工厂管理员不能创建站点
+          if (role === "factory_admin") {
+            throw new HttpError.Forbidden("工厂管理员不能创建站点");
           }
 
-          if (!entity) {
-            throw new HttpError.NotFound("关联的实体不存在");
-          }
+          // 使用数据库 Insert 类型
+          const siteData = {
+            name: body.name,
+            domain: body.domain,
+            siteType: body.siteType,
+            factoryId: body.factoryId,
+            exporterId: body.exporterId,
+            isActive: body.isActive ?? true,
+          };
 
           // 检查域名是否已存在
           const existingSite = await db.query.sitesTable.findFirst({
@@ -347,11 +274,12 @@ export const siteRoute = new Elysia({
             throw new HttpError.BadRequest("域名已存在");
           }
 
-          const [site] = await db.insert(sitesTable).values(body).returning();
+          const [site] = await db.insert(sitesTable).values(siteData).returning();
 
           return { data: site };
         },
         {
+          auth: true,
           body: SiteTModel.Insert,
           detail: {
             summary: "创建站点",
@@ -365,17 +293,17 @@ export const siteRoute = new Elysia({
         async ({ query, db }) => {
           const whereConditions: any = {};
 
-          if (query.site_type) {
-            whereConditions.siteType = query.site_type;
+          if (query.siteType) {
+            whereConditions.siteType = query.siteType;
           }
-          if (query.is_active !== undefined) {
-            whereConditions.isActive = query.is_active;
+          if (query.isActive !== undefined) {
+            whereConditions.isActive = query.isActive;
           }
           // Drizzle 1.0 doesn't support OR in where objects directly for findMany
           // We'll handle this differently or use a raw query if needed
-          if (query.entity_id) {
+          if (query.entityId) {
             // This might need special handling for OR condition
-            whereConditions.factoryId = query.entity_id;
+            whereConditions.factoryId = query.entityId;
           }
 
           const sites = await db.query.sitesTable.findMany({
@@ -404,6 +332,7 @@ export const siteRoute = new Elysia({
           return { data: sites };
         },
         {
+          auth: true,
           query: SiteTModel.ListQuery,
           detail: {
             summary: "获取站点列表",
@@ -414,16 +343,53 @@ export const siteRoute = new Elysia({
       // 更新站点
       .patch(
         "/:siteId",
-        async ({ params, body, db }) => {
+        async ({ params, body, db, role, tenantId }) => {
           const { siteId } = params;
+
+          // 验证权限
+          // 超级管理员可以管理任何站点
+          // 出口商管理员可以管理自己旗下工厂的站点
+          // 工厂管理员可以管理自己的站点
+          const site = await db.query.sitesTable.findFirst({
+            where: {
+              id: siteId,
+            },
+            with: {
+              factoryOwner: {
+                columns: { id: true, exporterId: true },
+              },
+            },
+          });
+
+          if (!site) {
+            throw new HttpError.NotFound("站点不存在");
+          }
+
+          if (role === "factory_admin") {
+            // 工厂管理员只能管理自己的站点
+            if (site.siteType !== "factory" || site.factoryId !== tenantId) {
+              throw new HttpError.Forbidden("您没有权限管理此站点");
+            }
+          } else if (role === "exporter_admin") {
+            // 出口商管理员只能管理自己旗下工厂的站点或自己的站点
+            if (site.siteType === "factory") {
+              if (!site.factoryOwner || site.factoryOwner.exporterId !== tenantId) {
+                throw new HttpError.Forbidden("您没有权限管理此工厂站点");
+              }
+            } else if (site.siteType === "exporter") {
+              if (site.exporterId !== tenantId) {
+                throw new HttpError.Forbidden("您没有权限管理此站点");
+              }
+            }
+          }
 
           // 如果更新域名，检查是否重复
           if (body.domain) {
             const existingSite = await db.query.sitesTable.findFirst({
-              where: and(
-                eq(sitesTable.domain, body.domain),
-                eq(sitesTable.isActive, true)
-              ),
+              where: {
+                domain: body.domain,
+                isActive: true,
+              },
             });
 
             if (existingSite && existingSite.id !== siteId) {
@@ -434,9 +400,7 @@ export const siteRoute = new Elysia({
           const updatedSite = await db
             .update(sitesTable)
             .set({ ...body, updatedAt: new Date() })
-            .where({
-              id: siteId,
-            })
+            .where(eq(sitesTable.id, siteId))
             .returning();
 
           if (!updatedSite[0]) {
@@ -446,10 +410,11 @@ export const siteRoute = new Elysia({
           return { data: updatedSite[0] };
         },
         {
+          auth: true,
           params: t.Object({
             siteId: t.String(),
           }),
-          body: SiteTModel.Patch,
+          body: SiteTModel.Update,
           detail: {
             summary: "更新站点",
             description: "更新站点信息",
@@ -459,8 +424,42 @@ export const siteRoute = new Elysia({
       // 删除站点
       .delete(
         "/:siteId",
-        async ({ params, db }) => {
+        async ({ params, db, role, tenantId }) => {
           const { siteId } = params;
+
+          // 验证权限（与更新站点相同的逻辑）
+          const site = await db.query.sitesTable.findFirst({
+            where: {
+              id: siteId,
+            },
+            with: {
+              factoryOwner: {
+                columns: { id: true, exporterId: true },
+              },
+            },
+          });
+
+          if (!site) {
+            throw new HttpError.NotFound("站点不存在");
+          }
+
+          if (role === "factory_admin") {
+            // 工厂管理员只能删除自己的站点
+            if (site.siteType !== "factory" || site.factoryId !== tenantId) {
+              throw new HttpError.Forbidden("您没有权限删除此站点");
+            }
+          } else if (role === "exporter_admin") {
+            // 出口商管理员只能删除自己旗下工厂的站点或自己的站点
+            if (site.siteType === "factory") {
+              if (!site.factoryOwner || site.factoryOwner.exporterId !== tenantId) {
+                throw new HttpError.Forbidden("您没有权限删除此工厂站点");
+              }
+            } else if (site.siteType === "exporter") {
+              if (site.exporterId !== tenantId) {
+                throw new HttpError.Forbidden("您没有权限删除此站点");
+              }
+            }
+          }
 
           // 检查是否有数据依赖
           const categories = await db.query.siteCategoriesTable.findFirst({
@@ -483,13 +482,12 @@ export const siteRoute = new Elysia({
             throw new HttpError.BadRequest("站点下还有商品，无法删除");
           }
 
-          await db.delete(sitesTable).where({
-            id: siteId,
-          });
+          await db.delete(sitesTable).where(eq(sitesTable.id, siteId));
 
           return { message: "站点已删除" };
         },
         {
+          auth: true,
           params: t.Object({
             siteId: t.String(),
           }),
@@ -503,11 +501,12 @@ export const siteRoute = new Elysia({
   // 站点分类管理
   .group("/categories", (app) =>
     app
+      .use(adminAuthPlugin)
       // 创建分类
       .post(
         "/",
-        async ({ body, userInfo, db }) => {
-          if (!userInfo?.currentSiteId) {
+        async ({ body, currentSite, db }) => {
+          if (!currentSite?.id) {
             throw new HttpError.Unauthorized("需要选择站点");
           }
 
@@ -516,7 +515,7 @@ export const siteRoute = new Elysia({
             const parent = await db.query.siteCategoriesTable.findFirst({
               where: {
                 id: body.parentId,
-                siteId: userInfo.currentSiteId,
+                siteId: currentSite.id,
               },
             });
 
@@ -529,13 +528,14 @@ export const siteRoute = new Elysia({
             .insert(siteCategoriesTable)
             .values({
               ...body,
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
             })
             .returning();
 
           return { data: category };
         },
         {
+          auth: true,
           body: SiteTModel.CategoryCreate,
           detail: {
             summary: "创建站点分类",
@@ -546,21 +546,21 @@ export const siteRoute = new Elysia({
       // 获取分类树
       .get(
         "/tree",
-        async ({ userInfo, db }) => {
-          if (!userInfo?.currentSiteId) {
+        async ({ currentSite, db }) => {
+          if (!currentSite?.id) {
             throw new HttpError.Unauthorized("需要选择站点");
           }
 
           // 使用关系查询
           const categories = await db.query.siteCategoriesTable.findMany({
             where: {
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
             },
             orderBy: { sortOrder: "asc" },
           });
 
           // 构建树形结构
-          const buildTree = (items: any[], parentId: string | null = null) =>
+          const buildTree = (items: any[], parentId: string | null = null): any[] =>
             items
               .filter((item) => item.parentId === parentId)
               .map((item) => ({
@@ -573,6 +573,7 @@ export const siteRoute = new Elysia({
           return { data: tree };
         },
         {
+          auth: true,
           detail: {
             summary: "获取分类树",
             description: "获取当前站点的分类树结构",
@@ -582,10 +583,10 @@ export const siteRoute = new Elysia({
       // 更新分类
       .patch(
         "/:categoryId",
-        async ({ params, body, userInfo, db }) => {
+        async ({ params, body, currentSite, db }) => {
           const { categoryId } = params;
 
-          if (!userInfo?.currentSiteId) {
+          if (!currentSite?.id) {
             throw new HttpError.Unauthorized("需要选择站点");
           }
 
@@ -593,7 +594,7 @@ export const siteRoute = new Elysia({
           const existing = await db.query.siteCategoriesTable.findFirst({
             where: {
               id: categoryId,
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
             },
           });
 
@@ -610,7 +611,7 @@ export const siteRoute = new Elysia({
             const parent = await db.query.siteCategoriesTable.findFirst({
               where: {
                 id: body.parentId,
-                siteId: userInfo.currentSiteId,
+                siteId: currentSite.id,
               },
             });
 
@@ -622,14 +623,13 @@ export const siteRoute = new Elysia({
           const updated = await db
             .update(siteCategoriesTable)
             .set({ ...body, updatedAt: new Date() })
-            .where({
-              id: categoryId,
-            })
+            .where(eq(siteCategoriesTable.id, categoryId))
             .returning();
 
           return { data: updated[0] };
         },
         {
+          auth: true,
           params: t.Object({
             categoryId: t.String(),
           }),
@@ -643,10 +643,10 @@ export const siteRoute = new Elysia({
       // 删除分类
       .delete(
         "/:categoryId",
-        async ({ params, userInfo, db }) => {
+        async ({ params, currentSite, db }) => {
           const { categoryId } = params;
 
-          if (!userInfo?.currentSiteId) {
+          if (!currentSite?.id) {
             throw new HttpError.Unauthorized("需要选择站点");
           }
 
@@ -654,7 +654,7 @@ export const siteRoute = new Elysia({
           const existing = await db.query.siteCategoriesTable.findFirst({
             where: {
               id: categoryId,
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
             },
           });
 
@@ -684,13 +684,14 @@ export const siteRoute = new Elysia({
             throw new HttpError.BadRequest("分类下还有商品，无法删除");
           }
 
-          await db.delete(siteCategoriesTable).where({
-            id: categoryId,
-          });
+          await db.delete(siteCategoriesTable).where(
+            eq(siteCategoriesTable.id, categoryId)
+          );
 
           return { message: "分类已删除" };
         },
         {
+          auth: true,
           params: t.Object({
             categoryId: t.String(),
           }),
@@ -704,10 +705,11 @@ export const siteRoute = new Elysia({
   // 站点商品管理
   .group("/products", (app) =>
     app
+      .use(adminAuthPlugin)
       // 添加商品到站点
       .post(
         "/",
-        async ({ body, userInfo, db }) => {
+        async ({ body, currentSite, db }) => {
           // 验证商品存在
           const product = await db.query.productsTable.findFirst({
             where: {
@@ -731,7 +733,7 @@ export const siteRoute = new Elysia({
             const category = await db.query.siteCategoriesTable.findFirst({
               where: {
                 id: body.siteCategoryId,
-                siteId: userInfo.currentSiteId,
+                siteId: currentSite.id,
               },
             });
 
@@ -743,7 +745,7 @@ export const siteRoute = new Elysia({
           // 检查是否已存在
           const existing = await db.query.siteProductsTable.findFirst({
             where: {
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
               productId: body.productId,
             },
           });
@@ -755,14 +757,23 @@ export const siteRoute = new Elysia({
           const [siteProduct] = await db
             .insert(siteProductsTable)
             .values({
-              ...body,
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
+              productId: body.productId,
+              siteCategoryId: body.siteCategoryId || null,
+              siteName: body.siteName || null,
+              siteDescription: body.siteDescription || null,
+              sitePrice: body.sitePrice ? body.sitePrice.toString() : null,
+              sortOrder: body.sortOrder || 0,
+              isVisible: body.isVisible ?? true,
+              isFeatured: body.isFeatured ?? false,
+              seoTitle: body.seoTitle || null,
             })
             .returning();
 
           return { data: siteProduct };
         },
         {
+          auth: true,
           body: SiteTModel.ProductCreate,
           detail: {
             summary: "添加商品到站点",
@@ -773,13 +784,15 @@ export const siteRoute = new Elysia({
       // 获取站点商品列表
       .get(
         "/",
-        async ({ query, userInfo, db }) => {
+        async ({ query, currentSite, db }) => {
           // 使用关系查询替换手动 JOIN
           const siteProducts = await db.query.siteProductsTable.findMany({
             where: {
-              siteId: userInfo.currentSiteId,
-              isVisible: true,
-              ...(query.category_id && { siteCategoryId: query.category_id }),
+              siteId: currentSite.id,
+              ...(query.isVisible !== undefined && {
+                isVisible: query.isVisible,
+              }),
+              ...(query.categoryId && { siteCategoryId: query.categoryId }),
               ...(query.isFeatured !== undefined && {
                 isFeatured: query.isFeatured,
               }),
@@ -800,6 +813,7 @@ export const siteRoute = new Elysia({
           return { data: siteProducts };
         },
         {
+          auth: true,
           query: SiteTModel.ProductListQuery,
           detail: {
             summary: "获取站点商品列表",
@@ -810,14 +824,14 @@ export const siteRoute = new Elysia({
       // 更新站点商品
       .patch(
         "/:siteProductId",
-        async ({ params, body, userInfo, db }) => {
+        async ({ params, body, currentSite, db }) => {
           const { siteProductId } = params;
 
           // 验证商品属于当前站点
           const existing = await db.query.siteProductsTable.findFirst({
             where: {
               id: siteProductId,
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
             },
           });
 
@@ -834,6 +848,7 @@ export const siteRoute = new Elysia({
           return { data: updated };
         },
         {
+          auth: true,
           params: t.Object({
             siteProductId: t.String(),
           }),
@@ -847,14 +862,14 @@ export const siteRoute = new Elysia({
       // 从站点移除商品
       .delete(
         "/:siteProductId",
-        async ({ params, userInfo, db }) => {
+        async ({ params, currentSite, db }) => {
           const { siteProductId } = params;
 
           // 验证商品属于当前站点
           const existing = await db.query.siteProductsTable.findFirst({
             where: {
               id: siteProductId,
-              siteId: userInfo.currentSiteId,
+              siteId: currentSite.id,
             },
           });
 
@@ -869,6 +884,7 @@ export const siteRoute = new Elysia({
           return { message: "商品已从站点移除" };
         },
         {
+          auth: true,
           params: t.Object({
             siteProductId: t.String(),
           }),
@@ -879,117 +895,3 @@ export const siteRoute = new Elysia({
         }
       )
   )
-  // 用户站点权限管理
-  .group("/permissions", (app) =>
-    app
-      // 授予用户站点权限
-      .post(
-        "/",
-        async ({ body, userInfo, db }) => {
-          // 验证用户存在
-          const user = await db.query.usersTable.findFirst({
-            where: {
-              id: body.userId,
-            },
-          });
-
-          if (!user) {
-            throw new Error("用户不存在");
-          }
-
-          // 检查是否已存在
-          const existing = await db.query.userSitePermissionsTable.findFirst({
-            where: {
-              userId: body.userId,
-              siteId: userInfo.currentSiteId,
-            },
-          });
-
-          if (existing) {
-            // 更新现有权限
-            const [updated] = await db
-              .update(userSitePermissionsTable)
-              .set({ role: body.role, updatedAt: new Date() })
-              .where(
-                and(
-                  eq(userSitePermissionsTable.userId, body.userId),
-                  eq(userSitePermissionsTable.siteId, userInfo.currentSiteId)
-                )
-              )
-              .returning();
-
-            return { data: updated };
-          }
-
-          // 创建新权限
-          const [permission] = await db
-            .insert(userSitePermissionsTable)
-            .values({
-              userId: body.userId,
-              siteId: userInfo.currentSiteId,
-              role: body.role,
-            })
-            .returning();
-
-          return { data: permission };
-        },
-        {
-          body: SiteTModel.PermissionCreate,
-          detail: {
-            summary: "授予站点权限",
-            description: "授予用户在当前站点的权限",
-          },
-        }
-      )
-      // 获取站点用户权限列表
-      .get(
-        "/",
-        async ({ siteContext }) => {
-          // 使用关系查询替换手动 JOIN
-          const permissions = await db.query.userSitePermissionsTable.findMany({
-            where: {
-              siteId: userInfo.currentSiteId,
-            },
-            with: {
-              user: true, // 通过关系获取用户信息
-            },
-            orderBy: { createdAt: "desc" },
-          });
-
-          return { data: permissions };
-        },
-        {
-          detail: {
-            summary: "获取权限列表",
-            description: "获取当前站点的所有用户权限",
-          },
-        }
-      )
-      // 撤销权限
-      .delete(
-        "/:userId",
-        async ({ params, userInfo, db }) => {
-          const { userId } = params;
-
-          await db
-            .delete(userSitePermissionsTable)
-            .where(
-              and(
-                eq(userSitePermissionsTable.userId, userId),
-                eq(userSitePermissionsTable.siteId, userInfo.currentSiteId)
-              )
-            );
-
-          return { message: "权限已撤销" };
-        },
-        {
-          params: t.Object({
-            userId: t.String(),
-          }),
-          detail: {
-            summary: "撤销权限",
-            description: "撤销用户在当前站点的权限",
-          },
-        }
-      )
-  );

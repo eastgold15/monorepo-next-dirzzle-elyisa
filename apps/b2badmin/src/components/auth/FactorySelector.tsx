@@ -1,6 +1,18 @@
 "use client";
 
-import { usePermissions } from "@/hooks/api/user";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useFactoriesQuery } from "@/hooks/api/use-factories";
+import {
+  useIsExporterAdmin,
+  useIsFactoryAdmin,
+  useTenantId,
+} from "@/stores/user-store";
 
 interface FactorySelectorProps {
   value?: string;
@@ -8,37 +20,52 @@ interface FactorySelectorProps {
   className?: string;
 }
 
-// Mock factory data - 在实际应用中从API获取
-const MOCK_FACTORIES = [
-  { id: "1", name: "Factory A - Shanghai", exporterId: "exporter1" },
-  { id: "2", name: "Factory B - Guangzhou", exporterId: "exporter1" },
-  { id: "3", name: "Factory C - Shenzhen", exporterId: "exporter2" },
-];
-
 export function FactorySelector({
   value,
   onChange,
   className,
 }: FactorySelectorProps) {
-  const { role, getAccessibleFactoryIds, getAccessibleExporterId } =
-    usePermissions();
+  const isExporterAdmin = useIsExporterAdmin();
+  const isFactoryAdmin = useIsFactoryAdmin();
+  const tenantId = useTenantId();
 
-  // 获取用户可以选择的工厂
+  // 获取工厂列表
+  const { data: factories, isLoading } = useFactoriesQuery();
+
+  if (isLoading) {
+    return (
+      <div className={`rounded-lg border border-slate-200 p-4 ${className}`}>
+        <div className="animate-pulse">
+          <div className="mb-2 h-4 w-3/4 rounded bg-slate-200" />
+          <div className="h-3 w-1/2 rounded bg-slate-200" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!factories || factories.length === 0) {
+    return (
+      <div
+        className={`rounded-lg border border-slate-200 p-4 text-center ${className}`}
+      >
+        <p className="text-slate-500">No accessible factories</p>
+        <p className="mt-1 text-slate-400 text-sm">
+          Please contact your administrator to get factory access
+        </p>
+      </div>
+    );
+  }
+
+  // 过滤可选择的工厂
   const getSelectableFactories = () => {
-    const factoryIds = getAccessibleFactoryIds();
-    const exporterId = getAccessibleExporterId();
+    if (isFactoryAdmin && tenantId) {
+      // 工厂管理员只能选择自己管理的工厂
+      return factories.filter((f) => f.id === tenantId);
+    }
 
-    if (role === "salesperson") {
-      // 业务员只能选择自己所属的工厂
-      return MOCK_FACTORIES.filter((f) => factoryIds.includes(f.id));
-    }
-    if (role === "factory_admin") {
-      // 工厂管理员可以选择自己管理的工厂
-      return MOCK_FACTORIES.filter((f) => factoryIds.includes(f.id));
-    }
-    if (role === "exporter_admin") {
-      // 出口商管理员可以选择所有下属工厂
-      return MOCK_FACTORIES.filter((f) => f.exporterId === exporterId);
+    if (isExporterAdmin) {
+      // 出口商管理员可以选择所有工厂
+      return factories;
     }
 
     return [];
@@ -53,7 +80,9 @@ export function FactorySelector({
       >
         <p className="text-slate-500">No accessible factories</p>
         <p className="mt-1 text-slate-400 text-sm">
-          Please contact your administrator to get factory access
+          {isFactoryAdmin
+            ? "You are not assigned to any factory"
+            : "Please contact your administrator to get factory access"}
         </p>
       </div>
     );
@@ -62,17 +91,19 @@ export function FactorySelector({
   // 如果只有一个工厂，自动选择
   if (selectableFactories.length === 1) {
     const factory = selectableFactories[0];
+
+    // 如果还没有值，自动设置
+    if (!value) {
+      onChange(factory.id);
+    }
+
     return (
       <div
         className={`rounded-lg border border-slate-200 bg-slate-50 p-4 ${className}`}
       >
         <p className="font-medium text-slate-700 text-sm">Selected Factory</p>
         <p className="font-semibold text-slate-900">{factory.name}</p>
-        <input
-          onChange={(e) => onChange(e.target.value)}
-          type="hidden"
-          value={factory.id}
-        />
+        <p className="text-slate-600 text-sm">{factory.code}</p>
       </div>
     );
   }
@@ -80,30 +111,26 @@ export function FactorySelector({
   // 多个工厂时显示选择器
   return (
     <div className={className}>
-      <label className="mb-1 block font-medium text-slate-700 text-sm">
-        Select Factory
-      </label>
-      <select
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-        onChange={(e) => onChange(e.target.value)}
-        value={value || ""}
-      >
-        <option value="">Choose a factory...</option>
-        {selectableFactories.map((factory) => (
-          <option key={factory.id} value={factory.id}>
-            {factory.name}
-          </option>
-        ))}
-      </select>
+      <Select onValueChange={onChange} value={value}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select a factory..." />
+        </SelectTrigger>
+        <SelectContent>
+          {selectableFactories.map((factory) => (
+            <SelectItem key={factory.id} value={factory.id}>
+              <div className="flex w-full items-center justify-between">
+                <span>{factory.name}</span>
+                <span className="text-slate-500 text-sm">{factory.code}</span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* 显示当前用户的角色提示 */}
       <p className="mt-1 text-slate-500 text-xs">
-        {role === "salesperson" &&
-          "You can only upload products to your assigned factory"}
-        {role === "factory_admin" &&
-          "You can upload products to your managed factories"}
-        {role === "exporter_admin" &&
-          "You can upload products to all your exporter's factories"}
+        {isFactoryAdmin && "You can manage this factory only"}
+        {isExporterAdmin && "You can manage all your factories"}
       </p>
     </div>
   );

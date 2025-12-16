@@ -484,7 +484,7 @@ export const productStatisticsTable = p.pgTable("product_statistics", {
   id: idUuid,
   createdAt,
   updatedAt,
-  productId: p.integer("product_id"), // ⚠️ 注意：这里可能是错误，应为 uuid？
+  productId: p.uuid("product_id"),
   date: p.varchar("date", { length: 10 }).notNull(),
   viewType: p.varchar("view_type", { length: 50 }).notNull(),
   count: p.integer("count").default(0).notNull(),

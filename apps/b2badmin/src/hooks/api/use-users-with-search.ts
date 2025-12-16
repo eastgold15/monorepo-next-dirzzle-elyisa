@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useManageableUsers } from "./use-user-api";
 

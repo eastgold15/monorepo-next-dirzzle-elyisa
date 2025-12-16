@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import {
   Building2,
   CheckCircle,
@@ -11,43 +10,61 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateFactoryModal } from "@/components/factory/CreateFactoryModal";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePermissions } from "@/hooks/api/user";
-import { rpc } from "@/lib/rpc";
-import { handleEden } from "@/lib/utils/base";
+import { useFactoriesQuery } from "@/hooks/api/use-factories";
+import {
+  useIsExporterAdmin,
+  useIsFactoryAdmin,
+  useIsSuperAdmin,
+} from "@/stores/user-store";
 
 export default function FactoryManager() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { canCreateFactories } = usePermissions();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 避免hydration错误
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // 权限检查
+  const isSuperAdmin = useIsSuperAdmin();
+  const isExporterAdmin = useIsExporterAdmin();
+  const isFactoryAdmin = useIsFactoryAdmin();
+  const canCreateFactory = isSuperAdmin || isExporterAdmin;
 
   // 获取工厂列表
-  const {
-    data: factoriesData,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["factories"],
-    queryFn: async () => {
-      const response = await rpc.api.factory.list.get();
-      const { data } = handleEden(response);
+  const { data: factories = [], isLoading, refetch } = useFactoriesQuery();
 
-      if (!data) {
-        throw new Error("获取工厂列表失败");
-      }
-
-      return data;
-    },
-  });
-
-  const factories = factoriesData?.factories || [];
+  // 如果还没挂载，返回一个加载状态的占位符
+  if (!isMounted) {
+    return (
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <div className="flex h-16 shrink-0 items-center gap-2">
+            <div className="h-4 w-4 animate-pulse rounded bg-slate-200" />
+            <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
+          </div>
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-center">
+              <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600" />
+              <p className="text-slate-500 text-sm">加载中...</p>
+            </div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -69,14 +86,11 @@ export default function FactoryManager() {
                   管理您的制造合作伙伴和工厂信息
                 </p>
               </div>
-              {canCreateFactories() && (
-                <button
-                  className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-indigo-700"
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  <Plus size={18} />
-                  <span>创建工厂</span>
-                </button>
+              {canCreateFactory && (
+                <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <Plus className="mr-2" size={18} />
+                  创建工厂
+                </Button>
               )}
             </div>
 
@@ -94,14 +108,11 @@ export default function FactoryManager() {
                 <p className="mb-4 text-center text-slate-500">
                   您还没有创建任何工厂。点击下方按钮开始创建您的第一个工厂。
                 </p>
-                {canCreateFactories() && (
-                  <button
-                    className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white shadow-sm transition-colors hover:bg-indigo-700"
-                    onClick={() => setIsCreateModalOpen(true)}
-                  >
-                    <Plus size={18} />
-                    <span>创建第一个工厂</span>
-                  </button>
+                {canCreateFactory && (
+                  <Button onClick={() => setIsCreateModalOpen(true)}>
+                    <Plus className="mr-2" size={18} />
+                    创建第一个工厂
+                  </Button>
                 )}
               </div>
             ) : (
@@ -197,16 +208,13 @@ export default function FactoryManager() {
       </SidebarInset>
 
       {/* 创建工厂弹窗 */}
-      {isCreateModalOpen && (
-        <CreateFactoryModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={() => {
-            setIsCreateModalOpen(false);
-            refetch();
-          }}
-        />
-      )}
+      <CreateFactoryModal
+        onOpenChange={setIsCreateModalOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        open={isCreateModalOpen}
+      />
     </SidebarProvider>
   );
 }

@@ -5,6 +5,8 @@ import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 import { OpenAPI } from "./lib/auth-openapi";
+import { factoryRoute } from "./modules/factory/factory";
+import { siteRoute } from "./modules/site/site";
 import { userRoute } from "./modules/user/user";
 import { userManagementController } from "./modules/user/user-management";
 import { adminAuthPlugin } from "./plugins/admin-auth.plugin";
@@ -83,6 +85,7 @@ export const server = new Elysia({ name: "server" })
   // .use(productTemplateRoute)
   // .use(skuRoute)
   // .use(translateRoute)
+  .use(siteRoute)
   .use(userRoute)
-  .use(userManagementController);
-// .use(factoryRoute);
+  .use(userManagementController)
+  .use(factoryRoute);
