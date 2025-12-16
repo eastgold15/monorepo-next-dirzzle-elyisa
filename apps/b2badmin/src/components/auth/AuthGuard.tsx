@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useUser } from "@/hooks/api/user";
+import { useUserContext } from "@/components/auth/UserProvider";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,8 +10,8 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const { data, isLoading } = useUser();
-  const user = data?.userInfo;
+  const { user: userData, isLoading } = useUserContext();
+  const user = userData?.userInfo;
   const router = useRouter();
 
   useEffect(() => {

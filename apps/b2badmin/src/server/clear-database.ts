@@ -4,16 +4,16 @@ import {
   attributeTemplateTable,
   attributeValueTable,
   CustomerTable,
-  // 基础数据
-  categoriesTable,
   exportersTable,
   factoriesTable,
   heroCardsTable,
+  // 基础数据
+  MasterTable,
   // 媒体相关
   mediaMetadataTable,
   mediaTable,
   permissionTable,
-  productCategoriesTable,
+
   productMediaTable,
   productsTable,
   productTemplateTable,
@@ -26,9 +26,7 @@ import {
   siteConfigTable,
   // 按照依赖关系排序，先删除有外键依赖的表
   skusTable,
-  systemConfigTable,
-  userResourceRolesTable,
-  userRolesTable,
+
   usersTable,
   verificationTable,
 } from "@repo/contract/table";
@@ -42,7 +40,7 @@ async function clearDatabase() {
     const tables = [
       // SKU和商品相关
       skusTable,
-      productCategoriesTable,
+
       productMediaTable,
       productTemplateTable,
       productsTable,
@@ -57,8 +55,7 @@ async function clearDatabase() {
 
       // Auth相关
       rolePermissionsTable,
-      userResourceRolesTable,
-      userRolesTable,
+
       accountTable,
       sessionTable,
       verificationTable,
@@ -67,11 +64,11 @@ async function clearDatabase() {
       permissionTable,
 
       // 基础数据
-      categoriesTable,
+      MasterTable,
       CustomerTable,
       heroCardsTable,
       siteConfigTable,
-      systemConfigTable,
+
 
       // 媒体相关
       mediaMetadataTable,

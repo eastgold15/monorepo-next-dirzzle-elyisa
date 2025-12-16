@@ -7,14 +7,14 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { categoriesTable } from "../../table.schema";
+import { MasterTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 import type { TreeNode } from "../helper/utils.types";
 
 // === 基础 Schema ===
-const Insert = createInsertSchema(categoriesTable);
-const UpdateBase = createUpdateSchema(categoriesTable);
-const Select = createSelectSchema(categoriesTable);
+const Insert = createInsertSchema(MasterTable);
+const UpdateBase = createUpdateSchema(MasterTable);
+const Select = createSelectSchema(MasterTable);
 
 // === 业务 Schema ===
 const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);

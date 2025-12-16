@@ -1,8 +1,127 @@
-
+import { CategoryModel, TreeNode } from "@repo/contract";
+import { categoriesTable } from "@repo/contract/table";
+import { asc, eq, inArray } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { HttpError } from "elysia-http-problem-json";
+import { db, dbPlugin } from "@/server/db/connection";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
-import { CategoriesService } from "./category.service";
+import { buildTree } from "@/server/utils/buildTree";
+import type { SupportedLocale } from "@/server/plugins/locale";
+import { translateService } from "../translations/translate.service";
+
+// 创建分类
+async function createCategory(data: CategoryModel["Create"]) {
+  const [newCategory] = await db
+    .insert(categoriesTable)
+    .values(data)
+    .returning();
+  return newCategory;
+}
+
+// 更新分类
+async function updateCategory(id: string, data: CategoryModel["Update"]) {
+  const [updatedCategory] = await db
+    .update(categoriesTable)
+    .set(data)
+    .where(eq(categoriesTable.id, id))
+    .returning();
+  return updatedCategory;
+}
+
+// 获取分类树形结构（已本地化）
+async function getCategoryTree(
+  locale: SupportedLocale = "zh-CN"
+): Promise<TreeNode<CategoryModel["Entity"]>[]> {
+  const categories = await db.query.categoriesTable.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+
+  // 并行翻译所有节点
+  const translatedCategories = await Promise.all(
+    categories.map(async (cat) => {
+      const translated = await translateService.translateCategory(
+        cat,
+        locale
+      );
+      return translated;
+    })
+  );
+
+  return buildTree(translatedCategories, "id", "parentId");
+}
+
+// 获取管理端分类树（原始数据，不翻译）
+async function getAdminCategoryTree() {
+  const categories = await db.query.categoriesTable.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+  return buildTree(categories, "id", "parentId");
+}
+
+// 根据 slug 获取分类详情（已翻译）
+async function getCategoryBySlug(slug: string, locale: SupportedLocale = "zh-CN") {
+  const category = await db.query.categoriesTable.findFirst({
+    where: { slug },
+  });
+
+  if (!category) {
+    throw new HttpError.NotFound("分类不存在");
+  }
+
+  // 使用新方法翻译
+  return translateService.translateCategory(category, locale);
+}
+
+// 根据 ID 获取分类详情（已翻译）
+async function getCategoryById(id: string, locale: SupportedLocale = "zh-CN") {
+  const category = await db.query.categoriesTable.findFirst({
+    where: { id },
+  });
+
+  if (!category) {
+    throw new HttpError.NotFound("分类不存在");
+  }
+
+  return translateService.translateCategory(category, locale);
+}
+
+// 批量删除分类：仅删除没有子分类的项，有子分类的自动跳过
+async function batchDelete(ids: string[]) {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  return await db.transaction(async (tx) => {
+    // 1. 找出哪些待删除的分类 **有子分类**
+    const parentsWithChildren = await tx.query.categoriesTable.findMany({
+      where: { parentId: { in: ids } },
+      columns: { parentId: true },
+      distinct: ["parentId"],
+    });
+
+    const parentIdsWithChildren = new Set(
+      parentsWithChildren.map((p) => p.parentId).filter(Boolean)
+    );
+
+    // 2. 过滤出"没有子分类"的 ID
+    const safeToDeleteIds = ids.filter(
+      (id) => !parentIdsWithChildren.has(id)
+    );
+
+    if (safeToDeleteIds.length === 0) {
+      return []; // 全部都有子分类，一个都不删
+    }
+
+    // 3. 删除安全的分类
+    const deleted = await tx
+      .delete(categoriesTable)
+      .where(inArray(categoriesTable.id, safeToDeleteIds))
+      .returning();
+
+    return deleted;
+  });
+}
 
 /**
  * 分类控制器
@@ -12,11 +131,12 @@ export const categoriesController = new Elysia({
   prefix: "/categories",
   tags: ["Categories"],
 })
+  .use(dbPlugin)
   .use(localeMiddleware)
   .get(
     "/tree",
     async () => {
-      const result = await CategoriesService.getAdminCategoryTree();
+      const result = await getAdminCategoryTree();
       return commonRes(result, 200, "获取管理端分类树形列表成功");
     },
     {
@@ -32,7 +152,7 @@ export const categoriesController = new Elysia({
   .get(
     "/slug/:slug",
     async ({ params: { slug }, locale }) => {
-      const category = await CategoriesService.getCategoryBySlug(slug, locale);
+      const category = await getCategoryBySlug(slug, locale);
       return commonRes(category, 200, "根据slug获取分类详情成功");
     },
     {
@@ -52,7 +172,7 @@ export const categoriesController = new Elysia({
     "/",
     async ({ locale }) => {
       console.log("获取分类树形列表，当前语言:", locale);
-      const result = await CategoriesService.getCategoryTree(locale);
+      const result = await getCategoryTree(locale);
       return commonRes(result, 200, "获取分类树形列表成功");
     },
     {
@@ -70,7 +190,7 @@ export const categoriesController = new Elysia({
   .get(
     "/:id",
     async ({ params: { id }, locale }) => {
-      const category = await CategoriesService.getCategoryById(id, locale);
+      const category = await getCategoryById(id, locale);
       return commonRes(category, 200, "获取分类详情成功");
     },
     {
@@ -89,7 +209,7 @@ export const categoriesController = new Elysia({
   .put(
     "/:id",
     async ({ params: { id }, body }) => {
-      const updatedCategory = await CategoriesService.updateCategory(id, body);
+      const updatedCategory = await updateCategory(id, body);
       return commonRes(updatedCategory, 200, "分类更新成功");
     },
     {
@@ -106,9 +226,9 @@ export const categoriesController = new Elysia({
   )
   //批量删除分类
   .delete(
-    "batchDelete",
+    "/batchDelete",
     async ({ body: { ids } }) => {
-      const _res = await CategoriesService.batchDelete(ids);
+      const _res = await batchDelete(ids);
       return commonRes(_res, 204, "分类删除成功");
     },
     {
@@ -126,7 +246,7 @@ export const categoriesController = new Elysia({
   .post(
     "/",
     async ({ body }) => {
-      const newCategory = await CategoriesService.createCategory(body);
+      const newCategory = await createCategory(body);
       return commonRes(newCategory, 201, "分类创建成功");
     },
     {

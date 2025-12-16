@@ -1,7 +1,215 @@
-import { AdsModel } from "@repo/contract";
+import { AdsTModel } from "@repo/contract";
+import { adsTable } from "@repo/contract/table";
+import { and, eq, inArray, like } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { HttpError } from "elysia-http-problem-json";
+import { db, dbPlugin } from "@/server/db/connection";
 import { commonRes } from "@/server/utils/Res";
-import { AdsService } from "./advertisement.service";
+
+// 获取广告列表
+async function getAdvertisementList(params: AdsTModel["ListQuery"]) {
+  const {
+    page = 1,
+    limit = 10,
+    sort = "sortOrder",
+    sortOrder = "asc",
+    search,
+    type,
+    position,
+    isActive,
+  } = params;
+
+  // 使用关系查询
+  const advertisements = await db.query.adsTable.findMany({
+    where: {
+      ...(search && {
+        title: { like: `%${search}%` }
+      }),
+      ...(type && {
+        type
+      }),
+      ...(position && {
+        position
+      }),
+      ...(isActive !== undefined && isActive !== null && {
+        isActive
+      }),
+      with: {
+        imageRef: {
+          columns: {
+            url: true,
+          },
+        },
+      },
+      orderBy: [
+        {
+          createdAt: 'desc',
+          sortOrder: 'desc'
+        }
+      ],
+      limit,
+      offset: (page - 1) * limit,
+    }
+  });
+
+  // 获取总数
+  const totalCountResult = await db
+    .select({ count: adsTable.id })
+    .from(adsTable)
+    .where(
+      and(
+        ...(search ? [like(adsTable.title, `%${search}%`)] : []),
+        ...(type ? [eq(adsTable.type, type)] : []),
+        ...(position ? [eq(adsTable.position, position)] : []),
+        ...(isActive !== undefined && isActive !== null
+          ? [eq(adsTable.isActive, isActive)]
+          : [])
+      )
+    );
+
+  const total = totalCountResult[0]?.count || 0;
+
+  // 格式化返回数据
+  const formattedItems = advertisements.map((ad) => ({
+    ...ad,
+    imageUrl: ad.image_id?.url,
+  }));
+
+  return {
+    items: formattedItems,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+// 根据ID获取广告详情
+async function getAdvertisementById(id: string) {
+  const advertisement = await db.query.adsTable.findFirst({
+    where: { id },
+    with: {
+      imageRef: {
+        columns: {
+          url: true,
+        },
+      },
+    },
+  });
+
+  if (!advertisement) {
+    throw new HttpError.NotFound("广告不存在");
+  }
+
+  return {
+    ...advertisement,
+    imageUrl: advertisement.imageRef?.url,
+  };
+}
+
+// 创建广告
+async function createAdvertisement(data: AdsTModel["Create"]) {
+  if (!data.image_id || data.image_id.length === 0) {
+    throw new HttpError.BadRequest("请上传图片");
+  }
+
+  // 设置默认值
+  const advertisementData = {
+    ...data,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    sortOrder: data.sortOrder ?? 0,
+    isActive: data.isActive ?? true,
+    image_id: data.image_id[0]!,
+  };
+
+  const [newAd] = await db
+    .insert(adsTable)
+    .values(advertisementData)
+    .returning();
+
+  if (!newAd) {
+    throw new Error("创建广告失败");
+  }
+
+  return newAd;
+}
+
+// 更新广告
+async function updateAdvertisement(id: string, data: AdsTModel["Update"]) {
+  const updateData: Partial<typeof adsTable.$inferInsert> = {
+    ...data,
+    image_id: data.image_id ? data.image_id[0] : undefined,
+    startDate: data.startDate,
+    endDate: data.endDate,
+  };
+
+  const result = await db
+    .update(adsTable)
+    .set(updateData)
+    .where(eq(adsTable.id, id))
+    .returning();
+
+  if (result.length === 0) {
+    throw new Error("广告不存在");
+  }
+
+  return result[0];
+}
+
+// 批量删除广告
+async function batchDeleteAdvertisement(ids: string[]) {
+  await db.delete(adsTable).where(inArray(adsTable.id, ids));
+}
+
+// 获取当前时间段的轮播图广告
+async function getCurrentCarouselAds(): Promise<AdsTModel["Entity"][]> {
+  const now = new Date();
+
+  const advertisements = await db.query.adsTable.findMany({
+    where: {
+      type: "carousel",
+      isActive: true,
+    },
+    with: {
+      imageRef: {
+        columns: {
+          url: true,
+        },
+      },
+    },
+    orderBy: (table, { asc }) => [asc(table.sortOrder), asc(table.createdAt)],
+  });
+
+  // 过滤出在有效时间范围内的广告
+  const validAds = advertisements.filter((ad) => {
+    const startDate = new Date(ad.startDate);
+    const endDate = new Date(ad.endDate);
+    return startDate <= now && endDate >= now;
+  });
+
+  // 格式化返回数据
+  return validAds.map((ad) => ({
+    ...ad,
+    imageUrl: ad.imageRef?.url,
+  }));
+}
+
+// 删除广告
+async function deleteAdvertisement(id: string) {
+  const result = await db
+    .delete(adsTable)
+    .where(eq(adsTable.id, id))
+    .returning();
+
+  if (result.length === 0) {
+    throw new Error("广告不存在");
+  }
+
+  return result[0];
+}
 
 /**
  * 广告控制器
@@ -10,16 +218,16 @@ import { AdsService } from "./advertisement.service";
 export const AdsController = new Elysia({
   prefix: "/advertisements",
 })
+  .use(dbPlugin)
   // 获取广告列表 - RESTful标准设计，支持类型筛选
   .get(
     "/",
     async ({ query }) => {
-      // 默认返回分页广告列表
-      const result = await AdsService.getAdvertisementList(query);
+      const result = await getAdvertisementList(query);
       return commonRes(result);
     },
     {
-      query: AdsModel.ListQuery,
+      query: AdsTModel.ListQuery,
       detail: {
         summary: "获取广告列表",
         description:
@@ -33,7 +241,7 @@ export const AdsController = new Elysia({
   .get(
     "/:id",
     async ({ params: { id } }) => {
-      const advertisement = await AdsService.getAdvertisementById(id);
+      const advertisement = await getAdvertisementById(id);
       return commonRes(advertisement);
     },
     {
@@ -52,11 +260,11 @@ export const AdsController = new Elysia({
   .post(
     "/",
     async ({ body }) => {
-      const advertisement = await AdsService.createAdvertisement(body);
+      const advertisement = await createAdvertisement(body);
       return commonRes(advertisement, 201);
     },
     {
-      body: AdsModel.Create,
+      body: AdsTModel.Create,
       detail: {
         summary: "创建广告",
         description: "创建新的广告",
@@ -69,14 +277,14 @@ export const AdsController = new Elysia({
   .put(
     "/:id",
     async ({ params: { id }, body }) => {
-      const advertisement = await AdsService.updateAdvertisement(id, body);
+      const advertisement = await updateAdvertisement(id, body);
       return commonRes(advertisement);
     },
     {
       params: t.Object({
         id: t.String(),
       }),
-      body: AdsModel.Update,
+      body: AdsTModel.Update,
       detail: {
         summary: "更新广告",
         description: "更新指定ID的广告信息",
@@ -89,7 +297,7 @@ export const AdsController = new Elysia({
   .delete(
     "/:id",
     async ({ params: { id } }) => {
-      const advertisement = await AdsService.deleteAdvertisement(id);
+      const advertisement = await deleteAdvertisement(id);
       return commonRes(advertisement);
     },
     {
@@ -107,8 +315,8 @@ export const AdsController = new Elysia({
   .delete(
     "/batchDel",
     async ({ body }) => {
-      const advertisement = await AdsService.batchDeleteAdvertisement(body.ids);
-      return commonRes(advertisement);
+      await batchDeleteAdvertisement(body.ids);
+      return commonRes({ message: "批量删除成功" });
     },
     {
       body: t.Object({
@@ -126,7 +334,7 @@ export const AdsController = new Elysia({
   .get(
     "/carousel/current",
     async () => {
-      const advertisements = await AdsService.getCurrentCarouselAds();
+      const advertisements = await getCurrentCarouselAds();
       return commonRes(advertisements);
     },
     {

@@ -45,6 +45,11 @@ export const InputTypeEnum = p.pgEnum("input_type", [
   "richtext",
 ]);
 
+export const entityTypeEnum = p.pgEnum("entity_type", [
+  "exporter",
+  "factory",
+]);
+
 // --- Tables ---
 export const usersTable = p.pgTable("user_table", {
   id: idUuid,
@@ -54,6 +59,11 @@ export const usersTable = p.pgTable("user_table", {
   email: p.text("email").notNull().unique(),
   emailVerified: p.boolean("email_verified").default(false).notNull(),
   image: p.text("image"),
+  // 
+  isSuperAdmin: p.boolean("is_super_admin").default(false).notNull(),
+  phone: p.text("phone"),
+  address: p.text("address"),
+  city: p.text("city"),
 });
 
 export const accountTable = p.pgTable("account", {
@@ -98,36 +108,22 @@ export const verificationTable = p.pgTable("verification", {
   expiresAt: p.timestamp("expires_at").notNull(),
 });
 
-export const userProfilesTable = p.pgTable("userprofile", {
-  userId: p
-    .uuid("user_id")
-    .primaryKey()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  phone: p.text("phone"),
-  address: p.text("address"),
-  city: p.text("city"),
-});
+
 
 export const roleTable = p.pgTable("roles", {
   id: idUuid,
   name: p.text("name").notNull().unique(),
   description: p.text("description"),
-});
+  // 🔥 新增：区分这是"系统内置角色"还是"用户自定义角色"
+  type: p.varchar("type", { enum: ["system", "custom"] }).default("custom").notNull(),
 
-export const userRolesTable = p.pgTable(
-  "user_roles",
-  {
-    userId: p
-      .uuid("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    roleId: p
-      .uuid("role_id")
-      .notNull()
-      .references(() => roleTable.id, { onDelete: "cascade" }),
-  },
-  (t) => [p.primaryKey({ columns: [t.userId, t.roleId] })]
-);
+  // 🔥 新增：权重值
+  // 100 = Owner, 80 = Admin, 50 = Editor, 10 = Viewer
+  priority: p.integer("priority").default(0).notNull(),
+
+  // 新增：支持角色继承
+  parentRoleId: p.uuid("parent_role_id"), // 🔥 自引用外键
+});
 
 export const permissionTable = p.pgTable("permissions", {
   id: idUuid,
@@ -136,6 +132,7 @@ export const permissionTable = p.pgTable("permissions", {
   name: p.text("name").notNull(),
   description: p.text("description"),
 });
+
 
 export const rolePermissionsTable = p.pgTable(
   "role_permissions",
@@ -152,24 +149,15 @@ export const rolePermissionsTable = p.pgTable(
   (t) => [p.primaryKey({ columns: [t.roleId, t.permissionId] })]
 );
 
-export const userResourceRolesTable = p.pgTable(
-  "user_resource_roles",
-  {
-    userId: p
-      .uuid("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    roleId: p
-      .uuid("role_id")
-      .notNull()
-      .references(() => roleTable.id, { onDelete: "cascade" }),
-    resourceType: p.text("resource_type").notNull(),
-    resourceId: p.uuid("resource_id").notNull(),
-    isPrimary: p.boolean("is_primary").default(false),
-    createdAt,
-    updatedAt,
-  },
-  (t) => [p.primaryKey({ columns: [t.userId, t.resourceType, t.resourceId] })]
+// 5. 🔥 核心：用户-站点-角色 关联表 (工牌表)
+// 这张表决定了 "谁" 在 "哪个站" 是 "什么身份"
+export const userSiteRolesTable = p.pgTable("user_site_roles", {
+  userId: p.uuid("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
+  roleId: p.uuid("role_id").notNull().references(() => roleTable.id, { onDelete: "restrict" }),
+  createdAt: p.timestamp("created_at").defaultNow(),
+},
+  (t) => [p.primaryKey({ columns: [t.userId, t.siteId] })] // 一个用户在一个站点只能有一个角色(通常足够)，若需兼职可去掉此主键限制
 );
 
 export const exportersTable = p.pgTable("exporters", {
@@ -188,7 +176,7 @@ export const exportersTable = p.pgTable("exporters", {
   isVerified: p.boolean("is_verified").default(false).notNull(),
 });
 
-export const categoriesTable = p.pgTable("categories", {
+export const MasterTable = p.pgTable("master_categories", {
   id: idUuid,
   name: p.varchar("name", { length: 255 }).notNull(),
   slug: p.varchar("slug", { length: 100 }).notNull().unique(),
@@ -221,20 +209,20 @@ export const factoriesTable = p.pgTable("factories", {
   employeeCount: p.integer("employee_count"),
 });
 
-export const factoryCategoryTable = p.pgTable(
-  "factory_category",
-  {
-    factoryId: p
-      .uuid("factory_id")
-      .notNull()
-      .references(() => factoriesTable.id, { onDelete: "cascade" }),
-    categoryId: p
-      .uuid("category_id")
-      .notNull()
-      .references(() => categoriesTable.id, { onDelete: "cascade" }),
-  },
-  (t) => [p.primaryKey({ columns: [t.factoryId, t.categoryId] })]
-);
+// export const factoryCategoryTable = p.pgTable(
+//   "factory_category",
+//   {
+//     factoryId: p
+//       .uuid("factory_id")
+//       .notNull()
+//       .references(() => factoriesTable.id, { onDelete: "cascade" }),
+//     categoryId: p
+//       .uuid("category_id")
+//       .notNull()
+//       .references(() => MasterTable.id, { onDelete: "cascade" }),
+//   },
+//   (t) => [p.primaryKey({ columns: [t.factoryId, t.categoryId] })]
+// );
 
 export const salespersonsTable = p.pgTable("salespersons", {
   id: idUuid,
@@ -245,10 +233,6 @@ export const salespersonsTable = p.pgTable("salespersons", {
     .notNull()
     .unique()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-  factoryId: p
-    .uuid("factory_id")
-    .notNull()
-    .references(() => factoriesTable.id, { onDelete: "cascade" }),
   phone: p.varchar("phone", { length: 50 }),
   whatsapp: p.varchar("whatsapp", { length: 50 }),
   position: p.varchar("position", { length: 100 }),
@@ -258,20 +242,40 @@ export const salespersonsTable = p.pgTable("salespersons", {
   lastAssignedAt: p.timestamp("last_assigned_at"),
 });
 
-export const salespersonCategoriesTable = p.pgTable(
-  "salesperson_categories",
-  {
-    salespersonId: p
-      .uuid("salesperson_id")
-      .notNull()
-      .references(() => salespersonsTable.id, { onDelete: "cascade" }),
-    categoryId: p
-      .uuid("category_id")
-      .notNull()
-      .references(() => categoriesTable.id, { onDelete: "cascade" }),
-  },
-  (t) => [p.primaryKey({ columns: [t.salespersonId, t.categoryId] })]
-);
+export const salespersonAffiliationsTable = p.pgTable("salesperson_affiliations", {
+  id: idUuid,
+  createdAt,
+  updatedAt,
+  salespersonId: p
+    .uuid("salesperson_id")
+    .notNull()
+    .references(() => salespersonsTable.id, { onDelete: "cascade" }),
+  // 只能有一个非空
+  factoryId: p.uuid("factory_id").references(() => factoriesTable.id, {
+    onDelete: "cascade",
+  }),
+  exporterId: p.uuid("exporter_id").references(() => exportersTable.id, {
+    onDelete: "cascade",
+  }),
+  entityType: entityTypeEnum("entity_type").notNull(),
+})
+
+
+
+// export const salespersonCategoriesTable = p.pgTable(
+//   "salesperson_categories",
+//   {
+//     salespersonId: p
+//       .uuid("salesperson_id")
+//       .notNull()
+//       .references(() => salespersonsTable.id, { onDelete: "cascade" }),
+//     categoryId: p
+//       .uuid("category_id")
+//       .notNull()
+//       .references(() => MasterTable.id, { onDelete: "cascade" }),
+//   },
+//   (t) => [p.primaryKey({ columns: [t.salespersonId, t.categoryId] })]
+// );
 
 export const mediaTable = p.pgTable("media", {
   id: idUuid,
@@ -323,6 +327,8 @@ export const adsTable = p.pgTable("advertisements", {
   isActive: p.boolean("is_active").default(true),
   startDate: p.timestamp("start_date").notNull(),
   endDate: p.timestamp("end_date").notNull(),
+  // 🔥 必须新增：属于哪个站点
+  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const heroCardsTable = p.pgTable("hero_cards", {
@@ -339,6 +345,8 @@ export const heroCardsTable = p.pgTable("hero_cards", {
   imageId: p.uuid("image_id").references(() => mediaTable.id),
   sortOrder: p.integer("sort_order").default(0),
   isActive: p.boolean("is_active").default(true),
+  // 🔥 必须新增：属于哪个站点
+  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const productsTable = p.pgTable("products_table", {
@@ -349,26 +357,27 @@ export const productsTable = p.pgTable("products_table", {
   name: p.varchar("name", { length: 255 }).notNull(),
   description: p.text("description"),
   status: p.integer("status").notNull().default(1),
+  units: p.varchar("units", { length: 20 }),
+
   factoryId: p.uuid("factory_id").references(() => factoriesTable.id, {
     onDelete: "restrict",
   }),
-  units: p.varchar("units", { length: 20 }),
 });
 
-export const productCategoriesTable = p.pgTable(
-  "product_categories",
-  {
-    productId: p
-      .uuid("product_id")
-      .notNull()
-      .references(() => productsTable.id),
-    categoryId: p
-      .uuid("category_id")
-      .notNull()
-      .references(() => categoriesTable.id),
-  },
-  (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
-);
+// export const productCategoriesTable = p.pgTable(
+//   "product_categories",
+//   {
+//     productId: p
+//       .uuid("product_id")
+//       .notNull()
+//       .references(() => productsTable.id),
+//     categoryId: p
+//       .uuid("category_id")
+//       .notNull()
+//       .references(() => MasterTable.id),
+//   },
+//   (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
+// );
 
 export const productMediaTable = p.pgTable(
   "product_images",
@@ -393,7 +402,7 @@ export const attributeTemplateTable = p.pgTable("attribute_templates", {
   categoryId: p
     .uuid("category_id")
     .notNull()
-    .references(() => categoriesTable.id),
+    .references(() => MasterTable.id),
 });
 
 export const attributeTable = p.pgTable("attributes_table", {
@@ -455,20 +464,20 @@ export const skusTable = p.pgTable("skus_table", {
   status: p.integer("status").notNull().default(1),
 });
 
-export const productFactoriesTable = p.pgTable(
-  "product_factories",
-  {
-    productId: p
-      .uuid("product_id")
-      .notNull()
-      .references(() => productsTable.id, { onDelete: "cascade" }),
-    factoryId: p
-      .uuid("factory_id")
-      .notNull()
-      .references(() => factoriesTable.id, { onDelete: "cascade" }),
-  },
-  (t) => [p.primaryKey({ columns: [t.productId, t.factoryId] })]
-);
+// export const productFactoriesTable = p.pgTable(
+//   "product_factories",
+//   {
+//     productId: p
+//       .uuid("product_id")
+//       .notNull()
+//       .references(() => productsTable.id, { onDelete: "cascade" }),
+//     factoryId: p
+//       .uuid("factory_id")
+//       .notNull()
+//       .references(() => factoriesTable.id, { onDelete: "cascade" }),
+//   },
+//   (t) => [p.primaryKey({ columns: [t.productId, t.factoryId] })]
+// );
 
 export const productStatisticsTable = p.pgTable("product_statistics", {
   id: idUuid,
@@ -502,6 +511,12 @@ export const inquiryTable = p.pgTable("inquiries", {
   customerPhone: p.integer("phone"), // ⚠️ 可能应为 varchar
   customerWhatsapp: p.varchar("whatsapp", { length: 50 }),
   status: inquiryStatusEnum("status").default("pending").notNull(),
+  // 🔥 新增：来源标记
+  // 这个询盘虽然属于 factoryId (通过 items 关联)，但我们需要知道它是从哪个 Site 提交的
+  siteId: p.uuid("site_id").references(() => sitesTable.id),
+
+
+
 });
 
 export const inquiryItemsTable = p.pgTable("inquiry_items", {
@@ -585,6 +600,8 @@ export const siteConfigTable = p.pgTable("site_config", {
   url: p.varchar("url", { length: 255 }).default(""),
   translatable: p.boolean("translatable").default(true),
   visible: p.boolean("visible").default(false),
+  // 🔥 必须新增：属于哪个站点
+  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const dailyInquiryCounterTable = p.pgTable("daily_inquiry_counter", {
@@ -598,14 +615,15 @@ export const dailyInquiryCounterTable = p.pgTable("daily_inquiry_counter", {
 
 export const translationDictTable = p.pgTable("translation_dict", {
   id: idUuid,
+  createdAt,
+  updatedAt,
   key: p.varchar("key", { length: 255 }).notNull().unique(),
   category: p.varchar("category", { length: 100 }).default("general"),
   description: p.text("description"),
   translations: p.json("translations").notNull().$type<Record<string, any>>(),
   isActive: p.boolean("is_active").default(true),
   sortOrder: p.integer("sort_order").default(0),
-  createdAt,
-  updatedAt,
+
 });
 
 // --- Multi-site Support Tables ---
@@ -619,22 +637,17 @@ export const sitesTable = p.pgTable("sites", {
   domain: p.varchar("domain", { length: 255 }).unique().notNull(),
 
   // 站点类型：factory 或 exporter
-  siteType: p.varchar("site_type", { enum: ["factory", "exporter"] }).notNull(),
-
-  // 关联的业务实体ID
-  entityId: p.uuid("entity_id").notNull(), // factory_id 或 exporter_id
-
-  // 站点配置
-  themeConfig: p.json("theme_config").$type<Record<string, any>>(),
-  featureConfig: p.json("feature_config").$type<Record<string, any>>(),
-
+  siteType: entityTypeEnum('site_type').notNull(),
+  factoryId: p.uuid("factory_id").references(() => factoriesTable.id),
+  exporterId: p.uuid("exporter_id").references(() => exportersTable.id),
   isActive: p.boolean("is_active").default(true),
-
 });
 
 // 站点分类表 - 每个站点独立的分类体系
 export const siteCategoriesTable = p.pgTable("site_categories", {
   id: idUuid,
+  createdAt,
+  updatedAt,
   siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
 
   name: p.varchar("name", { length: 100 }).notNull(),
@@ -642,10 +655,9 @@ export const siteCategoriesTable = p.pgTable("site_categories", {
   sortOrder: p.integer("sort_order").default(0),
 
   // 分类可以关联到全局分类（可选，用于数据聚合）
-  globalCategoryId: p.uuid("global_category_id").references(() => categoriesTable.id),
+  masterCategoryId: p.uuid("master_category_id").references(() => MasterTable.id),
 
-  createdAt,
-  updatedAt,
+
 });
 
 // 站点商品关联表 - 每个站点展示的商品
@@ -672,21 +684,6 @@ export const siteProductsTable = p.pgTable("site_products", {
 
   // 关联站点分类
   siteCategoryId: p.uuid("site_category_id").references(() => siteCategoriesTable.id),
-
-
 });
-
-// 用户站点权限表
-export const userSitePermissionsTable = p.pgTable(
-  "user_site_permissions",
-  {
-    userId: p.uuid("user_id").references(() => usersTable.id).notNull(),
-    siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
-    role: p.varchar("role", { enum: ["admin", "editor", "viewer"] }).notNull(),
-    createdAt,
-    updatedAt,
-  },
-  (t) => [p.primaryKey({ columns: [t.userId, t.siteId] })]
-);
 
 

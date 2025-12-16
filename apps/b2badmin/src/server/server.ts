@@ -5,8 +5,9 @@ import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { dbPlugin } from "@/server/db/connection";
 import { auth } from "@/server/lib/auth";
 import { OpenAPI } from "@/server/lib/auth-openapi";
-import { betterAuthPlugin } from "@/server/plugins/auth.plugin";
+
 import { localeMiddleware } from "@/server/plugins/locale";
+import { adminAuthPlugin } from "./plugins/admin-auth.plugin";
 import { loggerPlugin } from "./plugins/logger";
 import { errorPlugin } from "./utils/err/err.plugin";
 
@@ -32,7 +33,7 @@ export const server = new Elysia({ name: "server" })
     })
   )
   .mount("/", auth.handler) // 使用 Better Auth 认证中间件
-  .use(betterAuthPlugin)
+  .use(adminAuthPlugin)
   .use(
     openapi({
       documentation: {

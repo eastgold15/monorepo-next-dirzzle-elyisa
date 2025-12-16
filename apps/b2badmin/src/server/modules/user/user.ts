@@ -2,19 +2,19 @@
 
 import { UserManagementTModel } from "@repo/contract";
 import {
-  exportersTable,
   factoriesTable,
   roleTable,
   salespersonsTable,
-  userResourceRolesTable,
+  sitesTable,
+  userSiteRolesTable,
   usersTable,
 } from "@repo/contract/table";
 
 import { and, count, desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { dbPlugin } from "@/server/db/connection";
+import { adminAuthPlugin } from "@/server/plugins/admin-auth.plugin";
 import { commonRes } from "@/server/utils/Res";
-import { betterAuthPlugin } from "../../plugins/auth.plugin";
 
 export const userRoute = new Elysia({
   prefix: "/user",
@@ -22,33 +22,12 @@ export const userRoute = new Elysia({
 })
 
   .use(dbPlugin)
-  .use(betterAuthPlugin)
+  .use(adminAuthPlugin)
   .get(
     "/me",
-    async ({ userInfo, db }) => {
-      const user = userInfo;
-
-      // 获取用户的资源角色关联
-      const userResources = await db
-        .select({
-          resourceType: userResourceRolesTable.resourceType,
-          resourceId: userResourceRolesTable.resourceId,
-          isPrimary: userResourceRolesTable.isPrimary,
-          roleName: roleTable.name,
-        })
-        .from(userResourceRolesTable)
-        .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
-        .where(eq(userResourceRolesTable.userId, userInfo.id));
-
-      // 获取用户的角色类型
-      const userRole =
-        userResources.find((r) => r.isPrimary)?.roleName || "salesperson";
-      const primaryExporter = userResources.find(
-        (r) => r.resourceType === "exporter" && r.isPrimary
-      );
-      const primaryFactory = userResources.find(
-        (r) => r.resourceType === "factory" && r.isPrimary
-      );
+    async ({ user, currentSite, tenantId, tenantType, allSites, db }) => {
+      // 获取当前用户的角色（从认证插件中获取的最高权限角色）
+      const currentRole = allSites[0]?.role?.name || "salesperson";
 
       // 初始化数据结构
       let exporterInfo: any = null;
@@ -56,23 +35,98 @@ export const userRoute = new Elysia({
       let colleaguesInfo: any[] = [];
       let subordinatesInfo: any[] = [];
 
-      // 根据角色获取详细信息
-      if (userRole === "exporter_admin" && primaryExporter) {
-        // 出口商管理员：获取出口商信息、所有工厂和用户
-        exporterInfo = await db
-          .select()
-          .from(exportersTable)
-          .where(eq(exportersTable.id, primaryExporter.resourceId))
-          .limit(1);
-        exporterInfo = exporterInfo[0] || null;
+      // 根据租户类型获取详细信息
+      if (tenantType === "exporter") {
+        // 出口商租户
+        exporterInfo = await db.query.exportersTable.findFirst({
+          where: {
+            id: tenantId,
+          },
+        });
 
-        // 获取该出口商下的所有工厂
-        factoriesInfo = await db
-          .select()
-          .from(factoriesTable)
-          .where(eq(factoriesTable.exporterId, primaryExporter.resourceId));
+        if (exporterInfo) {
+          // 获取该出口商下的所有工厂
+          factoriesInfo = await db.query.factoriesTable.findMany({
+            where: {
+              exporterId: tenantId,
+            },
+          });
+        }
+      } else if (tenantType === "factory") {
+        // 工厂租户
+        const factory = await db.query.factoriesTable.findFirst({
+          where: {
+            id: tenantId,
+          },
+        });
 
-        // 获取该出口商下的所有用户（同事）
+        if (factory?.exporterId) {
+          // 获取出口商信息
+          exporterInfo = await db.query.exportersTable.findFirst({
+            where: {
+              id: factory.exporterId,
+            },
+          });
+
+          // 获取同出口商下的所有工厂
+          factoriesInfo = await db.query.factoriesTable.findMany({
+            where: {
+              exporterId: factory.exporterId,
+            },
+          });
+        }
+      }
+
+      // 根据角色获取团队信息
+      if (currentRole === "SUPER_ADMIN" || currentRole === "exporter_admin") {
+        // 获取出口商下的所有用户
+        if (exporterInfo) {
+          colleaguesInfo = await db
+            .select({
+              userId: usersTable.id,
+              userName: usersTable.name,
+              userEmail: usersTable.email,
+              role: roleTable.name,
+              avatar: usersTable.image,
+            })
+            .from(userSiteRolesTable)
+            .innerJoin(sitesTable, eq(userSiteRolesTable.siteId, sitesTable.id))
+            .innerJoin(usersTable, eq(usersTable.id, userSiteRolesTable.userId))
+            .leftJoin(roleTable, eq(roleTable.id, userSiteRolesTable.roleId))
+            .where(
+              and(
+                eq(sitesTable.entityId, exporterInfo.id),
+                eq(sitesTable.siteType, "exporter")
+              )
+            );
+        }
+      } else if (currentRole === "factory_admin") {
+        // 获取工厂下的业务员
+        subordinatesInfo = await db
+          .select({
+            userId: usersTable.id,
+            userName: usersTable.name,
+            userEmail: usersTable.email,
+            phone: salespersonsTable.phone,
+            avatar: usersTable.image,
+          })
+          .from(userSiteRolesTable)
+          .innerJoin(sitesTable, eq(userSiteRolesTable.siteId, sitesTable.id))
+          .innerJoin(usersTable, eq(usersTable.id, userSiteRolesTable.userId))
+          .innerJoin(roleTable, eq(roleTable.id, userSiteRolesTable.roleId))
+          .leftJoin(
+            salespersonsTable,
+            eq(salespersonsTable.userId, usersTable.id)
+          )
+          .where(
+            and(
+              eq(sitesTable.entityId, tenantId),
+              eq(sitesTable.siteType, "factory"),
+              eq(roleTable.name, "salesperson")
+            )
+          );
+      } else if (currentRole === "salesperson") {
+        // 获取同工厂的同事
         colleaguesInfo = await db
           .select({
             userId: usersTable.id,
@@ -80,157 +134,17 @@ export const userRoute = new Elysia({
             userEmail: usersTable.email,
             role: roleTable.name,
             avatar: usersTable.image,
-            isPrimary: userResourceRolesTable.isPrimary,
           })
-          .from(userResourceRolesTable)
-          .innerJoin(
-            usersTable,
-            eq(usersTable.id, userResourceRolesTable.userId)
-          )
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
+          .from(userSiteRolesTable)
+          .innerJoin(sitesTable, eq(userSiteRolesTable.siteId, sitesTable.id))
+          .innerJoin(usersTable, eq(usersTable.id, userSiteRolesTable.userId))
+          .leftJoin(roleTable, eq(roleTable.id, userSiteRolesTable.roleId))
           .where(
             and(
-              eq(userResourceRolesTable.resourceType, "exporter"),
-              eq(userResourceRolesTable.resourceId, primaryExporter.resourceId)
-              // 不要排除自己，需要显示所有用户
+              eq(sitesTable.entityId, tenantId),
+              eq(sitesTable.siteType, "factory")
             )
           );
-      } else if (userRole === "factory_admin" && primaryFactory) {
-        // 工厂管理员：获取工厂信息、出口商信息和业务员
-        const factory = await db
-          .select()
-          .from(factoriesTable)
-          .where(eq(factoriesTable.id, primaryFactory.resourceId))
-          .limit(1);
-
-        if (factory[0]) {
-          // 获取出口商信息
-          if (factory[0].exporterId) {
-            exporterInfo = await db
-              .select()
-              .from(exportersTable)
-              .where(eq(exportersTable.id, factory[0].exporterId))
-              .limit(1);
-            exporterInfo = exporterInfo[0] || null;
-
-            // 获取同出口商下的所有工厂
-            factoriesInfo = await db
-              .select()
-              .from(factoriesTable)
-              .where(eq(factoriesTable.exporterId, factory[0].exporterId));
-          }
-
-          // 获取该工厂下的业务员（下属）
-          subordinatesInfo = await db
-            .select({
-              userId: usersTable.id,
-              userName: usersTable.name,
-              userEmail: usersTable.email,
-              phone: salespersonsTable.phone,
-              avatar: usersTable.image,
-            })
-            .from(userResourceRolesTable)
-            .innerJoin(
-              usersTable,
-              eq(usersTable.id, userResourceRolesTable.userId)
-            )
-            .innerJoin(
-              roleTable,
-              eq(roleTable.id, userResourceRolesTable.roleId)
-            )
-            .leftJoin(
-              salespersonsTable,
-              eq(salespersonsTable.userId, usersTable.id)
-            )
-            .where(
-              and(
-                eq(userResourceRolesTable.resourceType, "factory"),
-                eq(
-                  userResourceRolesTable.resourceId,
-                  primaryFactory.resourceId
-                ),
-                eq(roleTable.name, "salesperson")
-              )
-            );
-
-          // 获取同出口商下的其他工厂管理员（同事）
-          colleaguesInfo = await db
-            .select({
-              userId: usersTable.id,
-              userName: usersTable.name,
-              userEmail: usersTable.email,
-              role: roleTable.name,
-              avatar: usersTable.image,
-            })
-            .from(userResourceRolesTable)
-            .innerJoin(
-              usersTable,
-              eq(usersTable.id, userResourceRolesTable.userId)
-            )
-            .leftJoin(
-              roleTable,
-              eq(roleTable.id, userResourceRolesTable.roleId)
-            )
-            .where(
-              and(
-                eq(userResourceRolesTable.resourceType, "exporter"),
-                eq(userResourceRolesTable.resourceId, factory[0].exporterId!),
-                eq(roleTable.name, "factory_admin"),
-                eq(usersTable.id, userInfo.id) // 只包含自己
-              )
-            );
-        }
-      } else if (userRole === "salesperson" && primaryFactory) {
-        // 业务员：获取所属工厂、出口商信息
-        const factory = await db
-          .select()
-          .from(factoriesTable)
-          .where(eq(factoriesTable.id, primaryFactory.resourceId))
-          .limit(1);
-
-        if (factory[0]) {
-          // 获取出口商信息
-          if (factory[0].exporterId) {
-            exporterInfo = await db
-              .select()
-              .from(exportersTable)
-              .where(eq(exportersTable.id, factory[0].exporterId))
-              .limit(1);
-            exporterInfo = exporterInfo[0] || null;
-
-            // 获取同出口商下的所有工厂
-            factoriesInfo = await db
-              .select()
-              .from(factoriesTable)
-              .where(eq(factoriesTable.exporterId, factory[0].exporterId));
-          }
-
-          // 获取同工厂的同事
-          colleaguesInfo = await db
-            .select({
-              userId: usersTable.id,
-              userName: usersTable.name,
-              userEmail: usersTable.email,
-              role: roleTable.name,
-              avatar: usersTable.image,
-            })
-            .from(userResourceRolesTable)
-            .innerJoin(
-              usersTable,
-              eq(usersTable.id, userResourceRolesTable.userId)
-            )
-            .leftJoin(
-              roleTable,
-              eq(roleTable.id, userResourceRolesTable.roleId)
-            )
-            .where(
-              and(
-                eq(userResourceRolesTable.resourceType, "factory"),
-                eq(userResourceRolesTable.resourceId, primaryFactory.resourceId)
-                // 不要排除自己
-              )
-            );
-        }
       }
 
       // 组织固定的返回数据结构
@@ -241,7 +155,7 @@ export const userRoute = new Elysia({
           name: user.name,
           email: user.email,
           avatar: user.image,
-          role: userRole,
+          role: currentRole,
           emailVerified: user.emailVerified,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
@@ -263,13 +177,14 @@ export const userRoute = new Elysia({
             : null,
 
           // 主要工厂（用户属于哪个工厂）
-          factory: primaryFactory
-            ? {
-              id: primaryFactory.resourceId,
-              role: primaryFactory.roleName,
-              isPrimary: primaryFactory.isPrimary,
-            }
-            : null,
+          factory:
+            tenantType === "factory"
+              ? {
+                id: tenantId,
+                role: currentRole,
+                isPrimary: true,
+              }
+              : null,
 
           // 可访问的工厂列表
           accessibleFactories: factoriesInfo.map((f) => ({
@@ -291,9 +206,9 @@ export const userRoute = new Elysia({
             factoriesCount: factoriesInfo.length,
             // 管理范围描述
             manageScope:
-              userRole === "exporter_admin"
+              currentRole === "SUPER_ADMIN" || currentRole === "exporter_admin"
                 ? "管理整个出口商及其所有工厂"
-                : userRole === "factory_admin"
+                : currentRole === "factory_admin"
                   ? "管理指定工厂"
                   : "仅限个人数据",
           },
@@ -303,12 +218,14 @@ export const userRoute = new Elysia({
         team: {
           // 上级或平级管理员（出口商管理员和工厂管理员）
           managers:
-            userRole === "salesperson"
+            currentRole === "salesperson"
               ? []
               : colleaguesInfo
                 .filter(
                   (c) =>
-                    c.role === "exporter_admin" || c.role === "factory_admin"
+                    c.role === "SUPER_ADMIN" ||
+                    c.role === "exporter_admin" ||
+                    c.role === "factory_admin"
                 )
                 .map((c) => ({
                   id: c.userId,
@@ -321,7 +238,7 @@ export const userRoute = new Elysia({
 
           // 同事（同级别的用户）
           colleagues: colleaguesInfo
-            .filter((c) => c.role === userRole) // 只显示同角色的同事
+            .filter((c) => c.role === currentRole) // 只显示同角色的同事
             .map((c) => ({
               id: c.userId,
               name: c.userName,
@@ -343,37 +260,50 @@ export const userRoute = new Elysia({
           // 统计
           stats: {
             managersCount:
-              userRole === "salesperson"
+              currentRole === "salesperson"
                 ? 0
                 : colleaguesInfo.filter(
                   (c) =>
-                    c.role === "exporter_admin" || c.role === "factory_admin"
+                    c.role === "SUPER_ADMIN" ||
+                    c.role === "exporter_admin" ||
+                    c.role === "factory_admin"
                 ).length,
-            colleaguesCount: colleaguesInfo.filter((c) => c.role === userRole)
-              .length,
+            colleaguesCount: colleaguesInfo.filter(
+              (c) => c.role === currentRole
+            ).length,
             subordinatesCount: subordinatesInfo.length,
             teamSize:
               colleaguesInfo.length +
               subordinatesInfo.length +
-              (userRole === "salesperson" ? 0 : 1), // +1 包含自己
+              (currentRole === "salesperson" ? 0 : 1), // +1 包含自己
           },
         },
 
         // 快速访问信息（用于前端导航）
         quickAccess: {
           // 当前用户的主要角色
-          primaryRole: userRole,
+          primaryRole: currentRole,
 
           // 是否有管理权限
-          canManage: userRole !== "salesperson",
+          canManage: currentRole !== "salesperson",
 
           // 可执行的操作
           actions: {
-            canCreateUser: userRole !== "salesperson",
-            canCreateFactory: userRole === "exporter_admin",
-            canViewReports: userRole !== "salesperson",
+            canCreateUser: currentRole !== "salesperson",
+            canCreateFactory: currentRole === "exporter_admin",
+            canViewReports: currentRole !== "salesperson",
             canManageProducts: true, // 所有角色都可以管理商品（权限不同）
           },
+        },
+
+        // 站点信息（新增）
+        sites: {
+          current: currentSite,
+          all: allSites.map((s) => ({
+            site: s.site,
+            role: s.role,
+            priority: s.priority,
+          })),
         },
       };
 
@@ -392,29 +322,8 @@ export const userRoute = new Elysia({
   // 获取用户列表
   .get(
     "/list",
-    async ({ userInfo, db, query }) => {
+    async ({ tenantId, tenantType, db, query }) => {
       try {
-        // 获取用户的资源角色关联
-        const userResources = await db
-          .select({
-            resourceType: userResourceRolesTable.resourceType,
-            resourceId: userResourceRolesTable.resourceId,
-            isPrimary: userResourceRolesTable.isPrimary,
-            roleName: roleTable.name,
-          })
-          .from(userResourceRolesTable)
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
-          .where(eq(userResourceRolesTable.userId, userInfo.id));
-
-        const userRole = userResources.find((r) => r.isPrimary)?.roleName;
-
-        console.log("用户资源关联:", userResources);
-        console.log("用户角色:", userRole);
-
-        if (!userRole) {
-          return commonRes(null, 403, "未找到用户角色");
-        }
-
         const {
           page = 1,
           limit = 20,
@@ -437,71 +346,39 @@ export const userRoute = new Elysia({
             userCreatedAt: usersTable.createdAt,
             userUpdatedAt: usersTable.updatedAt,
             roleName: roleTable.name,
+            siteId: sitesTable.id,
+            siteName: sitesTable.name,
+            siteType: sitesTable.siteType,
             factoryId: factoriesTable.id,
             factoryName: factoriesTable.name,
             factoryCode: factoriesTable.code,
           })
           .from(usersTable)
           .innerJoin(
-            userResourceRolesTable,
-            eq(usersTable.id, userResourceRolesTable.userId)
+            userSiteRolesTable,
+            eq(usersTable.id, userSiteRolesTable.userId)
           )
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
+          .innerJoin(sitesTable, eq(userSiteRolesTable.siteId, sitesTable.id))
+          .leftJoin(roleTable, eq(roleTable.id, userSiteRolesTable.roleId))
           .leftJoin(
             salespersonsTable,
             eq(salespersonsTable.userId, usersTable.id)
           )
-          .leftJoin(
-            factoriesTable,
-            or(
-              eq(factoriesTable.id, salespersonsTable.factoryId),
-              eq(factoriesTable.id, userResourceRolesTable.resourceId)
-            )
-          )
+          .leftJoin(factoriesTable, eq(factoriesTable.id, sitesTable.entityId))
           .$dynamic();
 
         // 构建条件数组
         const conditions = [];
 
-        // 根据角色过滤数据
-        if (userRole === "exporter_admin") {
-          const primaryExporter = userResources.find(
-            (r) => r.resourceType === "exporter" && r.isPrimary
-          );
-          console.log("主出口商:", primaryExporter);
-          if (primaryExporter) {
-            conditions.push(
-              or(
-                eq(factoriesTable.exporterId, primaryExporter.resourceId),
-                eq(
-                  userResourceRolesTable.resourceId,
-                  primaryExporter.resourceId
-                )
-              )
-            );
-          }
-        } else if (userRole === "factory_admin") {
-          const primaryFactory = userResources.find(
-            (r) => r.resourceType === "factory" && r.isPrimary
-          );
-          if (primaryFactory) {
-            conditions.push(
-              eq(userResourceRolesTable.resourceId, primaryFactory.resourceId)
-            );
-          } else {
-            // 如果没有分配工厂，返回空
-            return commonRes({
-              users: [],
-              pagination: {
-                page: Number(page),
-                limit: Number(limit),
-                total: 0,
-                totalPages: 0,
-              },
-            });
-          }
+        // 根据租户类型过滤数据
+        if (tenantType === "exporter") {
+          // 出口商管理员：查看该出口商下的所有用户（包括所有工厂站点）
+          conditions.push(eq(factoriesTable.exporterId, tenantId));
+        } else if (tenantType === "factory") {
+          // 工厂管理员：查看该工厂下的用户
+          conditions.push(eq(sitesTable.entityId, tenantId));
         } else {
-          // 业务员不能查看用户列表
+          // 其他角色不能查看用户列表
           return commonRes(null, 403, "权限不足");
         }
 
@@ -535,21 +412,16 @@ export const userRoute = new Elysia({
           .select({ count: count() })
           .from(usersTable)
           .innerJoin(
-            userResourceRolesTable,
-            eq(usersTable.id, userResourceRolesTable.userId)
+            userSiteRolesTable,
+            eq(usersTable.id, userSiteRolesTable.userId)
           )
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
+          .innerJoin(sitesTable, eq(userSiteRolesTable.siteId, sitesTable.id))
+          .leftJoin(roleTable, eq(roleTable.id, userSiteRolesTable.roleId))
           .leftJoin(
             salespersonsTable,
             eq(salespersonsTable.userId, usersTable.id)
           )
-          .leftJoin(
-            factoriesTable,
-            or(
-              eq(factoriesTable.id, salespersonsTable.factoryId),
-              eq(factoriesTable.id, userResourceRolesTable.resourceId)
-            )
-          );
+          .leftJoin(factoriesTable, eq(factoriesTable.id, sitesTable.entityId));
 
         if (conditions.length > 0) {
           countQuery.where(and(...conditions));
@@ -579,6 +451,9 @@ export const userRoute = new Elysia({
             (user.roleName === "factory_admin" ? "工厂管理员" : "未设置"),
           isActive: user.userIsActive ?? true, // 如果没有 salesperson 记录，默认为活跃
           roleName: user.roleName || "unknown",
+          siteId: user.siteId,
+          siteName: user.siteName,
+          siteType: user.siteType,
           factoryName: user.factoryName,
           factoryId: user.factoryId,
           createdAt: user.userCreatedAt?.toISOString().split("T")[0],
@@ -610,21 +485,9 @@ export const userRoute = new Elysia({
   // 创建业务员账号
   .post(
     "/salesperson",
-    async ({ body, userInfo, db }) => {
+    async ({ body, tenantId, tenantType, roles, db }) => {
       try {
-        // 获取用户的资源角色关联
-        const userResources = await db
-          .select({
-            resourceType: userResourceRolesTable.resourceType,
-            resourceId: userResourceRolesTable.resourceId,
-            isPrimary: userResourceRolesTable.isPrimary,
-            roleName: roleTable.name,
-          })
-          .from(userResourceRolesTable)
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
-          .where(eq(userResourceRolesTable.userId, userInfo.id));
-
-        const userRole = userResources.find((r) => r.isPrimary)?.roleName;
+        const userRole = roles[0]; // 从认证中间件获取的用户角色
 
         // 权限检查：只有管理员可以创建业务员
         if (
@@ -639,30 +502,22 @@ export const userRoute = new Elysia({
 
         // 验证工厂权限
         let canCreateInFactory = false;
-        if (userRole === "exporter_admin") {
-          // 出口商管理员可以在自己的任何工厂下创建业务员
-          const primaryExporter = userResources.find(
-            (r) => r.resourceType === "exporter" && r.isPrimary
-          );
-          if (primaryExporter) {
-            const factory = await db
-              .select()
-              .from(factoriesTable)
-              .where(
-                and(
-                  eq(factoriesTable.id, factoryId),
-                  eq(factoriesTable.exporterId, primaryExporter.resourceId)
-                )
-              )
-              .limit(1);
-            canCreateInFactory = factory.length > 0;
+        if (userRole === "exporter_admin" || userRole === "SUPER_ADMIN") {
+          // 出口商管理员或超级管理员可以在该出口商下的任何工厂创建业务员
+          if (tenantType === "exporter") {
+            const factory = await db.query.factoriesTable.findFirst({
+              where: {
+
+                id: factoryId,
+                exporterId: tenantId
+
+              }
+            });
+            canCreateInFactory = !!factory;
           }
         } else if (userRole === "factory_admin") {
           // 工厂管理员只能在自己管理的工厂下创建业务员
-          const primaryFactory = userResources.find(
-            (r) => r.resourceType === "factory" && r.isPrimary
-          );
-          canCreateInFactory = primaryFactory?.resourceId === factoryId;
+          canCreateInFactory = tenantId === factoryId;
         }
 
         if (!canCreateInFactory) {
@@ -705,16 +560,47 @@ export const userRoute = new Elysia({
             })
             .returning();
 
-          // 2. 分配角色和资源
-          await tx.insert(userResourceRolesTable).values({
+          // 2. 获取或创建工厂站点
+          let [factorySite] = await tx
+            .select()
+            .from(sitesTable)
+            .where(
+              and(
+                eq(sitesTable.entityId, factoryId),
+                eq(sitesTable.siteType, "factory")
+              )
+            )
+            .limit(1);
+
+          if (!factorySite) {
+            // 如果站点不存在，创建一个
+            const factory = await tx.query.factoriesTable.findFirst({
+              where: {
+                id: factoryId
+              }
+            });
+            if (!factory) {
+              throw new Error("工厂不存在");
+            }
+            [factorySite] = await tx
+              .insert(sitesTable)
+              .values({
+                name: `${factory.name} - 管理站点`,
+                domain: `${factory.code}.admin.example.com`,
+                siteType: "factory",
+                entityId: factoryId,
+              })
+              .returning();
+          }
+
+          // 3. 分配角色到站点
+          await tx.insert(userSiteRolesTable).values({
             userId: newUser.id,
-            resourceType: "factory",
-            resourceId: factoryId,
+            siteId: factorySite.id,
             roleId: salespersonRole[0].id,
-            isPrimary: true,
           });
 
-          // 3. 创建业务员记录
+          // 4. 创建业务员记录
           const [newSalesperson] = await tx
             .insert(salespersonsTable)
             .values({
@@ -726,7 +612,7 @@ export const userRoute = new Elysia({
             })
             .returning();
 
-          // 4. 获取工厂名称
+          // 5. 获取工厂名称
           const factory = await tx
             .select({ name: factoriesTable.name })
             .from(factoriesTable)
@@ -770,65 +656,40 @@ export const userRoute = new Elysia({
   // 获取可访问的工厂列表
   .get(
     "/factories",
-    async ({ userInfo, db }) => {
+    async ({ tenantId, tenantType, db }) => {
       try {
-        // 获取用户的资源角色关联
-        const userResources = await db
-          .select({
-            resourceType: userResourceRolesTable.resourceType,
-            resourceId: userResourceRolesTable.resourceId,
-            isPrimary: userResourceRolesTable.isPrimary,
-            roleName: roleTable.name,
-          })
-          .from(userResourceRolesTable)
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
-          .where(eq(userResourceRolesTable.userId, userInfo.id));
-
-        const userRole = userResources.find((r) => r.isPrimary)?.roleName;
-
         let factories: any[] = [];
 
-        if (userRole === "exporter_admin") {
+        if (tenantType === "exporter") {
           // 出口商管理员可以查看所有工厂
-          const primaryExporter = userResources.find(
-            (r) => r.resourceType === "exporter" && r.isPrimary
-          );
-          if (primaryExporter) {
-            factories = await db
-              .select({
-                id: factoriesTable.id,
-                name: factoriesTable.name,
-                code: factoriesTable.code,
-                description: factoriesTable.description,
-                isActive: factoriesTable.isActive,
-              })
-              .from(factoriesTable)
-              .where(
-                and(
-                  eq(factoriesTable.exporterId, primaryExporter.resourceId),
-                  eq(factoriesTable.isActive, true)
-                )
-              );
-          }
-        } else if (userRole === "factory_admin") {
+          factories = await db.query.factoriesTable.findMany({
+            where: {
+              exporterId: tenantId,
+              isActive: true
+            },
+            columns: {
+              id: true,
+              name: true,
+              code: true,
+              description: true,
+              isActive: true,
+            },
+          });
+        } else if (tenantType === "factory") {
           // 工厂管理员只能查看自己管理的工厂
-          const primaryFactory = userResources.find(
-            (r) => r.resourceType === "factory" && r.isPrimary
-          );
-          if (primaryFactory) {
-            const factory = await db
-              .select({
-                id: factoriesTable.id,
-                name: factoriesTable.name,
-                code: factoriesTable.code,
-                description: factoriesTable.description,
-                isActive: factoriesTable.isActive,
-              })
-              .from(factoriesTable)
-              .where(eq(factoriesTable.id, primaryFactory.resourceId))
-              .limit(1);
-            factories = factory;
-          }
+          const factory = await db.query.factoriesTable.findFirst({
+            where: {
+              id: tenantId,
+            },
+            columns: {
+              id: true,
+              name: true,
+              code: true,
+              description: true,
+              isActive: true,
+            },
+          });
+          factories = factory ? [factory] : [];
         } else {
           // 其他角色无权查看
           return commonRes(null, 403, "权限不足");
@@ -852,24 +713,12 @@ export const userRoute = new Elysia({
   // 更新用户状态
   .patch(
     "/:userId/status",
-    async ({ params, body, userInfo, db }) => {
+    async ({ params, body, tenantId, tenantType, roles, db }) => {
       try {
         const { userId } = params as { userId: string };
         const { isActive } = body as { isActive: boolean };
 
-        // 获取当前用户的角色
-        const userResources = await db
-          .select({
-            resourceType: userResourceRolesTable.resourceType,
-            resourceId: userResourceRolesTable.resourceId,
-            isPrimary: userResourceRolesTable.isPrimary,
-            roleName: roleTable.name,
-          })
-          .from(userResourceRolesTable)
-          .leftJoin(roleTable, eq(roleTable.id, userResourceRolesTable.roleId))
-          .where(eq(userResourceRolesTable.userId, userInfo.id));
-
-        const userRole = userResources.find((r) => r.isPrimary)?.roleName;
+        const userRole = roles[0]; // 从认证中间件获取的用户角色
 
         if (
           !userRole ||
@@ -878,52 +727,84 @@ export const userRoute = new Elysia({
           return commonRes(null, 403, "权限不足，无法修改用户状态");
         }
 
-        // 检查目标用户是否存在
-        const targetUser = await db
+        // 检查目标用户是否存在以及其站点关联
+        const targetUserSites = await db
           .select({
             userId: usersTable.id,
             userName: usersTable.name,
+            siteId: sitesTable.id,
+            siteType: sitesTable.siteType,
+            entityId: sitesTable.entityId,
             salespersonId: salespersonsTable.id,
             factoryId: salespersonsTable.factoryId,
           })
           .from(usersTable)
+          .innerJoin(
+            userSiteRolesTable,
+            eq(usersTable.id, userSiteRolesTable.userId)
+          )
+          .innerJoin(sitesTable, eq(userSiteRolesTable.siteId, sitesTable.id))
           .leftJoin(
             salespersonsTable,
             eq(salespersonsTable.userId, usersTable.id)
           )
-          .where(eq(usersTable.id, userId))
-          .limit(1);
+          .where(eq(usersTable.id, userId));
 
-        if (targetUser.length === 0) {
-          return commonRes(null, 404, "用户不存在");
+        if (targetUserSites.length === 0) {
+          return commonRes(null, 404, "用户不存在或未分配到任何站点");
         }
 
         // 权限检查：只能管理自己权限范围内的用户
         let canManage = false;
-        if (userRole === "exporter_admin") {
-          // 出口商管理员可以管理所有业务员和工厂管理员
-          const primaryExporter = userResources.find(
-            (r) => r.resourceType === "exporter" && r.isPrimary
-          );
-          if (primaryExporter && targetUser[0].factoryId) {
-            const factory = await db
-              .select()
-              .from(factoriesTable)
-              .where(
-                and(
-                  eq(factoriesTable.id, targetUser[0].factoryId),
-                  eq(factoriesTable.exporterId, primaryExporter.resourceId)
-                )
-              )
-              .limit(1);
-            canManage = factory.length > 0;
+        if (userRole === "exporter_admin" || userRole === "SUPER_ADMIN") {
+          // 出口商管理员或超级管理员可以管理该出口商下的所有用户
+          if (tenantType === "exporter") {
+            // 检查目标用户是否属于当前出口商
+            const hasExporterAccess = targetUserSites.some((site) => {
+              if (site.siteType === "exporter" && site.entityId === tenantId) {
+                return true;
+              }
+              if (site.siteType === "factory" && site.factoryId) {
+                // 检查工厂是否属于当前出口商
+                return db.query.factoriesTable
+                  .findFirst({
+                    where: and(
+                      eq(factoriesTable.id, site.factoryId),
+                      eq(factoriesTable.exporterId, tenantId)
+                    ),
+                  })
+                  .then((factory) => !!factory);
+              }
+              return false;
+            });
+
+            // 对出口商管理员，需要检查所有站点
+            canManage = await Promise.all(
+              targetUserSites.map(async (site) => {
+                if (
+                  site.siteType === "exporter" &&
+                  site.entityId === tenantId
+                ) {
+                  return true;
+                }
+                if (site.siteType === "factory" && site.factoryId) {
+                  const factory = await db.query.factoriesTable.findFirst({
+                    where: {
+                      id: site.factoryId,
+                      exporterId: tenantId
+                    },
+                  });
+                  return !!factory;
+                }
+                return false;
+              })
+            ).then((results) => results.some((r) => r));
           }
         } else if (userRole === "factory_admin") {
           // 工厂管理员只能管理自己工厂的业务员
-          const primaryFactory = userResources.find(
-            (r) => r.resourceType === "factory" && r.isPrimary
+          canManage = targetUserSites.some(
+            (site) => site.siteType === "factory" && site.entityId === tenantId
           );
-          canManage = primaryFactory?.resourceId === targetUser[0].factoryId;
         }
 
         if (!canManage) {
@@ -931,11 +812,12 @@ export const userRoute = new Elysia({
         }
 
         // 更新业务员状态
-        if (targetUser[0].salespersonId) {
+        const salespersonUser = targetUserSites.find((u) => u.salespersonId);
+        if (salespersonUser) {
           await db
             .update(salespersonsTable)
             .set({ isActive })
-            .where(eq(salespersonsTable.id, targetUser[0].salespersonId));
+            .where(eq(salespersonsTable.id, salespersonUser.salespersonId!));
         }
 
         return commonRes(

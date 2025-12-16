@@ -1,525 +1,485 @@
 import { defineRelations } from "drizzle-orm";
 import * as schema from "./table.schema";
 
-export const relations = defineRelations(
-  schema,
-  (r) => ({
-    // --- Auth ---
-    usersTable: {
-      userProfile: r.one.userProfilesTable({
-        from: r.usersTable.id,
-        to: r.userProfilesTable.userId,
-      }),
-      userRoles: r.many.userRolesTable(),
-      roles: r.many.roleTable({
-        from: r.usersTable.id.through(r.userRolesTable.userId),
-        to: r.roleTable.id.through(r.userRolesTable.roleId),
-      }),
-      userResourceRoles: r.many.userResourceRolesTable(),
-      accounts: r.many.accountTable(),
-      sessions: r.many.sessionTable({
-        alias: "sessions",
-      }),
-      salesperson: r.one.salespersonsTable({
-        from: r.usersTable.id,
-        to: r.salespersonsTable.userId,
-      }),
-    },
-    userRolesTable: {
-      user: r.one.usersTable({
-        from: r.userRolesTable.userId,
-        to: r.usersTable.id,
-        alias: 'user',
-      }),
-      role: r.one.roleTable({
-        from: r.userRolesTable.roleId,
-        to: r.roleTable.id,
-        alias: 'role',
-      }),
-    },
+export const relations = defineRelations(schema, (r) => ({
+  // --- Auth ---
+  usersTable: {
+    // 🔥 关键修改 1: 用户 <-> 站点-角色 (通过 userSiteRolesTable)
+    siteRoles: r.many.userSiteRolesTable(),
+    accounts: r.many.accountTable(),
+    sessions: r.many.sessionTable(),
+    salesperson: r.one.salespersonsTable({
+      from: r.usersTable.id,
+      to: r.salespersonsTable.userId,
+    }),
+  },
 
-    userResourceRolesTable: {
-      user: r.one.usersTable({
-        from: r.userResourceRolesTable.userId,
-        to: r.usersTable.id,
-        alias: 'user',
-      }),
-      role: r.one.roleTable({
-        from: r.userResourceRolesTable.roleId,
-        to: r.roleTable.id,
-        alias: 'role',
-      }),
-    },
+  // 🔥 关键修改 2: 核心权限关联表 (新架构的中心)
+  userSiteRolesTable: {
+    user: r.one.usersTable({
+      from: [r.userSiteRolesTable.userId],
+      to: [r.usersTable.id],
+    }),
+    site: r.one.sitesTable({
+      from: [r.userSiteRolesTable.siteId],
+      to: [r.sitesTable.id],
+    }),
+    role: r.one.roleTable({
+      from: [r.userSiteRolesTable.roleId],
+      to: [r.roleTable.id],
+    }),
+  },
 
-    roleTable: {
-      users: r.many.usersTable({
-        from: r.roleTable.id.through(r.userRolesTable.roleId),
-        to: r.usersTable.id.through(r.userRolesTable.userId),
-      }),
-      permissions: r.many.permissionTable({
-        from: r.roleTable.id.through(r.rolePermissionsTable.roleId),
-        to: r.permissionTable.id.through(r.rolePermissionsTable.permissionId),
-      }),
-      userRoles: r.many.userRolesTable({
-        alias: 'user_roles',
-      }),
-      rolePermissions: r.many.rolePermissionsTable({
-        alias: 'role_permissions',
-      }),
-      userResourceRoles: r.many.userResourceRolesTable({
-        alias: 'user_resource_roles',
-      }),
-    },
-    rolePermissionsTable: {
-      role: r.one.roleTable({
-        from: r.rolePermissionsTable.roleId,
-        to: r.roleTable.id,
-        alias: 'role',
-      }),
-      permission: r.one.permissionTable({
-        from: r.rolePermissionsTable.permissionId,
-        to: r.permissionTable.id,
-        alias: 'permission',
-      }),
-    },
-    permissionTable: {
-      roles: r.many.roleTable({
-        from: r.permissionTable.id.through(r.rolePermissionsTable.permissionId),
-        to: r.roleTable.id.through(r.rolePermissionsTable.roleId),
-      }),
-      rolePermissions: r.many.rolePermissionsTable({
-        alias: 'role_permissions',
-      }),
-    },
+  roleTable: {
+    // 用户不再直接关联角色，而是通过站点关联
+    userSiteRoles: r.many.userSiteRolesTable(),
+    Permissions: r.many.permissionTable({
+      from: r.roleTable.id.through(r.rolePermissionsTable.roleId),
+      to: r.permissionTable.id.through(r.rolePermissionsTable.permissionId),
+      alias: "role_permissions",
+    }),
+    parentRole: r.one.roleTable({
+      from: r.roleTable.parentRoleId,
+      to: r.roleTable.id,
+      alias: "parent_role",
+    }),
+  },
 
-    // // --- Exporters & Factories ---
-    exportersTable: {
-      factories: r.many.factoriesTable({
-        alias: 'factories',
-      }),
-      quotations: r.many.quotationsTable({
-        alias: 'quotations',
-      }),
-    },
+  rolePermissionsTable: {
+    role: r.one.roleTable({
+      from: r.rolePermissionsTable.roleId,
+      to: r.roleTable.id,
+      alias: "role",
+    }),
+    permission: r.one.permissionTable({
+      from: r.rolePermissionsTable.permissionId,
+      to: r.permissionTable.id,
+      alias: "permission",
+    }),
+  },
+  permissionTable: {
+    roles: r.many.roleTable({
+      from: r.permissionTable.id.through(r.rolePermissionsTable.permissionId),
+      to: r.roleTable.id.through(r.rolePermissionsTable.roleId),
+    }),
+  },
 
-    factoriesTable: {
-      exporter: r.one.exportersTable({
-        from: r.factoriesTable.exporterId,
-        to: r.exportersTable.id,
-        alias: 'exporter',
-      }),
-      categories: r.many.categoriesTable({
-        from: r.factoriesTable.id.through(r.factoryCategoryTable.factoryId),
-        to: r.categoriesTable.id.through(r.factoryCategoryTable.categoryId),
-      }),
-      salespersons: r.many.salespersonsTable({
-        alias: 'salespersons',
-      }),
-      products: r.many.productsTable({
-        from: r.factoriesTable.id.through(r.productFactoriesTable.factoryId),
-        to: r.productsTable.id.through(r.productFactoriesTable.productId),
-      }),
-      productsViaFactory: r.many.productFactoriesTable({
-        alias: 'products_via_factory',
-      }),
-      media: r.many.mediaTable({
-        alias: 'media',
-      }),
-    },
+  // // --- Exporters & Factories ---
+  exportersTable: {
+    factories: r.many.factoriesTable({
+      from: r.exportersTable.id,
+      to: r.factoriesTable.exporterId,
+      alias: "factories",
+    }),
+    quotations: r.many.quotationsTable({
+      from: r.exportersTable.id,
+      to: r.quotationsTable.exporterId,
+      alias: "quotations",
+    }),
+    // 🔥 站点可以被 Exporter 拥有
+    sites: r.many.sitesTable({
+      from: r.exportersTable.id,
+      to: r.sitesTable.exporterId,
+      alias: "sites",
+    }),
+  },
 
-    factoryCategoryTable: {
-      factory: r.one.factoriesTable({
-        from: r.factoryCategoryTable.factoryId,
-        to: r.factoriesTable.id,
-        alias: 'factory',
-      }),
-      category: r.one.categoriesTable({
-        from: r.factoryCategoryTable.categoryId,
-        to: r.categoriesTable.id,
-        alias: 'category',
-      }),
-    },
+  factoriesTable: {
+    exporter: r.one.exportersTable({
+      from: r.factoriesTable.exporterId,
+      to: r.exportersTable.id,
+      alias: "exporter",
+    }),
+    // categories: r.many.MasterTable({
+    //   from: r.factoriesTable.id.through(r.factoryCategoryTable.factoryId),
+    //   to: r.MasterTable.id.through(r.factoryCategoryTable.categoryId),
+    // }),
+    // salespersons: r.many.salespersonsTable({
+    //   from: r.factoriesTable.id.through(r.salespersonCategoriesTable.factoryId),
+    //   to: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
+    //   alias: 'salespersons',
+    // }),
+    products: r.many.productsTable({
+      from: r.factoriesTable.id,
+      to: r.productsTable.factoryId,
+      alias: "products",
+    }),
+    // media: r.many.mediaTable({
+    //   from: r.factoriesTable.id.through(r.mediaTable.factoryId),
+    //   to: r.mediaTable.id.through(r.factoriesTable.id),
+    //   alias: 'media',
+    // }),
+    // 🔥 站点可以被 Factory 拥有
+    sites: r.many.sitesTable({
+      from: r.factoriesTable.id,
+      to: r.sitesTable.factoryId,
+      alias: "sites",
+    }),
+  },
 
-    // // --- Salespersons ---
-    salespersonsTable: {
-      user: r.one.usersTable({
-        from: r.salespersonsTable.userId,
-        to: r.usersTable.id,
-        alias: 'user',
-      }),
-      factory: r.one.factoriesTable({
-        from: r.salespersonsTable.factoryId,
-        to: r.factoriesTable.id,
-        alias: 'factory',
-      }),
-      categories: r.many.categoriesTable({
-        from: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
-        to: r.categoriesTable.id.through(r.salespersonCategoriesTable.categoryId),
-      }),
-      assignedCategories: r.many.salespersonCategoriesTable({
-        alias: 'assigned_categories',
-      }),
-    },
+  // --- Master Categories (全局标准) ---
+  MasterTable: {
+    // 假设您已将原 categoriesTable 重命名为 MasterTable
+    parent: r.one.MasterTable({
+      from: r.MasterTable.parentId,
+      to: r.MasterTable.id,
+      alias: "parent",
+    }),
+    // factoryCategories: r.many.factoryCategoryTable({
+    //   from: r.MasterTable.id,
+    //   to: r.factoryCategoryTable.categoryId,
+    // }),
+    // salespersonCategories: r.many.salespersonCategoriesTable({
+    //   from: r.MasterTable.id,
+    //   to: r.salespersonCategoriesTable.categoryId,
+    // }),
+    // productCategories: r.many.productCategoriesTable({
+    //   from: r.MasterTable.id,
+    //   to: r.productCategoriesTable.categoryId,
+    // }),
+    attributeTemplates: r.many.attributeTemplateTable({
+      from: r.MasterTable.id,
+      to: r.attributeTemplateTable.categoryId,
+    }),
 
-    salespersonCategoriesTable: {
-      salesperson: r.one.salespersonsTable({
-        from: r.salespersonCategoriesTable.salespersonId,
-        to: r.salespersonsTable.id,
-        alias: 'salesperson',
-      }),
-      category: r.one.categoriesTable({
-        from: r.salespersonCategoriesTable.categoryId,
-        to: r.categoriesTable.id,
-        alias: 'category',
-      }),
-    },
+    // 🔥 关联到站点分类 (可选关系，用于数据聚合)
+    siteCategories: r.many.siteCategoriesTable({
+      from: r.MasterTable.id,
+      to: r.siteCategoriesTable.masterCategoryId,
+    }),
+  },
 
-    // --- Categories ---
-    categoriesTable: {
-      parent: r.one.categoriesTable({
-        from: r.categoriesTable.parentId,
-        to: r.categoriesTable.id,
-        alias: 'parent',
-      }),
-      children: r.many.categoriesTable({
-        from: r.categoriesTable.id,
-        to: r.categoriesTable.parentId,
-      }),
-      factories: r.many.factoriesTable({
-        from: r.categoriesTable.id.through(r.factoryCategoryTable.categoryId),
-        to: r.factoriesTable.id.through(r.factoryCategoryTable.factoryId),
-      }),
-      factoryCategories: r.many.factoryCategoryTable({
-        alias: 'factory_categories',
-      }),
-      salespersons: r.many.salespersonsTable({
-        from: r.categoriesTable.id.through(r.salespersonCategoriesTable.categoryId),
-        to: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
-      }),
-      salespersonCategories: r.many.salespersonCategoriesTable({
-        alias: 'salespersons',
-      }),
-      products: r.many.productsTable({
-        from: r.categoriesTable.id.through(r.productCategoriesTable.categoryId),
-        to: r.productsTable.id.through(r.productCategoriesTable.productId),
-      }),
-      productCategories: r.many.productCategoriesTable({
-        alias: 'products',
-      }),
-      attributeTemplates: r.many.attributeTemplateTable({
-        alias: 'attribute_templates',
-      }),
-    },
+  // --- Sites (新架构的中心) ---
+  sitesTable: {
+    // 🔥 站点归属: 站点关联到 Factory 或 Exporter (通过 entityId)
+    // exporterOwner: r.one.exportersTable({
+    //   from: r.sitesTable.entityId,
+    //   to: r.exportersTable.id,
+    // }),
+    // factoryOwner: r.one.factoriesTable({
+    //   from: r.sitesTable.entityId,
+    //   to: r.factoriesTable.id,
+    // }),
 
-    // --- Media ---
-    mediaTable: {
-      metadata: r.one.mediaMetadataTable({
-        from: r.mediaTable.id,
-        to: r.mediaMetadataTable.fileId,
-        alias: 'metadata',
-      }),
-      ads: r.many.adsTable({
-        alias: 'ads',
-      }),
-      heroCards: r.many.heroCardsTable({
-        alias: 'hero_cards',
-      }),
-      productMedia: r.many.productMediaTable({
-        alias: 'product_media',
-      }),
-      skus: r.many.skusTable({
-        alias: 'skus',
-      }),
-      user: r.one.usersTable({
-        from: r.mediaTable.userId,
-        to: r.usersTable.id,
-        alias: 'user',
-      }),
-      factory: r.one.factoriesTable({
-        from: r.mediaTable.factoryId,
-        to: r.factoriesTable.id,
-        alias: 'factory',
-      }),
-    },
+    // 关联到所有依赖站点的展示/配置数据
+    userSiteRoles: r.many.userSiteRolesTable(),
+    siteCategories: r.many.siteCategoriesTable(),
+    siteProducts: r.many.siteProductsTable(),
+    ads: r.many.adsTable(),
+    heroCards: r.many.heroCardsTable(),
+    siteConfig: r.many.siteConfigTable(),
+    inquiries: r.many.inquiryTable(),
+  },
+  siteProductsTable: {
+    site: r.one.sitesTable({
+      from: r.siteProductsTable.siteId,
+      to: r.sitesTable.id,
+    }),
+    product: r.one.productsTable({
+      from: r.siteProductsTable.productId,
+      to: r.productsTable.id,
+    }),
+    siteCategory: r.one.siteCategoriesTable({
+      from: r.siteProductsTable.siteCategoryId,
+      to: r.siteCategoriesTable.id,
+    }),
+  },
 
-    mediaMetadataTable: {
-      media: r.one.mediaTable({
-        from: r.mediaMetadataTable.fileId,
-        to: r.mediaTable.id,
-        alias: 'media',
-      }),
-    },
+  siteCategoriesTable: {
+    site: r.one.sitesTable({
+      from: r.siteCategoriesTable.siteId,
+      to: r.sitesTable.id,
+    }),
+    parent: r.one.siteCategoriesTable({
+      from: r.siteCategoriesTable.parentId,
+      to: r.siteCategoriesTable.id,
+      alias: "parent",
+    }),
+    children: r.many.siteCategoriesTable({
+      from: r.siteCategoriesTable.id,
+      to: r.siteCategoriesTable.parentId,
+    }),
+    globalCategory: r.one.MasterTable({
+      from: r.siteCategoriesTable.masterCategoryId,
+      to: r.MasterTable.id,
+      alias: "global_category",
+    }),
+    siteProducts: r.many.siteProductsTable(),
+  },
 
-    // --- Ads & Hero Cards ---
-    adsTable: {
-      imageRef: r.one.mediaTable({
-        from: r.adsTable.image_id,
-        to: r.mediaTable.id,
-        alias: 'image_ref',
-      }),
-    },
+  // --- Products (资源层) ---
+  productsTable: {
+    siteProducts: r.many.siteProductsTable(), // 产品被多个站点引用
+    // categories: r.many.MasterTable({
+    //   from: r.productsTable.id.through(r.productCategoriesTable.productId),
+    //   to: r.MasterTable.id.through(r.productCategoriesTable.categoryId),
+    // }),
+    productMedia: r.many.productMediaTable(),
+    // productCategories: r.many.productCategoriesTable({
+    //   alias: 'product_categories',
+    // }),
+    skus: r.many.skusTable({}),
+    productTemplate: r.one.productTemplateTable({
+      from: r.productsTable.id,
+      to: r.productTemplateTable.productId,
+    }),
+    factory: r.one.factoriesTable({
+      from: r.productsTable.factoryId,
+      to: r.factoriesTable.id,
+    }),
+    quotationItems: r.many.quotationItemsTable({}),
+  },
 
-    heroCardsTable: {
-      media: r.one.mediaTable({
-        from: r.heroCardsTable.imageId,
-        to: r.mediaTable.id,
-      }),
-    },
+  // --- Inquiries ---
+  inquiryTable: {
+    items: r.many.inquiryItemsTable({
+    }),
+    // 🔥 新增站点关系
+    site: r.one.sitesTable({
+      from: [r.inquiryTable.siteId],
+      to: [r.sitesTable.id],
+    }),
+  },
 
-    // --- Products ---
-    productsTable: {
-      categories: r.many.categoriesTable({
-        from: r.productsTable.id.through(r.productCategoriesTable.productId),
-        to: r.categoriesTable.id.through(r.productCategoriesTable.categoryId),
-      }),
-      factories: r.many.factoriesTable({
-        from: r.productsTable.id.through(r.productFactoriesTable.productId),
-        to: r.factoriesTable.id.through(r.productFactoriesTable.factoryId),
-      }),
-      productMedia: r.many.productMediaTable({
-        alias: 'product_media',
-      }),
-      productCategories: r.many.productCategoriesTable({
-        alias: 'product_categories',
-      }),
-      skus: r.many.skusTable({
-        alias: 'skus',
-      }),
-      productTemplate: r.one.productTemplateTable({
-        from: r.productsTable.id,
-        to: r.productTemplateTable.productId,
-      }),
-      productFactories: r.many.productFactoriesTable({
-        alias: 'product_factories',
-      }),
-      factory: r.one.factoriesTable({
-        from: r.productsTable.factoryId,
-        to: r.factoriesTable.id,
-      }),
-      quotationItems: r.many.quotationItemsTable({
-        alias: 'quotation_items',
-      }),
-    },
+  // --- Ads & Hero Cards ---
+  adsTable: {
+    site: r.one.sitesTable({
+      from: [r.adsTable.siteId],
+      to: [r.sitesTable.id],
+    }),
+    media: r.one.mediaTable({
+      from: [r.adsTable.image_id],
+      to: [r.mediaTable.id],
+    }),
+  },
+  heroCardsTable: {
+    site: r.one.sitesTable({
+      from: [r.heroCardsTable.siteId],
+      to: [r.sitesTable.id],
+    }),
+    media: r.one.mediaTable({
+      from: r.heroCardsTable.imageId,
+      to: r.mediaTable.id,
+    }),
+  },
 
-    productCategoriesTable: {
-      product: r.one.productsTable({
-        from: r.productCategoriesTable.productId,
-        to: r.productsTable.id,
-        alias: 'product',
-      }),
-      category: r.one.categoriesTable({
-        from: r.productCategoriesTable.categoryId,
-        to: r.categoriesTable.id,
-        alias: 'category',
-      }),
-    },
+  // --- Site Config ---
+  siteConfigTable: {
+    site: r.one.sitesTable({
+      from: r.siteConfigTable.siteId,
+      to: r.sitesTable.id,
+    }),
+  },
+  // factoryCategoryTable: {
+  //   factory: r.one.factoriesTable({
+  //     from: r.factoryCategoryTable.factoryId,
+  //     to: r.factoriesTable.id,
+  //     alias: 'factory',
+  //   }),
+  //   category: r.one.MasterTable({
+  //     from: r.factoryCategoryTable.categoryId,
+  //     to: r.MasterTable.id,
+  //     alias: 'category',
+  //   }),
+  // },
 
-    productMediaTable: {
-      product: r.one.productsTable({
-        from: r.productMediaTable.productId,
-        to: r.productsTable.id,
-      }),
-      media: r.one.mediaTable({
-        from: r.productMediaTable.imageId,
-        to: r.mediaTable.id,
-      }),
-    },
+  // // --- Salespersons ---
+  salespersonsTable: {
+    user: r.one.usersTable({
+      from: r.salespersonsTable.userId,
+      to: r.usersTable.id,
+      alias: "user",
+    }),
+    // factory: r.one.factoriesTable({
+    //   from: r.salespersonsTable.factoryId,
+    //   to: r.factoriesTable.id,
+    //   alias: 'factory',
+    // }),
+    // categories: r.many.MasterTable({
+    //   from: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
+    //   to: r.MasterTable.id.through(r.salespersonCategoriesTable.categoryId),
+    // }),
+    // assignedCategories: r.many.salespersonCategoriesTable({
+    //   alias: 'assigned_categories',
+    // }),
+  },
 
-    productFactoriesTable: {
-      product: r.one.productsTable({
-        from: r.productFactoriesTable.productId,
-        to: r.productsTable.id,
-      }),
-      factory: r.one.factoriesTable({
-        from: r.productFactoriesTable.factoryId,
-        to: r.factoriesTable.id,
-      }),
-    },
+  salespersonCategoriesTable: {
+    // salesperson: r.one.salespersonsTable({
+    //   from: r.salespersonCategoriesTable.salespersonId,
+    //   to: r.salespersonsTable.id,
+    //   alias: 'salesperson',
+    // }),
+    // category: r.one.MasterTable({
+    //   from: r.salespersonCategoriesTable.categoryId,
+    //   to: r.MasterTable.id,
+    //   alias: 'category',
+    // }),
+  },
 
-    // --- Attributes ---
-    attributeTemplateTable: {
-      category: r.one.categoriesTable({
-        from: r.attributeTemplateTable.categoryId,
-        to: r.categoriesTable.id,
-      }),
-      attributes: r.many.attributeTable({
-        from: r.attributeTemplateTable.id,
-        to: r.attributeTable.templateId,
-      }),
-      productTemplates: r.many.productTemplateTable({
-        from: r.attributeTemplateTable.id,
-        to: r.productTemplateTable.templateId,
-        alias: 'product_templates',
-      }),
-    },
+  // --- Media ---
+  mediaTable: {
+    metadata: r.one.mediaMetadataTable({
+      from: r.mediaTable.id,
+      to: r.mediaMetadataTable.fileId,
+      alias: "metadata",
+    }),
+    ads: r.many.adsTable({}),
+    heroCards: r.many.heroCardsTable({}),
+    productMedia: r.many.productMediaTable({}),
+    skus: r.many.skusTable({}),
+    // factory: r.one.factoriesTable({
+    //   from: r.mediaTable.factoryId,
+    //   to: r.factoriesTable.id,
+    // }),
+  },
 
-    attributeTable: {
-      template: r.one.attributeTemplateTable({
-        from: r.attributeTable.templateId,
-        to: r.attributeTemplateTable.id,
-      }),
-      values: r.many.attributeValueTable({
-        from: r.attributeTable.id,
-        to: r.attributeValueTable.attributeId,
-      }),
-    },
+  mediaMetadataTable: {
+    media: r.one.mediaTable({
+      from: r.mediaMetadataTable.fileId,
+      to: r.mediaTable.id,
+      alias: "media",
+    }),
+  },
 
-    attributeValueTable: {
-      attribute: r.one.attributeTable({
-        from: r.attributeValueTable.attributeId,
-        to: r.attributeTable.id,
-      }),
-    },
+  productCategoriesTable: {
+    // product: r.one.productsTable({
+    //   from: r.productCategoriesTable.productId,
+    //   to: r.productsTable.id,
+    //   alias: 'product',
+    // }),
+    // category: r.one.MasterTable({
+    //   from: r.productCategoriesTable.categoryId,
+    //   to: r.MasterTable.id,
+    //   alias: 'category',
+    // }),
+  },
 
-    productTemplateTable: {
-      product: r.one.productsTable({
-        from: r.productTemplateTable.productId,
-        to: r.productsTable.id,
-      }),
-      template: r.one.attributeTemplateTable({
-        from: r.productTemplateTable.templateId,
-        to: r.attributeTemplateTable.id,
-      }),
-    },
+  productMediaTable: {
+    product: r.one.productsTable({
+      from: r.productMediaTable.productId,
+      to: r.productsTable.id,
+    }),
+    media: r.one.mediaTable({
+      from: r.productMediaTable.imageId,
+      to: r.mediaTable.id,
+    }),
+  },
 
-    // --- SKUs ---
-    skusTable: {
-      product: r.one.productsTable({
-        from: r.skusTable.productId,
-        to: r.productsTable.id,
-      }),
-      media: r.one.mediaTable({
-        from: r.skusTable.imageId,
-        to: r.mediaTable.id,
-      }),
-      inquiryItems: r.many.inquiryItemsTable({
-        alias: 'inquiry_items',
-      }),
-    },
+  // --- Attributes ---
+  attributeTemplateTable: {
+    category: r.one.MasterTable({
+      from: r.attributeTemplateTable.categoryId,
+      to: r.MasterTable.id,
+    }),
+    attributes: r.many.attributeTable({
+      from: r.attributeTemplateTable.id,
+      to: r.attributeTable.templateId,
+    }),
+    productTemplates: r.many.productTemplateTable({
+      from: r.attributeTemplateTable.id,
+      to: r.productTemplateTable.templateId,
+      alias: "product_templates",
+    }),
+  },
 
-    // --- Inquiries ---
-    inquiryTable: {
-      items: r.many.inquiryItemsTable({
-        alias: 'items',
-      }),
-    },
+  attributeTable: {
+    template: r.one.attributeTemplateTable({
+      from: r.attributeTable.templateId,
+      to: r.attributeTemplateTable.id,
+    }),
+    values: r.many.attributeValueTable({
+      from: r.attributeTable.id,
+      to: r.attributeValueTable.attributeId,
+    }),
+  },
 
-    inquiryItemsTable: {
-      inquiry: r.one.inquiryTable({
-        from: r.inquiryItemsTable.inquiryId,
-        to: r.inquiryTable.id,
-      }),
-      sku: r.one.skusTable({
-        from: r.inquiryItemsTable.skuId,
-        to: r.skusTable.id,
-      }),
-    },
+  attributeValueTable: {
+    attribute: r.one.attributeTable({
+      from: r.attributeValueTable.attributeId,
+      to: r.attributeTable.id,
+    }),
+  },
 
-    // --- Quotations ---
-    quotationsTable: {
-      client: r.one.CustomerTable({
-        from: r.quotationsTable.clientId,
-        to: r.CustomerTable.id,
-      }),
-      exporter: r.one.exportersTable({
-        from: r.quotationsTable.exporterId,
-        to: r.exportersTable.id,
-      }),
-      items: r.many.quotationItemsTable({
-      }),
-    },
+  productTemplateTable: {
+    product: r.one.productsTable({
+      from: r.productTemplateTable.productId,
+      to: r.productsTable.id,
+    }),
+    template: r.one.attributeTemplateTable({
+      from: r.productTemplateTable.templateId,
+      to: r.attributeTemplateTable.id,
+    }),
+  },
 
-    quotationItemsTable: {
-      quotation: r.one.quotationsTable({
-        from: r.quotationItemsTable.quotationId,
-        to: r.quotationsTable.id,
-      }),
-      product: r.one.productsTable({
-        from: r.quotationItemsTable.productId,
-        to: r.productsTable.id,
-      }),
-      factory: r.one.factoriesTable({
-        from: r.quotationItemsTable.factoryId,
-        to: r.factoriesTable.id,
-      }),
-    },
+  // --- SKUs ---
+  skusTable: {
+    product: r.one.productsTable({
+      from: r.skusTable.productId,
+      to: r.productsTable.id,
+    }),
+    media: r.one.mediaTable({
+      from: r.skusTable.imageId,
+      to: r.mediaTable.id,
+    }),
+    inquiryItems: r.many.inquiryItemsTable(),
+  },
 
-    // --- Others ---
-    CustomerTable: {
-      quotations: r.many.quotationsTable(),
-    },
+  inquiryItemsTable: {
+    inquiry: r.one.inquiryTable({
+      from: r.inquiryItemsTable.inquiryId,
+      to: r.inquiryTable.id,
+    }),
+    sku: r.one.skusTable({
+      from: r.inquiryItemsTable.skuId,
+      to: r.skusTable.id,
+    }),
+  },
 
-    accountTable: {
-      user: r.one.usersTable({
-        from: r.accountTable.userId,
-        to: r.usersTable.id,
-      }),
-    },
+  // --- Quotations ---
+  quotationsTable: {
+    client: r.one.CustomerTable({
+      from: r.quotationsTable.clientId,
+      to: r.CustomerTable.id,
+    }),
+    exporter: r.one.exportersTable({
+      from: r.quotationsTable.exporterId,
+      to: r.exportersTable.id,
+    }),
+    items: r.many.quotationItemsTable({}),
+  },
 
-    sessionTable: {
-      user: r.one.usersTable({
-        from: r.sessionTable.userId,
-        to: r.usersTable.id,
-      }),
-    },
+  quotationItemsTable: {
+    quotation: r.one.quotationsTable({
+      from: r.quotationItemsTable.quotationId,
+      to: r.quotationsTable.id,
+    }),
+    product: r.one.productsTable({
+      from: r.quotationItemsTable.productId,
+      to: r.productsTable.id,
+    }),
+    factory: r.one.factoriesTable({
+      from: r.quotationItemsTable.factoryId,
+      to: r.factoriesTable.id,
+    }),
+  },
 
-    // --- Sites ---
-    sitesTable: {
-      siteCategories: r.many.siteCategoriesTable(),
-      siteProducts: r.many.siteProductsTable(),
-    },
+  // --- Others ---
+  CustomerTable: {
+    quotations: r.many.quotationsTable(),
+  },
 
-    siteCategoriesTable: {
-      site: r.one.sitesTable({
-        from: r.siteCategoriesTable.siteId,
-        to: r.sitesTable.id,
-        alias: 'site',
-      }),
-      parent: r.one.siteCategoriesTable({
-        from: r.siteCategoriesTable.parentId,
-        to: r.siteCategoriesTable.id,
-        alias: 'parent',
-      }),
-      children: r.many.siteCategoriesTable({
-        alias: 'children',
-      }),
-      globalCategory: r.one.categoriesTable({
-        from: r.siteCategoriesTable.globalCategoryId,
-        to: r.categoriesTable.id,
-        alias: 'global_category',
-      }),
-      siteProducts: r.many.siteProductsTable(),
-    },
+  accountTable: {
+    user: r.one.usersTable({
+      from: r.accountTable.userId,
+      to: r.usersTable.id,
+    }),
+  },
 
-    siteProductsTable: {
-      site: r.one.sitesTable({
-        from: r.siteProductsTable.siteId,
-        to: r.sitesTable.id,
-        alias: 'site',
-      }),
-      product: r.one.productsTable({
-        from: r.siteProductsTable.productId,
-        to: r.productsTable.id,
-        alias: 'product',
-      }),
-      siteCategory: r.one.siteCategoriesTable({
-        from: r.siteProductsTable.siteCategoryId,
-        to: r.siteCategoriesTable.id,
-        alias: 'site_category',
-      }),
-    },
-
-    userSitePermissionsTable: {
-      user: r.one.usersTable({
-        from: r.userSitePermissionsTable.userId,
-        to: r.usersTable.id,
-        alias: 'user',
-      }),
-      site: r.one.sitesTable({
-        from: r.userSitePermissionsTable.siteId,
-        to: r.sitesTable.id,
-        alias: 'site',
-      }),
-    },
-  })
-);
+  sessionTable: {
+    user: r.one.usersTable({
+      from: r.sessionTable.userId,
+      to: r.usersTable.id,
+    }),
+  },
+}));

@@ -6,23 +6,24 @@ import {
   attributeValueTable,
   // 其他
   CustomerTable,
-  // 基础数据
-  categoriesTable,
+  dailyInquiryCounterTable,
   // 业务数据
   exportersTable,
   factoriesTable,
   heroCardsTable,
+  // 基础数据
+  MasterTable,
   permissionTable,
-  productCategoriesTable,
-  productsTable,
   productTemplateTable,
   rolePermissionsTable,
   roleTable,
+  siteCategoriesTable,
   siteConfigTable,
+  siteProductsTable,
+  sitesTable,
   skusTable,
-  systemConfigTable,
-  userResourceRolesTable,
-  userRolesTable,
+  translationDictTable,
+  userSiteRolesTable,
   usersTable,
 } from "@repo/contract/table";
 import { randomUUIDv7 } from "bun";
@@ -32,6 +33,36 @@ import { db } from "./db/connection";
 
 // 角色权限映射（内联定义，避免导入问题）
 const ROLE_PERMISSIONS: Record<string, string[]> = {
+  super_admin: [
+    "view_users",
+    "create_users",
+    "edit_users",
+    "delete_users",
+    "view_factories",
+    "create_factories",
+    "edit_factories",
+    "delete_factories",
+    "view_products",
+    "create_products",
+    "edit_products",
+    "delete_products",
+    "publish_products",
+    "view_media",
+    "upload_media",
+    "delete_media",
+    "view_orders",
+    "process_orders",
+    "view_analytics",
+    "export_reports",
+    "view_site_config",
+    "edit_site_config",
+    "view_categories",
+    "edit_categories",
+    "assign_categories",
+    "manage_sites",
+    "view_inquiries",
+    "process_inquiries",
+  ],
   exporter_admin: [
     "view_users",
     "create_users",
@@ -58,6 +89,8 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "view_categories",
     "edit_categories",
     "assign_categories",
+    "view_inquiries",
+    "process_inquiries",
   ],
   factory_admin: [
     "view_users",
@@ -78,6 +111,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "view_analytics",
     "view_categories",
     "assign_categories",
+    "view_inquiries",
   ],
   salesperson: [
     "view_products",
@@ -87,6 +121,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "upload_media",
     "delete_media",
     "view_orders",
+    "view_inquiries",
   ],
 };
 
@@ -96,9 +131,34 @@ const hashedPassword =
 
 // 1. 角色数据
 const roles = [
-  { id: randomUUIDv7(), name: "exporter_admin", description: "出口商管理员" },
-  { id: randomUUIDv7(), name: "factory_admin", description: "工厂管理员" },
-  { id: randomUUIDv7(), name: "salesperson", description: "业务员" },
+  {
+    id: randomUUIDv7(),
+    name: "exporter_admin",
+    description: "出口商管理员",
+    type: "system",
+    priority: 80,
+  },
+  {
+    id: randomUUIDv7(),
+    name: "factory_admin",
+    description: "工厂管理员",
+    type: "system",
+    priority: 70,
+  },
+  {
+    id: randomUUIDv7(),
+    name: "salesperson",
+    description: "业务员",
+    type: "system",
+    priority: 50,
+  },
+  {
+    id: randomUUIDv7(),
+    name: "super_admin",
+    description: "超级管理员",
+    type: "system",
+    priority: 100,
+  },
 ];
 
 // 2. 权限数据（基于permissions.t.model.ts中定义的权限）
@@ -143,6 +203,13 @@ const permissions = [
   { id: randomUUIDv7(), name: "view_categories", description: "查看分类" },
   { id: randomUUIDv7(), name: "edit_categories", description: "编辑分类" },
   { id: randomUUIDv7(), name: "assign_categories", description: "分配分类" },
+
+  // 站点管理
+  { id: randomUUIDv7(), name: "manage_sites", description: "管理站点" },
+
+  // 询盘管理
+  { id: randomUUIDv7(), name: "view_inquiries", description: "查看询盘" },
+  { id: randomUUIDv7(), name: "process_inquiries", description: "处理询盘" },
 ];
 
 // 3. 产品分类数据 - 添加更多鞋类相关分类
@@ -297,6 +364,15 @@ const factoryData = [
 
 // 6. 用户数据
 const users = [
+  {
+    id: randomUUIDv7(),
+    name: "超级管理员",
+    email: "super@admin.com",
+    emailVerified: true,
+    isSuperAdmin: true,
+    image:
+      "https://ui-avatars.com/api/?name=超级管理员&background=random&color=fff",
+  },
   {
     id: randomUUIDv7(),
     name: "张三",
@@ -576,7 +652,7 @@ const skus = [
 const heroCards = [
   {
     id: "e6d2b19c-81ec-4b4a-9f70-a0242ae92920",
-    title: "DISCOVER \"HEY BABY\" COLLECTION",
+    title: 'DISCOVER "HEY BABY" COLLECTION',
     description: "Crafted in the decadent leopard design calf hair",
     buttonText: "LETS SHOPPIN",
     buttonUrl: "",
@@ -588,7 +664,8 @@ const heroCards = [
   {
     id: "eeb815b1-ded9-4b66-9bfa-fac1502ee013",
     title: "EXPLORE SANDALES",
-    description: "Handcrafted in exquisite detail,explore our selection of sandals",
+    description:
+      "Handcrafted in exquisite detail,explore our selection of sandals",
     buttonText: "EXPLORE MORE",
     buttonUrl: "",
     backgroundClass: "bg-blue-50",
@@ -598,7 +675,7 @@ const heroCards = [
   },
   {
     id: "23ddb3b0-f732-4d5b-af8a-12f724415dea",
-    title: "MEET \"HEY BABY\" COLLECTION",
+    title: 'MEET "HEY BABY" COLLECTION',
     description: "A sleek mule designed for elegant occasions",
     buttonText: "DISCOVER MORE",
     buttonUrl: "",
@@ -609,42 +686,125 @@ const heroCards = [
   },
 ];
 
-// 13. 站点配置数据
-const siteConfigs = [
-  { key: "site_name", value: "Gina 采购平台", description: "站点名称" },
+// 15. 站点数据
+const sites = [
   {
+    id: randomUUIDv7(),
+    name: "环球贸易站点",
+    domain: "global-trade.example.com",
+    siteType: "exporter",
+    exporterId: "", // 稍后设置
+    isActive: true,
+  },
+  {
+    id: randomUUIDv7(),
+    name: "东莞电子制造厂站点",
+    domain: "dg-electronics.example.com",
+    siteType: "factory",
+    factoryId: "", // 稍后设置
+    isActive: true,
+  },
+  {
+    id: randomUUIDv7(),
+    name: "深圳科技园站点",
+    domain: "sz-tech.example.com",
+    siteType: "factory",
+    factoryId: "", // 稍后设置
+    isActive: true,
+  },
+];
+
+// 16. 站点分类数据（每个站点的独立分类体系）
+const siteCategories = [
+  // 环球贸易站点的分类
+  {
+    id: randomUUIDv7(),
+    siteId: "", // 稍后设置
+    name: "电子产品",
+    parentId: null,
+    sortOrder: 1,
+    masterCategoryId: "", // 稍后设置
+  },
+  {
+    id: randomUUIDv7(),
+    siteId: "", // 稍后设置
+    name: "手机",
+    parentId: "", // 稍后设置
+    sortOrder: 1,
+    masterCategoryId: "",
+  },
+  // 工厂站点的分类
+  {
+    id: randomUUIDv7(),
+    siteId: "", // 稍后设置
+    name: "主打产品",
+    parentId: null,
+    sortOrder: 1,
+    masterCategoryId: "",
+  },
+];
+
+// 17. 站点配置数据
+const siteConfigs2 = [
+  {
+    id: randomUUIDv7(),
+    key: "site_name",
+    value: "环球贸易公司",
+    description: "站点名称",
+    category: "general",
+    siteId: "", // 稍后设置
+  },
+  {
+    id: randomUUIDv7(),
     key: "site_description",
-    value: "专业的B2B采购平台",
+    value: "专业的电子产品出口商",
     description: "站点描述",
-  },
-  { key: "contact_email", value: "contact@gina.com", description: "联系邮箱" },
-  { key: "contact_phone", value: "+86 400-123-4567", description: "联系电话" },
-  {
-    key: "company_address",
-    value: "深圳市南山区科技园",
-    description: "公司地址",
+    category: "general",
+    siteId: "", // 稍后设置
   },
 ];
 
-// 14. 系统配置数据
-const systemConfigs = [
+// 18. 翻译字典数据
+const translationDict = [
   {
     id: randomUUIDv7(),
-    configKey: "daily_limit",
-    configValue: "50",
-    configType: "string",
-    description: "每日询盘限制",
+    key: "welcome_message",
+    category: "general",
+    description: "欢迎信息",
+    translations: {
+      en: "Welcome to our platform",
+      zh: "欢迎来到我们的平台",
+      es: "Bienvenido a nuestra plataforma",
+    },
+    isActive: true,
+    sortOrder: 1,
   },
   {
     id: randomUUIDv7(),
-    configKey: "max_images",
-    configValue: "10",
-    configType: "string",
-    description: "商品最大图片数",
+    key: "contact_us",
+    category: "contact",
+    description: "联系我们",
+    translations: {
+      en: "Contact Us",
+      zh: "联系我们",
+      es: "Contáctanos",
+    },
+    isActive: true,
+    sortOrder: 2,
   },
 ];
 
-// 15. 客户数据
+// 19. 每日询盘计数器数据
+const dailyInquiryCounter = [
+  {
+    id: randomUUIDv7(),
+    date: new Date().toISOString().split("T")[0], // 今天
+    count: 0,
+    lastResetAt: new Date(),
+  },
+];
+
+// 20. 客户数据
 const customers = [
   {
     id: randomUUIDv7(),
@@ -704,7 +864,7 @@ async function seedCompleteDatabase() {
 
     // 4. 插入产品分类数据
     console.log("📦 插入产品分类数据...");
-    await db.insert(categoriesTable).values(categories);
+    await db.insert(MasterTable).values(categories);
 
     // 5. 设置属性模板的分类ID并插入
     console.log("📋 插入属性模板数据...");
@@ -757,7 +917,6 @@ async function seedCompleteDatabase() {
     }));
     await db.insert(factoriesTable).values(factoryDataWithCategories);
 
-
     // 10. 插入用户数据到users表
     console.log("👥 插入用户数据...");
     await db.insert(usersTable).values(users);
@@ -776,100 +935,81 @@ async function seedCompleteDatabase() {
     }));
     await db.insert(accountTable).values(accounts);
 
-    // 12. 插入用户角色关联数据
-    console.log("👑 插入用户角色关联...");
-    const userRoleRelations = [
+    // 12. 插入站点数据
+    console.log("🌐 插入站点数据...");
+    sites[0].exporterId = exporterData[0].id; // 环球贸易站点
+    sites[1].factoryId = factoryDataWithCategories[0].id; // 东莞电子制造厂站点
+    sites[2].factoryId = factoryDataWithCategories[1].id; // 深圳科技园站点
+    await db.insert(sitesTable).values(sites);
+
+    // 13. 插入站点分类数据
+    console.log("📂 插入站点分类数据...");
+    // 设置站点分类的ID
+    siteCategories[0].siteId = sites[0].id; // 环球贸易站点
+    siteCategories[1].siteId = sites[0].id; // 环球贸易站点
+    siteCategories[2].siteId = sites[1].id; // 东莞电子制造厂站点
+
+    siteCategories[0].masterCategoryId = categories[0].id; // 电子产品
+    siteCategories[1].masterCategoryId = categories[0].id; // 电子产品
+    siteCategories[1].parentId = siteCategories[0].id; // 手机是电子产品的子分类
+    siteCategories[2].masterCategoryId = categories[0].id; // 电子产品
+
+    await db.insert(siteCategoriesTable).values(siteCategories);
+
+    // 14. 插入用户站点角色关联数据
+    console.log("👑 插入用户站点角色关联...");
+    const userSiteRoles = [
+      // 超级管理员 - 可以访问所有站点
+      {
+        userId: users[0].id,
+        siteId: sites[0].id,
+        roleId: roles[3].id, // super_admin
+      },
       // 张三 - 出口商管理员
-      { id: randomUUIDv7(), userId: users[0].id, roleId: roles[0].id },
-      // 李四 - 工厂管理员
-      { id: randomUUIDv7(), userId: users[1].id, roleId: roles[1].id },
-      // 王五 - 业务员
-      { id: randomUUIDv7(), userId: users[2].id, roleId: roles[2].id },
-      // 其他用户 - 业务员
-      { id: randomUUIDv7(), userId: users[3].id, roleId: roles[2].id },
-      { id: randomUUIDv7(), userId: users[4].id, roleId: roles[2].id },
-    ];
-    await db.insert(userRolesTable).values(userRoleRelations);
-
-    // 13. 插入用户资源角色关联数据
-    console.log("🏢 插入用户资源关联...");
-    const userResourceRoles = [
-      // 张三 - 管理出口商1
       {
-        id: randomUUIDv7(),
-        userId: users[0].id,
-        roleId: roles[0].id,
-        resourceType: "exporter",
-        resourceId: exporterData[0].id,
-        isPrimary: true,
-      },
-      {
-        id: randomUUIDv7(),
-        userId: users[0].id,
-        roleId: roles[0].id,
-        resourceType: "exporter",
-        resourceId: exporterData[1].id,
-        isPrimary: false,
-      },
-      // 李四 - 管理工厂1
-      {
-        id: randomUUIDv7(),
         userId: users[1].id,
-        roleId: roles[1].id,
-        resourceType: "factory",
-        resourceId: factoryDataWithCategories[0].id,
-        isPrimary: true,
+        siteId: sites[0].id,
+        roleId: roles[0].id, // exporter_admin
       },
-      // 王五 - 业务员，分配到出口商1
+      // 李四 - 工厂管理员
       {
-        id: randomUUIDv7(),
         userId: users[2].id,
-        roleId: roles[2].id,
-        resourceType: "exporter",
-        resourceId: exporterData[0].id,
-        isPrimary: true,
+        siteId: sites[1].id,
+        roleId: roles[1].id, // factory_admin
       },
-      // 赵六 - 业务员，分配到工厂1
+      // 王五 - 业务员
       {
-        id: randomUUIDv7(),
         userId: users[3].id,
-        roleId: roles[2].id,
-        resourceType: "factory",
-        resourceId: factoryDataWithCategories[0].id,
-        isPrimary: true,
+        siteId: sites[0].id,
+        roleId: roles[2].id, // salesperson
       },
-      // 陈七 - 业务员，分配到出口商2
+      // 赵六 - 业务员
       {
-        id: randomUUIDv7(),
         userId: users[4].id,
-        roleId: roles[2].id,
-        resourceType: "exporter",
-        resourceId: exporterData[1].id,
-        isPrimary: true,
+        siteId: sites[1].id,
+        roleId: roles[2].id, // salesperson
+      },
+      // 陈七 - 业务员
+      {
+        userId: users[5].id,
+        siteId: sites[2].id,
+        roleId: roles[2].id, // salesperson
       },
     ];
-    await db.insert(userResourceRolesTable).values(userResourceRoles);
+    await db.insert(userSiteRolesTable).values(userSiteRoles);
 
-    // 14. 插入商品数据
+    // 15. 插入商品数据
     console.log("🛍️ 插入商品数据...");
     products[0].factoryId = factoryDataWithCategories[0].id; // 智能手机 - 电子厂
     products[1].factoryId = factoryDataWithCategories[2].id; // 运动T恤 - 服装厂
     await db.insert(productsTable).values(products);
 
-    // 15. 插入SKU数据
+    // 16. 插入SKU数据
     console.log("📦 插入SKU数据...");
     skus[0].productId = products[0].id; // 智能手机 SKU
     skus[1].productId = products[0].id;
     skus[2].productId = products[1].id; // 运动T恤 SKU
     await db.insert(skusTable).values(skus);
-
-    // 16. 插入商品分类关联
-    console.log("🏷️ 插入商品分类关联...");
-    const productCategories = [
-      { productId: products[0].id, categoryId: categories[0].id }, // 智能手机 - 电子产品
-      { productId: products[1].id, categoryId: categories[1].id }, // 运动T恤 - 服装
-    ];
-    await db.insert(productCategoriesTable).values(productCategories);
 
     // 17. 插入商品模板关联
     console.log("📋 插入商品模板关联...");
@@ -879,42 +1019,81 @@ async function seedCompleteDatabase() {
     ];
     await db.insert(productTemplateTable).values(productTemplates);
 
-    // 18. 插入主页卡片数据
+    // 18. 插入站点商品关联数据
+    console.log("🛒 插入站点商品关联数据...");
+    const siteProducts = [
+      {
+        siteId: sites[0].id, // 环球贸易站点
+        productId: products[0].id, // 智能手机
+        isFeatured: true,
+        sortOrder: 1,
+        isVisible: true,
+        siteCategoryId: siteCategories[1].id, // 手机分类
+      },
+      {
+        siteId: sites[1].id, // 东莞电子制造厂站点
+        productId: products[0].id, // 智能手机
+        isFeatured: true,
+        sortOrder: 1,
+        isVisible: true,
+        siteCategoryId: siteCategories[2].id, // 主打产品分类
+      },
+    ];
+    await db.insert(siteProductsTable).values(siteProducts);
+
+    // 19. 插入主页卡片数据（需要siteId）
     console.log("🎨 插入主页卡片数据...");
-    await db.insert(heroCardsTable).values(heroCards);
+    const heroCardsWithSite = heroCards.map((card) => ({
+      ...card,
+      siteId: sites[0].id, // 默认添加到环球贸易站点
+    }));
+    await db.insert(heroCardsTable).values(heroCardsWithSite);
 
-    // 19. 插入站点配置数据
+    // 20. 插入站点配置数据
     console.log("⚙️ 插入站点配置数据...");
-    await db.insert(siteConfigTable).values(siteConfigs);
+    // 设置站点配置的siteId
+    siteConfigs2[0].siteId = sites[0].id; // 环球贸易站点
+    siteConfigs2[1].siteId = sites[0].id; // 环球贸易站点
+    await db.insert(siteConfigTable).values(siteConfigs2);
 
-    // 20. 插入系统配置数据
-    console.log("🖥️ 插入系统配置数据...");
-    await db.insert(systemConfigTable).values(systemConfigs);
+    // 21. 插入翻译字典数据
+    console.log("🌍 插入翻译字典数据...");
+    await db.insert(translationDictTable).values(translationDict);
 
-    // 21. 插入客户数据
+    // 22. 插入每日询盘计数器数据
+    console.log("📊 插入每日询盘计数器数据...");
+    await db.insert(dailyInquiryCounterTable).values(dailyInquiryCounter);
+
+    // 23. 插入客户数据
     console.log("🏢 插入客户数据...");
     await db.insert(CustomerTable).values(customers);
 
     console.log("✅ 数据库初始化完成！");
     console.log("\n📝 创建的账号信息：");
-    console.log("1. 出口商管理员: admin@exporter.com");
-    console.log("2. 工厂管理员: factory@manager.com");
-    console.log("3. 业务员1: sales@rep.com");
-    console.log("4. 业务员2: john@example.com");
-    console.log("5. 业务员3: jane@example.com");
+    console.log("1. 超级管理员: super@admin.com");
+    console.log("2. 出口商管理员: admin@exporter.com");
+    console.log("3. 工厂管理员: factory@manager.com");
+    console.log("4. 业务员1: sales@rep.com");
+    console.log("5. 业务员2: john@example.com");
+    console.log("6. 业务员3: jane@example.com");
     console.log("\n💡 所有账号的密码都是: 12345678");
     console.log("\n📊 初始化的数据包括：");
-    console.log("- 3个角色及其权限");
-    console.log("- 5个产品分类");
+    console.log("- 4个角色及其权限");
+    console.log("- 22个权限");
+    console.log("- 8个产品分类");
     console.log("- 3个属性模板");
     console.log("- 4个属性定义");
     console.log("- 16个属性值");
     console.log("- 2个出口商");
     console.log("- 3个工厂");
-    console.log("- 5个用户");
+    console.log("- 6个用户");
+    console.log("- 3个站点");
+    console.log("- 3个站点分类");
+    console.log("- 2个站点商品关联");
     console.log("- 2个示例商品");
     console.log("- 3个SKU");
-    console.log("- 主页卡片、站点配置、系统配置等");
+    console.log("- 3个主页卡片");
+    console.log("- 站点配置、翻译字典、每日询盘计数器、客户数据等");
   } catch (error) {
     console.error("❌ 数据库初始化失败:", error);
     process.exit(1);
