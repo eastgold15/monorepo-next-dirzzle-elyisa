@@ -9,7 +9,11 @@ import { errorPlugin } from "~/utils/err/err.plugin";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 import { OpenAPI } from "./lib/auth-openapi";
+import { AdsController } from "./modules/advertisement/advertisement";
 import { factoryRoute } from "./modules/factory/factory";
+import { HeroCardsController } from "./modules/hero-cards/hero-cards";
+import { masterCategoryRoute } from "./modules/master-category/master-category";
+import { mediaRoute } from "./modules/media/media";
 import { siteRoute } from "./modules/site/site";
 import { siteProductsRoute } from "./modules/site/site-products";
 import { siteCategoryRoute } from "./modules/site/siteCategory";
@@ -56,6 +60,7 @@ export const server = new Elysia({ name: "server" })
           { name: "商品图片管理", description: "商品图片关联管理" },
           { name: "站点商品管理", description: "出口商站点产品聚合管理" },
           { name: "站点分类管理", description: "站点分类管理" },
+          { name: "主分类管理", description: "主分类管理" },
           { name: "Categories", description: "分类管理" },
           { name: "Factory", description: "工厂管理" },
           { name: "Media", description: "媒体文件管理" }, // 新的媒体管理标签
@@ -83,15 +88,16 @@ export const server = new Elysia({ name: "server" })
   // 3. Problem JSON 插件 (将最终的 HttpError 转换为 RFC 7807 响应)
   .use(httpProblemJsonPlugin())
   .use(dbPlugin)
-  // .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
+  .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
   // .use(categoriesController)
-  // .use(AdsController)
-  // .use(HeroCardsController) // 添加首页展示卡片控制器
+  .use(AdsController)
+  .use(HeroCardsController) // 添加首页展示卡片控制器
   // .use(siteConfigsController)
   // .use(product2Route)
   // .use(productTemplateRoute)
   // .use(skuRoute)
   // .use(translateRoute)
+  .use(masterCategoryRoute)
   .use(siteRoute)
   .use(siteCategoryRoute)
   .use(userRoute)

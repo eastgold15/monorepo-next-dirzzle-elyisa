@@ -219,7 +219,7 @@ export const useCurrentUser = () => useUserStore((state) => state.userInfo?.user
 export const useIsUserLoading = () => useUserStore((state) => state.isLoading);
 export const useUserError = () => useUserStore((state) => state.error);
 export const useUserPermissions = () => useUserStore((state) => state.userInfo?.permissions || []);
-export const useUserRole = () => useUserStore((state) => state.userInfo?.role);
+export const useUserRole = () => useUserStore((state) => state.userInfo?.roles);
 export const useUserCan = () => useUserStore((state) => state.userInfo?.can || (() => false));
 export const useTenantId = () => useUserStore((state) => state.userInfo?.tenantId);
 export const useTenantType = () => useUserStore((state) => state.userInfo?.tenantType);

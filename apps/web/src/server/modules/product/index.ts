@@ -1,7 +1,7 @@
 import {
   mediaTable,
   ProductTModel,
-  productCategoriesTable,
+  productMasterCategoriesTable,
   productMediaTable,
   productsTable,
   skusTable,
@@ -57,11 +57,11 @@ export const productRoute = new Elysia({ prefix: "product" })
           exists(
             db
               .select({})
-              .from(productCategoriesTable)
+              .from(productMasterCategoriesTable)
               .where(
                 and(
-                  eq(productCategoriesTable.productId, productsTable.id),
-                  eq(productCategoriesTable.categoryId, categoryId)
+                  eq(productMasterCategoriesTable.productId, productsTable.id),
+                  eq(productMasterCategoriesTable.categoryId, categoryId)
                 )
               )
           )
@@ -78,13 +78,13 @@ export const productRoute = new Elysia({ prefix: "product" })
           createdAt: productsTable.createdAt,
           updatedAt: productsTable.updatedAt,
           // 关联字段按需选择，重命名避免冲突
-          categoryId: productCategoriesTable.categoryId,
+          categoryId: productMasterCategoriesTable.categoryId,
           imageUrl: mediaTable.url,
         })
         .from(productsTable)
         .leftJoin(
-          productCategoriesTable,
-          eq(productsTable.id, productCategoriesTable.productId)
+          productMasterCategoriesTable,
+          eq(productsTable.id, productMasterCategoriesTable.productId)
         )
         // 先关联商品图片表，再关联媒体表（链式LEFT JOIN，逻辑上是一个关联单元）
         .leftJoin(
@@ -199,10 +199,10 @@ export const productRoute = new Elysia({ prefix: "product" })
         })
         .from(productsTable)
         .innerJoin(
-          productCategoriesTable,
-          eq(productsTable.id, productCategoriesTable.productId)
+          productMasterCategoriesTable,
+          eq(productsTable.id, productMasterCategoriesTable.productId)
         )
-        .where(eq(productCategoriesTable.categoryId, categoryId))
+        .where(eq(productMasterCategoriesTable.categoryId, categoryId))
         .limit(limit)
         .offset((page - 1) * limit);
 
@@ -210,10 +210,10 @@ export const productRoute = new Elysia({ prefix: "product" })
         .select({ count: count() })
         .from(productsTable)
         .innerJoin(
-          productCategoriesTable,
-          eq(productsTable.id, productCategoriesTable.productId)
+          productMasterCategoriesTable,
+          eq(productsTable.id, productMasterCategoriesTable.productId)
         )
-        .where(eq(productCategoriesTable.categoryId, categoryId));
+        .where(eq(productMasterCategoriesTable.categoryId, categoryId));
 
       const totalRecords = totalRecordsResult[0]?.count || 0;
 

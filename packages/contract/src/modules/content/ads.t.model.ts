@@ -19,11 +19,19 @@ const Select = createSelectSchema(adsTable);
 
 // Create ads - 排除自动生成的字段，将 image_id 转换为数组
 const Create = t.Intersect([
-  t.Omit(Insert, ["id", "createdAt", "updatedAt", "image_id"]),
+  t.Omit(UpdateBase, [
+    "id",
+    "createdAt",
+    "updatedAt",
+    "startDate",
+    "endDate",
+  ]),
   t.Object({
-    image_id: t.Array(t.String({ minimum: 1 }), { minItems: 1 }),
+    startDate: t.String({ format: "date-time" }),
+    endDate: t.String({ format: "date-time" }),
   }),
 ]);
+
 
 // Update ads - 完整更新，排除自动字段，转换 image_id 为数组
 const Update = t.Intersect([
@@ -31,12 +39,10 @@ const Update = t.Intersect([
     "id",
     "createdAt",
     "updatedAt",
-    "image_id",
     "startDate",
     "endDate",
   ]),
   t.Object({
-    image_id: t.Array(t.String({ minimum: 1 })),
     startDate: t.String({ format: "date-time" }),
     endDate: t.String({ format: "date-time" }),
   }),
@@ -48,12 +54,10 @@ const Patch = t.Intersect([
     "id",
     "createdAt",
     "updatedAt",
-    "image_id",
     "startDate",
     "endDate",
   ]),
   t.Object({
-    image_id: t.Optional(t.Array(t.String({ minimum: 1 }))),
     startDate: t.Optional(t.String({ format: "date-time" })),
     endDate: t.Optional(t.String({ format: "date-time" })),
   }),

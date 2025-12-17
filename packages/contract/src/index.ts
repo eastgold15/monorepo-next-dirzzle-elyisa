@@ -16,6 +16,8 @@ export * from "./modules/helper/query-types.t.model";
 export * from "./modules/helper/utils.types";
 // ==================== Inquiry 模块导出 ====================
 export * from "./modules/inquiry"
+// ==================== Master Category 模块导出 ====================
+export * from "./modules/master-category/master-category.t.model";
 
 // ==================== Media 模块导出 ====================
 export * from "./modules/media"

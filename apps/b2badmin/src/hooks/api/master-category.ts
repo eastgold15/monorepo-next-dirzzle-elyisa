@@ -28,10 +28,9 @@ export function useMasterCategories(parentId?: string) {
     queryKey: ["master-categories", "flat", parentId],
     queryFn: async () => {
       const response = await rpc.api["master-category"].get({
-        query: { parentId, page: 1, limit: 1000 } // 获取所有数据用于下拉选择
+        $query: { parentId, page: 1, limit: 1000 } // 获取所有数据用于下拉选择
       });
       if (response.error) {
-        //@ts-expect-error
         throw new Error(response.error.message || "获取主分类失败");
       }
       const categories = response.data || [];

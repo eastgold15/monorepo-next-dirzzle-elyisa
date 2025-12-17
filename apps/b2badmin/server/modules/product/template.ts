@@ -1,31 +1,36 @@
-import { eq, inArray } from "drizzle-orm";
-import { Elysia, t } from "elysia";
-import { HttpError } from "elysia-http-problem-json";
-import { dbPlugin } from "@/server/db/connection";
 import {
   attributeTable,
   attributeTemplateTable,
   attributeValueTable,
-} from "@/server/db/schema";
-import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
-import { buildPageMeta } from "@/server/utils/services";
+} from "@repo/contract";
+import { eq, inArray } from "drizzle-orm";
+import { Elysia, t } from "elysia";
+import { HttpError } from "elysia-http-problem-json";
+import { dbPlugin } from "~/db/connection";
+import { adminAuthPlugin } from "../../plugins/admin-auth.plugin";
+import { commonRes } from "../../utils/Res";
 
 /**
  * 产品模板管理接口
- * 整合属性模板、属性和属性值，返回前端需要的格式
+ * 模板是基于主分类的公用模板，所有站点都可以使用
  */
 export const productTemplateRoute = new Elysia({
   name: "product-template",
   prefix: "/product/template",
+  tags: ["产品模板管理"],
 })
   .use(dbPlugin)
+  .use(adminAuthPlugin)
   .get(
     "/",
-    async ({ query, db }): Promise<CommonRes<PageData<any>>> => {
-      const { page = 1, limit = 10 } = query;
+    async ({ query, db }) => {
+      const { page = 1, limit = 10, categoryId } = query;
 
-      // 获取所有属性模板
+      // 获取属性模板
       const templates = await db.query.attributeTemplateTable.findMany({
+        where: {
+          ...(categoryId ? { categoryId } : {}),
+        },
         with: {
           category: {
             columns: {
@@ -41,7 +46,9 @@ export const productTemplateRoute = new Elysia({
         templates.map(async (template) => {
           // 获取模板下的所有属性
           const attributes = await db.query.attributeTable.findMany({
-            where: eq(attributeTable.templateId, template.id),
+            where: {
+              templateId: template.id,
+            },
             orderBy: (attribute, { asc }) => [asc(attribute.sortOrder)],
           });
 
@@ -51,7 +58,9 @@ export const productTemplateRoute = new Elysia({
               let values: any[] = [];
               if (attr.inputType === "select") {
                 values = await db.query.attributeValueTable.findMany({
-                  where: eq(attributeValueTable.attributeId, attr.id),
+                  where: {
+                    attributeId: attr.id,
+                  },
                   orderBy: (value, { asc }) => [asc(value.sortOrder)],
                 });
               }
@@ -72,9 +81,9 @@ export const productTemplateRoute = new Elysia({
           return {
             id: template.id,
             name: template.name,
-            description: `${template.category?.name || ""}分类模板`,
+            description: `${(template as any).category?.name || ""}分类模板`,
             categoryId: template.categoryId,
-            categoryName: template.category?.name || "",
+            categoryName: (template as any).category?.name || "",
             fields: attributesWithValues,
             createdAt: template.createdAt,
           };
@@ -86,10 +95,7 @@ export const productTemplateRoute = new Elysia({
       const startIndex = (page - 1) * limit;
       const items = templatesWithFields.slice(startIndex, startIndex + limit);
 
-      return commonRes({
-        items,
-        meta: buildPageMeta(total, page, limit),
-      });
+      return items;
     },
     {
       detail: {
@@ -100,12 +106,13 @@ export const productTemplateRoute = new Elysia({
       query: t.Object({
         page: t.Optional(t.Number()),
         limit: t.Optional(t.Number()),
+        categoryId: t.Optional(t.String()),
       }),
     }
   )
   .post(
     "/",
-    async ({ body, db }) => {
+    async ({ body, db, status }) => {
       const { name, description, categoryId, fields } = body;
 
       // 创建属性模板
@@ -125,7 +132,10 @@ export const productTemplateRoute = new Elysia({
             templateId: template.id,
             name: field.name,
             code: field.code,
-            inputType: (field.type === 'multiselect' || field.type === 'richtext') ? 'text' : field.type,
+            inputType:
+              field.type === "multiselect" || field.type === "richtext"
+                ? "text"
+                : field.type,
             isRequired: true,
             isSaleAttr: field.isSkuSpec,
             sortOrder: field.sortOrder || 0,
@@ -148,8 +158,7 @@ export const productTemplateRoute = new Elysia({
           );
         }
       }
-
-      return commonRes({ id: template.id }, 201);
+      return status(201);
     },
     {
       detail: {
@@ -183,7 +192,7 @@ export const productTemplateRoute = new Elysia({
   )
   .put(
     "/update/:id",
-    async ({ params: { id }, body, db }) => {
+    async ({ params: { id }, body, db, status }) => {
       const { name, description, categoryId, fields } = body;
 
       // 更新模板基本信息
@@ -202,7 +211,9 @@ export const productTemplateRoute = new Elysia({
 
       // 获取现有属性
       const existingAttributes = await db.query.attributeTable.findMany({
-        where: eq(attributeTable.templateId, id),
+        where: {
+          templateId: id,
+        },
       });
 
       // 删除不再需要的属性和其值
@@ -293,7 +304,7 @@ export const productTemplateRoute = new Elysia({
         }
       }
 
-      return commonRes({ id: template.id });
+      return status(200);
     },
     {
       detail: {
@@ -334,7 +345,11 @@ export const productTemplateRoute = new Elysia({
     async ({ body: { ids }, db }) => {
       // 获取要删除的模板下的所有属性
       const attributes = await db.query.attributeTable.findMany({
-        where: inArray(attributeTable.templateId, ids),
+        where: {
+          id: {
+            in: ids,
+          },
+        },
       });
 
       if (attributes.length > 0) {
@@ -375,11 +390,27 @@ export const productTemplateRoute = new Elysia({
     }
   )
   .get(
-    "/detail/:id",
-    async ({ params: { id }, db }) => {
-      // 获取模板详情
-      const template = await db.query.attributeTemplateTable.findFirst({
-        where: eq(attributeTemplateTable.id, id),
+    "/by-site-category/:siteCategoryId",
+    async ({ params: { siteCategoryId }, db, currentSite }) => {
+      if (!currentSite) {
+        throw new HttpError.Forbidden("您没有权限访问任何站点");
+      }
+
+      // 根据站点分类ID找到对应的主分类ID
+      const siteCategory = await db.query.siteCategoriesTable.findFirst({
+        where: { id: siteCategoryId },
+        columns: {
+          masterCategoryId: true,
+        },
+      });
+
+      if (!siteCategory?.masterCategoryId) {
+        throw new HttpError.NotFound("该站点分类没有关联的主分类");
+      }
+
+      // 根据主分类ID获取模板列表
+      const templates = await db.query.attributeTemplateTable.findMany({
+        where: { categoryId: siteCategory.masterCategoryId },
         with: {
           category: {
             columns: {
@@ -390,58 +421,66 @@ export const productTemplateRoute = new Elysia({
         },
       });
 
-      if (!template) {
-        throw new HttpError.NotFound("模板不存在");
-      }
+      // 为每个模板获取属性和属性值
+      const templatesWithFields = await Promise.all(
+        templates.map(async (template) => {
+          // 获取模板下的所有属性
+          const attributes = await db.query.attributeTable.findMany({
+            where: {
+              templateId: template.id,
+            },
+            orderBy: (attribute, { asc }) => [asc(attribute.sortOrder)],
+          });
 
-      // 获取模板下的所有属性
-      const attributes = await db.query.attributeTable.findMany({
-        where: eq(attributeTable.templateId, id),
-        orderBy: (attribute, { asc }) => [asc(attribute.sortOrder)],
-      });
+          // 获取每个属性的值（如果是select类型）
+          const attributesWithValues = await Promise.all(
+            attributes.map(async (attr) => {
+              let values: any[] = [];
+              if (attr.inputType === "select") {
+                values = await db.query.attributeValueTable.findMany({
+                  where: {
+                    attributeId: attr.id,
+                  },
+                  orderBy: (value, { asc }) => [asc(value.sortOrder)],
+                });
+              }
 
-      // 获取每个属性的值
-      const attributesWithValues = await Promise.all(
-        attributes.map(async (attr) => {
-          let values: any[] = [];
-          if (attr.inputType === "select") {
-            values = await db.query.attributeValueTable.findMany({
-              where: eq(attributeValueTable.attributeId, attr.id),
-              orderBy: (value, { asc }) => [asc(value.sortOrder)],
-            });
-          }
+              return {
+                id: attr.id,
+                name: attr.name,
+                code: attr.code,
+                type: attr.inputType,
+                isSkuSpec: attr.isSaleAttr,
+                isRequired: attr.isRequired,
+                options: values.map((v) => v.value),
+                sortOrder: attr.sortOrder,
+              };
+            })
+          );
 
           return {
-            id: attr.id,
-            name: attr.name,
-            code: attr.code,
-            type: attr.inputType,
-            isSkuSpec: attr.isSaleAttr,
-            isRequired: attr.isRequired,
-            options: values.map((v) => v.value),
-            sortOrder: attr.sortOrder,
+            id: template.id,
+            name: template.name,
+            description: `${(template as any).category?.name || ""}分类模板`,
+            categoryId: template.categoryId,
+            categoryName: (template as any).category?.name || "",
+            fields: attributesWithValues,
+            createdAt: template.createdAt,
           };
         })
       );
 
-      return commonRes({
-        id: template.id,
-        name: template.name,
-        description: `${template.category?.name || ""}分类模板`,
-        categoryId: template.categoryId,
-        categoryName: template.category?.name || "",
-        fields: attributesWithValues,
-        createdAt: template.createdAt,
-      });
+      return commonRes(templatesWithFields);
     },
     {
+      auth: true,
       detail: {
-        summary: "获取产品模板详情",
-        description: "根据ID获取产品模板详情，包含所有字段定义",
+        summary: "根据站点分类获取模板列表",
+        description: "根据站点分类ID找到对应的主分类，返回该主分类下的所有模板",
         tags: ["产品模板管理"],
       },
       params: t.Object({
-        id: t.String(),
+        siteCategoryId: t.String(),
       }),
     }
   );

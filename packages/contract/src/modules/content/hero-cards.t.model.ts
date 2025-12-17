@@ -16,9 +16,19 @@ const UpdateBase = createUpdateSchema(heroCardsTable);
 const Select = createSelectSchema(heroCardsTable);
 
 // === 业务 Schema ===
-const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);
+const Create = t.Intersect([
+  t.Omit(Insert, ["id", "createdAt", "updatedAt", "mediaId"]),
+  t.Object({
+    mediaId: t.Array(t.String({ minimum: 1 }), { minItems: 1 }),
+  }),
+]);
 
-const Update = t.Omit(UpdateBase, ["id", "createdAt", "updatedAt"]);
+const Update = t.Intersect([
+  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "mediaId"]),
+  t.Object({
+    mediaId: t.Optional(t.Array(t.String({ minimum: 1 }))),
+  }),
+]);
 
 const Patch = t.Partial(Update);
 
@@ -45,6 +55,10 @@ const BatchStatusUpdate = t.Object({
   isActive: t.Boolean(),
 });
 
+const BatchDelete = t.Object({
+  ids: t.Array(t.String({ minimum: 1 })),
+});
+
 // === 1. 运行时 Schema 集合（值）===
 export const HeroCardsTModel = {
   Insert,
@@ -56,6 +70,7 @@ export const HeroCardsTModel = {
   Entity,
   BusinessQuery,
   BatchStatusUpdate,
+  BatchDelete
 } as const;
 
 // === 2. 编译时类型集合（类型）===
@@ -69,4 +84,5 @@ export type HeroCardsTModel = {
   Entity: typeof Entity.static;
   BusinessQuery: typeof BusinessQuery.static;
   BatchStatusUpdate: typeof BatchStatusUpdate.static;
+  BatchDelete: typeof BatchDelete.static;
 };

@@ -1,16 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
-import { handleEden } from "@/lib/utils/base";
 
 // 广告相关 hooks
 export function useAdsList(params?: Record<string, any>) {
   return useQuery({
     queryKey: ["ads", "list", params],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.advertisements.get({
+      const { data, error } = await rpc.api.advertisements.get({
         query: params || {}
-      }));
-      return result;
+      });
+      if (error || !data) {
+        // @ts-expect-error
+        throw new Error(error.message || "获取广告列表失败");
+      }
+      return data;
     },
     staleTime: 5 * 60 * 1000, // 5分钟
   });
@@ -21,9 +24,7 @@ export function useAdsCreate() {
 
   return useMutation({
     mutationFn: async (data: any) => {
-      const result = handleEden(await rpc.api.advertisements.post({
-        data
-      }));
+      const result = await rpc.api.advertisements.post(data);
       return result;
     },
     onSuccess: () => {
@@ -37,10 +38,12 @@ export function useAdsUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const result = handleEden(await rpc.api.advertisements[id].put({
-        data
-      }));
-      return result;
+      const { data: res, error } = await rpc.api.advertisements({ id }).put(data);
+      if (error || !data) {
+        // @ts-expect-error
+        throw new Error(error.message || "更新广告失败");
+      }
+      return res;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
@@ -52,11 +55,13 @@ export function useAdsDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (ids: string[]) => {
-      const result = handleEden(await rpc.api.advertisements.batchDel.delete({
-        data: { ids }
-      }));
-      return result;
+    mutationFn: async (id: string) => {
+      const { data, error } = await rpc.api.advertisements({ id }).delete();
+      if (error || !data) {
+        // @ts-expect-error
+        throw new Error(error.message || "删除广告失败");
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
@@ -64,24 +69,22 @@ export function useAdsDelete() {
   });
 }
 
-export function useAdsDetail(id: string) {
-  return useQuery({
-    queryKey: ["ads", "detail", id],
-    queryFn: async () => {
-      const result = handleEden(await rpc.api.advertisements[id].get());
-      return result;
-    },
-    enabled: !!id,
-  });
-}
+export function useAdsBatchDelete() {
+  const queryClient = useQueryClient();
 
-export function useCurrentCarouselAds() {
-  return useQuery({
-    queryKey: ["ads", "carousel", "current"],
-    queryFn: async () => {
-      const result = handleEden(await rpc.api.advertisements["carousel/current"].get());
-      return result;
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data, error } = await rpc.api.advertisements.batchDel.delete({
+        ids
+      });
+      if (error || !data) {
+        // @ts-expect-error
+        throw new Error(error.message || "批量删除广告失败");
+      }
+      return data;
     },
-    staleTime: 2 * 60 * 1000, // 2分钟
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ads"] });
+    },
   });
 }

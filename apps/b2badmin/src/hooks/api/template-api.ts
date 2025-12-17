@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 
 // 获取模板列表
-export function useTemplates(page = 1, limit = 10) {
+export function useTemplates(page = 1, limit = 10, categoryId?: string) {
   return useQuery({
-    queryKey: ["templates", page, limit],
+    queryKey: ["templates", page, limit, categoryId],
     queryFn: async () => {
       const res = await rpc.api.product.template.get({
-        $query: { page, limit },
+        $query: { page, limit, categoryId },
       });
       if (res.error) {
         throw new Error(res.error.message);
@@ -18,12 +18,29 @@ export function useTemplates(page = 1, limit = 10) {
   });
 }
 
+// 根据站点分类获取模板列表
+export function useTemplatesBySiteCategory(siteCategoryId?: string) {
+  return useQuery({
+    queryKey: ["templates", "site-category", siteCategoryId],
+    queryFn: async () => {
+      if (!siteCategoryId) return [];
+      const res = await rpc.api.product.template["by-site-category"][":siteCategoryId"].get();
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+      return res.data || [];
+    },
+    enabled: !!siteCategoryId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
 // 获取模板详情
 export function useTemplate(id: string) {
   return useQuery({
     queryKey: ["template", id],
     queryFn: async () => {
-      const res = await rpc.api.product.template.detail[":id"].get();
+      const res = await rpc.api.product.template.detail({ id }).get();
       if (res.error) {
         throw new Error(res.error.message);
       }
@@ -90,7 +107,7 @@ export function useUpdateTemplate() {
         }>;
       };
     }) => {
-      const res = await rpc.api.product.template.update[":id"].put(data);
+      const res = await rpc.api.product.template.update({ id }).put(data);
       if (res.error) {
         throw new Error(res.error.message);
       }

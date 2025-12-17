@@ -1,12 +1,10 @@
 import { HeroCardsTModel } from "@repo/contract";
 import { heroCardsTable } from "@repo/contract/table";
-import { and, desc, eq, inArray, or } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { db, dbPlugin } from "~/db/connection";
 import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
-import { localeMiddleware } from "~/plugins/locale";
-import { commonRes } from "~/utils/Res";
 
 /**
  * 首页展示卡片控制器
@@ -17,18 +15,14 @@ export const HeroCardsController = new Elysia({
 })
   .use(dbPlugin)
   .use(adminAuthPlugin)
-  .use(localeMiddleware)
 
-  // 获取首页展示卡片列表 - 支持分页、搜索和筛选
+  // 获取首页展示卡片列表 - 支持搜索和筛选
   .get(
     "/",
     async ({ query, currentSite }) => {
       const {
-        page = 1,
-        limit = 10,
         sort = "sortOrder",
         sortOrder = "asc",
-        search,
         isActive,
       } = query;
 
@@ -37,73 +31,28 @@ export const HeroCardsController = new Elysia({
         siteId: currentSite.id,
       };
 
-      if (search || isActive !== undefined) {
-        const conditions: any[] = [];
-
-        if (search) {
-          conditions.push(
-            or(
-              { title: { like: `%${search}%` } },
-              { description: { like: `%${search}%` } }
-            )
-          );
-        }
-        if (isActive !== undefined) {
-          conditions.push({ isActive });
-        }
-
-        if (conditions.length === 1) {
-          Object.assign(whereCondition, conditions[0]);
-        } else if (conditions.length > 1) {
-          Object.assign(whereCondition, and(...conditions));
-        }
+      if (isActive !== undefined) {
+        whereCondition.isActive = isActive;
       }
 
       // 使用关系查询
       const heroCards = await db.query.heroCardsTable.findMany({
-        where:
-          Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
+        where: whereCondition,
         with: {
           media: {
             columns: {
               id: true,
-              fileName: true,
               url: true,
-              alt: true,
             },
           },
         },
-        orderBy: (table, { asc }) => {
-          const orderColumn =
-            table[sort as keyof typeof table] || table.sortOrder;
-          return sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
-        },
-        limit,
-        offset: (page - 1) * limit,
+        orderBy: { sortOrder: sortOrder === "desc" ? "desc" : "asc" },
       });
 
-      // 获取总数
-      const totalCountResult = await db
-        .select({ count: heroCardsTable.id })
-        .from(heroCardsTable)
-        .where(
-          Object.keys(whereCondition).length > 0 ? whereCondition : undefined
-        );
-
-      const total = totalCountResult.length;
-
-      return commonRes({
-        items: heroCards.map((item) => ({
-          ...item,
-          url: item.media?.url || null,
-        })),
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
+      return heroCards.map((item) => ({
+        ...item,
+        url: item.media?.url || null,
+      }));
     },
     {
       auth: true,
@@ -111,47 +60,7 @@ export const HeroCardsController = new Elysia({
       detail: {
         summary: "获取首页展示卡片列表",
         description:
-          "获取首页展示卡片列表，支持分页、搜索和筛选。可以搜索标题和描述内容",
-        tags: ["Hero Cards"],
-      },
-    }
-  )
-
-  // 获取启用的首页展示卡片（用于前端展示）
-  .get(
-    "/active",
-    async ({ currentSite }) => {
-      const cards = await db.query.heroCardsTable.findMany({
-        where: {
-          siteId: currentSite.id,
-          isActive: true,
-        },
-        with: {
-          media: {
-            columns: {
-              id: true,
-              fileName: true,
-              url: true,
-              alt: true,
-            },
-          },
-        },
-        orderBy: { sortOrder: "asc" },
-      });
-
-      return commonRes(
-        cards.map((item) => ({
-          ...item,
-          url: item.media?.url || null,
-        }))
-      );
-    },
-    {
-      // 这个接口不需要认证，用于前端展示
-      detail: {
-        summary: "获取启用的首页展示卡片",
-        description:
-          "获取所有启用状态的首页展示卡片，按排序顺序排列，用于前端展示",
+          "获取首页展示卡片列表，支持搜索和筛选。可以搜索标题和描述内容",
         tags: ["Hero Cards"],
       },
     }
@@ -161,7 +70,10 @@ export const HeroCardsController = new Elysia({
   .post(
     "/",
     async ({ body, currentSite }) => {
-      if (!body.imageId || (Array.isArray(body.imageId) && body.imageId.length === 0)) {
+      if (
+        !body.mediaId ||
+        (Array.isArray(body.mediaId) && body.mediaId.length === 0)
+      ) {
         throw new HttpError.BadRequest("请上传图片");
       }
 
@@ -172,7 +84,7 @@ export const HeroCardsController = new Elysia({
         sortOrder: body.sortOrder ?? 0,
         isActive: body.isActive ?? true,
         backgroundClass: body.backgroundClass ?? "bg-blue-50",
-        imageId: Array.isArray(body.imageId) ? body.imageId[0] : body.imageId,
+        mediaId: Array.isArray(body.mediaId) ? body.mediaId[0] : body.mediaId,
       };
 
       const [newCard] = await db
@@ -184,7 +96,7 @@ export const HeroCardsController = new Elysia({
         throw new Error("创建首页展示卡片失败");
       }
 
-      return commonRes(newCard, 201);
+      return newCard;
     },
     {
       auth: true,
@@ -217,7 +129,11 @@ export const HeroCardsController = new Elysia({
       // 准备更新数据
       const updateData = {
         ...body,
-        imageId: body.imageId,
+        mediaId: body.mediaId
+          ? Array.isArray(body.mediaId)
+            ? body.mediaId[0]
+            : body.mediaId
+          : undefined,
       };
 
       const result = await db
@@ -230,7 +146,7 @@ export const HeroCardsController = new Elysia({
         throw new Error("首页展示卡片不存在");
       }
 
-      return commonRes(result[0]);
+      return result[0];
     },
     {
       auth: true,
@@ -272,7 +188,7 @@ export const HeroCardsController = new Elysia({
         throw new Error("首页展示卡片不存在");
       }
 
-      return commonRes(result[0]);
+      return result[0];
     },
     {
       auth: true,
@@ -292,12 +208,12 @@ export const HeroCardsController = new Elysia({
     "/batch",
     async ({ body: { ids }, currentSite }) => {
       if (ids.length === 0) {
-        return commonRes(null, 204, "没有选择要删除的卡片");
+        return { message: "没有选择要删除的卡片" };
       }
 
       // 检查所有卡片是否属于当前站点
       const existingCards = await db.query.heroCardsTable.findMany({
-        where: inArray(heroCardsTable.id, ids),
+        where: { id: { in: ids } },
         columns: { id: true, siteId: true },
       });
 
@@ -311,7 +227,9 @@ export const HeroCardsController = new Elysia({
       // 批量删除
       await db.delete(heroCardsTable).where(inArray(heroCardsTable.id, ids));
 
-      return commonRes(null, 204, `成功删除 ${ids.length} 个首页展示卡片`);
+      return {
+        message: `成功删除 ${ids.length} 个首页展示卡片`,
+      };
     },
     {
       auth: true,

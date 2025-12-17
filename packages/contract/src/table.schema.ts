@@ -285,16 +285,12 @@ export const mediaTable = p.pgTable("media", {
   storageKey: p.varchar("storage_key", { length: 255 }).notNull(),
   category: p.varchar("category").notNull(),
   url: p.varchar("url", { length: 255 }).notNull(),
-  userId: p.uuid("user_id").references(() => usersTable.id, {
-    onDelete: "cascade",
-  }),
-  factoryId: p.uuid("factory_id").references(() => factoriesTable.id, {
-    onDelete: "cascade",
-  }),
   originalName: p.varchar("original_name", { length: 255 }).notNull(),
   mimeType: p.varchar("mime_type", { length: 100 }).notNull(),
   status: p.boolean("status").notNull().default(true),
   isPublic: p.boolean("is_public").notNull().default(false),
+
+  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const mediaMetadataTable = p.pgTable("media_metadata", {
