@@ -261,3 +261,38 @@
   - 每个角色只能在其权限范围内操作
   - 出口商可以统一管理其旗下所有工厂的站点
   - 工厂有自主管理自己站点的权限
+
+
+  工厂级管理 (由工厂业务员主导)
+谁在操作： 工厂业务员 (salespersonsTable 关联到 usersTable)。
+
+操作流程：
+
+业务员登录系统。
+
+他们被授权管理特定工厂 (salespersonAffiliationsTable 记录了他们与哪个 Factory/Exporter 关联)。
+
+他们直接在 productsTable 中创建/编辑商品，确保 factoryId 正确指向他们的工厂。
+
+他们维护商品细节 (SKU、图片、属性等)。
+
+您的参与： 无需参与，除非您需要审核数据。
+
+2. 出口商级管理/站点聚合 (由您或您的管理员主导)
+谁在操作： 您或您的超级管理员 (isSuperAdmin: true 或有相应角色的用户)。
+
+操作流程：
+
+您登录系统，切换到您的出口站点 (sitesTable 中 siteType 为 'exporter' 的记录)。
+
+进入“产品管理”或“站点商品聚合”界面。
+
+通过 siteProductsTable 关联工厂商品：您选择一个已存在的商品 (productId)，将其链接到您的站点 (siteId)。
+
+在 siteProductsTable 中，您可以设置此商品在您站点上的独立价格 (sitePrice)、名称 (siteName) 和分类 (siteCategoryId)。
+
+目的： 您不修改工厂的原始数据，您只是引用并定制它在您的出口站点上的表现。
+
+结论：
+
+您作为出口商，主要关注宏观的聚合和站点的定制化配置（sitesTable, siteProductsTable, siteConfigTable）。具体的商品细节维护（如 SKU 价格、库存、产品描述）应由工厂业务员完成，实现了职责分离和数据源的单一性。

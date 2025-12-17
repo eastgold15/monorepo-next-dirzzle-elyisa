@@ -2,17 +2,19 @@ import { cors } from "@elysiajs/cors";
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
+import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
+import { localeMiddleware } from "~/plugins/locale";
+import { loggerPlugin } from "~/plugins/logger";
+import { errorPlugin } from "~/utils/err/err.plugin";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 import { OpenAPI } from "./lib/auth-openapi";
 import { factoryRoute } from "./modules/factory/factory";
 import { siteRoute } from "./modules/site/site";
+import { siteProductsRoute } from "./modules/site/site-products";
+import { siteCategoryRoute } from "./modules/site/siteCategory";
 import { userRoute } from "./modules/user/user";
 import { userManagementController } from "./modules/user/user-management";
-import { adminAuthPlugin } from "./plugins/admin-auth.plugin";
-import { localeMiddleware } from "./plugins/locale";
-import { loggerPlugin } from "./plugins/logger";
-import { errorPlugin } from "./utils/err/err.plugin";
 
 /**
  * Main API router
@@ -49,6 +51,11 @@ export const server = new Elysia({ name: "server" })
         },
         tags: [
           { name: "Product V2", description: "商品管理 V2" },
+          { name: "商品管理", description: "工厂级商品管理" },
+          { name: "SKU管理", description: "商品SKU管理" },
+          { name: "商品图片管理", description: "商品图片关联管理" },
+          { name: "站点商品管理", description: "出口商站点产品聚合管理" },
+          { name: "站点分类管理", description: "站点分类管理" },
           { name: "Categories", description: "分类管理" },
           { name: "Factory", description: "工厂管理" },
           { name: "Media", description: "媒体文件管理" }, // 新的媒体管理标签
@@ -86,6 +93,11 @@ export const server = new Elysia({ name: "server" })
   // .use(skuRoute)
   // .use(translateRoute)
   .use(siteRoute)
+  .use(siteCategoryRoute)
   .use(userRoute)
   .use(userManagementController)
-  .use(factoryRoute);
+  .use(factoryRoute)
+  // .use(product)
+  // .use(sku)
+  // .use(productMedia)
+  .use(siteProductsRoute);

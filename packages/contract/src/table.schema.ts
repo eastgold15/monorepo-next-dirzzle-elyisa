@@ -318,10 +318,7 @@ export const adsTable = p.pgTable("advertisements", {
   title: p.varchar("title", { length: 255 }).notNull(),
   description: p.varchar("description", { length: 255 }).notNull(),
   type: adsTypeEnum("type").notNull(),
-  image_id: p
-    .uuid("image_id")
-    .notNull()
-    .references(() => mediaTable.id),
+  mediaId: p.uuid("media_id").notNull().references(() => mediaTable.id),
   link: p.varchar("link", { length: 500 }).notNull(),
   position: adsPositionEnum("ads_position").default("home-top"),
   sortOrder: p.integer("sort_order").default(0),
@@ -343,7 +340,7 @@ export const heroCardsTable = p.pgTable("hero_cards", {
   backgroundClass: p
     .varchar("background_class", { length: 100 })
     .default("bg-blue-50"),
-  imageId: p.uuid("image_id").references(() => mediaTable.id),
+  mediaId: p.uuid("media_id").references(() => mediaTable.id),
   sortOrder: p.integer("sort_order").default(0),
   isActive: p.boolean("is_active").default(true),
   // 🔥 必须新增：属于哪个站点
@@ -359,13 +356,9 @@ export const productsTable = p.pgTable("products_table", {
   description: p.text("description"),
   status: p.integer("status").notNull().default(1),
   units: p.varchar("units", { length: 20 }),
-
-  factoryId: p.uuid("factory_id").references(() => factoriesTable.id, {
-    onDelete: "restrict",
-  }),
 });
 
-export const productCategoriesTable = p.pgTable(
+export const productMasterCategoriesTable = p.pgTable(
   "product_categories",
   {
     productId: p
@@ -381,19 +374,19 @@ export const productCategoriesTable = p.pgTable(
 );
 
 export const productMediaTable = p.pgTable(
-  "product_images",
+  "product_media",
   {
     productId: p
       .uuid("product_id")
       .notNull()
       .references(() => productsTable.id),
-    imageId: p
-      .uuid("image_id")
+    mediaId: p
+      .uuid("media_id")
       .notNull()
       .references(() => mediaTable.id),
     isMain: p.boolean("is_main").default(false),
   },
-  (t) => [p.primaryKey({ columns: [t.productId, t.imageId] })]
+  (t) => [p.primaryKey({ columns: [t.productId, t.mediaId] })]
 );
 
 export const attributeTemplateTable = p.pgTable("attribute_templates", {
@@ -449,8 +442,10 @@ export const skusTable = p.pgTable("skus_table", {
   createdAt,
   updatedAt,
   skuCode: p.varchar("sku_code", { length: 100 }).notNull().unique(),
-  productId: p.uuid("product_id").notNull(),
-  imageId: p.uuid("image_id").references(() => mediaTable.id),
+  productId: p.uuid("product_id").references(() => productsTable.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }).notNull(),
   price: p
     .decimal("price", { precision: 10, scale: 2 })
     .notNull()
@@ -463,32 +458,26 @@ export const skusTable = p.pgTable("skus_table", {
   specJson: p.json("spec_json").notNull(),
   extraAttributes: p.json("extra_attributes"),
   status: p.integer("status").notNull().default(1),
+
 });
 
-// export const productFactoriesTable = p.pgTable(
-//   "product_factories",
-//   {
-//     productId: p
-//       .uuid("product_id")
-//       .notNull()
-//       .references(() => productsTable.id, { onDelete: "cascade" }),
-//     factoryId: p
-//       .uuid("factory_id")
-//       .notNull()
-//       .references(() => factoriesTable.id, { onDelete: "cascade" }),
-//   },
-//   (t) => [p.primaryKey({ columns: [t.productId, t.factoryId] })]
-// );
+export const skuMediaTable = p.pgTable(
+  "sku_media",
+  {
+    skuId: p
+      .uuid("sku_id")
+      .notNull()
+      .references(() => skusTable.id, { onDelete: "cascade" }),
+    mediaId: p
+      .uuid("media_id")
+      .notNull()
+      .references(() => mediaTable.id, { onDelete: "restrict" }),
+    isMain: p.boolean("is_main").default(false), // 标记主图
+    sortOrder: p.integer("sort_order").default(0),
+  },
+  (t) => [p.primaryKey({ columns: [t.skuId, t.mediaId] })]
+);
 
-export const productStatisticsTable = p.pgTable("product_statistics", {
-  id: idUuid,
-  createdAt,
-  updatedAt,
-  productId: p.uuid("product_id"),
-  date: p.varchar("date", { length: 10 }).notNull(),
-  viewType: p.varchar("view_type", { length: 50 }).notNull(),
-  count: p.integer("count").default(0).notNull(),
-});
 
 export const CustomerTable = p.pgTable("customer", {
   id: idUuid,
@@ -509,7 +498,7 @@ export const inquiryTable = p.pgTable("inquiries", {
   customerName: p.varchar("customer_name", { length: 100 }),
   customerCompany: p.varchar("company_name", { length: 200 }).notNull(),
   customerEmail: p.varchar("email", { length: 255 }).notNull(),
-  customerPhone: p.integer("phone"), // ⚠️ 可能应为 varchar
+  customerPhone: p.varchar("phone", { length: 50 }),
   customerWhatsapp: p.varchar("whatsapp", { length: 50 }),
   status: inquiryStatusEnum("status").default("pending").notNull(),
   // 🔥 新增：来源标记
@@ -535,7 +524,6 @@ export const inquiryItemsTable = p.pgTable("inquiry_items", {
   productName: p.varchar("product_name", { length: 255 }).notNull(),
   productDescription: p.text("product_description"),
   skuQuantity: p.integer("sku_quantity").notNull(),
-  skuImage: p.varchar("sku_image", { length: 500 }),
   skuPrice: p.decimal("sku_price", { precision: 10, scale: 2 }),
   paymentMethod: p.varchar("payment_method", { length: 255 }).notNull(),
   customerRequirements: p.text("customer_requirements"),
@@ -634,14 +622,15 @@ export const sitesTable = p.pgTable("sites", {
   id: idUuid,
   createdAt,
   updatedAt,
+
   name: p.varchar("name", { length: 100 }).notNull(),
   domain: p.varchar("domain", { length: 255 }).unique().notNull(),
+  isActive: p.boolean("is_active").default(true),
 
   // 站点类型：factory 或 exporter
   siteType: entityTypeEnum('site_type').notNull(),
   factoryId: p.uuid("factory_id").references(() => factoriesTable.id),
   exporterId: p.uuid("exporter_id").references(() => exportersTable.id),
-  isActive: p.boolean("is_active").default(true),
 });
 
 // 站点分类表 - 每个站点独立的分类体系
@@ -649,16 +638,20 @@ export const siteCategoriesTable = p.pgTable("site_categories", {
   id: idUuid,
   createdAt,
   updatedAt,
-  siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
 
   name: p.varchar("name", { length: 100 }).notNull(),
   parentId: p.uuid("parent_id"),
   sortOrder: p.integer("sort_order").default(0),
 
+  siteId: p.uuid("site_id").references(() => sitesTable.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }).notNull(),
   // 分类可以关联到全局分类（可选，用于数据聚合）
-  masterCategoryId: p.uuid("master_category_id").references(() => MasterTable.id),
-
-
+  masterCategoryId: p.uuid("master_category_id").references(() => MasterTable.id, {
+    onDelete: "set null",
+    onUpdate: "cascade",
+  }),
 });
 
 // 站点商品关联表 - 每个站点展示的商品
@@ -666,8 +659,7 @@ export const siteProductsTable = p.pgTable("site_products", {
   id: idUuid,
   createdAt,
   updatedAt,
-  siteId: p.uuid("site_id").references(() => sitesTable.id).notNull(),
-  productId: p.uuid("product_id").references(() => productsTable.id).notNull(),
+
 
   // 站点级别的商品配置
   sitePrice: p.decimal("site_price", { precision: 10, scale: 2 }),
@@ -682,9 +674,19 @@ export const siteProductsTable = p.pgTable("site_products", {
   // SEO
   seoTitle: p.varchar("seo_title", { length: 200 }),
 
-
+  siteId: p.uuid("site_id").references(() => sitesTable.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }).notNull(),
+  productId: p.uuid("product_id").references(() => productsTable.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }).notNull(),
   // 关联站点分类
-  siteCategoryId: p.uuid("site_category_id").references(() => siteCategoriesTable.id),
+  siteCategoryId: p.uuid("site_category_id").references(() => siteCategoriesTable.id, {
+    onDelete: "set null",
+    onUpdate: "cascade",
+  }),
 });
 
 

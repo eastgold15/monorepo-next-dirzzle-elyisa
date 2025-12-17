@@ -1,13 +1,15 @@
 "use client";
 
+import type { SiteCategoryTModel } from "@repo/contract";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
-import {
-  type Category,
-  flattenCategories,
-  useCategoriesTree,
-} from "@/hooks/api/category";
+import { useSiteCategoriesTree } from "@/hooks/api/site-category";
+
+// 将契约层的实体类型转换为前端使用的带children的类型
+type SiteCategory = SiteCategoryTModel["Entity"] & {
+  children?: SiteCategory[];
+};
 
 interface CategoryTreeSelectProps {
   value?: string;
@@ -25,13 +27,30 @@ export function CategoryTreeSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-  const { data: categories = [], isLoading } = useCategoriesTree();
+  const { data: categories = [], isLoading } = useSiteCategoriesTree();
 
-  // 扁平化的选项用于搜索
-  const flattenedOptions = useMemo(
-    () => flattenCategories(categories),
-    [categories]
-  );
+  // 扁平化的选项用于显示选中的分类名称
+  const flattenedOptions = useMemo(() => {
+    const flatten = (
+      cats: SiteCategory[]
+    ): Array<{ value: string; label: string }> => {
+      const result: Array<{ value: string; label: string }> = [];
+      const traverse = (items: SiteCategory[], level = 0) => {
+        items.forEach((item) => {
+          result.push({
+            value: item.id,
+            label: level > 0 ? "  ".repeat(level) + item.name : item.name,
+          });
+          if (item.children && item.children.length > 0) {
+            traverse(item.children, level + 1);
+          }
+        });
+      };
+      traverse(cats);
+      return result;
+    };
+    return flatten(categories);
+  }, [categories]);
 
   // 获取选中的分类名称
   const selectedCategoryName = useMemo(() => {
@@ -57,7 +76,7 @@ export function CategoryTreeSelect({
     setIsOpen(false);
   };
 
-  const renderTree = (items: Category[], level = 0): React.ReactNode =>
+  const renderTree = (items: SiteCategory[], level = 0): React.ReactNode =>
     items.map((category) => {
       const hasChildren = category.children && category.children.length > 0;
       const isExpanded = expandedNodes.has(category.id);

@@ -71,8 +71,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: ShoppingBag,
       },
       {
-        title: "Categories",
-        url: "/dashboard/categories",
+        title: "Site Categories",
+        url: "/dashboard/site-categories",
         icon: Tags,
       }
     );
@@ -125,13 +125,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/dashboard/site-config",
         icon: Settings,
       });
-    }
 
-    // Site Categories - 管理员可以访问
-    if (isSuperAdmin || isExporterAdmin || isFactoryAdmin) {
+      // Master Categories - 全局分类管理，只有超级管理员和出口商管理员可以访问
       items.push({
-        title: "Site Categories",
-        url: "/dashboard/site-categories",
+        title: "Master Categories",
+        url: "/dashboard/master-categories",
         icon: Layers,
       });
     }

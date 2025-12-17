@@ -105,11 +105,6 @@ export const relations = defineRelations(schema, (r) => ({
     //   to: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
     //   alias: 'salespersons',
     // }),
-    products: r.many.productsTable({
-      from: r.factoriesTable.id,
-      to: r.productsTable.factoryId,
-      alias: "products",
-    }),
     // media: r.many.mediaTable({
     //   from: r.factoriesTable.id.through(r.mediaTable.factoryId),
     //   to: r.mediaTable.id.through(r.factoriesTable.id),
@@ -229,10 +224,6 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.productsTable.id,
       to: r.productTemplateTable.productId,
     }),
-    factory: r.one.factoriesTable({
-      from: r.productsTable.factoryId,
-      to: r.factoriesTable.id,
-    }),
     quotationItems: r.many.quotationItemsTable({}),
   },
 
@@ -254,7 +245,7 @@ export const relations = defineRelations(schema, (r) => ({
       to: [r.sitesTable.id],
     }),
     media: r.one.mediaTable({
-      from: [r.adsTable.image_id],
+      from: [r.adsTable.mediaId],
       to: [r.mediaTable.id],
     }),
   },
@@ -264,7 +255,7 @@ export const relations = defineRelations(schema, (r) => ({
       to: [r.sitesTable.id],
     }),
     media: r.one.mediaTable({
-      from: r.heroCardsTable.imageId,
+      from: r.heroCardsTable.mediaId,
       to: r.mediaTable.id,
     }),
   },
@@ -351,7 +342,10 @@ export const relations = defineRelations(schema, (r) => ({
     ads: r.many.adsTable({}),
     heroCards: r.many.heroCardsTable({}),
     productMedia: r.many.productMediaTable({}),
-    skus: r.many.skusTable({}),
+    skuMedia: r.one.skuMediaTable({
+      from: r.mediaTable.id,
+      to: r.skuMediaTable.mediaId
+    }),
     // factory: r.one.factoriesTable({
     //   from: r.mediaTable.factoryId,
     //   to: r.factoriesTable.id,
@@ -385,7 +379,7 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.productsTable.id,
     }),
     media: r.one.mediaTable({
-      from: r.productMediaTable.imageId,
+      from: r.productMediaTable.mediaId,
       to: r.mediaTable.id,
     }),
   },
@@ -442,9 +436,9 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.skusTable.productId,
       to: r.productsTable.id,
     }),
-    media: r.one.mediaTable({
-      from: r.skusTable.imageId,
-      to: r.mediaTable.id,
+    media: r.many.mediaTable({
+      from: r.skusTable.id.through(r.skuMediaTable.skuId),
+      to: r.mediaTable.id.through(r.skuMediaTable.mediaId),
     }),
     inquiryItems: r.many.inquiryItemsTable(),
   },

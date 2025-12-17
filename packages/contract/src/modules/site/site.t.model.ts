@@ -1,5 +1,4 @@
 import {
-  siteCategoriesTable,
   siteProductsTable,
   sitesTable
 } from "@repo/contract/table";
@@ -11,17 +10,15 @@ import {
 } from "drizzle-typebox";
 import { t } from "elysia";
 import { ExporterTModel, FactoryTModel } from "../company";
-import { ProductTModel } from "../product/product.t.model";
-import { SiteCategoryTModel } from "./siteCategry.t.model";
 
 // Site Model Types - 直接使用数据库生成的类型
-const SiteInsert = createInsertSchema(sitesTable);
-const SiteUpdate = createUpdateSchema(sitesTable);
-const SiteSelect = createSelectSchema(sitesTable);
+const Insert = createInsertSchema(sitesTable);
+const Update = createUpdateSchema(sitesTable);
+const Select = createSelectSchema(sitesTable);
 
-const SiteCategoryInsert = createInsertSchema(siteCategoriesTable);
-const SiteCategoryUpdate = createUpdateSchema(siteCategoriesTable);
-const SiteCategorySelect = createSelectSchema(siteCategoriesTable);
+const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);
+
+
 
 const SiteProductInsert = createInsertSchema(siteProductsTable);
 const SiteProductUpdate = createUpdateSchema(siteProductsTable);
@@ -29,21 +26,13 @@ const SiteProductSelect = createSelectSchema(siteProductsTable);
 
 // Extended Site Entity with relationships
 const SiteEntity = t.Composite([
-  SiteSelect,
+  Select,
   t.Object({
     factory: t.Optional(FactoryTModel.Entity),
     exporter: t.Optional(ExporterTModel.Entity),
   }),
 ]);
 
-// Site Product with product details
-const SiteProductEntity = t.Composite([
-  SiteProductSelect,
-  t.Object({
-    product: t.Optional(ProductTModel.Entity),
-    site_category: t.Optional(SiteCategoryTModel.Entity),
-  }),
-]);
 
 // Query Types
 const SiteListQuery = t.Object({
@@ -83,7 +72,7 @@ const SiteSwitchRequest = t.Object({
 
 const SiteSwitchResponse = t.Object({
   success: t.Boolean(),
-  currentSite: SiteSelect,
+  currentSite: Select,
   allSites: t.Array(SiteEntity),
 });
 
@@ -103,7 +92,7 @@ const AccessibleSitesResponse = t.Object({
 
 // Context Types
 const SiteContext = t.Object({
-  site: SiteSelect,
+  site: Select,
   siteType: t.Union([t.Literal("factory"), t.Literal("exporter")]),
   entityId: t.String(),
   entity: t.Optional(t.Union([FactoryTModel.Select, ExporterTModel.Entity])),
@@ -111,16 +100,14 @@ const SiteContext = t.Object({
 
 export const SiteTModel = {
   // Schema types - 直接使用数据库生成的类型
-  Insert: SiteInsert,
-  Update: SiteUpdate,
-  Select: SiteSelect,
+  Insert,
+  Update,
+  Select,
   ListQuery: SiteListQuery,
   Entity: SiteEntity,
 
-  // Category types - 使用数据库生成的类型
-  CategoryCreate: SiteCategoryInsert,
-  CategoryUpdate: SiteCategoryUpdate,
-  CategorySelect: SiteCategorySelect,
+  Create,
+
   CategoryListQuery: SiteCategoryListQuery,
 
   // Product types - 使用数据库生成的类型
@@ -128,14 +115,14 @@ export const SiteTModel = {
   ProductUpdate: SiteProductUpdate,
   ProductSelect: SiteProductSelect,
   ProductListQuery: SiteProductListQuery,
-  ProductEntity: SiteProductEntity,
+
 
   PermissionCreate: UserSitePermissionCreateBody,
 
   // Site switching types
   SwitchRequest: SiteSwitchRequest,
   SwitchResponse: SiteSwitchResponse,
-  AccessibleSitesResponse: AccessibleSitesResponse,
+  AccessibleSitesResponse,
 
   // Context type
   Context: SiteContext,
@@ -143,23 +130,21 @@ export const SiteTModel = {
 
 // Runtime type exports
 export type SiteTModel = {
-  Insert: typeof SiteInsert.static;
-  Update: typeof SiteUpdate.static;
-  Select: typeof SiteSelect.static;
+  Insert: typeof Insert.static;
+  Update: typeof Update.static;
+  Select: typeof Select.static;
+  Create: typeof Create.static;
 
   ListQuery: typeof SiteListQuery.static;
   Entity: typeof SiteEntity.static;
 
-  CategoryCreate: typeof SiteCategoryInsert.static;
-  CategoryUpdate: typeof SiteCategoryUpdate.static;
-  CategorySelect: typeof SiteCategorySelect.static;
   CategoryListQuery: typeof SiteCategoryListQuery.static;
 
   ProductCreate: typeof SiteProductInsert.static;
   ProductUpdate: typeof SiteProductUpdate.static;
   ProductSelect: typeof SiteProductSelect.static;
   ProductListQuery: typeof SiteProductListQuery.static;
-  ProductEntity: typeof SiteProductEntity.static;
+
 
   PermissionCreate: typeof UserSitePermissionCreateBody.static;
 

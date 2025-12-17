@@ -1,5 +1,10 @@
 import type { FactoryTModel as FactoryType } from "@repo/contract";
-import { FactoryTModel, factoriesTable, sitesTable, roleTable, userSiteRolesTable } from "@repo/contract";
+import {
+  FactoryTModel,
+  factoriesTable,
+  sitesTable,
+  userSiteRolesTable,
+} from "@repo/contract";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "~/db/connection";
@@ -70,18 +75,24 @@ export const factoryRoute = new Elysia({
           name: body.name,
           code: body.code,
           description: body.description || null,
-          website: body.website || `https://${body.code.toLowerCase()}.example.com`,
+          website:
+            body.website || `https://${body.code.toLowerCase()}.example.com`,
           address: body.address,
           contactPhone: body.contactPhone,
           logo: body.logo || null,
           businessLicense: body.businessLicense || null,
           mainProducts: body.mainProducts || null,
-          annualRevenue: body.annualRevenue ? body.annualRevenue.toString() : null,
+          annualRevenue: body.annualRevenue
+            ? body.annualRevenue.toString()
+            : null,
           employeeCount: body.employeeCount || null,
           // 确保 exporterId 要么是有效值，要么是 null
-          exporterId: role === "exporter_admin"
-            ? tenantId
-            : (body.exporterId ? body.exporterId : null),
+          exporterId:
+            role === "exporter_admin"
+              ? tenantId
+              : body.exporterId
+                ? body.exporterId
+                : null,
           isActive: true,
           isVerified: false, // 默认未认证
         };
@@ -93,24 +104,27 @@ export const factoryRoute = new Elysia({
           .returning();
 
         // 为工厂创建站点
-        const [newSite] = await tx.insert(sitesTable).values({
-          name: body.name,
-          domain: body.code.toLowerCase(),
-          siteType: "factory",
-          factoryId: newFactory.id,
-          isActive: true,
-        }).returning();
+        const [newSite] = await tx
+          .insert(sitesTable)
+          .values({
+            name: body.name,
+            domain: body.code.toLowerCase(),
+            siteType: "factory",
+            factoryId: newFactory.id,
+            isActive: true,
+          })
+          .returning();
 
         // 为创建者自动分配权限到新站点
         let creatorRole;
         if (role === "super_admin") {
           creatorRole = await tx.query.roleTable.findFirst({
-            where: { name: "super_admin" }
+            where: { name: "super_admin" },
           });
         } else if (role === "exporter_admin") {
           // 出口商管理员创建工厂时，默认获得该工厂的管理员权限
           creatorRole = await tx.query.roleTable.findFirst({
-            where: { name: "factory_admin" }
+            where: { name: "factory_admin" },
           });
         }
 
