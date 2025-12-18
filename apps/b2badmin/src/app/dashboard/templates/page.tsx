@@ -3,13 +3,14 @@
 import { Edit2, List, Plus, Save, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
-import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
+import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useMasterCategories } from "@/hooks/api/master-category";
 import {
   useCreateTemplate,
   useDeleteTemplates,
@@ -28,7 +29,9 @@ export default function TemplateManager() {
 
   const templates = templatesData?.data?.items || [];
 
-  // 获取分类列表
+  // 获取主分类列表
+  const { data: categories = [] } = useMasterCategories();
+
   // 创建模板
   const createTemplateMutation = useCreateTemplate();
   const updateTemplateMutation = useUpdateTemplate();
@@ -280,11 +283,11 @@ export default function TemplateManager() {
                       <div>
                         <label className="mb-1 block font-medium text-slate-700 text-sm">
                           {" "}
-                          Category{" "}
+                          主分类{" "}
                         </label>{" "}
-                        <CategoryTreeSelect
+                        <MasterCategorySelect
                           onChange={setSelectedCategoryId}
-                          placeholder="选择分类"
+                          placeholder="选择主分类"
                           value={selectedCategoryId}
                         />
                       </div>
@@ -527,7 +530,15 @@ export default function TemplateManager() {
                         <span>Category:</span>{" "}
                         <span className="font-medium text-slate-900">
                           {" "}
-                          {selectedCategoryId ? "已选择分类" : "-"}{" "}
+                          {(() => {
+                            if (!selectedCategoryId) return "-";
+                            // 从分类数据中查找选中的分类名称
+                            const categoryName =
+                              categories.find(
+                                (cat) => cat.id === selectedCategoryId
+                              )?.name || "已选择主分类";
+                            return categoryName;
+                          })()}{" "}
                         </span>
                       </li>
                       <li className="flex justify-between">

@@ -15,6 +15,7 @@
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@repo/contract": "*",
+    "@t3-oss/env-nextjs": "^0.13.10",
     "@tanstack/react-query": "5.90.11",
     "@types/nodemailer": "^7.0.4",
     "class-variance-authority": "^0.7.1",
@@ -34,6 +35,7 @@
     "react-hook-form": "^7.68.0",
     "tailwind-merge": "^3.4.0",
     "ws": "8.18.3",
+    "zod": "^4.2.1",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

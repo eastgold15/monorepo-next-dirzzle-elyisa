@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-
+import "./src/env.ts"
 const nextConfig: NextConfig = {
   /* config options here */
   poweredByHeader: false,
@@ -10,7 +10,11 @@ const nextConfig: NextConfig = {
       { hostname: "oss-cn-hongkong.aliyuncs.com" },
     ],
   },
-
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  }
 };
 
 export default nextConfig;

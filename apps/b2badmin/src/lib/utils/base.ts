@@ -20,25 +20,59 @@ export declare class EdenFetchError<
  * @returns The response data of type T
  * @throws EdenFetchError if the response contains an error
  */
-export function handleEden<T, E = unknown>(
-  response: (
-    | {
-        data: T;
-        error: null;
-      }
-    | {
-        data: null;
-        error: EdenFetchError<number, E>;
-      }
-  ) & {
-    status: number;
-    response: Record<number, unknown>;
-    headers: Record<string, string>;
+// export function handleEden<T, E = unknown>(
+//   response: (
+//     | {
+//         data: T;
+//         error: null;
+//       }
+//     | {
+//         data: null;
+//         error: EdenFetchError<number, E>;
+//       }
+//   ) & {
+//     status: number;
+//     response: Record<number, unknown>;
+//     headers: Record<string, string>;
+//   }
+// ): T {
+//   if (response.error) throw response.error;
+//   return response.data;
+// }
+
+/**
+ * 专门处理 Elysia Eden RPC 返回结果的工具函数
+ */
+export async function handleEden<T, E>(
+  promise: Promise<{ data: T; error: E }>
+): Promise<NonNullable<T>> {
+  const { data, error } = await promise;
+
+  if (error) {
+    // 1. 打印原始错误方便开发调试
+    console.error("[RPC Error]:", error);
+
+    // 2. 按照你提供的结构深度提取 message
+    // 这里的 error 类型对应你给出的 { status, value }
+    const val = (error as any).value;
+    const errorMessage =
+      val?.message ||        // 对应 403 和 422 的 message
+      val?.summary ||        // 对应 422 可能存在的 summary
+      (error as any).status || // 兜底显示状态码
+      "请求失败";
+
+    // 3. 抛出统一的 Error 对象，供外部 try-catch 或全局错误处理捕获
+    throw new Error(errorMessage);
   }
-): T {
-  if (response.error) throw response.error;
-  return response.data;
+
+  if (data === null || data === undefined) {
+    throw new Error("返回数据为空");
+  }
+  // 4. 只有成功且 data 存在时才返回
+  return data as NonNullable<T>;
 }
+
+
 
 /**
  * Safe parsing utility for TypeBox schemas that returns a discriminated union result

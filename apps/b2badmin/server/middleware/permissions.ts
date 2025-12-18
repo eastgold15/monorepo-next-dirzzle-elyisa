@@ -1,21 +1,15 @@
 import { Elysia } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { db } from "../db/connection";
-import {
-  usersTable,
-  userRolesTable,
-  roleTable,
-  factoriesTable,
-  exportersTable,
-  salespersonsTable
-} from "@repo/contract/table";
-import { eq, and } from "drizzle-orm";
 
 // 角色类型定义
-export type UserRole = 'exporter_admin' | 'factory_admin' | 'salesperson';
+export type UserRole = "exporter_admin" | "factory_admin" | "salesperson";
 
 // 权限检查函数
-export async function checkUserPermissions(userId: string, requiredRole?: UserRole) {
+export async function checkUserPermissions(
+  userId: string,
+  requiredRole?: UserRole
+) {
   // 获取用户的角色信息
   const userWithRoles = await db.query.usersTable.findFirst({
     where: { id: userId },
@@ -44,7 +38,7 @@ export async function checkUserPermissions(userId: string, requiredRole?: UserRo
   }
 
   // 获取用户角色
-  const roles = userWithRoles.userRoles.map(ur => ur.role.name);
+  const roles = userWithRoles.userRoles.map((ur) => ur.role.name);
 
   // 如果没有角色，拒绝访问
   if (roles.length === 0) {
@@ -83,9 +77,9 @@ export async function checkFactoryAccess(userId: string, factoryId: string) {
   const userPermissions = await checkUserPermissions(userId);
 
   // 出口商管理员可以访问所有旗下工厂
-  if (userPermissions.roles.includes('exporter_admin')) {
+  if (userPermissions.roles.includes("exporter_admin")) {
     const factories = await getExporterFactories(userPermissions.exporterId!);
-    const hasAccess = factories.some(f => f.id === factoryId);
+    const hasAccess = factories.some((f) => f.id === factoryId);
     if (!hasAccess) {
       throw new HttpError.Forbidden("您无权访问该工厂");
     }
@@ -93,7 +87,7 @@ export async function checkFactoryAccess(userId: string, factoryId: string) {
   }
 
   // 工厂管理员只能访问自己的工厂
-  if (userPermissions.roles.includes('factory_admin')) {
+  if (userPermissions.roles.includes("factory_admin")) {
     if (userPermissions.factoryId !== factoryId) {
       throw new HttpError.Forbidden("您只能管理自己的工厂");
     }
@@ -101,7 +95,7 @@ export async function checkFactoryAccess(userId: string, factoryId: string) {
   }
 
   // 业务员通过 salesperson 表关联到工厂
-  if (userPermissions.roles.includes('salesperson')) {
+  if (userPermissions.roles.includes("salesperson")) {
     if (userPermissions.factoryId !== factoryId) {
       throw new HttpError.Forbidden("您只能操作被分配的工厂");
     }
@@ -112,10 +106,10 @@ export async function checkFactoryAccess(userId: string, factoryId: string) {
 }
 
 // Elysia 权限中间件
-export const permissionsPlugin = new Elysia({ name: 'permissions' })
-  .derive({ as: 'global' }, async ({ headers, set }) => {
+export const permissionsPlugin = new Elysia({ name: "permissions" })
+  .derive({ as: "global" }, async ({ headers, set }) => {
     // 从请求头获取用户信息（假设通过认证中间件设置）
-    const userId = headers['x-user-id'] as string;
+    const userId = headers["x-user-id"] as string;
 
     if (!userId) {
       set.status = 401;
@@ -132,7 +126,7 @@ export const permissionsPlugin = new Elysia({ name: 'permissions' })
     // 检查是否为出口商管理员
     exporterAdmin: {
       async resolve({ userPermissions }) {
-        if (!userPermissions.roles.includes('exporter_admin')) {
+        if (!userPermissions.roles.includes("exporter_admin")) {
           throw new HttpError.Forbidden("需要出口商管理员权限");
         }
       },
@@ -140,7 +134,7 @@ export const permissionsPlugin = new Elysia({ name: 'permissions' })
     // 检查是否为工厂管理员
     factoryAdmin: {
       async resolve({ userPermissions }) {
-        if (!userPermissions.roles.includes('factory_admin')) {
+        if (!userPermissions.roles.includes("factory_admin")) {
           throw new HttpError.Forbidden("需要工厂管理员权限");
         }
       },
@@ -148,7 +142,7 @@ export const permissionsPlugin = new Elysia({ name: 'permissions' })
     // 检查是否为业务员
     salesperson: {
       async resolve({ userPermissions }) {
-        if (!userPermissions.roles.includes('salesperson')) {
+        if (!userPermissions.roles.includes("salesperson")) {
           throw new HttpError.Forbidden("需要业务员权限");
         }
       },
@@ -171,7 +165,7 @@ export const permissionsPlugin = new Elysia({ name: 'permissions' })
 export async function getUserVisibleFactories(userId: string) {
   const userPermissions = await checkUserPermissions(userId);
 
-  if (userPermissions.roles.includes('exporter_admin')) {
+  if (userPermissions.roles.includes("exporter_admin")) {
     return await getExporterFactories(userPermissions.exporterId!);
   }
 

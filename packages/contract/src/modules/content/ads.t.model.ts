@@ -19,12 +19,13 @@ const Select = createSelectSchema(adsTable);
 
 // Create ads - 排除自动生成的字段，将 image_id 转换为数组
 const Create = t.Intersect([
-  t.Omit(UpdateBase, [
+  t.Omit(Insert, [
     "id",
     "createdAt",
     "updatedAt",
     "startDate",
     "endDate",
+    "siteId"
   ]),
   t.Object({
     startDate: t.String({ format: "date-time" }),
@@ -72,11 +73,12 @@ const BusinessQuery = t.Intersect([
 ]);
 
 // ListQuery - 组合业务查询、分页和排序
-const ListQuery = t.Object({
-  ...BusinessQuery.properties,
-  ...PaginationParams.properties,
-  ...SortParams.properties,
-});
+const ListQuery = t.Composite([
+  BusinessQuery,
+  PaginationParams,
+  SortParams,
+]);
+
 
 // Entity - 返回实体模型，包含关联的图片URL
 const Entity = t.Intersect([

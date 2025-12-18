@@ -3,20 +3,16 @@
 import type { SiteCategoryTModel } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
+import { handleEden } from "@/lib/utils/base";
 
 // 获取当前站点的分类树
 export function useSiteCategoriesTree() {
   return useQuery({
     queryKey: ["site-categories", "tree"],
     queryFn: async () => {
-      const response = await rpc.api.site.category.get();
-      // 直接返回 response，因为我们的API返回的是数据本身而不是包装对象
-      if (response.error) {
-        // @ts-expect-error
-        throw new Error(response.error.message || "获取站点分类失败");
-      }
+      const data = await handleEden(rpc.api.site.category.get());
       // 确保返回数组，即使是空数组
-      return (response.data || []) as SiteCategoryTModel["Entity"][];
+      return (data || []) as SiteCategoryTModel["Entity"][];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -27,13 +23,8 @@ export function useSiteCategories() {
   return useQuery({
     queryKey: ["site-categories", "flat"],
     queryFn: async () => {
-      const response = await rpc.api.site.category.get();
-      if (response.error) {
-        // @ts-expect-error
-        throw new Error(response.error.message || "获取站点分类失败");
-      }
-      const categories = response.data || [];
-      return categories;
+      const categories = await handleEden(rpc.api.site.category.get());
+      return categories || [];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -45,12 +36,7 @@ export function useCreateSiteCategory() {
 
   return useMutation({
     mutationFn: async (data: SiteCategoryTModel["Create"]) => {
-      const response = await rpc.api.site.category.post(data);
-      if (response.error) {
-        // @ts-expect-error
-        throw new Error(response.error.message || "创建分类失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api.site.category.post(data));
     },
     onSuccess: () => {
       // 刷新分类树
@@ -71,12 +57,7 @@ export function useUpdateSiteCategory() {
       id: string;
       data: SiteCategoryTModel["Update"];
     }) => {
-      const response = await rpc.api.site.category.update({ id }).put(data);
-      if (response.error) {
-        // @ts-expect-error
-        throw new Error(response.error.message || "更新分类失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api.site.category.update({ id }).put(data));
     },
     onSuccess: () => {
       // 刷新分类树
@@ -91,12 +72,7 @@ export function useDeleteSiteCategory() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await rpc.api.site.category.delete({ id }).delete();
-      if (response.error) {
-        // @ts-expect-error
-        throw new Error(response.error.message || "删除分类失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api.site.category.delete({ id }).delete());
     },
     onSuccess: () => {
       // 刷新分类树
@@ -177,12 +153,7 @@ export function useBatchDeleteSiteCategories() {
       // 由于 Elysia 的限制，我们需要逐个删除
       // 在实际应用中，可能需要创建一个批量删除的接口
       const deletePromises = ids.map(async (id) => {
-        const response = await rpc.api.site.category.delete({ id }).delete();
-        if (response.error) {
-          // @ts-expect-error
-          throw new Error(response.error.message || `删除分类 ${id} 失败`);
-        }
-        return response.data;
+        return await handleEden(rpc.api.site.category.delete({ id }).delete());
       });
 
       await Promise.all(deletePromises);

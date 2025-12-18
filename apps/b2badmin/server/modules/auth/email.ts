@@ -1,6 +1,6 @@
 import type { Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
-import { envConfig } from "@/lib/env/server";
+import { env } from "@/env";
 
 class EmailService {
   private readonly transporter: Transporter | null;
@@ -9,19 +9,19 @@ class EmailService {
   constructor() {
     // 检查邮件服务是否已配置
     this.isConfigured = !!(
-      envConfig.EMAIL_USER &&
-      envConfig.EMAIL_PASSWORD &&
-      envConfig.EMAIL_FROM
+      env.EMAIL_USER &&
+      env.EMAIL_PASSWORD &&
+      env.EMAIL_FROM
     );
 
     if (this.isConfigured) {
       this.transporter = nodemailer.createTransport({
-        host: envConfig.EMAIL_HOST,
-        port: envConfig.EMAIL_PORT,
-        secure: envConfig.EMAIL_PORT === 465, // true for 465, false for other ports
+        host: env.EMAIL_HOST,
+        port: env.EMAIL_PORT,
+        secure: env.EMAIL_PORT === 465, // true for 465, false for other ports
         auth: {
-          user: envConfig.EMAIL_USER,
-          pass: envConfig.EMAIL_PASSWORD,
+          user: env.EMAIL_USER,
+          pass: env.EMAIL_PASSWORD,
         },
       });
     } else {
@@ -56,7 +56,7 @@ class EmailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: envConfig.EMAIL_FROM,
+        from: env.EMAIL_FROM,
         to,
         subject,
         text,
@@ -110,7 +110,7 @@ class EmailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: envConfig.EMAIL_FROM,
+        from: env.EMAIL_FROM,
         to,
         subject,
         text,

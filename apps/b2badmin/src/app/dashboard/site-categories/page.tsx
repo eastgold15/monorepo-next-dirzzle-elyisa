@@ -489,7 +489,7 @@ export default function SiteCategoryManager() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-bold text-3xl text-slate-900">
-                {currentSite?.name || "当前站点"} - 分类管理
+                {currentSite?.site.name || "当前站点"} - 分类管理
               </h1>
               <p className="mt-2 text-slate-600">
                 管理当前站点的商品分类，支持多级分类结构。

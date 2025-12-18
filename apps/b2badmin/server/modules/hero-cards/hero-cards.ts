@@ -70,12 +70,7 @@ export const HeroCardsController = new Elysia({
   .post(
     "/",
     async ({ body, currentSite }) => {
-      if (
-        !body.mediaId ||
-        (Array.isArray(body.mediaId) && body.mediaId.length === 0)
-      ) {
-        throw new HttpError.BadRequest("请上传图片");
-      }
+
 
       // 设置默认值
       const heroCardData = {
@@ -83,8 +78,7 @@ export const HeroCardsController = new Elysia({
         siteId: currentSite.id,
         sortOrder: body.sortOrder ?? 0,
         isActive: body.isActive ?? true,
-        backgroundClass: body.backgroundClass ?? "bg-blue-50",
-        mediaId: Array.isArray(body.mediaId) ? body.mediaId[0] : body.mediaId,
+        backgroundClass: body.backgroundClass ?? "bg-blue-50"
       };
 
       const [newCard] = await db
@@ -99,7 +93,8 @@ export const HeroCardsController = new Elysia({
       return newCard;
     },
     {
-      auth: true,
+      allPermissions: ["hero_cards:create"],
+      allRoles: ["super_admin", "exporter_admin", "factory_admin"],
       body: HeroCardsTModel.Create,
       detail: {
         summary: "创建首页展示卡片",
@@ -149,7 +144,8 @@ export const HeroCardsController = new Elysia({
       return result[0];
     },
     {
-      auth: true,
+      allPermissions: ["hero_cards:update"],
+      allRoles: ["super_admin", "exporter_admin", "factory_admin"],
       params: t.Object({
         id: t.String(),
       }),
@@ -191,7 +187,8 @@ export const HeroCardsController = new Elysia({
       return result[0];
     },
     {
-      auth: true,
+      allPermissions: ["hero_cards:delete"],
+      allRoles: ["super_admin", "exporter_admin", "factory_admin"],
       params: t.Object({
         id: t.String(),
       }),
@@ -232,7 +229,8 @@ export const HeroCardsController = new Elysia({
       };
     },
     {
-      auth: true,
+      allPermissions: ["hero_cards:delete"],
+      allRoles: ["super_admin", "exporter_admin", "factory_admin"],
       body: HeroCardsTModel.BatchDelete,
       detail: {
         summary: "批量删除首页展示卡片",

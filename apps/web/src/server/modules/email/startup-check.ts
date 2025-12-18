@@ -3,7 +3,8 @@
  * 在应用启动时验证邮件配置是否正确
  */
 
-import { envConfig } from "@/lib/env/server";
+import { env } from "@/env";
+
 import { verifyEmailConnection } from "./email";
 
 /**
@@ -16,11 +17,11 @@ export async function validateEmailConfig(): Promise<void> {
 
   // 检查必要的配置项
   const requiredConfigs = {
-    EMAIL_HOST: envConfig.EMAIL_HOST,
-    EMAIL_PORT: envConfig.EMAIL_PORT,
-    EMAIL_USER: envConfig.EMAIL_USER,
-    EMAIL_PASSWORD: envConfig.EMAIL_PASSWORD,
-    EMAIL_FROM: envConfig.EMAIL_FROM,
+    EMAIL_HOST: env.EMAIL_HOST,
+    EMAIL_PORT: env.EMAIL_PORT,
+    EMAIL_USER: env.EMAIL_USER,
+    EMAIL_PASSWORD: env.EMAIL_PASSWORD,
+    EMAIL_FROM: env.EMAIL_FROM,
   };
 
   const missingConfigs: string[] = [];
@@ -82,10 +83,8 @@ export async function validateEmailConfig(): Promise<void> {
         console.log("• 适合开发和测试");
       } else {
         console.log("\n✅ 邮件服务连接成功！");
-        console.log(
-          `📮 服务器: ${envConfig.EMAIL_HOST}:${envConfig.EMAIL_PORT}`
-        );
-        console.log(`📨 发件人: ${envConfig.EMAIL_FROM}`);
+        console.log(`📮 服务器: ${env.EMAIL_HOST}:${env.EMAIL_PORT}`);
+        console.log(`📨 发件人: ${env.EMAIL_FROM}`);
         console.log("🎉 系统已准备好发送询价通知邮件");
       }
     } else {
@@ -129,9 +128,9 @@ export async function validateEmailConfig(): Promise<void> {
  */
 export function showEmailConfigSummary(): void {
   console.log("\n📧 邮件服务配置摘要:");
-  console.log(`  主机: ${envConfig.EMAIL_HOST || "未配置"}`);
-  console.log(`  端口: ${envConfig.EMAIL_PORT || "未配置"}`);
-  console.log(`  用户: ${envConfig.EMAIL_USER || "未配置"}`);
-  console.log(`  密码: ${envConfig.EMAIL_PASSWORD ? "已配置" : "未配置"}`);
-  console.log(`  发件人: ${envConfig.EMAIL_FROM || "未配置"}`);
+  console.log(`  主机: ${env.EMAIL_HOST || "未配置"}`);
+  console.log(`  端口: ${env.EMAIL_PORT || "未配置"}`);
+  console.log(`  用户: ${env.EMAIL_USER || "未配置"}`);
+  console.log(`  密码: ${env.EMAIL_PASSWORD ? "已配置" : "未配置"}`);
+  console.log(`  发件人: ${env.EMAIL_FROM || "未配置"}`);
 }

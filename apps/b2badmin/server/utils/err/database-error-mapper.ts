@@ -35,7 +35,6 @@ export function mapDatabaseError(error: {
   // 提取原始 PostgreSQL 错误对象（适配 Drizzle/或其他 ORM 包装的错误）
   const pgError = extractOriginalPgError(error);
 
-
   const code = pgError?.code;
   const detail = pgError?.detail ?? "";
   const constraint = pgError?.constraint ?? "";
@@ -78,12 +77,9 @@ export function mapDatabaseError(error: {
       return new HttpError.InternalServerError("数据库操作超时");
     default:
       return new HttpError.InternalServerError(
-        `数据库错误${code ? ` [${code}]` : ""}: ${stripQuery(rawMsg) || "未知数据库错误"}`,
-
+        `数据库错误${code ? ` [${code}]` : ""}: ${stripQuery(rawMsg) || "未知数据库错误"}`
       );
   }
-
-
 }
 
 // 提取原始 PostgreSQL 错误

@@ -17,39 +17,40 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useRoleDisplayName } from "@/hooks/useRoleDisplayName";
+import { usePermissions } from "@/hooks/usePermissions";
 import { cn } from "@/lib/utils";
-import {
-  useAccessibleSites,
-  useCurrentRole,
-  useCurrentSite,
-  useUserStore,
-} from "@/stores/user-store";
+import { useSiteStore } from "@/stores/site-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { useUserInfo } from "@/stores/user-store";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();
-  const getRoleDisplayName = useRoleDisplayName();
+  const { getUserRoleDisplay } = usePermissions();
 
-  // 站点相关hooks
-  const currentSite = useCurrentSite();
-  const accessibleSites = useAccessibleSites();
-  const { switchSite } = useUserStore();
-  const currentRole = useCurrentRole();
+  // 获取用户和站点信息
+  const { user } = useAuthStore();
+  const userInfo = useUserInfo();
+  const { setCurrentSiteId } = useSiteStore();
+
+  // 当前站点和角色
+  const currentSite = user?.site;
+  const currentRole = user?.role?.name;
+  const accessibleSites = userInfo?.allSites || [];
 
   // 状态管理
   const [isSwitching, setIsSwitching] = useState<string | null>(null);
 
   // 处理站点切换
   const handleSwitchSite = async (siteId: string) => {
-    if (!currentSite || siteId === currentSite?.site?.id) return;
+    if (!currentSite || siteId === currentSite?.id) return;
 
     setIsSwitching(siteId);
     try {
-      const success = await switchSite(siteId);
-      if (success) {
-        // 切换成功后可以添加一些反馈，比如显示成功提示
-        console.log("站点切换成功");
-      }
+      // 直接设置站点ID，权限通过 header 的 x-site-id 自动处理
+      setCurrentSiteId(siteId);
+
+      // 刷新页面以应用新的站点上下文
+      window.location.reload();
     } catch (error) {
       console.error("站点切换失败:", error);
       // 可以添加错误提示
@@ -79,9 +80,13 @@ export function TeamSwitcher() {
 
   // 获取站点显示名称
   const getSiteDisplayName = (site: any) => {
-    // 根据新的数据结构，站点信息在 site.site 中
+    // 对于可访问站点列表中的站点
     if (site.site) {
       return site.site.name || "未知站点";
+    }
+    // 对于当前站点
+    if (site.name) {
+      return site.name;
     }
     // 兼容旧的数据结构
     if (site.factory) {
@@ -90,12 +95,16 @@ export function TeamSwitcher() {
     if (site.exporter) {
       return site.exporter.name;
     }
-    return site.name || "未知站点";
+    return "未知站点";
   };
 
   // 获取站点类型图标
   const getSiteIcon = (site: any) => {
-    // 根据新的数据结构
+    // 对于当前站点
+    if (site.siteType === "factory") {
+      return Factory;
+    }
+    // 对于可访问站点列表中的站点
     if (site.site?.siteType === "factory") {
       return Factory;
     }
@@ -108,9 +117,13 @@ export function TeamSwitcher() {
 
   // 获取站点代码
   const getSiteCode = (site: any) => {
-    // 根据新的数据结构，使用域名作为代码
-    if (site.site?.domain) {
-      return site.site.domain;
+    // 对于当前站点，可能需要从其他字段获取
+    if (site.id) {
+      return site.id;
+    }
+    // 对于可访问站点列表中的站点
+    if (site.site?.id) {
+      return site.site.id;
     }
     // 兼容旧的数据结构
     if (site.factory) {
@@ -119,7 +132,7 @@ export function TeamSwitcher() {
     if (site.exporter) {
       return site.exporter.code;
     }
-    return site.domain || "";
+    return "";
   };
 
   // 如果当前站点还未加载，显示加载状态
@@ -164,8 +177,7 @@ export function TeamSwitcher() {
                   {getSiteDisplayName(currentSite)}
                 </span>
                 <span className="truncate text-xs">
-                  {getRoleDisplayName(currentRole || "salesperson")} ·{" "}
-                  {getSiteCode(currentSite)}
+                  {getUserRoleDisplay()} · {getSiteCode(currentSite)}
                 </span>
               </div>
               <ChevronDown className="ml-auto" />
@@ -213,17 +225,21 @@ export function TeamSwitcher() {
                   切换站点 ({accessibleSites.length - 1})
                 </DropdownMenuLabel>
                 {accessibleSites
-                  .filter((site) => site.site?.id !== currentSite?.site?.id)
+                  .filter((site) => {
+                    const siteId = site.site?.id || site.id;
+                    return siteId !== currentSite?.id;
+                  })
                   .map((site) => {
-                    const isCurrentlySwitching = isSwitching === site.site?.id;
+                    const siteId = site.site?.id || site.id;
+                    const isCurrentlySwitching = isSwitching === siteId;
                     const Icon = getSiteIcon(site);
 
                     return (
                       <DropdownMenuItem
                         className="cursor-pointer gap-2 p-3 transition-colors hover:bg-muted/50"
                         disabled={isCurrentlySwitching}
-                        key={site.site.id}
-                        onClick={() => handleSwitchSite(site.site.id)}
+                        key={siteId}
+                        onClick={() => handleSwitchSite(siteId)}
                       >
                         <div className="flex size-6 items-center justify-center rounded-md border">
                           <Icon className="size-3.5" />
@@ -233,19 +249,19 @@ export function TeamSwitcher() {
                             <p className="font-medium">
                               {getSiteDisplayName(site)}
                             </p>
-                            {site.site.siteType === "factory" && (
+                            {(site.site?.siteType === "factory" || site.siteType === "factory") && (
                               <span className="rounded bg-blue-100 px-1.5 py-0.5 text-blue-800 text-xs">
                                 工厂
                               </span>
                             )}
-                            {site.site.siteType === "exporter" && (
+                            {(site.site?.siteType === "exporter" || site.siteType === "exporter") && (
                               <span className="rounded bg-green-100 px-1.5 py-0.5 text-green-800 text-xs">
                                 出口商
                               </span>
                             )}
                           </div>
                           <p className="text-muted-foreground text-xs">
-                            {site.role.name} · {getSiteCode(site)}
+                            {site.role?.name || currentRole} · {getSiteCode(site)}
                           </p>
                         </div>
                         {isCurrentlySwitching && (

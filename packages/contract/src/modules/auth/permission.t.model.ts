@@ -113,6 +113,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "delete_media",
     "view_orders", // 只能查看自己的订单
   ],
+  super_admin: []
 };
 
 // 数据过滤范围
@@ -147,6 +148,12 @@ export const ROLE_DATA_SCOPE: Record<UserRole, DataScope> = {
     factories: "own", // 只能查看自己的工厂信息
     orders: "own", // 只能查看自己的订单
   },
+  super_admin: {
+    products: "all", // 可以查看所有商品
+    users: "all", // 可以查看所有用户
+    factories: "all", // 可以查看所有工厂
+    orders: "all", // 可以查看所有订单
+  }
 }; // 权限相关类型定义
 
 // === 权限 Schema ===

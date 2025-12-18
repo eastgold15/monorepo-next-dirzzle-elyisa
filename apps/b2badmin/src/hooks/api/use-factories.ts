@@ -1,20 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { rpc } from "@/lib/rpc";
+import { handleEden } from "@/lib/utils/base";
 
 // 获取工厂列表
 export function useFactoriesQuery() {
   return useQuery({
     queryKey: ["factories"],
     queryFn: async () => {
-      const response = await rpc.api.factory.list.get();
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "获取工厂列表失败");
-      }
-
+      const data = await handleEden(rpc.api.factory.list.get());
       return data.factories;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -28,15 +22,7 @@ export function useCreateFactory() {
 
   return useMutation({
     mutationFn: async (body: any) => {
-      const response = await rpc.api.factory.post(body);
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "创建工厂失败");
-      }
-
-      return data;
+      return await handleEden(rpc.api.factory.post(body));
     },
     onSuccess: () => {
       toast.success("工厂创建成功");
@@ -56,15 +42,11 @@ export function useUpdateFactory() {
 
   return useMutation({
     mutationFn: async ({ factoryId, ...body }: { factoryId: string } & any) => {
-      const response = await rpc.api.factory.factoryId({ factoryId }).patch(body);
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "更新工厂失败");
-      }
-
-      return data;
+      return await handleEden(
+        rpc.api.factory
+          .factoryId({ factoryId })
+          .patch(body)
+      );
     },
     onSuccess: () => {
       toast.success("工厂信息更新成功");

@@ -1,19 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
+import { handleEden } from "@/lib/utils/base";
 
 // 首页展示卡片相关 hooks
-export function useHeroCardsList(params?: Record<string, any>) {
+export function useHeroCardsList(params?: {
+  page?: number;
+  limit?: number;
+  title?: string;
+  isActive?: boolean;
+  sortOrder?: "asc" | "desc";
+  sort?: string;
+}) {
   return useQuery({
     queryKey: ["hero-cards", "list", params],
     queryFn: async () => {
-      const { data, error } = await rpc.api["hero-cards"].get({
-        query: params || {},
-      });
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error.message || "获取首页展示卡片列表失败");
-      }
-      return data;
+      const res = await handleEden(
+        rpc.api["hero-cards"].get({
+          query: {
+            page: 1,
+            limit: 10,
+            ...params,
+          },
+        })
+      );
+
+      return res;
     },
     staleTime: 5 * 60 * 1000, // 5分钟
   });
@@ -23,15 +34,17 @@ export function useHeroCardsCreate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: any) => {
-      const { data: result, error } = await rpc.api["hero-cards"].post({
-        data,
-      });
-      if (error || !result) {
-        // @ts-expect-error
-        throw new Error(error.message || "创建首页展示卡片失败");
-      }
-      return result;
+    mutationFn: async (data: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonUrl?: string;
+      mediaId: string[];
+      backgroundClass?: string;
+      isActive?: boolean;
+      sortOrder?: number;
+    }) => {
+      return await handleEden(rpc.api["hero-cards"].post(data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
@@ -43,15 +56,20 @@ export function useHeroCardsUpdate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const { data: result, error } = await rpc.api["hero-cards"][id].put({
-        data,
-      });
-      if (error || !result) {
-        // @ts-expect-error
-        throw new Error(error.message || "更新首页展示卡片失败");
-      }
-      return result;
+    mutationFn: async ({ id, data }: {
+      id: string;
+      data: {
+        title?: string;
+        description?: string;
+        buttonText?: string;
+        buttonUrl?: string;
+        mediaId?: string[];
+        backgroundClass?: string;
+        isActive?: boolean;
+        sortOrder?: number;
+      };
+    }) => {
+      return await handleEden(rpc.api["hero-cards"]({ id }).put(data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
@@ -64,12 +82,7 @@ export function useHeroCardsDelete() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data: result, error } = await rpc.api["hero-cards"][id].delete();
-      if (error || !result) {
-        // @ts-expect-error
-        throw new Error(error.message || "删除首页展示卡片失败");
-      }
-      return result;
+      return await handleEden(rpc.api["hero-cards"]({ id }).delete());
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
@@ -82,14 +95,11 @@ export function useHeroCardsBatchDelete() {
 
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const { data: result, error } = await rpc.api["hero-cards"].batch.delete({
-        data: { ids },
-      });
-      if (error || !result) {
-        // @ts-expect-error
-        throw new Error(error.message || "批量删除首页展示卡片失败");
-      }
-      return result;
+      return await handleEden(
+        rpc.api["hero-cards"].delete({
+          body: { ids },
+        })
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
@@ -101,12 +111,16 @@ export function useActiveHeroCards() {
   return useQuery({
     queryKey: ["hero-cards", "active"],
     queryFn: async () => {
-      const { data, error } = await rpc.api["hero-cards"].active.get();
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error.message || "获取启用的首页展示卡片失败");
-      }
-      return data;
+      // 获取激活的首页展示卡片
+      return await handleEden(
+        rpc.api["hero-cards"].get({
+          query: {
+            page: 1,
+            limit: 100,
+            isActive: true,
+          },
+        })
+      );
     },
     staleTime: 2 * 60 * 1000, // 2分钟
   });

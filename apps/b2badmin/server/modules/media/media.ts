@@ -165,7 +165,7 @@ export const mediaRoute = new Elysia({
 
   .get(
     "/list",
-    async ({ query, user, db, currentSite }) => {
+    async ({ query, db, currentSite }) => {
       const { category, search } = query;
 
       if (!currentSite) {
@@ -176,7 +176,7 @@ export const mediaRoute = new Elysia({
         where: {
           ...(category ? { category } : {}),
           ...(search ? { originalName: { like: `%${search}%` } } : {}),
-          siteId: currentSite.id
+          siteId: currentSite.id,
         },
         orderBy: { createdAt: "desc" },
       });
@@ -200,6 +200,7 @@ export const mediaRoute = new Elysia({
         summary: "获取当前站点的媒体文件列表",
         description: "获取当前站点的所有媒体文件，支持分类和搜索过滤",
       },
-      auth: true,
+      allPermissions: ["media:read"],
+      allRoles: ["*"],
     }
   );

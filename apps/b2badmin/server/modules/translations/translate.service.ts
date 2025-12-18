@@ -23,7 +23,7 @@ export class TranslateService {
     this.cache = cache ?? new LRUCache(500);
     this.dictManager = dictManager ?? new DictManagerService();
 
-    if (process.env.NODE_ENV === "development") {
+    if (env.NODE_ENV === "development") {
       console.log("开发环境：清理翻译缓存以确保使用最新的翻译结果");
       this.clearCache();
     }
@@ -105,10 +105,10 @@ export class TranslateService {
     const hitRate =
       this.stats.totalTranslations > 0
         ? (
-            ((this.stats.cacheHits + this.stats.databaseHits) /
-              this.stats.totalTranslations) *
-            100
-          ).toFixed(2)
+          ((this.stats.cacheHits + this.stats.databaseHits) /
+            this.stats.totalTranslations) *
+          100
+        ).toFixed(2)
         : "0";
 
     return {

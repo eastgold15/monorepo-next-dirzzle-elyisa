@@ -63,7 +63,8 @@ export const siteCategoryRoute = new Elysia({
             return tree;
         },
         {
-            auth: true,
+           
+            allRoles: ["super_admin"],
             detail: {
                 summary: "获取站点的树形分类",
                 description: "返回当前用户站点的树形分类结构，包含父子层级关系",

@@ -20,7 +20,13 @@
     "db:push": "bun x drizzle-kit push",
     "db:generate": "bun x drizzle-kit generate",
     "db:migrate": "bun x drizzle-kit migrate",
-    "db:studio": "bun x drizzle-kit studio"
+    "db:studio": "bun x drizzle-kit studio",
+    "gen:contract": "bun run  scripts/gen-contract-starter.ts",
+    "gen:ai-docs": "bun run  scripts/gen-ai-docs.ts",
+    "gen": "bun run scripts/gen-contract-full.ts",
+    "gen:watch": "bun --watch scripts/gen-contract-full.ts",
+    "gen:all": "bun run scripts/gen-all.ts",
+    "gen:final": "bun run scripts/gen-all-final.ts"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

@@ -1,5 +1,6 @@
 import { treaty } from "@elysiajs/eden";
 import type { App } from "@/app/api/[[...route]]/route";
+import { env } from "@/env";
 
 /**
  * Creates an RPC client using edenTreaty.
@@ -11,11 +12,12 @@ import type { App } from "@/app/api/[[...route]]/route";
  * - On the server side, it uses localhost with the specified PORT (or 3000 as default)
  * - On the client side, it uses the current window's origin
  */
-const siteId = typeof window !== 'undefined' ? localStorage.getItem("SiteId") : null;
+const siteId =
+  typeof window !== "undefined" ? localStorage.getItem("SiteId") : null;
 
 export const rpc = treaty<App>(
   typeof window === "undefined"
-    ? `http://localhost:${process.env.PORT || 3000}`
+    ? `http://localhost:${env.APP_PORT || 3000}`
     : window.location.origin,
   {
     headers: siteId ? { "X-Site-Id": siteId } : {},

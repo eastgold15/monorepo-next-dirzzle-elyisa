@@ -12,6 +12,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { IMAGE_MIME_TYPE_MAP } from "@repo/contract";
 import { HttpError } from "elysia-http-problem-json";
+import { env } from "@/env";
 import { AbstractStorage } from "./AbstractStorage";
 
 // 顶层正则表达式常量，提升性能
@@ -43,12 +44,12 @@ export class OSSStorage extends AbstractStorage {
    * 从环境变量获取配置
    */
   private static getConfigFromEnv(): OSSConfig {
-    const accessKeyId = process.env.ACCESS_KEY_ID;
-    const secretAccessKey = process.env.SECRET_ACCESS_KEY;
-    const bucket = process.env.BUCKET;
-    const region = process.env.REGION;
-    const endpoint = process.env.ENDPOINT;
-    const domain = process.env.DOMAIN;
+    const accessKeyId = env.ACCESS_KEY_ID;
+    const secretAccessKey = env.SECRET_ACCESS_KEY;
+    const bucket = env.BUCKET;
+    const region = env
+    const endpoint = env.ENDPOINT;
+    const domain = env.DOMAIN;
 
     if (!(accessKeyId && secretAccessKey && bucket && endpoint)) {
       throw new HttpError.BadRequest(

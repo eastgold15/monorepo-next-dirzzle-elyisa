@@ -1,5 +1,17 @@
 "use client";
 
+import { NavGroup } from "@/components/nav-group";
+import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/team-switcher";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { PERMISSIONS } from "@/config/permissions";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   BarChart3,
   Building2,
@@ -16,38 +28,10 @@ import {
   Users,
 } from "lucide-react";
 import type * as React from "react";
-import { NavGroup } from "@/components/nav-group";
-import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar";
-
-import {
-  useCurrentRole,
-  useCurrentSite,
-  useIsExporterAdmin,
-  useIsExporterSite,
-  useIsFactoryAdmin,
-  useIsFactorySite,
-  useIsSalesperson,
-  useIsSuperAdmin,
-} from "@/stores/user-store";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // 站点和角色相关的hooks
-  const currentSite = useCurrentSite();
-  const currentRole = useCurrentRole();
-  const isSuperAdmin = useIsSuperAdmin();
-  const isExporterAdmin = useIsExporterAdmin();
-  const isFactoryAdmin = useIsFactoryAdmin();
-  const isSalesperson = useIsSalesperson();
-  const isExporterSite = useIsExporterSite();
-  const isFactorySite = useIsFactorySite();
+ 
+ 
 
   // Dashboard - 始终显示在最前面
   const getDashboardItems = () => [
@@ -59,80 +43,77 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   ];
 
-  // 业务管理相关菜单 - 根据站点类型和角色动态显示
+  // 业务管理相关菜单 - 根据权限动态生成
   const getBusinessItems = () => {
     const items = [];
 
-    // 基础菜单项 - 所有角色都可以访问
-    items.push(
-      {
-        title: "Products",
-        url: "/dashboard/products",
-        icon: ShoppingBag,
-      },
-      {
-        title: "Site Categories",
-        url: "/dashboard/site-categories",
-        icon: Tags,
-      }
-    );
+    // 基础菜单项
+    items.push({
+      title: "Products",
+      url: "/dashboard/products",
+      icon: ShoppingBag,
+      permission: PERMISSIONS.PRODUCT.READ,
+    });
 
-    // Media Library - 所有角色都可以访问
+    items.push({
+      title: "Site Categories",
+      url: "/dashboard/site-categories",
+      icon: Tags,
+      permission: PERMISSIONS.SITE_CATEGORY.READ,
+    });
+
+    // Media Library
     items.push({
       title: "Media Library",
       url: "/dashboard/media",
       icon: Image,
+      permission: PERMISSIONS.MEDIA.READ,
     });
 
-    // Templates - 管理员可以访问
-    if (isSuperAdmin || isExporterAdmin || isFactoryAdmin) {
-      items.push({
-        title: "Templates",
-        url: "/dashboard/templates",
-        icon: FileBox,
-      });
-    }
+    // Templates - 管理员权限
+    items.push({
+      title: "Templates",
+      url: "/dashboard/templates",
+      icon: FileBox,
+      roles: ["super_admin", "exporter_admin", "factory_admin"],
+    });
 
-    // Advertisements - 出口商站点或超级管理员可以访问
-    if (isExporterSite || isSuperAdmin) {
-      items.push({
-        title: "Advertisements",
-        url: "/dashboard/ads",
-        icon: PieChart,
-      });
-    }
+    // Advertisements - 出口商权限
+    items.push({
+      title: "Advertisements",
+      url: "/dashboard/ads",
+      icon: PieChart,
+      roles: ["super_admin", "exporter_admin"],
+    });
 
-    // Hero Cards - 管理员可以访问
-    if (isSuperAdmin || isExporterAdmin || isFactoryAdmin) {
-      items.push({
-        title: "Hero Cards",
-        url: "/dashboard/hero-cards",
-        icon: Frame,
-      });
-    }
+    // Hero Cards - 管理员权限
+    items.push({
+      title: "Hero Cards",
+      url: "/dashboard/hero-cards",
+      icon: Frame,
+      roles: ["super_admin", "exporter_admin", "factory_admin"],
+    });
 
     return items;
   };
 
-  // 站点管理相关菜单 - 根据站点类型显示
+  // 站点管理相关菜单
   const getSiteItems = () => {
     const items = [];
 
-    // Site Management - 超级管理员和出口商管理员可以访问
-    if (isSuperAdmin || (isExporterSite && isExporterAdmin)) {
-      items.push({
-        title: "Site Config",
-        url: "/dashboard/site-config",
-        icon: Settings,
-      });
+    items.push({
+      title: "Site Config",
+      url: "/dashboard/site-config",
+      icon: Settings,
+      roles: ["super_admin", "exporter_admin"],
+    });
 
-      // Master Categories - 全局分类管理，只有超级管理员和出口商管理员可以访问
-      items.push({
-        title: "Master Categories",
-        url: "/dashboard/master-categories",
-        icon: Layers,
-      });
-    }
+    items.push({
+      title: "Master Categories",
+      url: "/dashboard/master-categories",
+      icon: Layers,
+      roles: ["super_admin", "exporter_admin"],
+    });
 
     return items;
   };
@@ -141,23 +122,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const getOrganizationItems = () => {
     const items = [];
 
-    // Factories - 超级管理员、出口商管理员、出口商站点可以访问
-    if (isSuperAdmin || isExporterAdmin || isExporterSite) {
-      items.push({
-        title: "Factories",
-        url: "/dashboard/factories",
-        icon: Building2,
-      });
-    }
+    items.push({
+      title: "Factories",
+      url: "/dashboard/factories",
+      icon: Building2,
+      roles: ["super_admin", "exporter_admin"],
+    });
 
-    // Users - 超级管理员和出口商管理员可以访问
-    if (isSuperAdmin || isExporterAdmin) {
-      items.push({
-        title: "Users",
-        url: "/dashboard/users",
-        icon: Users,
-      });
-    }
+    items.push({
+      title: "Users",
+      url: "/dashboard/users",
+      icon: Users,
+      roles: ["super_admin", "exporter_admin"],
+    });
 
     return items;
   };
@@ -166,25 +143,57 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const getAnalyticsItems = () => {
     const items = [];
 
-    // Analytics - 管理员可以访问
-    if (isSuperAdmin || isExporterAdmin || isFactoryAdmin) {
-      items.push({
-        title: "Analytics",
-        url: "/dashboard/analytics",
-        icon: BarChart3,
-      });
-    }
+    items.push({
+      title: "Analytics",
+      url: "/dashboard/analytics",
+      icon: BarChart3,
+      roles: ["super_admin", "exporter_admin", "factory_admin"],
+    });
 
-    // Product Statistics - 超级管理员和管理员可以访问
-    if (isSuperAdmin || isExporterAdmin || isFactoryAdmin) {
-      items.push({
-        title: "Product Statistics",
-        url: "/dashboard/product-statistics",
-        icon: ShieldCheck,
-      });
-    }
+    items.push({
+      title: "Product Statistics",
+      url: "/dashboard/product-statistics",
+      icon: ShieldCheck,
+      roles: ["super_admin", "exporter_admin", "factory_admin"],
+    });
 
     return items;
+  };
+
+  // 创建权限控制的 NavGroup 组件
+  const PermissionNavGroup = ({
+    title,
+    items
+  }: {
+    title: string;
+    items: Array<{
+      title: string;
+      url: string;
+      icon: any;
+      isActive?: boolean;
+      permission?: string;
+      roles?: string[];
+    }>;
+  }) => {
+    const { can, hasRole } = usePermissions();
+
+    // 过滤出用户有权限的菜单项
+    const filteredItems = items.filter(item => {
+      if (item.permission && !can(item.permission)) {
+        return false;
+      }
+      if (item.roles && !hasRole(item.roles)) {
+        return false;
+      }
+      return true;
+    });
+
+    // 如果没有权限访问的菜单项，不显示整个分组
+    if (filteredItems.length === 0) {
+      return null;
+    }
+
+    return <NavGroup title={title} items={filteredItems} />;
   };
 
   return (
@@ -194,10 +203,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavGroup items={getDashboardItems()} title="概览" />
-        <NavGroup items={getBusinessItems()} title="业务管理" />
-        <NavGroup items={getSiteItems()} title="站点管理" />
-        <NavGroup items={getOrganizationItems()} title="组织管理" />
-        <NavGroup items={getAnalyticsItems()} title="数据分析" />
+        <PermissionNavGroup items={getBusinessItems()} title="业务管理" />
+        <PermissionNavGroup items={getSiteItems()} title="站点管理" />
+        <PermissionNavGroup items={getOrganizationItems()} title="组织管理" />
+        <PermissionNavGroup items={getAnalyticsItems()} title="数据分析" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

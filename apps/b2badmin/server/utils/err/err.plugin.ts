@@ -4,6 +4,7 @@ import chalk from "chalk";
 import { Elysia } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { createLogger } from "logixlysia";
+import { env } from "@/env";
 import { mapDatabaseError } from "./database-error-mapper";
 import { isDatabaseError } from "./guards";
 
@@ -73,7 +74,7 @@ export const errorPlugin = new Elysia()
       processedError = mapDatabaseError(dbError);
 
       // 开发环境提示
-      if (process.env.NODE_ENV === "development") {
+      if (env.NODE_ENV === "development") {
         console.error(`\n${createSeparator("🗄️ DATABASE ERROR DETECTED")}`);
         console.error(
           chalk.red(`🚨 DB Error Code: ${chalk.yellow(dbError.code)}`)
@@ -115,7 +116,7 @@ export const errorPlugin = new Elysia()
         // pino 结构化数据
         url,
         headers: request.headers,
-        method
+        method,
       },
       `Request Error [${errorSource.toUpperCase()}]: ${processedError.status} - ${processedError.message}`
     );
@@ -123,7 +124,7 @@ export const errorPlugin = new Elysia()
     // =================================================================
     // ========== 第三步：开发环境美化输出 (记录转换后的结果) ==========
     // =================================================================
-    if (process.env.NODE_ENV === "development") {
+    if (env.NODE_ENV === "development") {
       let separator: string;
       switch (errorSource) {
         case "database":

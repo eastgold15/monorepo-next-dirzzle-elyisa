@@ -41,11 +41,11 @@ export const siteRoute = new Elysia({
           orderBy: { createdAt: "desc" },
         });
 
-        const formattedSites = allSites.map((site) => ({
-          site: {
-            ...site,
-            factory: site.factoryOwner,
-            exporter: site.exporterOwner,
+        const formattedSites = allSites.map((currentSite) => ({
+          currentSite: {
+            ...currentSite,
+            factory: currentSite.factoryOwner,
+            exporter: currentSite.exporterOwner,
           },
           role: {
             name: "SUPER_ADMIN",
@@ -115,7 +115,8 @@ export const siteRoute = new Elysia({
       return { sites: formattedSites };
     },
     {
-      auth: true,
+
+      allRoles: ['*'],
       detail: {
         summary: "获取可访问站点列表",
         description: "获取用户有权限访问的所有站点，包括角色信息",
@@ -123,101 +124,6 @@ export const siteRoute = new Elysia({
     }
   )
 
-  // 切换当前站点
-  .post(
-    "/switch",
-    async ({ body, db, user, currentSite, allSites }) => {
-      const { siteId } = body;
-
-      // 验证站点存在
-      const targetSite = await db.query.sitesTable.findFirst({
-        where: {
-          id: siteId,
-        },
-        with: {
-          factoryOwner: {
-            columns: {
-              id: true,
-              name: true,
-              code: true,
-            },
-          },
-          exporterOwner: {
-            columns: {
-              id: true,
-              name: true,
-              code: true,
-            },
-          },
-        },
-      });
-
-      if (!targetSite) {
-        throw new HttpError.NotFound("站点不存在");
-      }
-
-      if (!targetSite.isActive) {
-        throw new HttpError.BadRequest("站点已停用");
-      }
-
-      // 验证用户权限
-      if (!user.isSuperAdmin) {
-        const userSiteRole = await db.query.userSiteRolesTable.findFirst({
-          where: {
-            userId: user.id,
-            siteId,
-          },
-          with: {
-            role: {
-              columns: {
-                id: true,
-                name: true,
-                priority: true,
-              },
-            },
-          },
-        });
-
-        if (!userSiteRole) {
-          throw new HttpError.Forbidden("您没有权限访问该站点");
-        }
-      }
-
-      // 从 adminAuthPlugin 提供的 allSites 中找到切换后的站点信息
-      const switchedSiteInfo = allSites.find((site) => site.site.id === siteId);
-
-      if (!switchedSiteInfo) {
-        throw new HttpError.Forbidden("您没有权限访问该站点");
-      }
-
-      // 返回与 /me 接口相同的数据格式
-      return {
-        user,
-        currentSite: {
-          ...targetSite,
-          factory: targetSite.factoryOwner,
-          exporter: targetSite.exporterOwner,
-        },
-        tenantId:
-          targetSite.siteType === "factory"
-            ? targetSite.factoryId
-            : targetSite.exporterId,
-        tenantType: targetSite.siteType,
-        allSites,
-        roles: switchedSiteInfo.role.name,
-        permissions: [], // 这里可以根据需要添加权限信息
-        can: () => true, // 临时处理
-      };
-    },
-    {
-      auth: true,
-      body: SiteTModel.SwitchRequest,
-      detail: {
-        summary: "切换当前站点",
-        description: "切换用户当前操作的站点，更新session中的站点上下文",
-      },
-    }
-  )
 
   // 站点管理 - 超级管理员可以管理所有站点
   .group("/admin", (app) =>
@@ -238,7 +144,7 @@ export const siteRoute = new Elysia({
             throw new HttpError.BadRequest("域名已存在");
           }
 
-          const [site] = await db
+          const [currentSite] = await db
             .insert(sitesTable)
             .values({
               name: body.name,
@@ -250,7 +156,7 @@ export const siteRoute = new Elysia({
             })
             .returning();
 
-          return { data: site };
+          return { data: currentSite };
         },
         {
           auth: true,

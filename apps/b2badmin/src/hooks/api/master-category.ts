@@ -3,20 +3,16 @@
 import type { MasterCategoryTModel } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
-
+import { handleEden } from "@/lib/utils/base";
 
 // 获取主分类树
 export function useMasterCategoriesTree() {
   return useQuery({
     queryKey: ["master-categories", "tree"],
     queryFn: async () => {
-      const response = await rpc.api["master-category"].tree.get();
-      if (response.error) {
-        //@ts-expect-error
-        throw new Error(response.error.message || "获取主分类失败");
-      }
+      const data = await handleEden(rpc.api["master-category"].tree.get());
       // 确保返回数组，即使是空数组
-      return (response.data || []) as MasterCategoryTModel["TreeEntity"][];
+      return (data || []) as MasterCategoryTModel["TreeEntity"][];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -27,14 +23,12 @@ export function useMasterCategories(parentId?: string) {
   return useQuery({
     queryKey: ["master-categories", "flat", parentId],
     queryFn: async () => {
-      const response = await rpc.api["master-category"].get({
-        $query: { parentId, page: 1, limit: 1000 } // 获取所有数据用于下拉选择
-      });
-      if (response.error) {
-        throw new Error(response.error.message || "获取主分类失败");
-      }
-      const categories = response.data || [];
-      return categories;
+      const categories = await handleEden(
+        rpc.api["master-category"].get({
+          query: { parentId, page: 1, limit: 1000 }, // 获取所有数据用于下拉选择
+        })
+      );
+      return categories || [];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -46,12 +40,7 @@ export function useCreateMasterCategory() {
 
   return useMutation({
     mutationFn: async (data: MasterCategoryTModel["Create"]) => {
-      const response = await rpc.api["master-category"].post(data);
-      if (response.error) {
-        // @ts-expect-error
-        throw new Error(response.error.message || "创建主分类失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api["master-category"].post(data));
     },
     onSuccess: () => {
       // 刷新主分类树和列表
@@ -72,12 +61,11 @@ export function useUpdateMasterCategory() {
       id: string;
       data: MasterCategoryTModel["Update"];
     }) => {
-      const response = await rpc.api["master-category"].update({ id }).put(data);
-      if (response.error) {
-        //@ts-expect-error
-        throw new Error(response.error.message || "更新主分类失败");
-      }
-      return response.data;
+      return await handleEden(
+        rpc.api["master-category"]
+          .update({ id })
+          .put(data)
+      );
     },
     onSuccess: () => {
       // 刷新主分类树和列表
@@ -92,12 +80,7 @@ export function useDeleteMasterCategory() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await rpc.api["master-category"].delete({ ids: [id] });
-      if (response.error) {
-        //@ts-expect-error
-        throw new Error(response.error.message || "删除主分类失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api["master-category"].delete({ ids: [id] }));
     },
     onSuccess: () => {
       // 刷新主分类树和列表
@@ -112,12 +95,7 @@ export function useBatchDeleteMasterCategories() {
 
   return useMutation({
     mutationFn: async ({ ids }: { ids: string[] }) => {
-      const response = await rpc.api["master-category"].delete({ ids });
-      if (response.error) {
-        //@ts-expect-error
-        throw new Error(response.error.message || "批量删除主分类失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api["master-category"].delete({ ids }));
     },
     onSuccess: () => {
       // 刷新主分类树和列表
@@ -131,12 +109,7 @@ export function useMasterCategory(id: string) {
   return useQuery({
     queryKey: ["master-category", id],
     queryFn: async () => {
-      const response = await rpc.api["master-category"].detail({ id }).get();
-      if (response.error) {
-        //@ts-expect-error
-        throw new Error(response.error.message || "获取主分类详情失败");
-      }
-      return response.data;
+      return await handleEden(rpc.api["master-category"].detail({ id }).get());
     },
     enabled: !!id,
   });
@@ -148,7 +121,8 @@ export function getMasterCategoryPath(
   allCategories: MasterCategoryTModel["TreeEntity"][]
 ): string {
   const path: string[] = [];
-  let currentCategory: MasterCategoryTModel["TreeEntity"] | undefined = category;
+  let currentCategory: MasterCategoryTModel["TreeEntity"] | undefined =
+    category;
 
   while (currentCategory) {
     path.unshift(currentCategory.name);
@@ -185,7 +159,9 @@ function findMasterCategoryById(
 }
 
 // 检查主分类是否有子分类
-export function hasMasterCategoryChildren(category: MasterCategoryTModel["TreeEntity"]): boolean {
+export function hasMasterCategoryChildren(
+  category: MasterCategoryTModel["TreeEntity"]
+): boolean {
   return !!(category.children && category.children.length > 0);
 }
 

@@ -4,6 +4,7 @@
  * 支持单例模式，避免重复创建相同类型的存储实例
  */
 
+import { env } from "@/env";
 import type { AbstractImageStorage } from "./ImageStorage";
 import { LocalImageStorage } from "./impl/LocalImageStorage";
 import { type OSSConfig, OSSImageStorage } from "./impl/OSSImageStorage";
@@ -100,7 +101,7 @@ class StorageFactory {
    */
   private static detectStorageType(): StorageType {
     // 优先级：环境变量 > 默认值
-    const envStorageType = process.env.STORAGE_TYPE?.toLowerCase();
+    const envStorageType = env.STORAGE_TYPE?.toLowerCase();
 
     if (envStorageType === "local") {
       return "local";
@@ -130,19 +131,19 @@ class StorageFactory {
       "ENDPOINT",
     ];
 
-    return requiredEnvVars.every((varName) => !!process.env[varName]);
+    return requiredEnvVars.every((varName) => !!env[varName]);
   }
 
   /**
    * 从环境变量获取 OSS 配置
    */
   private static getOSSConfigFromEnv() {
-    const accessKeyId = process.env.ACCESS_KEY_ID;
-    const secretAccessKey = process.env.SECRET_ACCESS_KEY;
-    const bucket = process.env.BUCKET;
-    const region = process.env.REGION || "default";
-    const endpoint = process.env.ENDPOINT;
-    const domain = process.env.DOMAIN;
+    const accessKeyId = env.ACCESS_KEY_ID;
+    const secretAccessKey = env.SECRET_ACCESS_KEY;
+    const bucket = env.BUCKET;
+    const region = env.REGION || "default";
+    const endpoint = env.ENDPOINT;
+    const domain = env.DOMAIN;
 
     if (!(accessKeyId && secretAccessKey && bucket && endpoint)) {
       throw new Error(
@@ -184,13 +185,13 @@ class StorageFactory {
         baseConfig.config = {
           baseDir:
             customConfig.baseDir ||
-            process.env.LOCAL_STORAGE_DIR ||
+            env.LOCAL_STORAGE_DIR ||
             "public/uploads",
           baseUrl:
-            customConfig.baseUrl || process.env.LOCAL_STORAGE_URL || "/uploads",
+            customConfig.baseUrl || env.LOCAL_STORAGE_URL || "/uploads",
           maxFileSize:
             customConfig.maxFileSize ||
-            Number.parseInt(process.env.MAX_FILE_SIZE || "10485760", 10), // 10MB
+            Number.parseInt(env.MAX_FILE_SIZE || "10485760", 10), // 10MB
         };
         break;
 

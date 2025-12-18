@@ -1,6 +1,4 @@
 import {
-  factoriesTable,
-  roleTable,
   salespersonAffiliationsTable,
   salespersonsTable,
   sitesTable,
@@ -27,8 +25,8 @@ export const userManagementController = new Elysia({
     "/salesperson",
     async ({ body, db, role, tenantId }) => {
       // 出口商可以创建任何工厂的业务员，工厂管理员只能创建自己工厂的业务员
-      const isExporterAdmin = role === "exporter_admin";
-      const isFactoryAdmin = role === "factory_admin";
+      const isExporterAdmin = role.name === "exporter_admin";
+      const isFactoryAdmin = role.name === "factory_admin";
 
       if (!(isExporterAdmin || isFactoryAdmin)) {
         throw new HttpError.Forbidden("无权限创建业务员账号");
@@ -81,13 +79,16 @@ export const userManagementController = new Elysia({
 
         if (!factorySite) {
           // 为工厂创建站点
-          const [newSite] = await tx.insert(sitesTable).values({
-            name: factory.name,
-            domain: factory.code.toLowerCase(),
-            siteType: "factory",
-            factoryId: body.factoryId,
-            isActive: true,
-          }).returning();
+          const [newSite] = await tx
+            .insert(sitesTable)
+            .values({
+              name: factory.name,
+              domain: factory.code.toLowerCase(),
+              siteType: "factory",
+              factoryId: body.factoryId,
+              isActive: true,
+            })
+            .returning();
           factorySite = newSite;
         }
 
@@ -118,6 +119,7 @@ export const userManagementController = new Elysia({
     },
     {
       auth: true,
+      allRoles: ["exporter_admin", "factory_admin"],
       body: t.Object({
         email: t.String({ format: "email" }),
         name: t.String(),
@@ -136,7 +138,7 @@ export const userManagementController = new Elysia({
     "/factory-admin",
     async ({ body, db, role }) => {
       // 只有出口商可以创建工厂管理员
-      if (role !== "exporter_admin") {
+      if (role.name !== "exporter_admin") {
         throw new HttpError.Forbidden("只有出口商管理员可以创建工厂管理员账号");
       }
 
@@ -182,13 +184,16 @@ export const userManagementController = new Elysia({
 
         if (!factorySite) {
           // 为工厂创建站点
-          const [newSite] = await tx.insert(sitesTable).values({
-            name: factory.name,
-            domain: factory.code.toLowerCase(),
-            siteType: "factory",
-            factoryId: body.factoryId,
-            isActive: true,
-          }).returning();
+          const [newSite] = await tx
+            .insert(sitesTable)
+            .values({
+              name: factory.name,
+              domain: factory.code.toLowerCase(),
+              siteType: "factory",
+              factoryId: body.factoryId,
+              isActive: true,
+            })
+            .returning();
           factorySite = newSite;
         }
 
@@ -253,7 +258,7 @@ export const userManagementController = new Elysia({
       }
 
       // 根据角色过滤
-      if (role === "factory_admin") {
+      if (role.name === "factory_admin") {
         // 工厂管理员只能看到自己工厂的业务员
         // 通过 salespersonAffiliationsTable 关联查询
         const factorySalespersonIds = await db
@@ -278,7 +283,7 @@ export const userManagementController = new Elysia({
             meta: { total: 0, page, limit, totalPages: 0 },
           };
         }
-      } else if (role !== "exporter_admin" && role !== "super_admin") {
+      } else if (role.name !== "exporter_admin" && role.name !== "super_admin") {
         // 其他角色没有管理权限
         return {
           items: [],
@@ -398,9 +403,9 @@ export const userManagementController = new Elysia({
     async ({ params: { id }, body, db, role, tenantId }) => {
       // 只有出口商、工厂管理员和超级管理员可以更新用户状态
       const canManage =
-        role === "exporter_admin" ||
-        role === "factory_admin" ||
-        role === "super_admin";
+        role.name === "exporter_admin" ||
+        role.name === "factory_admin" ||
+        role.name === "super_admin";
 
       if (!canManage) {
         throw new HttpError.Forbidden("无权限更新用户状态");
@@ -423,7 +428,7 @@ export const userManagementController = new Elysia({
       }
 
       // 工厂管理员只能管理自己工厂的用户
-      if (role === "factory_admin") {
+      if (role.name === "factory_admin") {
         // 检查该用户是否属于当前工厂管理员管理的工厂
         const affiliations = userRecord.salesperson?.affiliations;
 

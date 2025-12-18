@@ -1,12 +1,12 @@
 import { SiteConfigModel } from "@repo/contract";
 import { siteConfigTable } from "@repo/contract/table";
-import { and, asc, count, desc, eq, inArray, like, or } from "drizzle-orm";
+import { and, count, eq, inArray, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { db, dbPlugin } from "@/server/db/connection";
+import type { SupportedLocale } from "@/server/plugins/locale";
 import { localeMiddleware } from "@/server/plugins/locale";
 import { commonRes } from "@/server/utils/Res";
-import type { SupportedLocale } from "@/server/plugins/locale";
 import { TranslateService } from "../translations/translate.service";
 
 // 获取配置列表 - 使用原生 Drizzle 查询实现分页
@@ -71,9 +71,8 @@ async function getList({
   // 执行查询
   const data = await db.query.siteConfigTable.findMany({
     where: whereCondition,
-    orderBy: sortOrder === "desc"
-      ? { [safeSort]: "desc" }
-      : { [safeSort]: "asc" },
+    orderBy:
+      sortOrder === "desc" ? { [safeSort]: "desc" } : { [safeSort]: "asc" },
     limit,
     offset: (page - 1) * limit,
   });
@@ -115,10 +114,7 @@ async function getAll({ category, visible }: SiteConfigModel["ListQuery"]) {
 
   return await db.query.siteConfigTable.findMany({
     where: whereCondition,
-    orderBy: [
-      { category: "asc" },
-      { key: "asc" }
-    ],
+    orderBy: [{ category: "asc" }, { key: "asc" }],
   });
 }
 

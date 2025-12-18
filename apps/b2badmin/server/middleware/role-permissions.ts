@@ -1,18 +1,10 @@
 import { Elysia } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import {
-  usersTable,
-  userRolesTable,
-  roleTable,
-  factoriesTable,
-  salespersonsTable
-} from "@repo/contract/table";
-import { eq, and } from "drizzle-orm";
 import { db } from "@/server/db/connection";
 
 // 角色权限检查插件
-export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
-  .derive({ as: 'global' }, async ({ userInfo }) => {
+export const rolePermissionsPlugin = new Elysia({ name: "role-permissions" })
+  .derive({ as: "global" }, async ({ userInfo }) => {
     if (!userInfo) {
       throw new HttpError.Unauthorized("用户未登录");
     }
@@ -36,9 +28,9 @@ export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
     });
 
     // 判断用户权限级别
-    const isExporterAdmin = roles.includes('exporter_admin');
-    const isFactoryAdmin = roles.includes('factory_admin');
-    const isSalesperson = roles.includes('salesperson');
+    const isExporterAdmin = roles.includes("exporter_admin");
+    const isFactoryAdmin = roles.includes("factory_admin");
+    const isSalesperson = roles.includes("salesperson");
 
     // 获取用户可管理的工厂列表
     let accessibleFactories = [];
@@ -55,11 +47,13 @@ export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
       });
     } else if ((isFactoryAdmin || isSalesperson) && userFactory?.factoryId) {
       // 工厂管理员和业务员只能管理自己的工厂
-      accessibleFactories = [{
-        id: userFactory.factory.id,
-        name: userFactory.factory.name,
-        code: userFactory.factory.code,
-      }];
+      accessibleFactories = [
+        {
+          id: userFactory.factory.id,
+          name: userFactory.factory.name,
+          code: userFactory.factory.code,
+        },
+      ];
     }
 
     return {
@@ -99,7 +93,12 @@ export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
     },
     // 检查是否可以管理工厂（出口商管理员或该工厂的管理员）
     canManageFactory: (factoryId?: string) => ({
-      async resolve({ isExporterAdmin, userFactoryId, accessibleFactories, params }) {
+      async resolve({
+        isExporterAdmin,
+        userFactoryId,
+        accessibleFactories,
+        params,
+      }) {
         const targetFactoryId = factoryId || params?.factoryId || params?.id;
 
         if (!targetFactoryId) {
@@ -108,7 +107,9 @@ export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
 
         // 出口商管理员需要检查工厂是否在其管理范围内
         if (isExporterAdmin) {
-          const hasAccess = accessibleFactories.some(f => f.id === targetFactoryId);
+          const hasAccess = accessibleFactories.some(
+            (f) => f.id === targetFactoryId
+          );
           if (!hasAccess) {
             throw new HttpError.Forbidden("您无权管理该工厂");
           }
@@ -122,7 +123,12 @@ export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
     }),
     // 检查是否可以查看工厂数据
     canViewFactory: (factoryId?: string) => ({
-      async resolve({ isExporterAdmin, userFactoryId, accessibleFactories, params }) {
+      async resolve({
+        isExporterAdmin,
+        userFactoryId,
+        accessibleFactories,
+        params,
+      }) {
         const targetFactoryId = factoryId || params?.factoryId || params?.id;
 
         if (!targetFactoryId) {
@@ -131,7 +137,9 @@ export const rolePermissionsPlugin = new Elysia({ name: 'role-permissions' })
 
         // 出口商管理员可以查看所有旗下工厂
         if (isExporterAdmin) {
-          const hasAccess = accessibleFactories.some(f => f.id === targetFactoryId);
+          const hasAccess = accessibleFactories.some(
+            (f) => f.id === targetFactoryId
+          );
           if (!hasAccess) {
             throw new HttpError.Forbidden("您无权查看该工厂数据");
           }
@@ -155,14 +163,14 @@ export function getFactoryPermissionFilter(
     // 出口商管理员可以看到所有旗下工厂
     return {
       factoryId: {
-        in: accessibleFactories.map(f => f.id)
-      }
+        in: accessibleFactories.map((f) => f.id),
+      },
     };
-  } else if (userFactoryId) {
+  }
+  if (userFactoryId) {
     // 工厂管理员和业务员只能看到自己的工厂
     return { factoryId: userFactoryId };
-  } else {
-    // 没有工厂关联的用户
-    return null;
   }
+  // 没有工厂关联的用户
+  return null;
 }

@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
-
 // 分类接口类型
 export interface Category {
   id: string;
@@ -65,13 +64,12 @@ export function useCategories() {
   return useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const res = await rpc.api.category.get({
-        query: { limit: 1000 }, // 获取所有分类
-      });
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data?.items || [];
+      const result = await handleEden(
+        rpc.api.category.get({
+          query: { limit: 1000 }, // 获取所有分类
+        })
+      );
+      return result?.items || [];
     },
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -89,12 +87,7 @@ export function useCategoriesTree() {
       }
 
       // 缓存不存在或过期，从API获取
-      const response = await rpc.api.categories.tree.get();
-      const { data } = handleEden(response);
-
-      if (!data) {
-        throw new Error("获取分类列表失败");
-      }
+      const data = await handleEden(rpc.api.categories.tree.get());
 
       // 保存到缓存
       saveCategoriesToCache(data as unknown as Category[]);
@@ -109,8 +102,7 @@ export function useCategory(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["category", id],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.category[id].get());
-      return result;
+      return await handleEden(rpc.api.category[id].get());
     },
     enabled: options?.enabled ?? true,
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -126,8 +118,8 @@ export function flattenCategories(categories: Category[]): CategoryOption[] {
   function traverse(items: Category[], level = 0) {
     for (const item of items) {
       // 分类名称是字符串格式
-      const name = item.name || 'Unknown';
-      const prefix = '　'.repeat(level); // 使用全角空格进行缩进
+      const name = item.name || "Unknown";
+      const prefix = "　".repeat(level); // 使用全角空格进行缩进
 
       result.push({
         value: item.id,

@@ -5,7 +5,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 项目概述
 
 这是一个基于 Bun + Turborepo 的现代化全栈电商项目，采用 Elysia 后端框架和 Next.js 前端框架。
-## 常用命令
+## 常用规则
+
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
+
+
+"当处理 API 相关逻辑时，必须先检查 packages/contracts。禁止在 apps/ 目录下自创 Interface，必须复用共享契约。"
+
+
+> **AI 行为规范：**
+> 1. 在处理 `apps/b2badmin` 下的任何 API 调用或表单组件时，**必须**先阅读根目录下的 `AI_API_REFERENCE.md`。
+> 2. 所有 API 调用都必须符合 `packages/contract/src/modules/generated` 目录下的契约定义。
+> 3. 前端表单组件的 `name` 属性必须与契约中定义的字段名一致。
+
+项目工程规范：
+
+数据源头：一切以 src/table.schema.ts 为准。
+
+契约使用：禁止手动编写 API 的 interface。必须通过 import { XxxContract } from "@/modules" 访问契约，通过 XxxDTO 访问类型。
+
+业务逻辑：基础 CRUD 必须使用 src/modules/services/generated 下的自动生成实例。
+
+扩展逻辑：如果需要复杂逻辑，请在 src/modules/custom/ 下创建同名 .contract.ts 文件，脚本会自动切换路由引用。
 
 ### 根目录命令
 - `bun dev` - 启动所有应用的开发服务器

@@ -1,18 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
+import { handleEden } from "@/lib/utils/base";
 
 // 获取模板列表
-export function useTemplates(page = 1, limit = 10, categoryId?: string) {
+export function useTemplates(search?: string) {
   return useQuery({
-    queryKey: ["templates", page, limit, categoryId],
+    queryKey: ["templates", search],
     queryFn: async () => {
-      const res = await rpc.api.product.template.get({
-        $query: { page, limit, categoryId },
-      });
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data;
+      return await handleEden(
+        rpc.api.product.templates.get({
+          query: { search },
+        })
+      );
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -24,11 +23,10 @@ export function useTemplatesBySiteCategory(siteCategoryId?: string) {
     queryKey: ["templates", "site-category", siteCategoryId],
     queryFn: async () => {
       if (!siteCategoryId) return [];
-      const res = await rpc.api.product.template["by-site-category"][":siteCategoryId"].get();
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data || [];
+      const data = await handleEden(
+        rpc.api.product.templates["by-site-category"][":siteCategoryId"].get()
+      );
+      return data || [];
     },
     enabled: !!siteCategoryId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -40,11 +38,9 @@ export function useTemplate(id: string) {
   return useQuery({
     queryKey: ["template", id],
     queryFn: async () => {
-      const res = await rpc.api.product.template.detail({ id }).get();
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data;
+      return await handleEden(
+        rpc.api.product.templates.detail({ id }).get()
+      );
     },
     enabled: !!id,
   });
@@ -69,11 +65,7 @@ export function useCreateTemplate() {
         sortOrder?: number;
       }>;
     }) => {
-      const res = await rpc.api.product.template.post(data);
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data;
+      return await handleEden(rpc.api.product.templates.post(data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
@@ -107,11 +99,7 @@ export function useUpdateTemplate() {
         }>;
       };
     }) => {
-      const res = await rpc.api.product.template.update({ id }).put(data);
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data;
+      return await handleEden(rpc.api.product.templates[id].put(data));
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
@@ -126,13 +114,11 @@ export function useDeleteTemplates() {
 
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const res = await rpc.api.product.template.delete({
-        ids
-      });
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      return res.data;
+      return await handleEden(
+        rpc.api.product.templates.delete({
+          ids,
+        })
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });

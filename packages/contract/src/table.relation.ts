@@ -55,12 +55,14 @@ export const relations = defineRelations(schema, (r) => ({
     role: r.one.roleTable({
       from: r.rolePermissionsTable.roleId,
       to: r.roleTable.id,
+      optional: false,
       alias: "role",
     }),
     permission: r.one.permissionTable({
       from: r.rolePermissionsTable.permissionId,
       to: r.permissionTable.id,
       alias: "permission",
+      optional: false,
     }),
   },
   permissionTable: {

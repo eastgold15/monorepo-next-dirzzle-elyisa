@@ -13,6 +13,7 @@ export interface TemplateField {
   isSkuSpec: boolean; // Determines if this field drives SKU generation
   options?: string[]; // For select/multiselect
   required?: boolean;
+  defaultValue?: string; // Default value for text/number fields
 }
 
 export interface ProductTemplate {

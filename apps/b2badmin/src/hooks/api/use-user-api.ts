@@ -1,25 +1,52 @@
+'use client'
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { rpc } from "@/lib/rpc";
+import { handleEden } from "@/lib/utils/base";
+import { useAuthStore } from "@/stores/auth-store";
+import { useSiteStore } from "@/stores/site-store";
+import { useUserStore } from "@/stores/user-store";
 
 // 主要的 useUser hook（支持站点参数）
 export function useMe(siteId?: string) {
   const router = useRouter();
+  const setCurrentSiteId = useSiteStore((s) => s.setCurrentSiteId);
+  const currentSiteId = useSiteStore((s) => s.currentSiteId);
+  const { setUser, setPermissions } = useAuthStore();
+  const { setUser: setUserInfo, setAccessibleSites } = useUserStore();
 
   return useQuery({
     queryKey: ["user", "me"],
     queryFn: async () => {
-      const response = await rpc.api.user.me.get();
-      const { data, error } = response;
+      try {
+        const data = await handleEden(rpc.api.user.me.get());
 
-      if (error || !data) {
+        // 更新用户信息 - 使用扁平化的数据结构
+        setUser(data.user);
+        setPermissions(data.permissions || []);
+        setUserInfo(data);
+
+        // 更新可访问站点列表（如果有）
+        if (data.allSites) {
+          setAccessibleSites(data.allSites);
+        }
+
+        // 同步站点ID到本地存储
+        if (!currentSiteId && data.currentSite?.id) {
+          setCurrentSiteId(data.currentSite.id);
+          localStorage.setItem("SiteId", data.currentSite.id);
+        }
+
+        return data;
+      } catch (error) {
+        // 清除认证信息
+        setUser(null);
+        setPermissions([]);
+        setUserInfo(null);
         router.push("/login");
-        return null;
+        throw error;
       }
-
-      localStorage.setItem("SiteId", data.currentSite.id);
-      return data;
     },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -35,19 +62,12 @@ export function useManageableUsers(params?: {
 }) {
   return useQuery({
     queryKey: ["user-management", "users", params],
-    queryFn: async () => {
-      const response = await rpc.api.user.management.get({
-        query: params || {},
-      });
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "获取用户列表失败");
-      }
-
-      return data;
-    },
+    queryFn: async () =>
+      await handleEden(
+        rpc.api.user.management.get({
+          query: params || {},
+        })
+      ),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
@@ -62,17 +82,7 @@ export function useCreateSalesperson() {
       name: string;
       password: string;
       factoryId: string;
-    }) => {
-      const response = await rpc.api.user.management.salesperson.post(body);
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "创建业务员账号失败");
-      }
-
-      return data;
-    },
+    }) => await handleEden(rpc.api.user.management.salesperson.post(body)),
     onSuccess: () => {
       toast.success("业务员账号创建成功");
       router.refresh();
@@ -93,18 +103,7 @@ export function useCreateFactoryAdmin() {
       name: string;
       password: string;
       factoryId: string;
-    }) => {
-      const response =
-        await rpc.api.user.management["factory-admin"].post(body);
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "创建工厂管理员账号失败");
-      }
-
-      return data;
-    },
+    }) => await handleEden(rpc.api.user.management["factory-admin"].post(body)),
     onSuccess: () => {
       toast.success("工厂管理员账号创建成功");
       router.refresh();
@@ -126,22 +125,12 @@ export function useUpdateUserStatus() {
     }: {
       userId: string;
       isActive: boolean;
-    }) => {
-      const response = await rpc.api.user
-        .management({ id: userId })
-        .status.patch({
+    }) =>
+      await handleEden(
+        rpc.api.user.management({ id: userId }).status.patch({
           isActive,
-        });
-
-      const { data, error } = response;
-
-      if (error || !data) {
-        // @ts-expect-error
-        throw new Error(error?.message || "更新用户状态失败");
-      }
-
-      return data;
-    },
+        })
+      ),
     onSuccess: () => {
       toast.success("用户状态更新成功");
       queryClient.invalidateQueries({ queryKey: ["user-management"] });

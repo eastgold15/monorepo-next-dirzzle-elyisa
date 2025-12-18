@@ -22,9 +22,7 @@ export const masterCategoryRoute = new Elysia({
   .get(
     "/tree",
     async ({ db, user }) => {
-      if (!user.isSuperAdmin) {
-        throw new HttpError.NotAcceptable("非超级管理员不能获取主分类树");
-      }
+
       // 获取所有主分类
       const categories = await db.query.MasterTable.findMany({
         orderBy: {
@@ -34,12 +32,18 @@ export const masterCategoryRoute = new Elysia({
       });
 
       // 构建树形结构
-      const tree = buildTree(categories, "id", "parentId") as MasterCategoryTModel["TreeEntity"][];
+      const tree = buildTree(
+        categories,
+        "id",
+        "parentId"
+      ) as MasterCategoryTModel["TreeEntity"][];
 
-      return tree
+      return tree;
     },
     {
-      auth: true,
+
+      allPermissions: ["masterCategory:read"],
+      allRoles: ["factory_admin", "super_admin"],
       detail: {
         summary: "获取主分类树",
         description: "获取主分类的树形结构，用于模板管理和商品分类",
@@ -67,6 +71,8 @@ export const masterCategoryRoute = new Elysia({
       return categories;
     },
     {
+      allPermissions: ["masterCategory:read"],
+      allRoles: ["factory_admin", "super_admin"],
       detail: {
         summary: "获取主分类列表",
         description: "分页获取主分类列表，支持按父分类筛选",

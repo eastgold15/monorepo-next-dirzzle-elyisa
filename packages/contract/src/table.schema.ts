@@ -336,9 +336,10 @@ export const heroCardsTable = p.pgTable("hero_cards", {
   backgroundClass: p
     .varchar("background_class", { length: 100 })
     .default("bg-blue-50"),
-  mediaId: p.uuid("media_id").references(() => mediaTable.id),
   sortOrder: p.integer("sort_order").default(0),
   isActive: p.boolean("is_active").default(true),
+
+  mediaId: p.uuid("media_id").references(() => mediaTable.id),
   // 🔥 必须新增：属于哪个站点
   siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
 });
@@ -438,10 +439,7 @@ export const skusTable = p.pgTable("skus_table", {
   createdAt,
   updatedAt,
   skuCode: p.varchar("sku_code", { length: 100 }).notNull().unique(),
-  productId: p.uuid("product_id").references(() => productsTable.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }).notNull(),
+
   price: p
     .decimal("price", { precision: 10, scale: 2 })
     .notNull()
@@ -454,7 +452,12 @@ export const skusTable = p.pgTable("skus_table", {
   specJson: p.json("spec_json").notNull(),
   extraAttributes: p.json("extra_attributes"),
   status: p.integer("status").notNull().default(1),
+  productId: p.uuid("product_id").references(() => productsTable.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }).notNull(),
 
+  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const skuMediaTable = p.pgTable(
@@ -655,7 +658,6 @@ export const siteProductsTable = p.pgTable("site_products", {
   id: idUuid,
   createdAt,
   updatedAt,
-
 
   // 站点级别的商品配置
   sitePrice: p.decimal("site_price", { precision: 10, scale: 2 }),

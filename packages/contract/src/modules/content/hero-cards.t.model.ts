@@ -17,16 +17,16 @@ const Select = createSelectSchema(heroCardsTable);
 
 // === 业务 Schema ===
 const Create = t.Intersect([
-  t.Omit(Insert, ["id", "createdAt", "updatedAt", "mediaId"]),
+  t.Omit(Insert, ["id", "createdAt", "updatedAt", "mediaId", 'siteId']),
   t.Object({
-    mediaId: t.Array(t.String({ minimum: 1 }), { minItems: 1 }),
+    mediaId: t.String(),
   }),
 ]);
 
 const Update = t.Intersect([
-  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "mediaId"]),
+  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "mediaId", 'siteId']),
   t.Object({
-    mediaId: t.Optional(t.Array(t.String({ minimum: 1 }))),
+    mediaId: t.Optional(t.String()),
   }),
 ]);
 
@@ -37,11 +37,11 @@ const BusinessQuery = t.Object({
   isActive: t.Optional(t.Boolean()),
 });
 
-const ListQuery = t.Object({
-  ...BusinessQuery.properties,
-  ...PaginationParams.properties,
-  ...SortParams.properties,
-});
+const ListQuery = t.Composite([
+  BusinessQuery,
+  PaginationParams,
+  SortParams
+]);
 
 const Entity = t.Intersect([
   Select,

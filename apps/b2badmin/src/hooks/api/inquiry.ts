@@ -5,6 +5,6 @@ import { handleEden } from "@/lib/utils/base";
 export function useInquiryMutation() {
   return useMutation({
     mutationFn: async (args: Parameters<typeof rpc.api.inquiry.post>[0]) =>
-      handleEden(await rpc.api.inquiry.post(args)),
+      await handleEden(rpc.api.inquiry.post(args)),
   });
 }

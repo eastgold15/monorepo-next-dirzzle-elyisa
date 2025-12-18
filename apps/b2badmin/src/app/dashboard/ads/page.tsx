@@ -469,7 +469,7 @@ export default function AdsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-bold text-3xl text-slate-900">
-                {currentSite?.name || "当前站点"} - 广告管理
+                {currentSite?.site.name || "当前站点"} - 广告管理
               </h1>
               <p className="mt-2 text-slate-600">
                 管理当前站点的广告内容，支持横幅、轮播图和列表广告。

@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -22,9 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useCreateFactory } from "@/hooks/api/use-factories";
-import { FactoryTModel } from "@repo/contract";
 
 const formSchema = z.object({
   name: z.string().min(2, "工厂名称至少需要2个字符"),
@@ -215,7 +213,10 @@ export function CreateFactoryModal({
                   <FormItem>
                     <FormLabel>主要产品</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如：电子元件、通信设备" {...field} />
+                      <Input
+                        placeholder="例如：电子元件、通信设备"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,14 +226,14 @@ export function CreateFactoryModal({
 
             <DialogFooter>
               <Button
+                disabled={createFactory.isPending}
+                onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={createFactory.isPending}
               >
                 取消
               </Button>
-              <Button type="submit" disabled={createFactory.isPending}>
+              <Button disabled={createFactory.isPending} type="submit">
                 {createFactory.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

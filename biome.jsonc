@@ -59,7 +59,8 @@
         "noNonNullAssertion": "off",
         "useBlockStatements": "off",
         "noNestedTernary": "off",
-        "useConsistentTypeDefinitions": "off"
+        "useConsistentTypeDefinitions": "off",
+        "noParameterProperties": "off"
       },
       // 正确性规则
       "correctness": {

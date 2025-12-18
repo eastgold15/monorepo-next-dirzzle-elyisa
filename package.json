@@ -11,7 +11,8 @@
     "fix": "npx ultracite fix",
     "check-type": "turbo run check-type",
     "clean": "bunx turbo@latest run clean  && rm -rf dist .turbo",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate-types": "bunx openapi-typescript apps/b2badmin/src/types/temp-schema.json  -o ./apps/b2badmin/src/types/api-schema.d.ts"
   },
   "engines": {
     "bun": ">=1.3.0"
@@ -22,6 +23,7 @@
     "husky": "^9.1.7",
     "lefthook": "^2.0.11",
     "lint-staged": "^16.2.7",
+    "openapi-typescript": "^7.10.1",
     "ultracite": "6.4.0"
   },
   "dependencies": {

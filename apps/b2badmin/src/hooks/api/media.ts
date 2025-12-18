@@ -7,8 +7,7 @@ export function useMediaList(query?: any) {
   return useQuery({
     queryKey: ["media", "list", query],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.media.get({ $query: query }));
-      return result;
+      return await handleEden(rpc.api.media.get({ $query: query }));
     },
     staleTime: 5 * 60 * 1000, // 5分钟
   });
@@ -18,8 +17,7 @@ export function useMediaDetail(id: string) {
   return useQuery({
     queryKey: ["media", id],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.media[id].get());
-      return result;
+      return await handleEden(rpc.api.media[id].get());
     },
     enabled: !!id,
   });
@@ -30,8 +28,7 @@ export function useMediaUpload() {
 
   return useMutation({
     mutationFn: async (data: FormData) => {
-      const result = handleEden(await rpc.api.media.upload.post({ body: data }));
-      return result;
+      return await handleEden(rpc.api.media.upload.post({ body: data }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
@@ -44,8 +41,7 @@ export function useMediaUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const result = handleEden(await rpc.api.media[id].put({ data }));
-      return result;
+      return await handleEden(rpc.api.media[id].put({ data }));
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
@@ -59,8 +55,7 @@ export function useMediaDelete() {
 
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const result = handleEden(await rpc.api.media.delete({ ids }));
-      return result;
+      return await handleEden(rpc.api.media.delete({ ids }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
@@ -73,8 +68,7 @@ export function useMediaStorageInfo() {
   return useQuery({
     queryKey: ["media", "storage", "info"],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.media.storage.info.get());
-      return result;
+      return await handleEden(rpc.api.media.storage.info.get());
     },
     staleTime: 10 * 60 * 1000, // 10分钟
   });
@@ -83,25 +77,29 @@ export function useMediaStorageInfo() {
 // 直接上传文件 hook
 export function useDirectUploadMutation() {
   return useMutation({
-    mutationFn: async (args: { file: File; category?: string; userId?: string }) => {
+    mutationFn: async (args: {
+      file: File;
+      category?: string;
+      userId?: string;
+    }) => {
       // 构造 FormData
       const formData = new FormData();
-      formData.append('file', args.file);
+      formData.append("file", args.file);
 
       if (args.category) {
-        formData.append('category', args.category);
+        formData.append("category", args.category);
       }
       if (args.userId) {
-        formData.append('userId', args.userId);
+        formData.append("userId", args.userId);
       }
 
-      const response = await rpc.api.media.upload.post({
-        file: args.file,
-        category: args.category,
-        userId: args.userId,
-      });
-
-      return handleEden(response);
+      return await handleEden(
+        rpc.api.media.upload.post({
+          file: args.file,
+          category: args.category,
+          userId: args.userId,
+        })
+      );
     },
   });
 }
@@ -138,11 +136,12 @@ export function useMediaListV2(params?: {
   return useQuery({
     queryKey: ["media", "list", params],
     queryFn: async () => {
-      const response = await rpc.api.media.list.get({
-        $query: params || {},
-        $header: {}
-      })
-      return handleEden(response);
+      return await handleEden(
+        rpc.api.media.list.get({
+          $query: params || {},
+          $header: {},
+        })
+      );
     },
     staleTime: 1000 * 60 * 5, // 5分钟
   });

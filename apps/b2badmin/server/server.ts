@@ -1,5 +1,5 @@
 import { cors } from "@elysiajs/cors";
-import { fromTypes, openapi } from "@elysiajs/openapi";
+
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
@@ -8,12 +8,16 @@ import { loggerPlugin } from "~/plugins/logger";
 import { errorPlugin } from "~/utils/err/err.plugin";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
-import { OpenAPI } from "./lib/auth-openapi";
+
 import { AdsController } from "./modules/advertisement/advertisement";
 import { factoryRoute } from "./modules/factory/factory";
 import { HeroCardsController } from "./modules/hero-cards/hero-cards";
 import { masterCategoryRoute } from "./modules/master-category/master-category";
 import { mediaRoute } from "./modules/media/media";
+import { attributeRoute } from "./modules/product/attribute";
+import { attributeValueRoute } from "./modules/product/attribute-value";
+import { productRoute } from "./modules/product/product";
+import { templateRoute } from "./modules/product/template";
 import { siteRoute } from "./modules/site/site";
 import { siteProductsRoute } from "./modules/site/site-products";
 import { siteCategoryRoute } from "./modules/site/siteCategory";
@@ -43,43 +47,7 @@ export const server = new Elysia({ name: "server" })
   )
   .mount("/", auth.handler) // 使用 Better Auth 认证中间件
   .use(adminAuthPlugin)
-  .use(
-    openapi({
-      documentation: {
-        components: await OpenAPI.components,
-        paths: await OpenAPI.getPaths(),
-        info: {
-          title: "Gina Shopping API",
-          version: "1.0.71",
-          description: "基于 Elysia + Drizzle + TypeScript 的电商后端 API",
-        },
-        tags: [
-          { name: "Product V2", description: "商品管理 V2" },
-          { name: "商品管理", description: "工厂级商品管理" },
-          { name: "SKU管理", description: "商品SKU管理" },
-          { name: "商品图片管理", description: "商品图片关联管理" },
-          { name: "站点商品管理", description: "出口商站点产品聚合管理" },
-          { name: "站点分类管理", description: "站点分类管理" },
-          { name: "主分类管理", description: "主分类管理" },
-          { name: "Categories", description: "分类管理" },
-          { name: "Factory", description: "工厂管理" },
-          { name: "Media", description: "媒体文件管理" }, // 新的媒体管理标签
-          { name: "Partners", description: "合作伙伴管理" },
-          { name: "Advertisements", description: "广告管理" },
-          { name: "Hero Cards", description: "首页展示卡片管理" },
-          { name: "Site Config", description: "站点配置" },
-        ],
-      },
-      references: fromTypes(
-        process.env.NODE_ENV === "production"
-          ? "dist/index.d.ts"
-          : "src/server.ts",
-        {
-          // debug: process.env.NODE_ENV !== "production",
-        }
-      ),
-    })
-  )
+
 
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
   .use(loggerPlugin)
@@ -100,10 +68,14 @@ export const server = new Elysia({ name: "server" })
   .use(masterCategoryRoute)
   .use(siteRoute)
   .use(siteCategoryRoute)
+  .use(productRoute)
   .use(userRoute)
   .use(userManagementController)
   .use(factoryRoute)
   // .use(product)
   // .use(sku)
   // .use(productMedia)
-  .use(siteProductsRoute);
+  .use(siteProductsRoute)
+  .use(attributeRoute)
+  .use(attributeValueRoute)
+  .use(templateRoute);

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useUserInfo, useIsUserLoading } from "@/stores/user-store";
+import { useIsUserLoading, useUserInfo } from "@/stores/user-store";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -16,7 +16,7 @@ export function AuthProvider({ children, fallback }: AuthProviderProps) {
 
   useEffect(() => {
     // 如果加载完成且用户未登录，重定向到登录页
-    if (!isLoading && !userInfo) {
+    if (!(isLoading || userInfo)) {
       router.push("/login");
     }
   }, [userInfo, isLoading, router]);

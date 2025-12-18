@@ -7,8 +7,7 @@ export function useTranslationsList() {
   return useQuery({
     queryKey: ["translations", "list"],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.translate.get());
-      return result;
+      return await handleEden(rpc.api.translate.get());
     },
     staleTime: 10 * 60 * 1000, // 10分钟
   });
@@ -18,8 +17,7 @@ export function useTranslationDetail(key: string) {
   return useQuery({
     queryKey: ["translation", key],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.translate[key].get());
-      return result;
+      return await handleEden(rpc.api.translate[key].get());
     },
     enabled: !!key,
   });
@@ -30,8 +28,7 @@ export function useTranslationUpdate() {
 
   return useMutation({
     mutationFn: async ({ key, data }: { key: string; data: any }) => {
-      const result = handleEden(await rpc.api.translate[key].put({ data }));
-      return result;
+      return await handleEden(rpc.api.translate[key].put({ data }));
     },
     onSuccess: (_, { key }) => {
       queryClient.invalidateQueries({ queryKey: ["translations"] });

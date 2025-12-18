@@ -7,7 +7,7 @@ import {
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
-import { envConfig } from "@/lib/env/server";
+import { env } from "@/env";
 import { db } from "../db/connection";
 import {
   createEmailVerificationTemplate,
@@ -20,8 +20,8 @@ const URL_REPLACE_REGEX = /^(\w+:\/\/[^/]+)(\/.*)$/;
 
 export const auth = betterAuth({
   basePath: "/auth",
-  baseURL: envConfig.BETTER_AUTH_URL,
-  secret: envConfig.BETTER_AUTH_SECRET, // 加密密钥
+  baseURL: env.BETTER_AUTH_BASE_URL,
+  secret: env.BETTER_AUTH_SECRET, // 加密密钥
   plugins: [openAPI()],
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -32,12 +32,7 @@ export const auth = betterAuth({
       verification: verificationTable, // ✅ "verification"
     },
   }),
-
-  advanced: {
-    database: {
-      generateId: false, // 关闭自动生成 ID，使用数据库默认值
-    },
-  },
+  generateId: false, // 关闭自动生成 ID，使用数据库默认值
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -54,7 +49,6 @@ export const auth = betterAuth({
   // 基础邮箱验证
   emailVerification: {
     sendOnSignUp: false,
-    requireEmailVerification: false,
     sendVerificationEmail: async ({ user, url }) => {
       // 增加`/api/` 才能访问后端
       const newUrls = url.replace(URL_REPLACE_REGEX, "$1/api$2");
@@ -70,9 +64,9 @@ export const auth = betterAuth({
 
   socialProviders: {
     github: {
-      clientId: envConfig.GITHUB_CLIENT_ID,
-      clientSecret: envConfig.GITHUB_CLIENT_SECRET,
-      enabled: !!(envConfig.GITHUB_CLIENT_ID && envConfig.GITHUB_CLIENT_SECRET),
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+      enabled: !!(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET),
     },
   },
 
@@ -80,9 +74,4 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 24 hours
   },
-  trustedOrigins: [
-    "http://localhost:9012",
-    "http://localhost:9013", // 前端开发服务器
-    "http://localhost:4000", // 标准前端端口
-  ],
 });

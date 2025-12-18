@@ -1,449 +1,970 @@
-import { SkuModel } from "@repo/contract";
-import { and, eq, inArray, like, or } from "drizzle-orm";
+import {
+    mediaTable,
+    productsTable,
+    SkuTModel,
+    salespersonAffiliationsTable,
+    salespersonsTable,
+    siteProductsTable,
+    sitesTable,
+    skusTable,
+    skuMediaTable,
+} from "@repo/contract";
+import { and, eq, inArray, like, sql, desc } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import { dbPlugin } from "@/server/db/connection";
-import {
-  attributeTable,
-  attributeValueTable,
-  mediaTable,
-  productTemplateTable,
-  skusTable,
-} from "@/server/db/schema";
-import { type CommonRes, commonRes, type PageData } from "@/server/utils/Res";
-import { buildPageMeta, paginate } from "@/server/utils/services";
+import { dbPlugin } from "~/db/connection";
+import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
 
-export const skuRoute = new Elysia({ name: "sku", prefix: "/v2/sku" })
-  .use(dbPlugin)
-  // 创建商品的sku
-  .post(
-    "/batchCreate/:productId",
-    async ({ params: { productId }, body: skus, db }) => {
-      const productTemplate = await db.query.productTemplateTable.findFirst({
-        where: eq(productTemplateTable.productId, productId),
-        with: { template: true },
-      });
-
-      if (!productTemplate) {
-        throw new HttpError.NotFound("商品模板不存在");
-      }
-
-      const templateId = productTemplate.templateId;
-
-      const saleAttributes = await db.query.attributeTable.findMany({
-        where: and(
-          eq(attributeTable.templateId, templateId),
-          eq(attributeTable.isSaleAttr, true)
-        ),
-        columns: {
-          id: true,
-          code: true,
-        },
-      });
-
-      const attrCodeToId = new Map(
-        saleAttributes.map((attr) => [attr.code, attr.id])
-      );
-      const expectedCodes = new Set(saleAttributes.map((attr) => attr.code));
-
-      // 3. 获取所有合法的 valueCode 集合（按 attributeId 分组）
-      const attributeIds = saleAttributes.map((a) => a.id);
-      const validValues = await db.query.attributeValueTable.findMany({
-        where: inArray(attributeValueTable.attributeId, attributeIds),
-        columns: {
-          valueCode: true,
-          attributeId: true,
-        },
-      });
-
-      const validValueCodes = new Map<string, Set<string>>();
-      for (const v of validValues) {
-        if (!validValueCodes.has(v.attributeId)) {
-          validValueCodes.set(v.attributeId, new Set());
-        }
-        validValueCodes.get(v.attributeId)?.add(v.valueCode);
-      }
-
-      // 4. 校验每个 SKU 的 specJson
-      for (const sku of skus) {
-        const { specJson } = sku;
-
-        // 4.1 必须包含所有销售属性
-        if (Object.keys(specJson).length !== expectedCodes.size) {
-          throw new Error(
-            `SKU 规格必须包含所有销售属性: ${Array.from(expectedCodes).join(", ")}`
-          );
-        }
-
-        // 4.2 每个属性值必须合法
-        for (const [code, valueCode] of Object.entries(specJson)) {
-          if (!expectedCodes.has(code)) {
-            throw new Error(`未知销售属性: ${code}`);
-          }
-
-          const attrId = attrCodeToId.get(code);
-          if (!attrId) {
-            throw new Error(`未知销售属性: ${code}`);
-          }
-          const allowed = validValueCodes.get(attrId);
-          if (!allowed?.has(valueCode)) {
-            throw new Error(`属性 "${code}" 的值 "${valueCode}" 不合法`);
-          }
-        }
-      }
-
-      // 5. 检查是否已存在相同 specJson 的 SKU（防重复）
-      const existingSkus = await db.query.skusTable.findMany({
-        where: eq(skusTable.productId, productId),
-        columns: { id: true, specJson: true },
-      });
-
-      const existingSpecs = new Set(
-        existingSkus.map((s) =>
-          JSON.stringify(
-            s.specJson,
-            Object.keys(s.specJson as Record<string, unknown>).sort()
-          )
-        )
-      );
-
-      const newSkusToInsert = skus.filter((sku) => {
-        const key = JSON.stringify(
-          sku.specJson,
-          Object.keys(sku.specJson).sort()
-        );
-        return !existingSpecs.has(key);
-      });
-
-      if (newSkusToInsert.length === 0) {
-        return new HttpError.NotFound("无新 SKU 需要创建");
-      }
-
-      // 6. 批量插入
-      const inserted = await db
-        .insert(skusTable)
-        .values(
-          newSkusToInsert.map((sku) => ({
-            productId,
-            skuCode: sku.skuCode,
-            price: sku.price,
-            stock: sku.stock ?? "0",
-            specJson: sku.specJson, // Drizzle 会自动序列化为 JSON
-            extraAttributes: {}, // 默认空对象
-            status: 0, // 默认状态为 0（不展示）
-          }))
-        )
-        .returning();
-
-      return commonRes(inserted);
-    },
-    {
-      params: t.Object({
-        productId: t.String(),
-      }),
-      body: SkuModel.BatchCreate,
-      detail: {
-        tags: ["批量创建商品SKU"],
-        summary: "批量创建商品SKU",
-      },
+/**
+ * 验证业务员是否可以管理指定商品
+ * @param db 数据库连接
+ * @param userId 用户ID
+ * @param productId 商品ID
+ * @param role 用户角色
+ * @returns boolean 是否有权限
+ */
+async function validateSalespersonProductPermission(
+    db: any,
+    userId: string,
+    productId: string,
+    role: string
+): Promise<boolean> {
+    if (role !== "salesperson") {
+        return true; // 非业务员角色不需要验证
     }
-  )
 
-  .delete(
-    "/",
-    async ({ body: { ids }, db }) => {
-      const res = await db
-        .delete(skusTable)
-        .where(inArray(skusTable.id, ids))
-        .returning();
-
-      if (!res.length) {
-        throw new HttpError.NotFound("SKU不存在");
-      }
-
-      return commonRes("删除成功", 204);
-    },
-    {
-      detail: {
-        summary: "批量删除SKU",
-        description: "根据ID列表批量删除SKU",
-        tags: ["SKU管理"],
-      },
-      body: t.Object({
-        ids: t.Array(t.String()),
-      }),
-    }
-  )
-
-  .put(
-    "/update/:id",
-    async ({ params: { id }, body, db }) => {
-      // 1. 检查 SKU 是否存在
-      const existing = await db
-        .select()
-        .from(skusTable)
-        .where(eq(skusTable.id, id))
-        .limit(1);
-
-      if (!existing[0]) {
-        throw new HttpError.NotFound("SKU 不存在");
-      }
-
-      // 2. 不允许修改 specJson（销售属性）
-      if (
-        body.specJson &&
-        JSON.stringify(body.specJson) !== JSON.stringify(existing[0].specJson)
-      ) {
-        throw new HttpError.BadRequest("销售属性不可修改，只能修改其他属性");
-      }
-
-      // 3. 准备更新数据
-      const updateData: any = {
-        ...body,
-      };
-
-      // 处理 imageId
-      if (body.imageId && Array.isArray(body.imageId)) {
-        updateData.imageId = body.imageId[0];
-      } else if (body.imageId === undefined) {
-        // 如果没有传入 imageId，则不更新
-        updateData.imageId = undefined;
-      }
-
-      // 处理 extraAttributes
-      if (body.extraAttributes === undefined) {
-        updateData.extraAttributes = existing[0].extraAttributes || {};
-      }
-
-      // 排除不应该更新的字段
-      updateData.id = undefined;
-      updateData.productId = undefined;
-      updateData.skuCode = undefined;
-      updateData.createdAt = undefined;
-      updateData.updatedAt = undefined;
-      updateData.specJson = undefined; // 不允许修改销售属性
-
-      // 4. 执行更新
-      const updated = await db
-        .update(skusTable)
-        .set(updateData)
-        .where(eq(skusTable.id, id))
-        .returning();
-
-      return commonRes(updated[0]);
-    },
-    {
-      detail: {
-        summary: "更新SKU",
-        description: "根据ID更新SKU信息，支持部分更新",
-        tags: ["SKU管理"],
-      },
-      params: t.Object({
-        id: t.String(),
-      }),
-      body: SkuModel.Update, // 使用新的前端友好的 schema
-    }
-  )
-
-  .get(
-    "/",
-    async ({ query, db }): Promise<CommonRes<PageData<SkuModel["Entity"]>>> => {
-      const {
-        page = 1,
-        limit = 10,
-        sort = "createdAt",
-        sortOrder = "desc",
-        search,
-        status,
-        productId,
-      } = query;
-
-      // 构建查询：选择字段（排除 imageId，改用关联图片对象）
-      const baseQuery = db
-        .select()
-        .from(skusTable)
-        .leftJoin(mediaTable, eq(skusTable.imageId, mediaTable.id))
-        .$dynamic();
-
-      // 构建 WHERE 条件
-      const conditions = [];
-
-      if (search) {
-        // 搜索 skuCode 或 productId（productId 转为字符串模糊匹配）
-        conditions.push(or(like(skusTable.skuCode, `%${search}%`)));
-      }
-
-      if (status !== undefined) {
-        conditions.push(eq(skusTable.status, status));
-      }
-
-      if (productId !== undefined) {
-        conditions.push(eq(skusTable.productId, productId));
-      }
-
-      if (conditions.length > 0) {
-        baseQuery.where(and(...conditions));
-      }
-
-      // 排序字段白名单
-      const allowedSortFields = {
-        skuCode: skusTable.skuCode,
-        price: skusTable.price,
-        stock: skusTable.stock,
-        createdAt: skusTable.createdAt,
-        updatedAt: skusTable.updatedAt,
-      };
-
-      const orderBy =
-        allowedSortFields[sort as keyof typeof allowedSortFields] ||
-        skusTable.createdAt;
-      const orderDirection = sortOrder;
-
-      // 执行分页，并转换数据格式
-      const result = await paginate(baseQuery, {
-        page,
-        limit,
-        orderBy,
-        orderDirection,
-      });
-
-      const transformedData = result.items.map((item) => {
-        // 解构赋值获取 skus_table
-        const { skus_table, media } = item;
-
-        // 创建一个新的对象，展开 skus_table 的所有属性
-        const transformedItem = {
-          ...skus_table,
-          imageId: media ? [media.id] : [], // 始终返回数组
-          specJson:
-            typeof skus_table.specJson === "object" &&
-            skus_table.specJson !== null
-              ? (skus_table.specJson as Record<string, string>)
-              : {},
-          extraAttributes:
-            typeof skus_table.extraAttributes === "object" &&
-            skus_table.extraAttributes !== null
-              ? (skus_table.extraAttributes as Record<string, any>)
-              : {},
-        };
-
-        return transformedItem;
-      });
-
-      return commonRes({
-        items: transformedData,
-        meta: buildPageMeta(result.total, page, limit),
-      });
-    },
-    {
-      detail: {
-        summary: "获取SKU列表",
-        description: "分页获取SKU列表，支持按商品筛选、搜索和排序",
-        tags: ["SKU管理"],
-      },
-      query: SkuModel.ListQuery,
-    }
-  )
-
-  .get(
-    "/detail/:id",
-    async ({ params: { id }, db }) => {
-      const res = await db
-        .select()
-        .from(skusTable)
-        .leftJoin(mediaTable, eq(skusTable.imageId, mediaTable.id))
-        .where(eq(skusTable.id, id));
-
-      if (!res[0]) {
-        throw new HttpError.NotFound("SKU不存在");
-      }
-
-      const sku = res[0].skus_table;
-
-      // 手动转换，避免 Zod 验证错误
-      const transformed = {
-        ...sku,
-        imageId: sku.imageId ? [sku.imageId] : [], // 始终返回数组
-        // 将 decimal 字段转换为字符串
-        marketPrice: sku.marketPrice?.toString() || undefined,
-        costPrice: sku.costPrice?.toString() || undefined,
-        weight: sku.weight?.toString() || undefined,
-        volume: sku.volume?.toString() || undefined,
-        specJson: sku.specJson ? (sku.specJson as Record<string, string>) : {}, // 确保不为 undefined
-        extraAttributes: sku.extraAttributes
-          ? (sku.extraAttributes as Record<string, any>)
-          : {}, // 处理 extraAttributes
-      };
-
-      return commonRes(transformed);
-    },
-    {
-      detail: {
-        summary: "获取SKU详情",
-        description: "根据ID获取SKU详情",
-        tags: ["SKU管理"],
-      },
-      params: t.Object({
-        id: t.String(),
-      }),
-    }
-  )
-
-  // 获取指定商品的所有SKU
-  .get(
-    "/product/:productId",
-    async ({ params: { productId }, query, db }) => {
-      const { status } = query;
-
-      const baseQuery = db
+    // 获取业务员关联的信息
+    const affiliations = await db
         .select({
-          id: skusTable.id,
-          skuCode: skusTable.skuCode,
-          price: skusTable.price,
-          stock: skusTable.stock,
-          status: skusTable.status,
-          specJson: skusTable.specJson,
-          extraAttributes: skusTable.extraAttributes,
-          imageId: skusTable.imageId,
-          createdAt: skusTable.createdAt,
+            factoryId: salespersonAffiliationsTable.factoryId,
+            exporterId: salespersonAffiliationsTable.exporterId,
+            entityType: salespersonAffiliationsTable.entityType,
+        })
+        .from(salespersonAffiliationsTable)
+        .innerJoin(
+            salespersonsTable,
+            eq(salespersonsTable.id, salespersonAffiliationsTable.salespersonId)
+        )
+        .where(eq(salespersonsTable.userId, userId));
+
+    // 检查是否有权限
+    for (const affiliation of affiliations) {
+        if (affiliation.entityType === "factory") {
+            // 工厂业务员：检查商品是否属于该工厂（通过siteProducts表关联）
+            const hasPermission = await db
+                .select({ count: sql`count(*)` })
+                .from(siteProductsTable)
+                .innerJoin(sitesTable, eq(siteProductsTable.siteId, sitesTable.id))
+                .where(
+                    and(
+                        eq(siteProductsTable.productId, productId),
+                        eq(sitesTable.factoryId, affiliation.factoryId)
+                    )
+                )
+                .limit(1);
+
+            if (hasPermission[0]?.count > 0) {
+                return true;
+            }
+        } else if (affiliation.entityType === "exporter") {
+            // 出口商业务员：检查商品是否属于该出口商的站点
+            const hasPermission = await db
+                .select({ count: sql`count(*)` })
+                .from(siteProductsTable)
+                .where(
+                    and(
+                        eq(siteProductsTable.productId, productId),
+                        eq(siteProductsTable.siteId, affiliation.exporterId)
+                    )
+                )
+                .limit(1);
+
+            if (hasPermission[0]?.count > 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * 验证业务员是否可以管理指定SKU
+ * @param db 数据库连接
+ * @param userId 用户ID
+ * @param skuId SKU ID
+ * @param role 用户角色
+ * @returns boolean 是否有权限
+ */
+async function validateSalespersonSkuPermission(
+    db: any,
+    userId: string,
+    skuId: string,
+    role: string
+): Promise<boolean> {
+    if (role !== "salesperson") {
+        return true; // 非业务员角色不需要验证
+    }
+
+    // 获取SKU对应的商品ID
+    const [sku] = await db
+        .select({
+            productId: skusTable.productId,
         })
         .from(skusTable)
-        .leftJoin(mediaTable, eq(skusTable.imageId, mediaTable.id))
-        .where(eq(skusTable.productId, productId))
-        .$dynamic();
+        .where(eq(skusTable.id, skuId))
+        .limit(1);
 
-      if (status !== undefined) {
-        baseQuery.where(eq(skusTable.status, status));
-      }
-
-      const skus = await baseQuery;
-
-      const transformedSkus = skus.map((sku) => {
-        return {
-          ...sku,
-          imageId: sku.imageId ? [sku.imageId] : [], // 始终返回数组
-          specJson: sku.specJson
-            ? (sku.specJson as Record<string, string>)
-            : {}, // 确保不为 undefined
-          extraAttributes: sku.extraAttributes
-            ? (sku.extraAttributes as Record<string, any>)
-            : {}, // 处理 extraAttributes
-        };
-      });
-
-      return commonRes(transformedSkus);
-    },
-    {
-      detail: {
-        summary: "获取商品SKU列表",
-        description: "获取指定商品的所有SKU",
-        tags: ["SKU管理"],
-      },
-      params: t.Object({
-        productId: t.String(),
-      }),
-      query: t.Object({
-        status: t.Optional(t.String()), // Elysia 会自动转换字符串到数字
-      }),
+    if (!sku) {
+        return false;
     }
-  );
+
+    // 使用商品权限验证
+    return await validateSalespersonProductPermission(
+        db,
+        userId,
+        sku.productId,
+        role
+    );
+}
+
+/**
+ * SKU管理接口
+ * 支持站点隔离和模板绑定
+ * 提供SKU的增删改查功能
+ */
+export const skuRoute = new Elysia({
+    name: "sku",
+    prefix: "/product/sku",
+    tags: ["SKU管理"],
+})
+    .use(dbPlugin)
+    .use(adminAuthPlugin)
+
+    // 批量创建SKU
+    .post(
+        "/batch",
+        async ({ body: { productId, skus }, db, user, role, currentSite }) => {
+            // 验证商品是否存在
+            const [product] = await db
+                .select({
+                    id: productsTable.id,
+                })
+                .from(productsTable)
+                .where(eq(productsTable.id, productId))
+                .limit(1);
+
+            if (!product) {
+                throw new HttpError.NotFound("商品不存在");
+            }
+
+            // 验证业务员权限
+            const hasPermission = await validateSalespersonProductPermission(
+                db,
+                user.id,
+                productId,
+                role.name
+            );
+
+            if (!hasPermission) {
+                throw new HttpError.Forbidden("您没有权限管理该商品的SKU");
+            }
+
+            // 检查SKU编码是否重复
+            const skuCodes = skus.map((s) => s.skuCode);
+            const existingSkus = await db
+                .select({
+                    skuCode: skusTable.skuCode,
+                })
+                .from(skusTable)
+                .where(
+                    and(
+                        eq(skusTable.productId, productId),
+                        inArray(skusTable.skuCode, skuCodes)
+                    )
+                );
+
+            if (existingSkus.length > 0) {
+                throw new HttpError.Conflict(
+                    `SKU编码已存在: ${existingSkus.map((s) => s.skuCode).join(", ")}`
+                );
+            }
+
+            // 创建SKU
+            const result = await db.transaction(async (tx) => {
+                const createdSkus = await tx
+                    .insert(skusTable)
+                    .values(
+                        skus.map((sku) => ({
+                            skuCode: sku.skuCode,
+                            productId,
+                            siteId: currentSite.id,
+                            price: sku.price,
+                            stock: sku.stock || "0",
+                            specJson: JSON.stringify(sku.specJson),
+                            status: 1,
+                        }))
+                    )
+                    .returning();
+
+                // 批量创建SKU和媒体的关联
+                for (let i = 0; i < skus.length; i++) {
+                    const sku = skus[i];
+                    const createdSku = createdSkus[i];
+
+                    if (sku.mediaIds && sku.mediaIds.length > 0) {
+                        await tx.insert(skuMediaTable).values(
+                            sku.mediaIds.map((mediaId, index) => ({
+                                skuId: createdSku.id,
+                                mediaId,
+                                isMain: index === 0, // 第一张作为主图
+                                sortOrder: index,
+                            }))
+                        );
+                    }
+                }
+
+                return createdSkus;
+            });
+
+            return result;
+        },
+        {
+            auth: true,
+            body: t.Object({
+                productId: t.String(),
+                skus: SkuTModel.BatchCreate,
+            }),
+            detail: {
+                summary: "批量创建SKU",
+                description: "为商品批量创建SKU",
+            },
+        }
+    )
+
+    // 创建单个SKU
+    .post(
+        "/",
+        async ({ body, db, user, role }) => {
+            const { productId, mediaId, ...skuData } = body;
+
+            // 验证商品是否存在
+            const [product] = await db
+                .select({
+                    id: productsTable.id,
+                })
+                .from(productsTable)
+                .where(eq(productsTable.id, productId))
+                .limit(1);
+
+            if (!product) {
+                throw new HttpError.NotFound("商品不存在");
+            }
+
+            // 验证业务员权限
+            const hasPermission = await validateSalespersonProductPermission(
+                db,
+                user.id,
+                productId,
+                role.name
+            );
+
+            if (!hasPermission) {
+                throw new HttpError.Forbidden("您没有权限管理该商品的SKU");
+            }
+
+            // 检查SKU编码是否重复
+            const [existing] = await db
+                .select({
+                    id: skusTable.id,
+                })
+                .from(skusTable)
+                .where(eq(skusTable.skuCode, skuData.skuCode))
+                .limit(1);
+
+            if (existing) {
+                throw new HttpError.Conflict("SKU编码已存在");
+            }
+
+            // 验证图片是否存在（如果提供了mediaId）
+            if (mediaId) {
+                const [image] = await db
+                    .select({
+                        id: mediaTable.id,
+                    })
+                    .from(mediaTable)
+                    .where(eq(mediaTable.id, mediaId))
+                    .limit(1);
+
+                if (!image) {
+                    throw new HttpError.NotFound("图片不存在");
+                }
+            }
+
+            // 创建SKU
+            const result = await db.transaction(async (tx) => {
+                const [sku] = await tx
+                    .insert(skusTable)
+                    .values({
+                        ...skuData,
+                        productId,
+                    })
+                    .returning();
+
+                // 如果提供了mediaId，创建SKU和媒体的关联
+                if (mediaId) {
+                    await tx
+                        .insert(skuMediaTable)
+                        .values({
+                            skuId: sku.id,
+                            mediaId,
+                        });
+                }
+
+                return sku;
+            });
+
+            return result;
+        },
+        {
+            auth: true,
+            body: SkuTModel.Create,
+            detail: {
+                summary: "创建SKU",
+                description: "为商品创建SKU，包含价格、库存、规格等信息",
+            },
+        }
+    )
+
+    // 更新SKU
+    .put(
+        "/:id",
+        async ({ params: { id }, body, db, user, role }) => {
+            // 验证SKU是否存在
+            const [sku] = await db
+                .select({
+                    id: skusTable.id,
+                    productId: skusTable.productId,
+                })
+                .from(skusTable)
+                .where(eq(skusTable.id, id))
+                .limit(1);
+
+            if (!sku) {
+                throw new HttpError.NotFound("SKU不存在");
+            }
+
+            // 验证业务员权限
+            const hasPermission = await validateSalespersonSkuPermission(
+                db,
+                user.id,
+                id,
+                role.name
+            );
+
+            if (!hasPermission) {
+                throw new HttpError.Forbidden("您没有权限管理该SKU");
+            }
+
+            // 检查SKU编码是否重复（如果要更新的话）
+            if (body.skuCode) {
+                const [duplicate] = await db
+                    .select({
+                        id: skusTable.id,
+                    })
+                    .from(skusTable)
+                    .where(
+                        and(
+                            eq(skusTable.skuCode, body.skuCode),
+                            sql`${skusTable.id} != ${id}`
+                        )
+                    )
+                    .limit(1);
+
+                if (duplicate) {
+                    throw new HttpError.Conflict("SKU编码已存在");
+                }
+            }
+
+
+            let updated
+            // 如果要更新mediaId
+            if (body.mediaId !== undefined) {
+                // 验证媒体是否存在
+                if (body.mediaId) {
+                    const [image] = await db
+                        .select({
+                            id: mediaTable.id,
+                        })
+                        .from(mediaTable)
+                        .where(eq(mediaTable.id, body.mediaId))
+                        .limit(1);
+
+                    if (!image) {
+                        throw new HttpError.NotFound("图片不存在");
+                    }
+                }
+
+                // 更新SKU的媒体关联
+                await db.transaction(async (tx) => {
+                    // 删除原有的关联
+                    await tx
+                        .delete(skuMediaTable)
+                        .where(eq(skuMediaTable.skuId, id));
+
+                    // 创建新的关联（如果mediaId不为空）
+                    if (body.mediaId) {
+                        await tx
+                            .insert(skuMediaTable)
+                            .values({
+                                skuId: id,
+                                mediaId: body.mediaId,
+                            });
+                    }
+                });
+
+                // 从body中移除mediaId，因为它不应该更新到skus表中
+                const { mediaId: _, ...updateData } = body;
+
+                // 更新SKU
+                updated = await db
+                    .update(skusTable)
+                    .set(updateData)
+                    .where(eq(skusTable.id, id))
+                    .returning();
+            } else {
+                // 更新SKU
+                updated = await db
+                    .update(skusTable)
+                    .set(body)
+                    .where(eq(skusTable.id, id))
+                    .returning();
+            }
+
+            return updated;
+        },
+        {
+            auth: true,
+            body: SkuTModel.Create,
+            params: t.Object({
+                id: t.String(),
+            }),
+            detail: {
+                summary: "更新SKU",
+                description: "更新SKU信息",
+            },
+        }
+    )
+
+    // 删除SKU
+    .delete(
+        "/",
+        async ({ body: { ids }, db, user, role }) => {
+            // 验证每个SKU的权限
+            for (const skuId of ids) {
+                const hasPermission = await validateSalespersonSkuPermission(
+                    db,
+                    user.id,
+                    skuId,
+                    role.name
+                );
+
+                if (!hasPermission) {
+                    throw new HttpError.Forbidden("您没有权限删除某些SKU");
+                }
+            }
+
+            // 删除SKU
+            const result = await db
+                .delete(skusTable)
+                .where(inArray(skusTable.id, ids))
+                .returning();
+
+            return result;
+        },
+        {
+            auth: true,
+            body: t.Object({
+                ids: t.Array(t.String(), { minItems: 1 }),
+            }),
+            detail: {
+                summary: "批量删除SKU",
+                description: "删除选中的SKU",
+            },
+        }
+    )
+
+    // 获取SKU列表
+    .get(
+        "/",
+        async ({ query, db, user, role }) => {
+            const {
+                page = 1,
+                limit = 10,
+                productId,
+                search,
+                status,
+                sort = "createdAt",
+                sortOrder = "desc",
+            } = query;
+
+            const baseConditions: any[] = [];
+
+            // 根据用户角色过滤数据
+            if (role.name === "salesperson") {
+                // 获取业务员关联的工厂和出口商信息
+                const affiliations = await db
+                    .select({
+                        factoryId: salespersonAffiliationsTable.factoryId,
+                        exporterId: salespersonAffiliationsTable.exporterId,
+                        entityType: salespersonAffiliationsTable.entityType,
+                    })
+                    .from(salespersonAffiliationsTable)
+                    .innerJoin(
+                        salespersonsTable,
+                        eq(salespersonsTable.id, salespersonAffiliationsTable.salespersonId)
+                    )
+                    .where(eq(salespersonsTable.userId, user.id));
+
+                if (affiliations.length === 0) {
+                    return []
+                }
+
+                // 获取有权限的商品ID列表
+                const productIdsSet = new Set<string>();
+                for (const affiliation of affiliations) {
+                    if (affiliation.entityType === "factory") {
+                        // 工厂业务员：获取该工厂所有站点的商品
+                        const siteProducts = await db
+                            .select({
+                                productId: siteProductsTable.productId,
+                            })
+                            .from(siteProductsTable)
+                            .innerJoin(
+                                sitesTable,
+                                eq(siteProductsTable.siteId, sitesTable.id)
+                            )
+                            .where(eq(sitesTable.factoryId, affiliation.factoryId!));
+
+                        siteProducts.forEach((sp) => productIdsSet.add(sp.productId));
+                    } else if (affiliation.entityType === "exporter") {
+                        // 出口商业务员：获取该出口商站点的商品
+                        const siteProducts = await db
+                            .select({
+                                productId: siteProductsTable.productId,
+                            })
+                            .from(siteProductsTable)
+                            .where(eq(siteProductsTable.siteId, affiliation.exporterId!));
+
+                        siteProducts.forEach((sp) => productIdsSet.add(sp.productId));
+                    }
+                }
+
+                if (productIdsSet.size === 0) {
+                    return []
+                }
+
+                baseConditions.push(
+                    inArray(skusTable.productId, Array.from(productIdsSet))
+                );
+            }
+
+            // 商品筛选
+            if (productId) {
+                baseConditions.push(eq(skusTable.productId, productId));
+            }
+
+            // 搜索条件
+            if (search) {
+                baseConditions.push(like(skusTable.skuCode, `%${search}%`));
+            }
+
+            // 状态筛选
+            if (status !== undefined) {
+                baseConditions.push(eq(skusTable.status, status));
+            }
+
+            // 排序字段白名单
+            const allowedSortFields = {
+                id: skusTable.id,
+                skuCode: skusTable.skuCode,
+                price: skusTable.price,
+                stock: skusTable.stock,
+                status: skusTable.status,
+                createdAt: skusTable.createdAt,
+                updatedAt: skusTable.updatedAt,
+            };
+
+            const orderBy =
+                allowedSortFields[sort as keyof typeof allowedSortFields] ||
+                skusTable.createdAt;
+            const orderDirection = sortOrder === "desc" ? desc(orderBy) : undefined;
+
+            // 构建查询
+            let queryBuilder = db
+                .select({
+                    id: skusTable.id,
+                    skuCode: skusTable.skuCode,
+                    productId: skusTable.productId,
+                    price: skusTable.price,
+                    marketPrice: skusTable.marketPrice,
+                    costPrice: skusTable.costPrice,
+                    weight: skusTable.weight,
+                    volume: skusTable.volume,
+                    stock: skusTable.stock,
+                    specJson: skusTable.specJson,
+                    extraAttributes: skusTable.extraAttributes,
+                    status: skusTable.status,
+                    createdAt: skusTable.createdAt,
+                    updatedAt: skusTable.updatedAt,
+                    productName: productsTable.name,
+                })
+                .from(skusTable)
+                .innerJoin(productsTable, eq(skusTable.productId, productsTable.id))
+                .$dynamic();
+
+            if (baseConditions.length > 0) {
+                queryBuilder = queryBuilder.where(and(...baseConditions))
+            }
+
+            // 添加排序
+            if (orderDirection) {
+                queryBuilder = queryBuilder.orderBy(orderBy);
+            }
+
+            // 执行查询
+            const items = await queryBuilder.limit(limit).offset((page - 1) * limit);
+
+            // 获取SKU的图片信息
+            const skuIds = items.map((item) => item.id);
+            const images =
+                skuIds.length > 0
+                    ? await db
+                        .select({
+                            skuId: skuMediaTable.skuId,
+                            mediaId: mediaTable.id,
+                            imageUrl: mediaTable.url,
+                            imageKey: mediaTable.storageKey,
+                        })
+                        .from(skuMediaTable)
+                        .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+                        .where(inArray(skuMediaTable.skuId, skuIds))
+                    : [];
+
+            const imageMap = images.reduce(
+                (map, img) => {
+                    if (img.mediaId) {
+                        map[img.skuId] = {
+                            id: img.mediaId,
+                            url: img.imageUrl,
+                            key: img.imageKey,
+                        };
+                    }
+                    return map;
+                },
+                {} as Record<string, any>
+            );
+
+            // 格式化返回数据
+            return items.map((item) => ({
+                ...item,
+                image: imageMap[item.id] || null,
+                specJson: item.specJson ? item.specJson : null,
+                extraAttributes: item.extraAttributes
+                    ? item.extraAttributes
+                    : null,
+                price: Number.parseFloat(item.price || "0"),
+                marketPrice: item.marketPrice
+                    ? Number.parseFloat(item.marketPrice)
+                    : null,
+                costPrice: item.costPrice ? Number.parseFloat(item.costPrice) : null,
+                weight: item.weight ? Number.parseFloat(item.weight) : null,
+                volume: item.volume ? Number.parseFloat(item.volume) : null,
+                stock: item.stock ? Number.parseFloat(item.stock) : null,
+            }));
+        },
+        {
+            auth: true,
+            query: SkuTModel.ListQuery,
+            detail: {
+                summary: "获取SKU列表",
+                description: "分页获取SKU列表，业务员只能看到自己工厂商品的SKU",
+            },
+        }
+    )
+
+    // 获取SKU详情
+    .get(
+        "/:id",
+        async ({ params: { id }, db, user, role }) => {
+            // 验证SKU是否存在
+            const [sku] = await db
+                .select({
+                    id: skusTable.id,
+                    skuCode: skusTable.skuCode,
+                    productId: skusTable.productId,
+                    price: skusTable.price,
+                    marketPrice: skusTable.marketPrice,
+                    costPrice: skusTable.costPrice,
+                    weight: skusTable.weight,
+                    volume: skusTable.volume,
+                    stock: skusTable.stock,
+                    specJson: skusTable.specJson,
+                    extraAttributes: skusTable.extraAttributes,
+                    status: skusTable.status,
+                    createdAt: skusTable.createdAt,
+                    updatedAt: skusTable.updatedAt,
+                })
+                .from(skusTable)
+                .where(eq(skusTable.id, id))
+                .limit(1);
+
+            if (!sku) {
+                throw new HttpError.NotFound("SKU不存在");
+            }
+
+            // 验证权限
+            const hasPermission = await validateSalespersonSkuPermission(
+                db,
+                user.id,
+                id,
+                role.name
+            );
+
+            if (!hasPermission) {
+                throw new HttpError.Forbidden("您没有权限查看该SKU");
+            }
+
+            // 获取商品名称
+            const [product] = await db
+                .select({
+                    name: productsTable.name,
+                })
+                .from(productsTable)
+                .where(eq(productsTable.id, sku.productId))
+                .limit(1);
+
+            // 获取所有关联的图片
+            const images = await db
+                .select({
+                    id: mediaTable.id,
+                    url: mediaTable.url,
+                    storageKey: mediaTable.storageKey,
+                    category: mediaTable.category,
+                    isMain: skuMediaTable.isMain,
+                    sortOrder: skuMediaTable.sortOrder,
+                })
+                .from(skuMediaTable)
+                .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+                .where(eq(skuMediaTable.skuId, sku.id))
+                .orderBy(skuMediaTable.sortOrder);
+
+            return {
+                ...sku,
+                productName: product?.name || "",
+                images: images.filter(img => img.url), // 过滤掉没有URL的图片
+                mainImage: images.find(img => img.isMain) || images[0] || null, // 主图或第一张图
+                specJson: sku.specJson ? sku.specJson : null,
+                extraAttributes: sku.extraAttributes
+                    ? sku.extraAttributes
+                    : null,
+                price: Number.parseFloat(sku.price || "0"),
+                marketPrice: sku.marketPrice
+                    ? Number.parseFloat(sku.marketPrice)
+                    : null,
+                costPrice: sku.costPrice ? Number.parseFloat(sku.costPrice) : null,
+                weight: sku.weight ? Number.parseFloat(sku.weight) : null,
+                volume: sku.volume ? Number.parseFloat(sku.volume) : null,
+                stock: sku.stock ? Number.parseFloat(sku.stock) : null,
+            };
+        },
+        {
+            auth: true,
+            params: t.Object({
+                id: t.String(),
+            }),
+            detail: {
+                summary: "获取SKU详情",
+                description: "获取SKU详细信息",
+            },
+        }
+    )
+
+    // 获取商品下的SKU列表（用于商品详情页）
+    .get(
+        "/by-product/:productId",
+        async ({ params: { productId }, db, user, role }) => {
+            // 验证权限
+            const hasPermission = await validateSalespersonProductPermission(
+                db,
+                user.id,
+                productId,
+                role.name
+            );
+
+            if (!hasPermission && role.name !== "super_admin") {
+                throw new HttpError.Forbidden("您没有权限查看该商品的SKU");
+            }
+
+            const skus = await db
+                .select({
+                    id: skusTable.id,
+                    skuCode: skusTable.skuCode,
+                    price: skusTable.price,
+                    marketPrice: skusTable.marketPrice,
+                    costPrice: skusTable.costPrice,
+                    stock: skusTable.stock,
+                    specJson: skusTable.specJson,
+                    status: skusTable.status,
+                })
+                .from(skusTable)
+                .where(eq(skusTable.productId, productId))
+                .orderBy(skusTable.createdAt);
+
+            // 获取图片信息
+            const skuIds = skus.map((s) => s.id);
+            const images =
+                skuIds.length > 0
+                    ? await db
+                        .select({
+                            skuId: skuMediaTable.skuId,
+                            id: mediaTable.id,
+                            url: mediaTable.url,
+                            storageKey: mediaTable.storageKey,
+                            category: mediaTable.category,
+                            isMain: skuMediaTable.isMain,
+                            sortOrder: skuMediaTable.sortOrder,
+                        })
+                        .from(skuMediaTable)
+                        .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+                        .where(inArray(skuMediaTable.skuId, skuIds))
+                        .orderBy(skuMediaTable.sortOrder)
+                    : [];
+
+            // 将图片按 SKU ID 分组
+            const imageMap = images.reduce(
+                (map, img) => {
+                    if (img.url) { // 只有有URL的图片才添加
+                        if (!map[img.skuId]) {
+                            map[img.skuId] = [];
+                        }
+                        map[img.skuId].push(img);
+                    }
+                    return map;
+                },
+                {} as Record<string, any[]>
+            );
+
+            return skus.map((sku) => {
+                const skuImages = imageMap[sku.id] || [];
+                return {
+                    ...sku,
+                    images: skuImages,
+                    mainImage: skuImages.find(img => img.isMain) || skuImages[0] || null,
+                    specJson: sku.specJson ? sku.specJson : null,
+                    price: Number.parseFloat(sku.price || "0"),
+                    marketPrice: sku.marketPrice
+                        ? Number.parseFloat(sku.marketPrice)
+                        : null,
+                    costPrice: sku.costPrice ? Number.parseFloat(sku.costPrice) : null,
+                    stock: sku.stock ? Number.parseFloat(sku.stock) : null,
+                };
+            });
+        },
+        {
+            auth: true,
+            params: t.Object({
+                productId: t.String(),
+            }),
+            detail: {
+                summary: "获取商品SKU列表",
+                description: "获取指定商品下的所有SKU",
+            },
+        }
+    )
+
+    // 更新SKU的媒体关联
+    .put(
+        "/:id/media",
+        async ({ params: { id }, body, db, user, role }) => {
+            // 验证SKU存在
+            const [sku] = await db
+                .select({
+                    id: skusTable.id,
+                    productId: skusTable.productId,
+                })
+                .from(skusTable)
+                .where(eq(skusTable.id, id))
+                .limit(1);
+
+            if (!sku) {
+                throw new HttpError.NotFound("SKU不存在");
+            }
+
+            // 验证权限
+            const hasPermission = await validateSalespersonProductPermission(
+                db,
+                user.id,
+                sku.productId,
+                role.name
+            );
+
+            if (!hasPermission && role.name !== "super_admin") {
+                throw new HttpError.Forbidden("您没有权限管理该商品的SKU");
+            }
+
+            // 验证媒体文件是否存在
+            if (body.mediaIds && body.mediaIds.length > 0) {
+                const existingMedia = await db
+                    .select({
+                        id: mediaTable.id,
+                    })
+                    .from(mediaTable)
+                    .where(inArray(mediaTable.id, body.mediaIds));
+
+                if (existingMedia.length !== body.mediaIds.length) {
+                    throw new HttpError.NotFound("部分媒体文件不存在");
+                }
+            }
+
+            // 更新媒体关联
+            await db.transaction(async (tx) => {
+                // 删除原有的关联
+                await tx
+                    .delete(skuMediaTable)
+                    .where(eq(skuMediaTable.skuId, id));
+
+                // 创建新的关联（如果提供了mediaIds）
+                if (body.mediaIds && body.mediaIds.length > 0) {
+                    await tx
+                        .insert(skuMediaTable)
+                        .values(
+                            body.mediaIds.map((mediaId, index) => ({
+                                skuId: id,
+                                mediaId,
+                                isMain: index === body.mainImageIndex || index === 0, // 根据指定索引或第一张作为主图
+                                sortOrder: index,
+                            }))
+                        );
+                }
+            });
+
+            return {
+                message: "媒体关联更新成功",
+            };
+        },
+        {
+            auth: true,
+            params: t.Object({
+                id: t.String(),
+            }),
+            body: t.Object({
+                mediaIds: t.Array(t.String()),
+                mainImageIndex: t.Optional(t.Number()), // 指定哪张图片作为主图
+            }),
+            detail: {
+                summary: "更新SKU媒体关联",
+                description: "更新SKU的图片关联，支持多张图片",
+            },
+        }
+    );

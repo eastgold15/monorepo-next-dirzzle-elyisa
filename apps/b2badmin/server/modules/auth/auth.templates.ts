@@ -3,6 +3,7 @@
  * 处理邮箱验证、密码重置等认证相关的邮件模板
  */
 
+import { env } from "@/env";
 import type { EmailTemplate } from "../email/email.types";
 import { createVerificationTemplate } from "../email/templates/template.utils";
 
@@ -65,7 +66,7 @@ export function createWelcomeTemplate(
   email: string,
   userName: string
 ): EmailTemplate {
-  const subject = `欢迎加入${process.env.COMPANY_NAME || "我们"}！`;
+  // const subject = `欢迎加入${env.COMPANY_NAME || "我们"}！`;
   const text = `亲爱的 ${userName}，欢迎加入我们的平台！感谢您的注册和邮箱验证。`;
 
   const html = `
@@ -99,10 +100,10 @@ export function createWelcomeTemplate(
           </div>
 
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.WEBSITE_URL || "#"}"
-               style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-              开始探索
-            </a>
+            // <a href="${env.WEBSITE_URL || "#"}"
+            //    style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+            //   开始探索
+            // </a>
           </div>
 
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">

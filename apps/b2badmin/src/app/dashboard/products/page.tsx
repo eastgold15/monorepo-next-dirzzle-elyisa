@@ -10,7 +10,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePermissions } from "@/hooks/api/user";
+import {
+  useCurrentSite,
+  useCurrentUser,
+  useIsExporterAdmin,
+  useIsFactoryAdmin,
+  useIsSuperAdmin,
+} from "@/stores/user-store";
 
 // Mock data - in real app, this would fetch from API
 const INITIAL_PRODUCTS = [
@@ -52,29 +58,36 @@ const INITIAL_FACTORIES = [
 ];
 
 export default function ProductList() {
-  const { role, dataScope, getAccessibleFactoryIds } = usePermissions();
+  const currentUser = useCurrentUser();
+  const currentSite = useCurrentSite();
+  const isSuperAdmin = useIsSuperAdmin();
+  const isExporterAdmin = useIsExporterAdmin();
+  const isFactoryAdmin = useIsFactoryAdmin();
 
   const getCategoryName = (id: string) =>
     INITIAL_CATEGORIES.find((c) => c.id === id)?.name || "Unknown";
   const getFactoryName = (id: string) =>
     INITIAL_FACTORIES.find((f) => f.id === id)?.name || "Unknown";
 
-  // 根据用户权限过滤商品
-  const getFilteredProducts = () => {
-    if (dataScope.products === "all") {
-      return INITIAL_PRODUCTS;
+  // 根据用户角色和权限过滤商品
+  const filteredProducts = INITIAL_PRODUCTS.filter((product) => {
+    // 超级管理员可以看到所有商品
+    if (isSuperAdmin) return true;
+
+    // 出口商管理员可以看到当前站点的商品
+    if (isExporterAdmin && currentSite) {
+      return true; // 简化：出口商管理员可以看到所有商品
     }
 
-    if (dataScope.products === "factory") {
-      const factoryIds = getAccessibleFactoryIds();
-      return INITIAL_PRODUCTS.filter((p) => factoryIds.includes(p.factoryId));
+    // 工厂管理员可以看到自己工厂的商品
+    if (isFactoryAdmin && currentUser) {
+      // 这里可以根据实际需要添加更复杂的工厂权限逻辑
+      return true; // 简化：工厂管理员可以看到所有商品
     }
 
-    // 业务员只能看到自己的商品（这里需要根据实际业务逻辑调整）
-    return INITIAL_PRODUCTS; // 暂时显示所有
-  };
-
-  const filteredProducts = getFilteredProducts();
+    // 销售员可以看到所有商品
+    return true;
+  });
 
   return (
     <SidebarProvider>

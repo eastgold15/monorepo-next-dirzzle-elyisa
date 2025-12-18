@@ -13,19 +13,35 @@ export const userRoute = new Elysia({
   .use(adminAuthPlugin)
   .get(
     "/me",
-    ({ user, currentSite, tenantId, tenantType, allSites, db, role }) => {
+    async ({ user, currentSite, tenantId, tenantType, db, role, permissions }) => {
+
+      const result = await db.query.userSiteRolesTable.findMany({
+        where: {
+          userId: user.id,
+        },
+        with: {
+          role: true,
+          site: true,
+        }
+      })
+
+      const allSites = result.map((item) => item.site);
       const userData = {
-        user,
+        user: {
+          ...user,
+          role,
+          site: currentSite,
+        },
         currentSite,
         tenantId,
         tenantType,
         allSites,
         roles: role,
+        permissions
       };
       return userData;
     },
     {
-      auth: true,
       detail: {
         summary: "获取当前用户信息",
         description:

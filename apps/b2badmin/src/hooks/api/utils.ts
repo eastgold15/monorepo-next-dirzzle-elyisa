@@ -1,13 +1,11 @@
 // API 工具函数
 
-import type { ApiResponse, ApiErrorResponse } from "@repo/contract";
+import type { ApiResponse } from "@repo/contract";
 
 /**
  * 处理 API 响应
  */
-export async function handleApiResponse<T>(
-  response: Response
-): Promise<T> {
+export async function handleApiResponse<T>(response: Response): Promise<T> {
   const data: ApiResponse = await response.json();
 
   if (!response.ok) {
@@ -68,10 +66,12 @@ export function formatApiError(error: unknown): string {
  * 检查是否为网络错误
  */
 export function isNetworkError(error: unknown): boolean {
-  return error instanceof Error &&
+  return (
+    error instanceof Error &&
     (error.message.includes("fetch") ||
-     error.message.includes("Network") ||
-     error.message.includes("ECONNREFUSED"));
+      error.message.includes("Network") ||
+      error.message.includes("ECONNREFUSED"))
+  );
 }
 
 /**
@@ -91,5 +91,6 @@ export const retryConfig = {
 
     return false;
   },
-  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  retryDelay: (attemptIndex: number) =>
+    Math.min(1000 * 2 ** attemptIndex, 30_000),
 };

@@ -1,7 +1,8 @@
 // This file is auto-generated, don't edit it
 import alimt20181012, * as $alimt20181012 from "@alicloud/alimt20181012";
 import * as $OpenApi from "@alicloud/openapi-client";
-import { envConfig } from "@/lib/env/server";
+import { env } from "@/env";
+
 import type { TranslateProvider } from "../interfaces/translation-provider.interface";
 export class AliyunTranslateProvider implements TranslateProvider {
   readonly name = "aliyun";
@@ -9,13 +10,13 @@ export class AliyunTranslateProvider implements TranslateProvider {
 
   constructor() {
     const config = new $OpenApi.Config({});
-    config.accessKeyId = envConfig.ALIBABA_CLOUD_ACCESS_KEY_ID;
-    config.accessKeySecret = envConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET;
+    config.accessKeyId = env.ALIBABA_CLOUD_ACCESS_KEY_ID;
+    config.accessKeySecret = env.ALIBABA_CLOUD_ACCESS_KEY_SECRET;
     config.regionId = "cn-hangzhou";
     config.endpoint = "mt.cn-hangzhou.aliyuncs.com";
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("NODE_ENV:", process.env.NODE_ENV);
+    if (env.NODE_ENV === "development") {
+      console.log("NODE_ENV:", env.NODE_ENV);
       this.client = new alimt20181012(config);
       return;
     }

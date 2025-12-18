@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { createAuthClient } from "better-auth/react";
+import { handleEden } from "@/lib/utils/base";
 
 // 注册数据的类型定义
 interface RegisterData {
@@ -22,9 +23,9 @@ export function useRegisterMutation() {
         callbackURL: "http://localhost:4000/dashboard",
       });
       if (error || !res) {
-        return null
+        return null;
       }
-      return res
+      return res;
     },
     onError: (error) => {
       console.error("Registration error:", error);

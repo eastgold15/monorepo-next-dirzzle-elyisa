@@ -7,8 +7,7 @@ export function useSiteConfigList() {
   return useQuery({
     queryKey: ["site-config", "list"],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.siteConfig.get());
-      return result;
+      return await handleEden(rpc.api.siteConfig.get());
     },
     staleTime: 10 * 60 * 1000, // 10分钟
   });
@@ -18,8 +17,7 @@ export function useSiteConfigDetail(key: string) {
   return useQuery({
     queryKey: ["site-config", key],
     queryFn: async () => {
-      const result = handleEden(await rpc.api.siteConfig[key].get());
-      return result;
+      return await handleEden(rpc.api.siteConfig[key].get());
     },
     enabled: !!key,
   });
@@ -30,8 +28,7 @@ export function useSiteConfigUpdate() {
 
   return useMutation({
     mutationFn: async ({ key, data }: { key: string; data: any }) => {
-      const result = handleEden(await rpc.api.siteConfig[key].put({ data }));
-      return result;
+      return await handleEden(rpc.api.siteConfig[key].put({ data }));
     },
     onSuccess: (_, { key }) => {
       queryClient.invalidateQueries({ queryKey: ["site-config"] });

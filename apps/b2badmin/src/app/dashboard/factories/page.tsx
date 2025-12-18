@@ -21,11 +21,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useFactoriesQuery } from "@/hooks/api/use-factories";
-import {
-  useIsExporterAdmin,
-  useIsFactoryAdmin,
-  useIsSuperAdmin,
-} from "@/stores/user-store";
+import { HasRole } from "@/components/auth";
 
 export default function FactoryManager() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -35,12 +31,6 @@ export default function FactoryManager() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // 权限检查
-  const isSuperAdmin = useIsSuperAdmin();
-  const isExporterAdmin = useIsExporterAdmin();
-  const isFactoryAdmin = useIsFactoryAdmin();
-  const canCreateFactory = isSuperAdmin || isExporterAdmin;
 
   // 获取工厂列表
   const { data: factories = [], isLoading, refetch } = useFactoriesQuery();
@@ -86,13 +76,15 @@ export default function FactoryManager() {
                   管理您的制造合作伙伴和工厂信息
                 </p>
               </div>
-              {canCreateFactory && (
+              <HasRole role={["super_admin", "exporter_admin"]}>
                 <Button onClick={() => setIsCreateModalOpen(true)}>
                   <Plus className="mr-2" size={18} />
                   创建工厂
                 </Button>
-              )}
+              </HasRole>
             </div>
+
+            
 
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -108,12 +100,12 @@ export default function FactoryManager() {
                 <p className="mb-4 text-center text-slate-500">
                   您还没有创建任何工厂。点击下方按钮开始创建您的第一个工厂。
                 </p>
-                {canCreateFactory && (
+                <HasRole role={["super_admin", "exporter_admin"]}>
                   <Button onClick={() => setIsCreateModalOpen(true)}>
                     <Plus className="mr-2" size={18} />
                     创建第一个工厂
                   </Button>
-                )}
+                </HasRole>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

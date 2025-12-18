@@ -3,6 +3,8 @@
  * 提供统一的URL解析和key提取功能
  */
 
+import { env } from "@/env";
+
 // 顶层正则表达式常量，提升性能
 const URL_KEY_REGEX = /^https?:\/\/[^/]+\/(.+)$/;
 
@@ -27,7 +29,7 @@ export function extractOssKeyFromUrl(fileUrl: string): string {
 
     // 检查是否为阿里云OSS默认域名格式 (bucket.oss-region.aliyuncs.com)
     const hostname = url.hostname;
-    const bucketName = process.env.BUCKET || "";
+    const bucketName = env.BUCKET || "";
 
     // 如果是阿里云OSS默认域名格式，直接返回pathname
     if (hostname.includes("aliyuncs.com") && hostname.startsWith(bucketName)) {
@@ -100,7 +102,7 @@ export function isOssDefaultDomain(fileUrl: string): boolean {
 export function isConfiguredEndpoint(fileUrl: string): boolean {
   try {
     const url = new URL(fileUrl);
-    const endpoint = process.env.ENDPOINT || "";
+    const endpoint = env.ENDPOINT || "";
 
     if (!endpoint) {
       return false;
