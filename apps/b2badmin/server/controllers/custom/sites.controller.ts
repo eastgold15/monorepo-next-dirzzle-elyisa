@@ -1,15 +1,12 @@
-import { Elysia, t } from "elysia";
 import { SitesContract } from "@repo/contract";
-import { sitesService } from "~/modules/index";
-import { authGuardMid } from "~/middleware/auth";
+import { Elysia, t } from "elysia";
 import { dbPlugin } from "~/db/connection";
-import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
-import { HttpError } from "elysia-http-problem-json";
-import { sitesTable } from "@repo/contract";
-import { eq } from "drizzle-orm";
+import { authGuardMid } from "~/middleware/auth";
+import { sitesService } from "~/modules/index";
 
 export const sitesController = new Elysia({ prefix: "/sites" })
   .use(authGuardMid)
+  .use(dbPlugin)
 
   // 获取用户可访问的站点列表
   .get(

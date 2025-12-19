@@ -12,7 +12,7 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 获取当前用户信息接口
   .get(
     "/me",
-    async ({ user, currentSite, tenantId, tenantType, db, role, permissions }) => {
+    async ({ user, currentSite, db, role, permissions }) => {
       const result = await db.query.userSiteRolesTable.findMany({
         where: {
           userId: user.id,
@@ -31,8 +31,6 @@ export const usersController = new Elysia({ prefix: "/users" })
           site: currentSite,
         },
         currentSite,
-        tenantId,
-        tenantType,
         allSites,
         roles: role,
         permissions

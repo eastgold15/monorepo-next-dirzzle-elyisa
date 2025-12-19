@@ -1,15 +1,15 @@
+import { roleTable, sitesTable, UserSiteRolesContract, userSiteRolesTable } from "@repo/contract";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { UserSiteRolesContract } from "@repo/contract";
-import { userSiteRolesService } from "~/modules/index";
-import { authGuardMid } from "~/middleware/auth";
-import { dbPlugin } from "~/db/connection";
-import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
 import { HttpError } from "elysia-http-problem-json";
-import { userSiteRolesTable, sitesTable, roleTable } from "@repo/contract";
-import { eq, and } from "drizzle-orm";
+import { dbPlugin } from "~/db/connection";
+import { authGuardMid } from "~/middleware/auth";
+import { userSiteRolesService } from "~/modules/index";
 
 export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .use(authGuardMid)
+  .use(dbPlugin)
+
 
   // 获取用户在站点中的角色列表
   .get("/", ({ query, permissions, auth }) => {
@@ -74,7 +74,9 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
 
       // 检查站点是否存在
       const site = await db.query.sitesTable.findFirst({
-        where: eq(sitesTable.id, siteId),
+        where: {
+          id: siteId,
+        },
       });
 
       if (!site) {
@@ -83,7 +85,9 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
 
       // 检查角色是否存在
       const role = await db.query.roleTable.findFirst({
-        where: eq(roleTable.id, roleId),
+        where: {
+          id: roleId,
+        },
       });
 
       if (!role) {
@@ -128,14 +132,15 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       const { siteId } = params;
 
       const siteUsers = await db.query.userSiteRolesTable.findMany({
-        where: eq(userSiteRolesTable.siteId, siteId),
+        where: {
+          siteId,
+        },
         with: {
           user: {
             columns: {
               id: true,
               name: true,
               email: true,
-              avatar: true,
               isActive: true,
             },
           },
@@ -149,7 +154,9 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
             },
           },
         },
-        orderBy: { assignedAt: "desc" },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       return { data: siteUsers };
@@ -175,7 +182,9 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       const { userId } = params;
 
       const userSites = await db.query.userSiteRolesTable.findMany({
-        where: eq(userSiteRolesTable.userId, userId),
+        where: {
+          userId,
+        },
         with: {
           site: {
             with: {
@@ -205,7 +214,9 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
             },
           },
         },
-        orderBy: { assignedAt: "desc" },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       return { data: userSites };
