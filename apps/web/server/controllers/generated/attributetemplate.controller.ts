@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { AttributeTemplateContract } from "@repo/contract";
-import { attributeTemplateService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { attributeTemplateService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const attributetemplateController = new Elysia({ prefix: "/attributetemplate" })
   .use(dbPlugin)

@@ -1,12 +1,6 @@
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { validateEmailConfig } from "./modules/email/startup-check";
-import { adsRoute } from "./modules/ads";
-import { categoryRoute } from "./modules/category";
-import { heroCardsRoute } from "./modules/hero-cards";
-import { inquiryRoute } from "./modules/inquiry";
-import { mediaRoute } from "./modules/meida";
-import { productRoute } from "./modules/product";
 import { dbPlugin } from "./db/connection";
 import * as controllers from "./controllers";
 
@@ -43,18 +37,11 @@ export const server = new Elysia({ name: "server" })
   })
   .use(dbPlugin)
   .use(httpProblemJsonPlugin())
-  // 自动挂载所有生成的控制器
+  // 自动挂载所有控制器（包括自定义和生成的）
   .group("/v1", (app) => {
     Object.values(controllers).forEach(controller => app.use(controller));
     return app;
-  })
-  // 使用现有的模块路由
-  .use(categoryRoute)
-  .use(productRoute)
-  .use(adsRoute)
-  .use(heroCardsRoute)
-  .use(mediaRoute)
-  .use(inquiryRoute);
+  });
 
 /**
  * Export the app type for use with RPC clients (e.g., edenTreaty)

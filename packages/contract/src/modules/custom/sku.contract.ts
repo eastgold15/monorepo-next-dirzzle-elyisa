@@ -82,6 +82,6 @@ export type SkusDTO = {
     ListQuery: typeof SkusContract.ListQuery.static;
     ListResponse: typeof Generated.ListResponse.static & {
         // 如果列表也需要扩展，可以在这里交叉类型
-        data: Array<typeof SkusContract.Response.static>;
+        data: typeof SkusContract.Response.static[];
     };
 };

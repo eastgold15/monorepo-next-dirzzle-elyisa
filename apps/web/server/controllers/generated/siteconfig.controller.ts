@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { SiteConfigContract } from "@repo/contract";
-import { siteConfigService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { siteConfigService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const siteconfigController = new Elysia({ prefix: "/siteconfig" })
   .use(dbPlugin)

@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { SkuMediaContract } from "@repo/contract";
-import { skuMediaService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { skuMediaService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const skumediaController = new Elysia({ prefix: "/skumedia" })
   .use(dbPlugin)

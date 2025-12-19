@@ -1,12 +1,11 @@
 import { MasterTable } from "@repo/contract";
 import { asc, eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { buildTree } from "@/server/utils/buildTree";
-import { commonRes } from "@/server/utils/Res";
+import { dbPlugin } from "~/db/connection";
+import { localeMiddleware } from "~/plugins/locale";
+import { buildTree } from "~/utils/buildTree";
 
-export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类树形列表 - 前端用户使用
+export const categoryController = new Elysia({ prefix: "/category" }) // 获取分类树形列表 - 前端用户使用
   .use(localeMiddleware)
   .use(dbPlugin)
   .get(
@@ -18,11 +17,7 @@ export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类�
         .from(MasterTable)
         .orderBy(asc(MasterTable.sortOrder));
 
-      return commonRes(
-        buildTree(categories, "id", "parentId"),
-        200,
-        "获取分类树形列表成功"
-      );
+      return buildTree(categories, "id", "parentId");
     },
     {
       detail: {
@@ -41,7 +36,7 @@ export const categoryRoute = new Elysia({ prefix: "category" }) // 获取分类�
         .select({ des: MasterTable.description })
         .from(MasterTable)
         .where(eq(MasterTable.id, id));
-      return commonRes(res[0], 200, "获取分类成功");
+      return res[0];
     },
     {
       params: t.Object({

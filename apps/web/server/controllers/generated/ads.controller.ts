@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { AdsContract } from "@repo/contract";
-import { adsService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { adsService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const adsController = new Elysia({ prefix: "/ads" })
   .use(dbPlugin)

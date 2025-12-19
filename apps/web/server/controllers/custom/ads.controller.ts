@@ -1,11 +1,10 @@
 import { adsTable } from "@repo/contract/table";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes } from "@/server/utils/Res";
+import { dbPlugin } from "~/db/connection";
+import { localeMiddleware } from "~/plugins/locale";
 
-export const adsRoute = new Elysia({ prefix: "ads" })
+export const adsController = new Elysia({ prefix: "/ads" })
   .use(localeMiddleware)
   .use(dbPlugin)
   .get(
@@ -25,7 +24,7 @@ export const adsRoute = new Elysia({ prefix: "ads" })
         )
         .limit(4);
 
-      return commonRes(ads, 200, "获取当前广告成功");
+      return ads;
     },
     {
       detail: {

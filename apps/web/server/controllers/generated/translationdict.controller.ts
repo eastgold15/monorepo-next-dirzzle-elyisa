@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { TranslationDictContract } from "@repo/contract";
-import { translationDictService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { translationDictService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const translationdictController = new Elysia({ prefix: "/translationdict" })
   .use(dbPlugin)

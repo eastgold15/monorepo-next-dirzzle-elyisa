@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { HeroCardsContract } from "@repo/contract";
-import { heroCardsService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { heroCardsService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const herocardsController = new Elysia({ prefix: "/herocards" })
   .use(dbPlugin)

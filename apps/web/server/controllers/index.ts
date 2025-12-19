@@ -1,7 +1,7 @@
 // 🛡️ 自动生成的 Web Controller 入口，支持 custom 覆盖
 export * from "./generated/customer.controller";
 export * from "./generated/account.controller";
-export * from "./generated/ads.controller";
+export * from "./custom/ads.controller";
 export * from "./generated/attribute.controller";
 export * from "./generated/attributetemplate.controller";
 export * from "./generated/attributevalue.controller";
@@ -10,10 +10,10 @@ export * from "./generated/exporters.controller";
 export * from "./generated/factories.controller";
 export * from "./generated/herocards.controller";
 export * from "./generated/inquiryitems.controller";
-export * from "./generated/inquiry.controller";
+export * from "./custom/inquiry.controller";
 export * from "./generated/master.controller";
 export * from "./generated/mediametadata.controller";
-export * from "./generated/media.controller";
+export * from "./custom/media.controller";
 export * from "./generated/permission.controller";
 export * from "./generated/productmastercategories.controller";
 export * from "./generated/productmedia.controller";

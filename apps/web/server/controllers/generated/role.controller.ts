@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { RoleContract } from "@repo/contract";
-import { roleService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { roleService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const roleController = new Elysia({ prefix: "/role" })
   .use(dbPlugin)

@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { SessionContract } from "@repo/contract";
-import { sessionService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { sessionService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const sessionController = new Elysia({ prefix: "/session" })
   .use(dbPlugin)

@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { VerificationContract } from "@repo/contract";
-import { verificationService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { verificationService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const verificationController = new Elysia({ prefix: "/verification" })
   .use(dbPlugin)

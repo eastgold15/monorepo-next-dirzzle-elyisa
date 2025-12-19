@@ -1,11 +1,10 @@
 import { heroCardsTable } from "@repo/contract/table";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes } from "@/server/utils/Res";
+import { dbPlugin } from "~/db/connection";
+import { localeMiddleware } from "~/plugins/locale";
 
-export const heroCardsRoute = new Elysia({ prefix: "hero-cards" })
+export const heroCardsController = new Elysia({ prefix: "/hero-cards" })
   .use(localeMiddleware)
   .use(dbPlugin)
   .get(
@@ -18,7 +17,7 @@ export const heroCardsRoute = new Elysia({ prefix: "hero-cards" })
         .orderBy(heroCardsTable.sortOrder)
         .limit(3);
 
-      return commonRes(heroCards, 200, "获取 Hero Cards 成功");
+      return heroCards;
     },
     {
       detail: {

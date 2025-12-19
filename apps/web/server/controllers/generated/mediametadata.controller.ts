@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { MediaMetadataContract } from "@repo/contract";
-import { mediaMetadataService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { mediaMetadataService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const mediametadataController = new Elysia({ prefix: "/mediametadata" })
   .use(dbPlugin)

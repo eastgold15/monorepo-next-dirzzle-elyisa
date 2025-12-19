@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { FactoriesContract } from "@repo/contract";
-import { factoriesService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { factoriesService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const factoriesController = new Elysia({ prefix: "/factories" })
   .use(dbPlugin)

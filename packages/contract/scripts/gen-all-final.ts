@@ -14,18 +14,26 @@ const CONTRACT_CUSTOM_DIR = path.resolve(MODULE_DIR, "custom");
 const CONTRACT_INDEX_FILE = path.resolve(MODULE_DIR, "index.ts");
 
 // 2. 服务层 (apps/b2badmin/server/modules)
-const SERVER_MODULE_DIR = path.resolve(__dirname, "../../../apps/b2badmin/server/modules");
-const SERVICE_GEN_DIR = path.resolve(SERVER_MODULE_DIR, "generated");
-const SERVICE_CUSTOM_DIR = path.resolve(SERVER_MODULE_DIR, "custom");
-const SERVICE_INDEX_FILE = path.resolve(SERVER_MODULE_DIR, "index.ts");
+const B2B_SERVER_MODULE_DIR = path.resolve(__dirname, "../../../apps/b2badmin/server/modules");
+const B2B_SERVICE_GEN_DIR = path.resolve(B2B_SERVER_MODULE_DIR, "generated");
+const B2B_SERVICE_CUSTOM_DIR = path.resolve(B2B_SERVER_MODULE_DIR, "custom");
+const B2B_SERVICE_INDEX_FILE = path.resolve(B2B_SERVER_MODULE_DIR, "index.ts");
 
 // 3. 控制器层 (apps/b2badmin/server/controllers)
-const SERVER_CONTROLLER_DIR = path.resolve(__dirname, "../../../apps/b2badmin/server/controllers");
-const CONTROLLER_GEN_DIR = path.resolve(SERVER_CONTROLLER_DIR, "generated");
+const B2B_SERVER_CONTROLLER_DIR = path.resolve(__dirname, "../../../apps/b2badmin/server/controllers");
+const B2B_CONTROLLER_GEN_DIR = path.resolve(B2B_SERVER_CONTROLLER_DIR, "generated");
+const B2B_CONTROLLER_CUSTOM_DIR = path.resolve(B2B_SERVER_CONTROLLER_DIR, "custom");
 
+// 4. Web 服务层 (apps/web/server/modules)
+const WEB_SERVER_MODULE_DIR = path.resolve(__dirname, "../../../apps/web/server/modules");
+const WEB_SERVICE_GEN_DIR = path.resolve(WEB_SERVER_MODULE_DIR, "generated");
+const WEB_SERVICE_CUSTOM_DIR = path.resolve(WEB_SERVER_MODULE_DIR, "custom");
+const WEB_SERVICE_INDEX_FILE = path.resolve(WEB_SERVER_MODULE_DIR, "index.ts");
 
-// --- 控制器层自定义目录 ---
-const CONTROLLER_CUSTOM_DIR = path.resolve(SERVER_CONTROLLER_DIR, "custom");
+// 5. Web 控制器层 (apps/web/server/controllers)
+const WEB_SERVER_CONTROLLER_DIR = path.resolve(__dirname, "../../../apps/web/server/controllers");
+const WEB_CONTROLLER_GEN_DIR = path.resolve(WEB_SERVER_CONTROLLER_DIR, "generated");
+const WEB_CONTROLLER_CUSTOM_DIR = path.resolve(WEB_SERVER_CONTROLLER_DIR, "custom");
 
 // --- 🛠️ 辅助函数 ---
 
@@ -51,10 +59,14 @@ function toCamelCase(str: string) {
 const ALL_DIRS = [
   CONTRACT_GEN_DIR,
   CONTRACT_CUSTOM_DIR,
-  SERVICE_GEN_DIR,
-  SERVICE_CUSTOM_DIR,
-  CONTROLLER_GEN_DIR,
-  CONTROLLER_CUSTOM_DIR
+  B2B_SERVICE_GEN_DIR,
+  B2B_SERVICE_CUSTOM_DIR,
+  B2B_CONTROLLER_GEN_DIR,
+  B2B_CONTROLLER_CUSTOM_DIR,
+  WEB_SERVICE_GEN_DIR,
+  WEB_SERVICE_CUSTOM_DIR,
+  WEB_CONTROLLER_GEN_DIR,
+  WEB_CONTROLLER_CUSTOM_DIR
 ];
 
 ALL_DIRS.forEach(dir => {
@@ -112,11 +124,11 @@ export type ${capitalized}DTO = {
   ListQuery: typeof ${capitalized}Contract.ListQuery.static;
 };`.trim();
 
-    fs.writeFileSync(path.join(CONTRACT_GEN_DIR, `${lowName}.contract.ts`), contractContent + "\n");
+    fs.writeFileSync(path.join(CONTRACT_GEN_DIR, `${lowName}.contract.ts`), `${contractContent}\n`);
 
-    // --- 2. 生成 Service (基础类) ---
-    const serviceContent = `
-import { ${key} } from "@repo/contract"; 
+    // --- 2. 生成 B2B Service (基础类) ---
+    const b2bServiceContent = `
+import { ${key} } from "@repo/contract";
 import { ${capitalized}Contract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 
@@ -126,10 +138,10 @@ export class ${capitalized}BaseService extends BaseService<typeof ${key}, typeof
     }
 }
 `.trim();
-    fs.writeFileSync(path.join(SERVICE_GEN_DIR, `${lowName}.service.ts`), serviceContent + "\n");
+    fs.writeFileSync(path.join(B2B_SERVICE_GEN_DIR, `${lowName}.service.ts`), `${b2bServiceContent}\n`);
 
-    // --- 3. 生成 Controller ---
-    const controllerContent = `
+    // --- 3. 生成 B2B Controller ---
+    const b2bControllerContent = `
 import { Elysia, t } from "elysia";
 import { ${capitalized}Contract } from "@repo/contract";
 import { ${instanceName}Service } from "~/modules/index";
@@ -164,10 +176,78 @@ export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
   });
 `.trim();
 
-    fs.writeFileSync(path.join(CONTROLLER_GEN_DIR, `${lowName}.controller.ts`), controllerContent + "\n");
+    fs.writeFileSync(path.join(B2B_CONTROLLER_GEN_DIR, `${lowName}.controller.ts`), `${b2bControllerContent}\n`);
+
+    // --- 4. 生成 Web Service ---
+    const webServiceContent = `
+import { ${key} } from "@repo/contract";
+import { ${capitalized}Contract } from "@repo/contract";
+import { BaseService } from "~/lib/base-service";
+
+export class ${capitalized}BaseService extends BaseService<typeof ${key}, typeof ${capitalized}Contract> {
+    constructor() {
+        super(${key}, ${capitalized}Contract);
+    }
+}
+`.trim();
+    fs.writeFileSync(path.join(WEB_SERVICE_GEN_DIR, `${lowName}.service.ts`), `${webServiceContent}\n`);
+
+    // --- 5. 生成 Web Controller ---
+    const webControllerContent = `
+import { Elysia, t } from "elysia";
+import { ${capitalized}Contract } from "@repo/contract";
+import { ${instanceName}Service } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
+
+export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
+  .use(dbPlugin)
+  .get("/", ({ query, db }) => {
+    return ${instanceName}Service.findAll(query, { db, user: null });
+  }, {
+    query: ${capitalized}Contract.ListQuery,
+    detail: {
+      summary: "获取${capitalized}列表",
+      description: "获取所有${capitalized}的列表信息",
+      tags: ["${capitalized}"]
+    }
+  })
+  .post("/", ({ body, db }) => {
+    return ${instanceName}Service.create(body, { db, user: null });
+  }, {
+    body: ${capitalized}Contract.Create,
+    detail: {
+      summary: "创建${capitalized}",
+      description: "创建新的${capitalized}",
+      tags: ["${capitalized}"]
+    }
+  })
+  .patch("/:id", ({ params, body, db }) => {
+    return ${instanceName}Service.update(params.id, body, { db, user: null });
+  }, {
+    params: t.Object({ id: t.String() }),
+    body: ${capitalized}Contract.Patch,
+    detail: {
+      summary: "更新${capitalized}",
+      description: "根据ID更新${capitalized}信息",
+      tags: ["${capitalized}"]
+    }
+  })
+  .delete("/:id", ({ params, db }) => {
+    return ${instanceName}Service.delete(params.id, { db, user: null });
+  }, {
+    params: t.Object({ id: t.String() }),
+    detail: {
+      summary: "删除${capitalized}",
+      description: "根据ID删除${capitalized}",
+      tags: ["${capitalized}"]
+    }
+  });
+`.trim();
+
+    fs.writeFileSync(path.join(WEB_CONTROLLER_GEN_DIR, `${lowName}.controller.ts`), webControllerContent + "\n");
   });
 
-  // --- 4. 生成统一索引 (带 Custom 覆盖逻辑) ---
+  // --- 6. 生成统一索引 (带 Custom 覆盖逻辑) ---
 
   // Contract Index
   const customContracts = fs.readdirSync(CONTRACT_CUSTOM_DIR).filter(f => f.endsWith(".contract.ts")).map(f => f.replace(".contract.ts", ""));
@@ -178,33 +258,59 @@ export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
   }).join("\n");
   fs.writeFileSync(CONTRACT_INDEX_FILE, `// 🛡️ 自动生成的契约索引\n${contractIndex}\n`);
 
-  // Service Index
-  const customServices = fs.readdirSync(SERVICE_CUSTOM_DIR).filter(f => f.endsWith(".service.ts")).map(f => f.replace(".service.ts", ""));
-  const serviceIndex = processedModules.map(m => {
-    const instanceName = toCamelCase(m.originalKey.replace("Table", "")) + "Service";
-    if (customServices.includes(m.lowName)) {
+  // B2B Service Index
+  const b2bCustomServices = fs.readdirSync(B2B_SERVICE_CUSTOM_DIR).filter(f => f.endsWith(".service.ts")).map(f => f.replace(".service.ts", ""));
+  const b2bServiceIndex = processedModules.map(m => {
+    const instanceName = `${toCamelCase(m.originalKey.replace("Table", ""))}Service`;
+    if (b2bCustomServices.includes(m.lowName)) {
       return `import { ${m.capitalized}Service } from "./custom/${m.lowName}.service";\nexport const ${instanceName} = new ${m.capitalized}Service();`;
     }
     return `import { ${m.capitalized}BaseService } from "./generated/${m.lowName}.service";\nexport const ${instanceName} = new ${m.capitalized}BaseService();`;
   }).join("\n\n");
-  fs.writeFileSync(SERVICE_INDEX_FILE, `// 🛡️ 自动生成的 Service 索引\n${serviceIndex}\n`);
+  fs.writeFileSync(B2B_SERVICE_INDEX_FILE, `// 🛡️ 自动生成的 B2B Service 索引\n${b2bServiceIndex}\n`);
 
-  // 4. 生成 Controller Index (带 Custom 覆盖逻辑)
-  const customControllers = fs.readdirSync(CONTROLLER_CUSTOM_DIR)
+  // B2B Controller Index
+  const b2bCustomControllers = fs.readdirSync(B2B_CONTROLLER_CUSTOM_DIR)
     .filter(f => f.endsWith(".controller.ts"))
     .map(f => f.replace(".controller.ts", ""));
-  // Controller Index
-  const controllerIndex = processedModules.map(m => {
+  const b2bControllerIndex = processedModules.map(m => {
     // 如果 custom 下有同名文件，则引用 custom
-    const source = customControllers.includes(m.lowName) ? "./custom" : "./generated";
+    const source = b2bCustomControllers.includes(m.lowName) ? "./custom" : "./generated";
     return `export * from "${source}/${m.lowName}.controller";`;
   }).join("\n");
 
   fs.writeFileSync(
-    path.join(SERVER_CONTROLLER_DIR, "index.ts"),
-    `// 🛡️ 自动生成的 Controller 入口，支持 custom 覆盖\n${controllerIndex}\n`
+    path.join(B2B_SERVER_CONTROLLER_DIR, "index.ts"),
+    `// 🛡️ 自动生成的 B2B Controller 入口，支持 custom 覆盖\n${b2bControllerIndex}\n`
   );
-  console.log(`✅ 同步完成！共处理 ${processedModules.length} 个模块。优先引用 custom 目录下的自定义实现。`);
+
+  // Web Service Index
+  const webCustomServices = fs.readdirSync(WEB_SERVICE_CUSTOM_DIR).filter(f => f.endsWith(".service.ts")).map(f => f.replace(".service.ts", ""));
+  const webServiceIndex = processedModules.map(m => {
+    const instanceName = `${toCamelCase(m.originalKey.replace("Table", ""))}Service`;
+    if (webCustomServices.includes(m.lowName)) {
+      return `import { ${m.capitalized}Service } from "./custom/${m.lowName}.service";\nexport const ${instanceName} = new ${m.capitalized}Service();`;
+    }
+    return `import { ${m.capitalized}BaseService } from "./generated/${m.lowName}.service";\nexport const ${instanceName} = new ${m.capitalized}BaseService();`;
+  }).join("\n\n");
+  fs.writeFileSync(WEB_SERVICE_INDEX_FILE, `// 🛡️ 自动生成的 Web Service 索引\n${webServiceIndex}\n`);
+
+  // Web Controller Index
+  const webCustomControllers = fs.readdirSync(WEB_CONTROLLER_CUSTOM_DIR)
+    .filter(f => f.endsWith(".controller.ts"))
+    .map(f => f.replace(".controller.ts", ""));
+  const webControllerIndex = processedModules.map(m => {
+    // 如果 custom 下有同名文件，则引用 custom
+    const source = webCustomControllers.includes(m.lowName) ? "./custom" : "./generated";
+    return `export * from "${source}/${m.lowName}.controller";`;
+  }).join("\n");
+
+  fs.writeFileSync(
+    path.join(WEB_SERVER_CONTROLLER_DIR, "index.ts"),
+    `// 🛡️ 自动生成的 Web Controller 入口，支持 custom 覆盖\n${webControllerIndex}\n`
+  );
+
+  console.log(`✅ 同步完成！共处理 ${processedModules.length} 个模块。B2B 和 Web 的代码已生成。优先引用 custom 目录下的自定义实现。`);
 }
 
 generate();

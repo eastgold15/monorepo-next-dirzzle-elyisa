@@ -1,11 +1,10 @@
 import { mediaTable } from "@repo/contract/table";
 import { asc, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes } from "@/server/utils/Res";
+import { dbPlugin } from "~/db/connection";
+import { localeMiddleware } from "~/plugins/locale";
 
-export const mediaRoute = new Elysia({ prefix: "media" }) // 获取图片 - 前端用户使用
+export const mediaController = new Elysia({ prefix: "/media" }) // 获取图片 - 前端用户使用
   .use(localeMiddleware)
   .use(dbPlugin)
   .get(
@@ -18,7 +17,7 @@ export const mediaRoute = new Elysia({ prefix: "media" }) // 获取图片 - 前�
         .where(eq(mediaTable.id, id))
         .orderBy(asc(mediaTable.createdAt));
 
-      return commonRes(media[0].url, 200, "获取图片url成功");
+      return media[0].url;
     },
     {
       params: t.Object({
@@ -37,7 +36,7 @@ export const mediaRoute = new Elysia({ prefix: "media" }) // 获取图片 - 前�
         .from(mediaTable)
         .where(inArray(mediaTable.id, ids));
 
-      return commonRes(media, 200, "获取图片url列表成功");
+      return media;
     },
     {
       query: t.Object({

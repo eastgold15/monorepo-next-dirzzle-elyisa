@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { MasterContract } from "@repo/contract";
-import { masterService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { masterService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const masterController = new Elysia({ prefix: "/master" })
   .use(dbPlugin)

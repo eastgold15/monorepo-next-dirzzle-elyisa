@@ -11,18 +11,18 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import { dbPlugin } from "@/server/db/connection";
-import { sendEmail } from "../email/email";
+import { dbPlugin } from "~/db/connection";
+import { sendEmail } from "../../modules/email/email";
 import {
   type QuotationData,
   quotationDefaultData,
-} from "./excelTemplate/QuotationData";
-import { generateInquiryNumber } from "./services/dayCount";
-import { generateQuotationExcel } from "./services/excel.service";
-import { createSalesInquiryTemplate } from "./services/inquiry.templates";
-import { generateTimeNo } from "./utils/timeNoGenerator";
+} from "../../modules/inquiry/excelTemplate/QuotationData";
+import { generateInquiryNumber } from "../../modules/inquiry/services/dayCount";
+import { generateQuotationExcel } from "../../modules/inquiry/services/excel.service";
+import { createSalesInquiryTemplate } from "../../modules/inquiry/services/inquiry.templates";
+import { generateTimeNo } from "../../modules/inquiry/utils/timeNoGenerator";
 
-export const inquiryRoute = new Elysia({ prefix: "inquiry" })
+export const inquiryController = new Elysia({ prefix: "/inquiry" })
   .use(dbPlugin)
   .post(
     "/",

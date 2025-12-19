@@ -1,6 +1,6 @@
 import { productTemplateTable } from "@repo/contract";
 import { ProductTemplateContract } from "@repo/contract";
-import { BaseService } from "../../../lib/base-service";
+import { BaseService } from "~/lib/base-service";
 
 export class ProductTemplateBaseService extends BaseService<typeof productTemplateTable, typeof ProductTemplateContract> {
     constructor() {

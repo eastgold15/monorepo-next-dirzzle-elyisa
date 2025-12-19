@@ -1,17 +1,19 @@
-import { eq, and, count, desc, asc, SQL, SQLWrapper } from "drizzle-orm";
-import { db } from "../db/connection";
-import type { CommonRes } from "../utils/Res";
+import { and, asc, count, desc, eq } from "drizzle-orm";
+import type { db } from "../db/connection";
 
 export interface ServiceContext {
   db: typeof db;
   user: any;
 }
 
-export class BaseService<T extends Record<string, any>, C extends Record<string, any>> {
+export class BaseService<
+  T extends Record<string, any>,
+  C extends Record<string, any>,
+> {
   constructor(
     private table: T,
     private contract: C
-  ) {}
+  ) { }
 
   async findAll(query: any, context: ServiceContext) {
     const { db } = context;
@@ -33,7 +35,7 @@ export class BaseService<T extends Record<string, any>, C extends Record<string,
     // 添加搜索条件
     if (search) {
       // 假设所有表都有 name 字段，如果没有需要根据实际情况修改
-      if ('name' in this.table) {
+      if ("name" in this.table) {
         conditions.push((this.table as any).name.like(`%${search}%`));
       }
     }
@@ -66,21 +68,18 @@ export class BaseService<T extends Record<string, any>, C extends Record<string,
         .orderBy(orderBy)
         .limit(limit)
         .offset(offset),
-      db
-        .select({ count: count() })
-        .from(this.table)
-        .where(where)
+      db.select({ count: count() }).from(this.table).where(where),
     ]);
 
     const total = totalResult[0]?.count || 0;
 
-    return CommonRes.success({
+    return {
       data,
       total,
       page: Number(page),
       pageSize: Number(pageSize),
       totalPages: Math.ceil(total / Number(pageSize)),
-    });
+    };
   }
 
   async findById(id: string, context: ServiceContext) {
@@ -91,17 +90,14 @@ export class BaseService<T extends Record<string, any>, C extends Record<string,
       .where(eq((this.table as any).id, id))
       .limit(1);
 
-    return result[0] ? CommonRes.success(result[0]) : CommonRes.error("Not found");
+    return result[0] || null;
   }
 
   async create(body: any, context: ServiceContext) {
     const { db } = context;
-    const result = await db
-      .insert(this.table)
-      .values(body)
-      .returning();
+    const result = await db.insert(this.table).values(body).returning();
 
-    return CommonRes.success(result[0]);
+    return result[0] || null;
   }
 
   async update(id: string, body: any, context: ServiceContext) {
@@ -112,7 +108,7 @@ export class BaseService<T extends Record<string, any>, C extends Record<string,
       .where(eq((this.table as any).id, id))
       .returning();
 
-    return result[0] ? CommonRes.success(result[0]) : CommonRes.error("Not found");
+    return result[0] || null;
   }
 
   async delete(id: string, context: ServiceContext) {
@@ -122,6 +118,6 @@ export class BaseService<T extends Record<string, any>, C extends Record<string,
       .where(eq((this.table as any).id, id))
       .returning();
 
-    return result[0] ? CommonRes.success(result[0]) : CommonRes.error("Not found");
+    return result[0] || null;
   }
 }

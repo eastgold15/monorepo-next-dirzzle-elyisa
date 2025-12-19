@@ -1,6 +1,6 @@
 import { sitesTable } from "@repo/contract";
 import { SitesContract } from "@repo/contract";
-import { BaseService } from "../../../lib/base-service";
+import { BaseService } from "~/lib/base-service";
 
 export class SitesBaseService extends BaseService<typeof sitesTable, typeof SitesContract> {
     constructor() {

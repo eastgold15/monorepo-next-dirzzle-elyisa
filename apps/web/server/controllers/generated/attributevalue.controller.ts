@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { AttributeValueContract } from "@repo/contract";
-import { attributeValueService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { attributeValueService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const attributevalueController = new Elysia({ prefix: "/attributevalue" })
   .use(dbPlugin)

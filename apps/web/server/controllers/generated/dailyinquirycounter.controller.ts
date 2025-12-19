@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { DailyInquiryCounterContract } from "@repo/contract";
-import { dailyInquiryCounterService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { dailyInquiryCounterService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const dailyinquirycounterController = new Elysia({ prefix: "/dailyinquirycounter" })
   .use(dbPlugin)

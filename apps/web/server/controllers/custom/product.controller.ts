@@ -8,12 +8,11 @@ import {
 } from "@repo/contract";
 import { and, count, eq, exists, like, type SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes } from "@/server/utils/Res";
-import { buildPageMeta, paginate } from "@/server/utils/services/pagination";
+import { dbPlugin } from "~/db/connection";
+import { localeMiddleware } from "~/plugins/locale";
+import { buildPageMeta, paginate } from "~/utils/services/pagination";
 
-export const productRoute = new Elysia({ prefix: "product" })
+export const productController = new Elysia({ prefix: "/product" })
   .use(localeMiddleware)
   .use(dbPlugin)
   .get(
@@ -106,14 +105,10 @@ export const productRoute = new Elysia({ prefix: "product" })
         orderDirection,
       });
 
-      return commonRes(
-        {
-          items: paginatedData.items,
-          meta: buildPageMeta(paginatedData.total, page, limit),
-        },
-        200,
-        "获取商品列表成功"
-      );
+      return {
+        items: paginatedData.items,
+        meta: buildPageMeta(paginatedData.total, page, limit),
+      };
     },
     {
       query: ProductTModel.ListQuery,
@@ -175,7 +170,7 @@ export const productRoute = new Elysia({ prefix: "product" })
         throw new Error("商品不存在");
       }
 
-      return commonRes(product, 200, "获取商品详情成功");
+      return product;
     },
     {
       params: t.Object({
@@ -217,14 +212,10 @@ export const productRoute = new Elysia({ prefix: "product" })
 
       const totalRecords = totalRecordsResult[0]?.count || 0;
 
-      return commonRes(
-        {
-          data: products.map((p) => p.product),
-          ...buildPageMeta(totalRecords, page, limit),
-        },
-        200,
-        "获取分类商品成功"
-      );
+      return {
+        data: products.map((p) => p.product),
+        ...buildPageMeta(totalRecords, page, limit),
+      };
     },
     {
       params: t.Object({

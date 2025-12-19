@@ -1,9 +1,6 @@
-// 🛡️ 自动生成的 Service 索引
+// 🛡️ 自动生成的 B2B Service 索引
 import { CustomerBaseService } from "./generated/customer.service";
 export const customerService = new CustomerBaseService();
-
-import { MasterBaseService } from "./generated/master.service";
-export const masterService = new MasterBaseService();
 
 import { AccountBaseService } from "./generated/account.service";
 export const accountService = new AccountBaseService();
@@ -11,8 +8,8 @@ export const accountService = new AccountBaseService();
 import { AdsService } from "./custom/ads.service";
 export const adsService = new AdsService();
 
-import { AttributeBaseService } from "./generated/attribute.service";
-export const attributeService = new AttributeBaseService();
+import { AttributeService } from "./custom/attribute.service";
+export const attributeService = new AttributeService();
 
 import { AttributeTemplateBaseService } from "./generated/attributetemplate.service";
 export const attributeTemplateService = new AttributeTemplateBaseService();
@@ -37,6 +34,9 @@ export const inquiryItemsService = new InquiryItemsBaseService();
 
 import { InquiryBaseService } from "./generated/inquiry.service";
 export const inquiryService = new InquiryBaseService();
+
+import { MasterBaseService } from "./generated/master.service";
+export const masterService = new MasterBaseService();
 
 import { MediaMetadataBaseService } from "./generated/mediametadata.service";
 export const mediaMetadataService = new MediaMetadataBaseService();
@@ -98,8 +98,8 @@ export const sitesService = new SitesBaseService();
 import { SkuMediaBaseService } from "./generated/skumedia.service";
 export const skuMediaService = new SkuMediaBaseService();
 
-import { SkusBaseService } from "./generated/skus.service";
-export const skusService = new SkusBaseService();
+import { SkusService } from "./custom/skus.service";
+export const skusService = new SkusService();
 
 import { TranslationDictBaseService } from "./generated/translationdict.service";
 export const translationDictService = new TranslationDictBaseService();

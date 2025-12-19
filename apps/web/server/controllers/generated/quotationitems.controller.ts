@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { QuotationItemsContract } from "@repo/contract";
-import { quotationItemsService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { quotationItemsService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const quotationitemsController = new Elysia({ prefix: "/quotationitems" })
   .use(dbPlugin)

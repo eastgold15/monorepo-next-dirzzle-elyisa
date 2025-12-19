@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { PermissionContract } from "@repo/contract";
-import { permissionService } from "../modules/index";
-import { dbPlugin } from "../db/connection";
+import { permissionService } from "~/modules/index";
+import { dbPlugin } from "~/db/connection";
 
 export const permissionController = new Elysia({ prefix: "/permission" })
   .use(dbPlugin)
