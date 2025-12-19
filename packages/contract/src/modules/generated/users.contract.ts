@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
-import { usersTable } from "~/table.schema";
-import { PaginationParams, SortParams } from "~/helper/query-types.model";
+import { usersTable } from "../../table.schema";
+import { PaginationParams, SortParams } from "../../helper/query-types.model";
 
 const _Select = createSelectSchema(usersTable);
 const _Insert = createInsertSchema(usersTable);

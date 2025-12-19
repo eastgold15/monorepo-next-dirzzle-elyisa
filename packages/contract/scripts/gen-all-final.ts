@@ -84,8 +84,8 @@ function generate() {
     const contractContent = `
 import { t } from "elysia";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
-import { ${key} } from "~/table.schema";
-import { PaginationParams, SortParams } from "~/helper/query-types.model";
+import { ${key} } from "../../table.schema";
+import { PaginationParams, SortParams } from "../../helper/query-types.model";
 
 const _Select = createSelectSchema(${key});
 const _Insert = createInsertSchema(${key});
