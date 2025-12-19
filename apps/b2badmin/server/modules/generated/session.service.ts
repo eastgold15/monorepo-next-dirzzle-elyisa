@@ -1,4 +1,4 @@
-import { sessionTable } from "@repo/contract"; 
+import { sessionTable } from "@repo/contract";
 import { SessionContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

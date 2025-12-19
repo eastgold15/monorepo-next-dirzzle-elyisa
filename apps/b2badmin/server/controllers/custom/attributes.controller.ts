@@ -1,5 +1,5 @@
 import {
-  AttributeCustomContract,
+  AttributeContract,
   AttributeTemplateContract,
   AttributeValueContract,
   attributeTable,
@@ -67,7 +67,7 @@ export const attributesController = new Elysia({
       return attributeRes;
     },
     {
-      body: AttributeCustomContract.Create,
+      body: AttributeContract.Create,
       detail: {
         summary: "创建属性",
         description: "创建新的属性，可选择关联到模板",
@@ -121,7 +121,7 @@ export const attributesController = new Elysia({
       params: t.Object({
         id: t.String(),
       }),
-      body: AttributeCustomContract.Update,
+      body: AttributeContract.Update,
       detail: {
         summary: "更新属性",
         description: "更新属性信息",
@@ -283,7 +283,7 @@ export const attributesController = new Elysia({
       }));
     },
     {
-      query: AttributeCustomContract.ListQuery,
+      query: AttributeContract.ListQuery,
       detail: {
         summary: "获取属性列表",
         description: "分页获取属性列表，支持多条件筛选",
@@ -606,3 +606,5 @@ export const templatesController = new Elysia({
 export const productAttributeRoutes = new Elysia()
   .use(attributesController)
   .use(templatesController);
+
+

@@ -1,4 +1,4 @@
-import { translationDictTable } from "@repo/contract"; 
+import { translationDictTable } from "@repo/contract";
 import { TranslationDictContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

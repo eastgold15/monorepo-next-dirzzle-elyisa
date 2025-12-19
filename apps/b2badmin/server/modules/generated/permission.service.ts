@@ -1,4 +1,4 @@
-import { permissionTable } from "@repo/contract"; 
+import { permissionTable } from "@repo/contract";
 import { PermissionContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

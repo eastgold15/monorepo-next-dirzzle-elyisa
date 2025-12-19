@@ -1,4 +1,4 @@
-import { accountTable } from "@repo/contract"; 
+import { accountTable } from "@repo/contract";
 import { AccountContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

@@ -1,4 +1,4 @@
-import { sitesTable } from "@repo/contract"; 
+import { sitesTable } from "@repo/contract";
 import { SitesContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

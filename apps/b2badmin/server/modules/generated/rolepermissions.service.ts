@@ -1,4 +1,4 @@
-import { rolePermissionsTable } from "@repo/contract"; 
+import { rolePermissionsTable } from "@repo/contract";
 import { RolePermissionsContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

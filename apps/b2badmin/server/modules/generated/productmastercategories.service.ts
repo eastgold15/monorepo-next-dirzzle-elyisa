@@ -1,4 +1,4 @@
-import { productMasterCategoriesTable } from "@repo/contract"; 
+import { productMasterCategoriesTable } from "@repo/contract";
 import { ProductMasterCategoriesContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

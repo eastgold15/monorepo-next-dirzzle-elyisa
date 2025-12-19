@@ -1,4 +1,4 @@
-import { dailyInquiryCounterTable } from "@repo/contract"; 
+import { dailyInquiryCounterTable } from "@repo/contract";
 import { DailyInquiryCounterContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

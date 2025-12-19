@@ -1,4 +1,4 @@
-import { mediaTable } from "@repo/contract"; 
+import { mediaTable } from "@repo/contract";
 import { MediaContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

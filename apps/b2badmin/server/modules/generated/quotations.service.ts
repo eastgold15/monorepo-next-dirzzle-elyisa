@@ -1,4 +1,4 @@
-import { quotationsTable } from "@repo/contract"; 
+import { quotationsTable } from "@repo/contract";
 import { QuotationsContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

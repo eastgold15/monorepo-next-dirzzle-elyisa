@@ -46,26 +46,26 @@ export const productsController = new Elysia({
       const templateMap = new Map();
 
       for (const row of templates) {
-        if (!templateMap.has(row.attribute_template.id)) {
-          templateMap.set(row.attribute_template.id, {
-            id: row.attribute_template.id,
-            name: row.attribute_template.name,
-            categoryId: row.attribute_template.categoryId,
+        if (!templateMap.has(row.attribute_templates.id)) {
+          templateMap.set(row.attribute_templates.id, {
+            id: row.attribute_templates.id,
+            name: row.attribute_templates.name,
+            categoryId: row.attribute_templates.categoryId,
             categoryName: null,
             fields: [],
           });
         }
 
-        if (row.attribute) {
-          const template = templateMap.get(row.attribute_template.id);
+        if (row.attributes_table) {
+          const template = templateMap.get(row.attribute_templates.id);
           template.fields.push({
-            id: row.attribute.id,
-            name: row.attribute.name,
-            code: row.attribute.code,
-            type: row.attribute.inputType,
-            isRequired: row.attribute.isRequired,
-            isSkuSpec: row.attribute.isSaleAttr,
-            sortOrder: row.attribute.sortOrder,
+            id: row.attributes_table.id,
+            name: row.attributes_table.name,
+            code: row.attributes_table.code,
+            type: row.attributes_table.inputType,
+            isRequired: row.attributes_table.isRequired,
+            isSkuSpec: row.attributes_table.isSaleAttr,
+            sortOrder: row.attributes_table.sortOrder,
           });
         }
       }
@@ -80,8 +80,8 @@ export const productsController = new Elysia({
             .where(
               inArray(
                 attributeValueTable.attributeId,
-                Array.from(templateMap.values()).flatMap((t) =>
-                  t.fields.map((f) => f.id)
+                Array.from(templateMap.values()).flatMap((t: any) =>
+                  t.fields.map((f: any) => f.id)
                 )
               )
             )
@@ -328,7 +328,7 @@ export const productsController = new Elysia({
           or(
             like(productsTable.name, `%${search}%`),
             like(productsTable.spuCode, `%${search}%`)
-          )
+          )!
         );
       }
 
@@ -447,7 +447,7 @@ export const productsController = new Elysia({
     "/:id",
     ({ params, permissions, auth }) => {
       if (!permissions.includes("PRODUCTS_VIEW")) throw new Error("Forbidden");
-      return productsService.findById(params.id, auth);
+      return productsService.findOne(params.id, auth);
     },
     {
       params: t.Object({ id: t.String() }),

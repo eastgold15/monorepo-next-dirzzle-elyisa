@@ -1,4 +1,4 @@
-import { attributeValueTable } from "@repo/contract"; 
+import { attributeValueTable } from "@repo/contract";
 import { AttributeValueContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

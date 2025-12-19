@@ -1,4 +1,4 @@
-import { heroCardsTable } from "@repo/contract"; 
+import { heroCardsTable } from "@repo/contract";
 import { HeroCardsContract } from "@repo/contract";
 import { BaseService } from "~/lib/base-service";
 

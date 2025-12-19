@@ -77,8 +77,8 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
               skuCode: sku.skuCode,
               productId,
               siteId: currentSite.id,
-              price: sku.price,
-              stock: sku.stock || "0",
+              price: String(sku.price),
+              stock: String(sku.stock || "0"),
               specJson: JSON.stringify(sku.specJson),
               status: 1,
             }))
@@ -132,7 +132,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
   .post(
     "/",
     async ({ body, db, user, role }) => {
-      const { productId, mediaId, ...skuData } = body;
+      const { productId, mediaId, attributeValues, ...skuData } = body;
 
       // 验证商品是否存在
       const [product] = await db
@@ -204,6 +204,16 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
             mediaId,
           });
         }
+
+        // TODO: 实现SKU属性值存储功能（需要创建 skus_values_table）
+        // if (attributeValues && attributeValues.length > 0) {
+        //   const skuValuesData = attributeValues.map((attrValue: any) => ({
+        //     skuId: sku.id,
+        //     attributeId: attrValue.attributeId,
+        //     value: attrValue.value,
+        //   }));
+        //   await tx.insert(skusValuesTable).values(skuValuesData);
+        // }
 
         return sku;
       });
@@ -638,9 +648,22 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
         .where(eq(skuMediaTable.skuId, sku.id))
         .orderBy(skuMediaTable.sortOrder);
 
+      // TODO: 获取属性值（需要创建 skus_values_table）
+      // const values = await db
+      //   .select({
+      //     attributeId: skusValuesTable.attributeId,
+      //     value: skusValuesTable.value,
+      //   })
+      //   .from(skusValuesTable)
+      //   .where(eq(skusValuesTable.skuId, sku.id));
+
       return {
         ...sku,
-        productName: product?.name || "",
+        product: product ? {
+          id: sku.productId,
+          name: product.name,
+        } : null,
+        values: [], // 暂时返回空数组
         images: images.filter((img) => img.url), // 过滤掉没有URL的图片
         mainImage: images.find((img) => img.isMain) || images[0] || null, // 主图或第一张图
         specJson: sku.specJson ? JSON.parse(sku.specJson) : null,
