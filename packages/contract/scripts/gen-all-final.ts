@@ -270,7 +270,7 @@ export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
   });
 `.trim();
 
-    fs.writeFileSync(path.join(WEB_CONTROLLER_GEN_DIR, `${lowName}.controller.ts`), webControllerContent + "\n");
+    fs.writeFileSync(path.join(WEB_CONTROLLER_GEN_DIR, `${lowName}.controller.ts`), `${webControllerContent}\n`);
   });
 
   // --- 6. 生成统一索引 (带 Custom 覆盖逻辑) ---
