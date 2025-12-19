@@ -182,7 +182,7 @@ export const exportersTable = p.pgTable("exporters", {
   isVerified: p.boolean("is_verified").default(false).notNull(),
 });
 
-export const MasterTable = p.pgTable("master_categories", {
+export const masterTable = p.pgTable("master_categories", {
   id: idUuid,
   name: p.varchar("name", { length: 255 }).notNull(),
   slug: p.varchar("slug", { length: 100 }).notNull().unique(),
@@ -272,7 +272,7 @@ export const salespersonCategoriesTable = p.pgTable(
     categoryId: p
       .uuid("category_id")
       .notNull()
-      .references(() => MasterTable.id, { onDelete: "cascade" }),
+      .references(() => masterTable.id, { onDelete: "cascade" }),
   },
   (t) => [p.primaryKey({ columns: [t.salespersonId, t.categoryId] })]
 );
@@ -357,7 +357,7 @@ export const productMasterCategoriesTable = p.pgTable(
     categoryId: p
       .uuid("category_id")
       .notNull()
-      .references(() => MasterTable.id),
+      .references(() => masterTable.id),
   },
   (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
 );
@@ -384,7 +384,7 @@ export const attributeTemplateTable = p.pgTable("attribute_templates", {
   categoryId: p
     .uuid("category_id")
     .notNull()
-    .references(() => MasterTable.id),
+    .references(() => masterTable.id),
 });
 
 export const attributeTable = p.pgTable("attributes_table", {
@@ -408,7 +408,6 @@ export const attributeValueTable = p.pgTable("attribute_values_table", {
     .notNull()
     .references(() => attributeTable.id),
   value: p.varchar("value", { length: 100 }).notNull(),
-  valueCode: p.varchar("value_code", { length: 50 }).notNull(),
   sortOrder: p.integer("sort_order").default(0),
 });
 
@@ -613,7 +612,7 @@ export const siteCategoriesTable = p.pgTable("site_categories", {
     onUpdate: "cascade",
   }).notNull(),
   // 分类可以关联到全局分类（可选，用于数据聚合）
-  masterCategoryId: p.uuid("master_category_id").references(() => MasterTable.id, {
+  masterCategoryId: p.uuid("master_category_id").references(() => masterTable.id, {
     onDelete: "set null",
     onUpdate: "cascade",
   }),

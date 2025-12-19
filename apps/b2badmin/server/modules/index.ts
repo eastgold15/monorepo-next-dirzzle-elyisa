@@ -86,8 +86,8 @@ export const sessionService = new SessionBaseService();
 import { SiteCategoriesBaseService } from "./generated/sitecategories.service";
 export const siteCategoriesService = new SiteCategoriesBaseService();
 
-import { SiteConfigBaseService } from "./generated/siteconfig.service";
-export const siteConfigService = new SiteConfigBaseService();
+import { SiteConfigService } from "./custom/siteconfig.service";
+export const siteConfigService = new SiteConfigService();
 
 import { SiteProductsBaseService } from "./generated/siteproducts.service";
 export const siteProductsService = new SiteProductsBaseService();

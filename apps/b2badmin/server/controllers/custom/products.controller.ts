@@ -1,30 +1,29 @@
 import {
+  attributeTable,
+  attributeTemplateTable,
+  attributeValueTable,
+  mediaTable,
+  ProductsContract,
   productMasterCategoriesTable,
   productMediaTable,
   productsTable,
   productTemplateTable,
+  siteCategoriesTable,
   siteProductsTable,
 } from "@repo/contract";
-import { and, desc, eq, inArray, like, or } from "drizzle-orm";
+import { and, eq, inArray, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "~/db/connection";
-import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
-import { localeMiddleware } from "~/plugins/locale";
+import { authGuardMid } from "~/middleware/auth";
+import { productsService } from "~/modules/index";
 
-/**
- * 商品管理接口
- * 支持站点隔离和模板绑定
- * 提供商品的增删改查功能
- */
-export const productRoute = new Elysia({
-  name: "product",
-  prefix: "/product",
-  tags: ["商品管理"],
+export const productsController = new Elysia({
+  prefix: "/products",
+  tags: ["Products"],
 })
+  .use(authGuardMid)
   .use(dbPlugin)
-  .use(adminAuthPlugin)
-  .use(localeMiddleware)
 
   // 获取所有可用的模板
   .get(
@@ -32,53 +31,85 @@ export const productRoute = new Elysia({
     async ({ query, db }) => {
       const { search } = query || {};
 
-      // 获取所有模板
-      const templates = await db.query.attributeTemplateTable.findMany({
-        where: {
-          name: {
-            like: `%${search}%`,
-          },
-        },
-        with: {
-          category: {
-            columns: {
-              id: true,
-              name: true,
-            },
-          },
-          attributes: {
-            with: {
-              values: {
-                orderBy: (values, { asc }) => [asc(values.sortOrder)],
-              },
-            },
-            orderBy: (attributes, { asc }) => [asc(attributes.sortOrder)],
-          },
-        },
-      });
+      const templates = await db
+        .select()
+        .from(attributeTemplateTable)
+        .where(
+          search ? like(attributeTemplateTable.name, `%${search}%`) : undefined
+        )
+        .leftJoin(
+          attributeTable,
+          eq(attributeTemplateTable.id, attributeTable.templateId)
+        );
 
-      return templates.map((template) => ({
-        id: template.id,
-        name: template.name,
-        categoryId: template.categoryId,
-        categoryName: template.category?.name || "",
-        fields: template.attributes.map((attr) => ({
-          id: attr.id,
-          name: attr.name,
-          code: attr.code,
-          type: attr.inputType,
-          isRequired: attr.isRequired,
-          isSkuSpec: attr.isSaleAttr,
-          options: attr.values?.map((v) => v.value) || [],
-          sortOrder: attr.sortOrder,
-        })),
-      }));
+      // 按模板分组
+      const templateMap = new Map();
+
+      for (const row of templates) {
+        if (!templateMap.has(row.attribute_template.id)) {
+          templateMap.set(row.attribute_template.id, {
+            id: row.attribute_template.id,
+            name: row.attribute_template.name,
+            categoryId: row.attribute_template.categoryId,
+            categoryName: null,
+            fields: [],
+          });
+        }
+
+        if (row.attribute) {
+          const template = templateMap.get(row.attribute_template.id);
+          template.fields.push({
+            id: row.attribute.id,
+            name: row.attribute.name,
+            code: row.attribute.code,
+            type: row.attribute.inputType,
+            isRequired: row.attribute.isRequired,
+            isSkuSpec: row.attribute.isSaleAttr,
+            sortOrder: row.attribute.sortOrder,
+          });
+        }
+      }
+
+      // 为每个模板获取属性值
+      const templateIds = Array.from(templateMap.keys());
+      const attributeValues =
+        templateIds.length > 0
+          ? await db
+            .select()
+            .from(attributeValueTable)
+            .where(
+              inArray(
+                attributeValueTable.attributeId,
+                Array.from(templateMap.values()).flatMap((t) =>
+                  t.fields.map((f) => f.id)
+                )
+              )
+            )
+          : [];
+
+      // 构建属性值映射
+      const valueMap = new Map();
+      for (const value of attributeValues) {
+        if (!valueMap.has(value.attributeId)) {
+          valueMap.set(value.attributeId, []);
+        }
+        valueMap.get(value.attributeId).push(value.value);
+      }
+
+      // 补充 options
+      for (const template of templateMap.values()) {
+        for (const field of template.fields) {
+          field.options = valueMap.get(field.id) || [];
+        }
+      }
+
+      return Array.from(templateMap.values());
     },
     {
-      auth: true,
       detail: {
         summary: "获取所有可用模板",
         description: "获取系统中所有可用的属性模板列表（全局公用）",
+        tags: ["Products"],
       },
       query: t.Optional(
         t.Object({
@@ -116,12 +147,16 @@ export const productRoute = new Elysia({
 
       const result = await db.transaction(async (tx) => {
         // 1. 验证站点分类
-        const siteCategory = await tx.query.siteCategoriesTable.findFirst({
-          where: {
-            id: siteCategoryId,
-            siteId: currentSite.id,
-          },
-        });
+        const [siteCategory] = await tx
+          .select()
+          .from(siteCategoriesTable)
+          .where(
+            and(
+              eq(siteCategoriesTable.id, siteCategoryId),
+              eq(siteCategoriesTable.siteId, currentSite.id)
+            )
+          )
+          .limit(1);
 
         if (!siteCategory) {
           throw new HttpError.NotFound("站点分类不存在");
@@ -129,9 +164,11 @@ export const productRoute = new Elysia({
 
         // 2. 验证模板（如果提供）
         if (templateId) {
-          const template = await tx.query.attributeTemplateTable.findFirst({
-            where: { id: templateId },
-          });
+          const [template] = await tx
+            .select()
+            .from(attributeTemplateTable)
+            .where(eq(attributeTemplateTable.id, templateId))
+            .limit(1);
 
           if (!template) {
             throw new HttpError.NotFound("模板不存在");
@@ -177,12 +214,15 @@ export const productRoute = new Elysia({
         // 6. 关联图片（简化版，只需传递图片ID）
         if (imageIds && imageIds.length > 0) {
           // 验证图片是否存在且属于当前站点
-          const existingImages = await tx.query.mediaTable.findMany({
-            where: {
-              id: { in: imageIds },
-              siteId: currentSite.id,
-            },
-          });
+          const existingImages = await db
+            .select()
+            .from(mediaTable)
+            .where(
+              and(
+                inArray(mediaTable.id, imageIds),
+                eq(mediaTable.siteId, currentSite.id)
+              )
+            );
 
           const foundIds = existingImages.map((img) => img.id);
           const notFound = imageIds.filter((id) => !foundIds.includes(id));
@@ -233,12 +273,6 @@ export const productRoute = new Elysia({
       };
     },
     {
-      auth: true,
-      detail: {
-        summary: "创建商品",
-        description: "创建新商品并绑定到站点分类，支持选择模板",
-        tags: ["商品管理"],
-      },
       body: t.Object({
         // 商品基础信息
         name: t.String({ minLength: 1, maxLength: 255 }),
@@ -263,6 +297,11 @@ export const productRoute = new Elysia({
         imageIds: t.Optional(t.Array(t.String({ format: "uuid" }))),
         mainImageId: t.Optional(t.String({ format: "uuid" })),
       }),
+      detail: {
+        summary: "创建商品",
+        description: "创建新商品并绑定到站点分类，支持选择模板",
+        tags: ["Products"],
+      },
     }
   )
 
@@ -279,7 +318,7 @@ export const productRoute = new Elysia({
       }
 
       // 构建查询条件
-      const conditions: any[] = [
+      const conditions = [
         eq(siteProductsTable.siteId, currentSite.id),
         eq(siteProductsTable.isVisible, true),
       ];
@@ -298,7 +337,7 @@ export const productRoute = new Elysia({
       }
 
       // 查询数据
-      const baseQuery = db
+      const result = await db
         .select({
           id: productsTable.id,
           name: productsTable.name,
@@ -318,31 +357,27 @@ export const productRoute = new Elysia({
           eq(siteProductsTable.productId, productsTable.id)
         )
         .limit(Number(limit))
-        .orderBy(desc(productsTable.createdAt))
+        .offset((page - 1) * limit)
         .where(and(...conditions));
-
-      // 分页
-      const result = await baseQuery;
 
       return result;
     },
     {
-      auth: true,
-      detail: {
-        summary: "获取商品列表",
-        description: "获取当前站点的商品列表",
-        tags: ["商品管理"],
-      },
       query: t.Object({
         page: t.Optional(t.Number()),
         limit: t.Optional(t.Number()),
         search: t.Optional(t.String()),
         categoryId: t.Optional(t.String()),
       }),
+      detail: {
+        summary: "获取商品列表",
+        description: "获取当前站点的商品列表",
+        tags: ["Products"],
+      },
     }
   )
 
-  // 删除商品（批量）
+  // 批量删除商品
   .delete(
     "/",
     async ({ body: { ids }, db, currentSite }) => {
@@ -352,12 +387,15 @@ export const productRoute = new Elysia({
 
       await db.transaction(async (tx) => {
         // 1. 验证商品是否属于当前站点
-        const siteProducts = await tx.query.siteProductsTable.findMany({
-          where: {
-            productId: { in: ids },
-            siteId: currentSite.id,
-          },
-        });
+        const siteProducts = await db
+          .select()
+          .from(siteProductsTable)
+          .where(
+            and(
+              inArray(siteProductsTable.productId, ids),
+              eq(siteProductsTable.siteId, currentSite.id)
+            )
+          );
 
         if (siteProducts.length !== ids.length) {
           throw new HttpError.Forbidden("部分商品不属于当前站点");
@@ -393,14 +431,64 @@ export const productRoute = new Elysia({
       return { message: "删除成功" };
     },
     {
-      auth: true,
-      detail: {
-        summary: "批量删除商品",
-        description: "删除属于当前站点的商品",
-        tags: ["商品管理"],
-      },
       body: t.Object({
         ids: t.Array(t.String()),
       }),
+      detail: {
+        summary: "批量删除商品",
+        description: "删除属于当前站点的商品",
+        tags: ["Products"],
+      },
+    }
+  )
+
+  // 标准的 CRUD 操作
+  .get(
+    "/:id",
+    ({ params, permissions, auth }) => {
+      if (!permissions.includes("PRODUCTS_VIEW")) throw new Error("Forbidden");
+      return productsService.findById(params.id, auth);
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "获取商品详情",
+        description: "获取指定商品的详细信息",
+        tags: ["Products"],
+      },
+    }
+  )
+
+  .patch(
+    "/:id",
+    ({ params, body, permissions, auth }) => {
+      if (!permissions.includes("PRODUCTS_EDIT")) throw new Error("Forbidden");
+      return productsService.update(params.id, body, auth);
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      body: ProductsContract.Patch,
+      detail: {
+        summary: "更新商品信息",
+        description: "更新商品的基本信息",
+        tags: ["Products"],
+      },
+    }
+  )
+
+  .delete(
+    "/:id",
+    ({ params, permissions, auth }) => {
+      if (!permissions.includes("PRODUCTS_DELETE"))
+        throw new Error("Forbidden");
+      return productsService.delete(params.id, auth);
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "删除商品",
+        description: "删除指定的商品",
+        tags: ["Products"],
+      },
     }
   );

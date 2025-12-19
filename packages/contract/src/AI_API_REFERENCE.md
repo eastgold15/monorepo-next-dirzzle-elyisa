@@ -1,650 +1,1448 @@
-# 全栈 API 契约速查表 (AI 专用)
+# 🤖 全栈 API 契约速查表 (AI 专用)
 
-> 提示 AI：请在编写任何 API 请求或组件时参考此文档，确保字段与后端契约 100% 一致。
+> 此文档由脚本深度解析 TypeBox 组合逻辑生成。AI 请参考此结构构建请求。
 
 ## 模块: ACCOUNT
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createaccount)
-- [ ] **PATCH** (Updateaccount)
-- [ ] **GET** (Listaccount)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: accountTable` | `Database` | Update | 直接映射自数据库表 accountTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: ADS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createads)
-- [ ] **PATCH** (Updateads)
-- [ ] **GET** (Listads)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: adsTable` | `Database` | Update | 直接映射自数据库表 adsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: ATTRIBUTE
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createattribute)
-- [ ] **PATCH** (Updateattribute)
-- [ ] **GET** (Listattribute)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: attributeTable` | `Database` | Update | 直接映射自数据库表 attributeTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: ATTRIBUTETEMPLATE
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createattributetemplate)
-- [ ] **PATCH** (Updateattributetemplate)
-- [ ] **GET** (Listattributetemplate)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: attributeTemplateTable` | `Database` | Update | 直接映射自数据库表 attributeTemplateTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: ATTRIBUTEVALUE
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createattributevalue)
-- [ ] **PATCH** (Updateattributevalue)
-- [ ] **GET** (Listattributevalue)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: attributeValueTable` | `Database` | Update | 直接映射自数据库表 attributeValueTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: CUSTOMER
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createcustomer)
-- [ ] **PATCH** (Updatecustomer)
-- [ ] **GET** (Listcustomer)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: CustomerTable` | `Database` | Update | 直接映射自数据库表 CustomerTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: DAILYINQUIRYCOUNTER
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createdailyinquirycounter)
-- [ ] **PATCH** (Updatedailyinquirycounter)
-- [ ] **GET** (Listdailyinquirycounter)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: dailyInquiryCounterTable` | `Database` | Update | 直接映射自数据库表 dailyInquiryCounterTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: EXPORTERS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createexporters)
-- [ ] **PATCH** (Updateexporters)
-- [ ] **GET** (Listexporters)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: exportersTable` | `Database` | Update | 直接映射自数据库表 exportersTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: FACTORIES
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createfactories)
-- [ ] **PATCH** (Updatefactories)
-- [ ] **GET** (Listfactories)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: factoriesTable` | `Database` | Update | 直接映射自数据库表 factoriesTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: HEROCARDS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createherocards)
-- [ ] **PATCH** (Updateherocards)
-- [ ] **GET** (Listherocards)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: heroCardsTable` | `Database` | Update | 直接映射自数据库表 heroCardsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: INQUIRY
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createinquiry)
-- [ ] **PATCH** (Updateinquiry)
-- [ ] **GET** (Listinquiry)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: inquiryTable` | `Database` | Update | 直接映射自数据库表 inquiryTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: INQUIRYITEMS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createinquiryitems)
-- [ ] **PATCH** (Updateinquiryitems)
-- [ ] **GET** (Listinquiryitems)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: inquiryItemsTable` | `Database` | Update | 直接映射自数据库表 inquiryItemsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: MASTER
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createmaster)
-- [ ] **PATCH** (Updatemaster)
-- [ ] **GET** (Listmaster)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: MasterTable` | `Database` | Update | 直接映射自数据库表 MasterTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: MEDIA
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createmedia)
-- [ ] **PATCH** (Updatemedia)
-- [ ] **GET** (Listmedia)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: mediaTable` | `Database` | Update | 直接映射自数据库表 mediaTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: MEDIAMETADATA
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createmediametadata)
-- [ ] **PATCH** (Updatemediametadata)
-- [ ] **GET** (Listmediametadata)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: mediaMetadataTable` | `Database` | Update | 直接映射自数据库表 mediaMetadataTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: PERMISSION
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createpermission)
-- [ ] **PATCH** (Updatepermission)
-- [ ] **GET** (Listpermission)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: permissionTable` | `Database` | Update | 直接映射自数据库表 permissionTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: PRODUCTMASTERCATEGORIES
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createproductmastercategories)
-- [ ] **PATCH** (Updateproductmastercategories)
-- [ ] **GET** (Listproductmastercategories)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: productMasterCategoriesTable` | `Database` | Update | 直接映射自数据库表 productMasterCategoriesTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: PRODUCTMEDIA
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createproductmedia)
-- [ ] **PATCH** (Updateproductmedia)
-- [ ] **GET** (Listproductmedia)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: productMediaTable` | `Database` | Update | 直接映射自数据库表 productMediaTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: PRODUCTS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createproducts)
-- [ ] **PATCH** (Updateproducts)
-- [ ] **GET** (Listproducts)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: productsTable` | `Database` | Update | 直接映射自数据库表 productsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: PRODUCTTEMPLATE
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createproducttemplate)
-- [ ] **PATCH** (Updateproducttemplate)
-- [ ] **GET** (Listproducttemplate)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: productTemplateTable` | `Database` | Update | 直接映射自数据库表 productTemplateTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: QUOTATIONITEMS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createquotationitems)
-- [ ] **PATCH** (Updatequotationitems)
-- [ ] **GET** (Listquotationitems)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: quotationItemsTable` | `Database` | Update | 直接映射自数据库表 quotationItemsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: QUOTATIONS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createquotations)
-- [ ] **PATCH** (Updatequotations)
-- [ ] **GET** (Listquotations)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: quotationsTable` | `Database` | Update | 直接映射自数据库表 quotationsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: ROLE
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createrole)
-- [ ] **PATCH** (Updaterole)
-- [ ] **GET** (Listrole)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: roleTable` | `Database` | Update | 直接映射自数据库表 roleTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: ROLEPERMISSIONS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createrolepermissions)
-- [ ] **PATCH** (Updaterolepermissions)
-- [ ] **GET** (Listrolepermissions)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: rolePermissionsTable` | `Database` | Update | 直接映射自数据库表 rolePermissionsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SALESPERSONAFFILIATIONS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsalespersonaffiliations)
-- [ ] **PATCH** (Updatesalespersonaffiliations)
-- [ ] **GET** (Listsalespersonaffiliations)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: salespersonAffiliationsTable` | `Database` | Update | 直接映射自数据库表 salespersonAffiliationsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SALESPERSONCATEGORIES
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsalespersoncategories)
-- [ ] **PATCH** (Updatesalespersoncategories)
-- [ ] **GET** (Listsalespersoncategories)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: salespersonCategoriesTable` | `Database` | Update | 直接映射自数据库表 salespersonCategoriesTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SALESPERSONS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsalespersons)
-- [ ] **PATCH** (Updatesalespersons)
-- [ ] **GET** (Listsalespersons)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: salespersonsTable` | `Database` | Update | 直接映射自数据库表 salespersonsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SESSION
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsession)
-- [ ] **PATCH** (Updatesession)
-- [ ] **GET** (Listsession)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: sessionTable` | `Database` | Update | 直接映射自数据库表 sessionTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SITECATEGORIES
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsitecategories)
-- [ ] **PATCH** (Updatesitecategories)
-- [ ] **GET** (Listsitecategories)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: siteCategoriesTable` | `Database` | Update | 直接映射自数据库表 siteCategoriesTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SITECONFIG
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsiteconfig)
-- [ ] **PATCH** (Updatesiteconfig)
-- [ ] **GET** (Listsiteconfig)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: siteConfigTable` | `Database` | Update | 直接映射自数据库表 siteConfigTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SITEPRODUCTS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsiteproducts)
-- [ ] **PATCH** (Updatesiteproducts)
-- [ ] **GET** (Listsiteproducts)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: siteProductsTable` | `Database` | Update | 直接映射自数据库表 siteProductsTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SITES
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createsites)
-- [ ] **PATCH** (Updatesites)
-- [ ] **GET** (Listsites)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: sitesTable` | `Database` | Update | 直接映射自数据库表 sitesTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SKUMEDIA
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createskumedia)
-- [ ] **PATCH** (Updateskumedia)
-- [ ] **GET** (Listskumedia)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: skuMediaTable` | `Database` | Update | 直接映射自数据库表 skuMediaTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: SKUS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createskus)
-- [ ] **PATCH** (Updateskus)
-- [ ] **GET** (Listskus)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: skusTable` | `Database` | Update | 直接映射自数据库表 skusTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: TRANSLATIONDICT
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createtranslationdict)
-- [ ] **PATCH** (Updatetranslationdict)
-- [ ] **GET** (Listtranslationdict)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: translationDictTable` | `Database` | Update | 直接映射自数据库表 translationDictTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: USERS
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createusers)
-- [ ] **PATCH** (Updateusers)
-- [ ] **GET** (Listusers)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: usersTable` | `Database` | Update | 直接映射自数据库表 usersTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: USERSITEROLES
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createusersiteroles)
-- [ ] **PATCH** (Updateusersiteroles)
-- [ ] **GET** (Listusersiteroles)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: userSiteRolesTable` | `Database` | Update | 直接映射自数据库表 userSiteRolesTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---
 ## 模块: VERIFICATION
-### 可用字段与约束:
-```typescript
-  Create: Omit
-  Update: Partial
-  ListQuery: Object
-  search: Optional
-  ListResponse: Object
-  data: Array
-  total: Number
-```
 
-- [ ] **POST** (Createverification)
-- [ ] **PATCH** (Updateverification)
-- [ ] **GET** (Listverification)
+### 🏷️ Response
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Ref: _Select` | `Schema` | 原样 | 引用内部预定义的 Schema |
+
+### 🏷️ Create
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: _Insert` | `Schema` | Omit | 对基础 Schema 进行 Omit 处理 |
+
+### 🏷️ Update
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Table: verificationTable` | `Database` | Update | 直接映射自数据库表 verificationTable |
+
+### 🏷️ Patch
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Base: t.Omit(_Insert` | `Schema` | Partial | 对基础 Schema 进行 Partial 处理 |
+
+### 🏷️ ListQuery
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `Inherit: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"]))` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
+| `search` | `Optional` | 可选 | t.Optional(t.String()) |
+
+### 🏷️ ListResponse
+| 来源/字段 | 类型 | 状态 | 详细说明 |
+| :--- | :--- | :--- | :--- |
+| `data` | `Array` | 必填 | t.Array(_Select) |
+| `total` | `Number` | 必填 | t.Number() |
+
 
 ---

@@ -1,5 +1,4 @@
-import { roleTable, sitesTable, UserSiteRolesContract, userSiteRolesTable } from "@repo/contract";
-import { eq } from "drizzle-orm";
+import { UserSiteRolesContract, userSiteRolesTable } from "@repo/contract";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "~/db/connection";
@@ -10,65 +9,87 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .use(authGuardMid)
   .use(dbPlugin)
 
-
   // 获取用户在站点中的角色列表
-  .get("/", ({ query, permissions, auth }) => {
-    if (!permissions.includes("USERSITEROLES_VIEW")) throw new Error("Forbidden");
-    return userSiteRolesService.findAll(query, auth);
-  }, {
-    query: UserSiteRolesContract.ListQuery,
-    detail: {
-      summary: "获取用户站点角色列表",
-      description: "分页获取用户在各个站点中的角色分配列表，支持按用户ID、站点ID、角色ID筛选",
-      tags: ["UserSiteRoles"],
+  .get(
+    "/",
+    ({ query, permissions, auth }) => {
+      if (!permissions.includes("USERSITEROLES_VIEW"))
+        throw new Error("Forbidden");
+      return userSiteRolesService.findAll(query, auth);
     },
-  })
+    {
+      query: UserSiteRolesContract.ListQuery,
+      detail: {
+        summary: "获取用户站点角色列表",
+        description:
+          "分页获取用户在各个站点中的角色分配列表，支持按用户ID、站点ID、角色ID筛选",
+        tags: ["UserSiteRoles"],
+      },
+    }
+  )
 
   // 分配用户到站点角色
-  .post("/", ({ body, permissions, auth, db }) => {
-    if (!permissions.includes("USERSITEROLES_CREATE")) throw new Error("Forbidden");
-    return userSiteRolesService.create(body, auth);
-  }, {
-    body: UserSiteRolesContract.Create,
-    detail: {
-      summary: "分配用户站点角色",
-      description: "将用户分配到指定站点，并授予相应的角色权限",
-      tags: ["UserSiteRoles"],
+  .post(
+    "/",
+    ({ body, permissions, auth, db }) => {
+      if (!permissions.includes("USERSITEROLES_CREATE"))
+        throw new Error("Forbidden");
+      return userSiteRolesService.create(body, auth);
     },
-  })
+    {
+      body: UserSiteRolesContract.Create,
+      detail: {
+        summary: "分配用户站点角色",
+        description: "将用户分配到指定站点，并授予相应的角色权限",
+        tags: ["UserSiteRoles"],
+      },
+    }
+  )
 
   // 更新用户站点角色
-  .patch("/:id", ({ params, body, permissions, auth }) => {
-    if (!permissions.includes("USERSITEROLES_EDIT")) throw new Error("Forbidden");
-    return userSiteRolesService.update(params.id, body, auth);
-  }, {
-    params: t.Object({ id: t.String() }),
-    body: UserSiteRolesContract.Patch,
-    detail: {
-      summary: "更新用户站点角色",
-      description: "更新用户在站点中的角色信息，如更改角色或权限级别",
-      tags: ["UserSiteRoles"],
+  .patch(
+    "/:id",
+    ({ params, body, permissions, auth }) => {
+      if (!permissions.includes("USERSITEROLES_EDIT"))
+        throw new Error("Forbidden");
+      return userSiteRolesService.update(params.id, body, auth);
     },
-  })
+    {
+      params: t.Object({ id: t.String() }),
+      body: UserSiteRolesContract.Patch,
+      detail: {
+        summary: "更新用户站点角色",
+        description: "更新用户在站点中的角色信息，如更改角色或权限级别",
+        tags: ["UserSiteRoles"],
+      },
+    }
+  )
 
   // 取消用户站点角色分配
-  .delete("/:id", ({ params, permissions, auth }) => {
-    if (!permissions.includes("USERSITEROLES_DELETE")) throw new Error("Forbidden");
-    return userSiteRolesService.delete(params.id, auth);
-  }, {
-    params: t.Object({ id: t.String() }),
-    detail: {
-      summary: "取消用户站点角色",
-      description: "取消用户在指定站点中的角色分配，用户将失去该站点的访问权限",
-      tags: ["UserSiteRoles"],
+  .delete(
+    "/:id",
+    ({ params, permissions, auth }) => {
+      if (!permissions.includes("USERSITEROLES_DELETE"))
+        throw new Error("Forbidden");
+      return userSiteRolesService.delete(params.id, auth);
     },
-  })
+    {
+      params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "取消用户站点角色",
+        description:
+          "取消用户在指定站点中的角色分配，用户将失去该站点的访问权限",
+        tags: ["UserSiteRoles"],
+      },
+    }
+  )
 
   // 批量分配多个用户到站点
   .post(
     "/batch-assign",
     async ({ body, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_CREATE")) throw new Error("Forbidden");
+      if (!permissions.includes("USERSITEROLES_CREATE"))
+        throw new Error("Forbidden");
 
       const { userIds, siteId, roleId } = body;
 
@@ -95,7 +116,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       }
 
       // 批量创建用户站点角色
-      const assignments = userIds.map(userId => ({
+      const assignments = userIds.map((userId) => ({
         userId,
         siteId,
         roleId,
@@ -127,7 +148,8 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .get(
     "/site/:siteId/users",
     async ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_VIEW")) throw new Error("Forbidden");
+      if (!permissions.includes("USERSITEROLES_VIEW"))
+        throw new Error("Forbidden");
 
       const { siteId } = params;
 
@@ -177,7 +199,8 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .get(
     "/user/:userId/sites",
     async ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_VIEW")) throw new Error("Forbidden");
+      if (!permissions.includes("USERSITEROLES_VIEW"))
+        throw new Error("Forbidden");
 
       const { userId } = params;
 

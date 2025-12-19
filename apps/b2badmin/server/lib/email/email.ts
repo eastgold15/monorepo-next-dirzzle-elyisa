@@ -2,7 +2,7 @@ import type { Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
 import { env } from "@/env";
 
-import type { EmailRequest, EmailResult } from "./email.types";
+import type { EmailRequest, EmailResult, EmailTemplate } from "./email.types";
 
 /**
  * 邮件发送服务
@@ -140,6 +140,88 @@ export async function sendEmail(request: EmailRequest): Promise<EmailResult> {
  */
 export async function verifyEmailConnection() {
   return await emailService.verifyConnection();
+}
+
+// 业务逻辑方法 - 兼容原有 auth/email.ts 的功能
+
+/**
+ * 创建邮箱验证邮件模板
+ */
+function createEmailVerificationTemplate(verificationUrl: string): EmailTemplate {
+  return {
+    subject: "验证您的邮箱地址",
+    text: `请点击以下链接验证您的邮箱：${verificationUrl}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">邮箱验证</h2>
+        <p>感谢您注册我们的服务！请点击下面的链接验证您的邮箱地址：</p>
+        <p><a href="${verificationUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">验证邮箱</a></p>
+        <p>如果按钮无法点击，请复制以下链接到浏览器地址栏：</p>
+        <p><code>${verificationUrl}</code></p>
+        <p>此链接将在24小时后过期。</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">如果您没有注册此账户，请忽略此邮件。</p>
+      </div>
+    `,
+  };
+}
+
+/**
+ * 创建密码重置邮件模板
+ */
+function createPasswordResetTemplate(resetUrl: string): EmailTemplate {
+  return {
+    subject: "重置您的密码",
+    text: `请点击以下链接重置您的密码：${resetUrl}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">密码重置</h2>
+        <p>您请求重置密码。请点击下面的链接重置您的密码：</p>
+        <p><a href="${resetUrl}" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">重置密码</a></p>
+        <p>如果按钮无法点击，请复制以下链接到浏览器地址栏：</p>
+        <p><code>${resetUrl}</code></p>
+        <p>此链接将在1小时后过期。</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">如果您没有请求重置密码，请忽略此邮件。</p>
+      </div>
+    `,
+  };
+}
+
+/**
+ * 发送验证邮件
+ * 兼容原有 auth/email.ts 的功能
+ */
+export async function sendVerificationEmail({
+  to,
+  verificationUrl,
+}: {
+  to: string;
+  verificationUrl: string;
+}): Promise<EmailResult> {
+  const template = createEmailVerificationTemplate(verificationUrl);
+  return await sendEmail({
+    to,
+    template,
+  });
+}
+
+/**
+ * 发送密码重置邮件
+ * 兼容原有 auth/email.ts 的功能
+ */
+export async function sendPasswordResetEmail({
+  to,
+  resetUrl,
+}: {
+  to: string;
+  resetUrl: string;
+}): Promise<EmailResult> {
+  const template = createPasswordResetTemplate(resetUrl);
+  return await sendEmail({
+    to,
+    template,
+  });
 }
 
 // 导出类型供业务模块使用

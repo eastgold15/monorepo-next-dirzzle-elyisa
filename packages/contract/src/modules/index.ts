@@ -3,7 +3,7 @@ export * from "./generated/customer.contract";
 export * from "./generated/master.contract";
 export * from "./generated/account.contract";
 export * from "./custom/ads.contract";
-export * from "./generated/attribute.contract";
+export * from "./custom/attribute.contract";
 export * from "./generated/attributetemplate.contract";
 export * from "./generated/attributevalue.contract";
 export * from "./generated/dailyinquirycounter.contract";

@@ -5,7 +5,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import type { TreeNode } from "../helper/utils.types";
+import type { TreeNode } from "../../helper/utils.types";
 
 const Insert = createInsertSchema(siteCategoriesTable);
 const UpdateBase = createUpdateSchema(siteCategoriesTable)

@@ -121,12 +121,17 @@ export const relations = defineRelations(schema, (r) => ({
   },
 
   // --- Master Categories (全局标准) ---
-  MasterTable: {
+  masterTable: {
     // 假设您已将原 categoriesTable 重命名为 MasterTable
-    parent: r.one.MasterTable({
-      from: r.MasterTable.parentId,
-      to: r.MasterTable.id,
+    parent: r.one.masterTable({
+      from: r.masterTable.parentId,
+      to: r.masterTable.id,
       alias: "parent",
+    }),
+    children: r.many.masterTable({
+      from: r.masterTable.id,
+      to: r.masterTable.parentId,
+      alias: "children",
     }),
     // factoryCategories: r.many.factoryCategoryTable({
     //   from: r.MasterTable.id,
@@ -141,13 +146,13 @@ export const relations = defineRelations(schema, (r) => ({
     //   to: r.productCategoriesTable.categoryId,
     // }),
     attributeTemplates: r.many.attributeTemplateTable({
-      from: r.MasterTable.id,
+      from: r.masterTable.id,
       to: r.attributeTemplateTable.categoryId,
     }),
 
     // 🔥 关联到站点分类 (可选关系，用于数据聚合)
     siteCategories: r.many.siteCategoriesTable({
-      from: r.MasterTable.id,
+      from: r.masterTable.id,
       to: r.siteCategoriesTable.masterCategoryId,
     }),
   },
@@ -202,9 +207,9 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.siteCategoriesTable.id,
       to: r.siteCategoriesTable.parentId,
     }),
-    globalCategory: r.one.MasterTable({
+    globalCategory: r.one.masterTable({
       from: r.siteCategoriesTable.masterCategoryId,
-      to: r.MasterTable.id,
+      to: r.masterTable.id,
       alias: "global_category",
     }),
     siteProducts: r.many.siteProductsTable(),
@@ -388,9 +393,9 @@ export const relations = defineRelations(schema, (r) => ({
 
   // --- Attributes ---
   attributeTemplateTable: {
-    category: r.one.MasterTable({
+    category: r.one.masterTable({
       from: r.attributeTemplateTable.categoryId,
-      to: r.MasterTable.id,
+      to: r.masterTable.id,
     }),
     attributes: r.many.attributeTable({
       from: r.attributeTemplateTable.id,

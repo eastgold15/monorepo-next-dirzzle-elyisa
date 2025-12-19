@@ -12,7 +12,7 @@ export class BaseService<
      * 🛡️ 收集隔离条件 (Scope Collector)
      * 抽离此逻辑，以便 findAll 和 $count 都能复用相同的过滤数组
      */
-    private getScopeFilters(auth: any): SQL[] {
+    protected getScopeFilters(auth: any): SQL[] {
         const { role, userId, exporterId, factoryId } = auth;
         const filters: SQL[] = [];
         const tableAny = this.table as any;
@@ -50,28 +50,39 @@ export class BaseService<
 
     // --- 核心业务方法 ---
 
-    async findAll(query: any, auth: any) {
+    /**
+        * 2. 增强版 findAll
+        * @param options 允许传入额外的 filters 和 排序
+        */
+    async findAll(
+        query: { page?: number; limit?: number;[key: string]: any },
+        auth: any,
+        extraFilters: SQL[] = [], // 👈 预留的扩展槽位
+        orderBy?: SQL             // 👈 预留排序槽位
+    ) {
         const { page = 1, limit = 10 } = query;
-        const filters = this.getScopeFilters(auth);
+        const scopeFilters = this.getScopeFilters(auth);
 
-        // 1. 数据查询：使用 .$dynamic() 链式构建
+        // 合并：数据隔离条件 + 业务过滤条件
+        const allFilters = [...scopeFilters, ...extraFilters];
+
         const data = await db
             .select()
             .from(this.table)
             .$dynamic()
-            .where(this.buildWhere(filters))
+            .where(this.buildWhere(allFilters))
+            .orderBy(orderBy ?? sql`created_at desc`) // 默认排序
             .limit(limit)
             .offset((page - 1) * limit);
 
-        // 2. 总数查询：使用最新的 $count API
-        // $count 会自动处理 count(*) 并返回 number
-        const total = await db.$count(this.table, this.buildWhere(filters));
+        const total = await db.$count(this.table, this.buildWhere(allFilters));
 
         return {
             data: data as (typeof this.contract.Response.static)[],
             total,
         };
     }
+
 
     async findOne(id: string, auth: any) {
         const filters = this.getScopeFilters(auth);

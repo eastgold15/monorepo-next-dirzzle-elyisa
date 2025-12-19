@@ -24,7 +24,7 @@ const UpdateBase = createUpdateSchema(mediaTable);
 const Select = createSelectSchema(mediaTable);
 
 import { mediaTable } from "../../table.schema";
-import { FileType } from "../helper/constant";
+import { FileType } from "../../helper/constant";
 import { MediaMetaTModel } from "./meta.t.model";
 
 // === 业务 Schema ===

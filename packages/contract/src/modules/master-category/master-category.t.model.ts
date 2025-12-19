@@ -7,14 +7,14 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import { MasterTable } from "../../table.schema";
+import type { TreeNode } from "../../helper/utils.types";
+import { masterTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
-import type { TreeNode } from "../helper/utils.types";
 
 // === 基础 Schema ===
-const Insert = createInsertSchema(MasterTable);
-const UpdateBase = createUpdateSchema(MasterTable);
-const Select = createSelectSchema(MasterTable);
+const Insert = createInsertSchema(masterTable);
+const UpdateBase = createUpdateSchema(masterTable);
+const Select = createSelectSchema(masterTable);
 
 // === 业务 Schema ===
 const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);
@@ -88,4 +88,3 @@ export type MasterCategoryTModel = {
   BusinessQuery: typeof BusinessQuery.static;
   PaginatedResponse: typeof PaginatedResponse.static;
 };
-

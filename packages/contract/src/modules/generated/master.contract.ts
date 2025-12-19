@@ -1,15 +1,19 @@
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-typebox";
 import { t } from "elysia";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
-import { MasterTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../../helper/query-types.model";
+import { masterTable } from "../../table.schema";
 
-const _Select = createSelectSchema(MasterTable);
-const _Insert = createInsertSchema(MasterTable);
+const _Select = createSelectSchema(masterTable);
+const _Insert = createInsertSchema(masterTable);
 
 export const MasterContract = {
   Response: _Select,
   Create: t.Omit(_Insert, ["id", "createdAt", "updatedAt"]),
-  Update: createUpdateSchema(MasterTable),
+  Update: createUpdateSchema(masterTable),
   Patch: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])),
   ListQuery: t.Object({
     ...t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])).properties,

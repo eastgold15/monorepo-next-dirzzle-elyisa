@@ -70,6 +70,8 @@ tools to resolve library id and get library docs without me having to explicitly
 
   先看packages\contract\scripts\gen-all-final.ts 脚本，明白我的意图，基本上运行一次之后，就是我自己手动修改controller中的逻辑了。根据业务需要把controller里面加openapi注释，描述每个接口的功能。 在完成逻辑。
 
+
+使用契约层的 *Contract 类型，而不是 *TModel 类型
 ### 根目录命令
 - `bun dev` - 启动所有应用的开发服务器
 - `bun build` - 构建所有应用

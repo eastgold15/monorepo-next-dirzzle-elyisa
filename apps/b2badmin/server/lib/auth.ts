@@ -9,11 +9,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
 import { env } from "@/env";
 import { db } from "../db/connection";
-import {
-  createEmailVerificationTemplate,
-  createPasswordResetTemplate,
-} from "../modules/auth/auth.templates";
-import { sendEmail } from "../modules/email/email";
+import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from "./email/email";
 
 // 将正则表达式移到顶层以提高性能
 const URL_REPLACE_REGEX = /^(\w+:\/\/[^/]+)(\/.*)$/;
@@ -43,11 +39,10 @@ export const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      // 使用新的邮件模板系统
-      const template = createPasswordResetTemplate(user.email, url);
-      await sendEmail({
+      // 使用集成的邮件发送函数
+      await sendPasswordResetEmail({
         to: user.email,
-        template,
+        resetUrl: url,
       });
     },
   },
@@ -58,11 +53,10 @@ export const auth = betterAuth({
       // 增加`/api/` 才能访问后端
       const newUrls = url.replace(URL_REPLACE_REGEX, "$1/api$2");
       console.log("newUrls:", newUrls);
-      // 使用新的邮件模板系统
-      const template = createEmailVerificationTemplate(user.email, newUrls);
-      await sendEmail({
+      // 使用集成的邮件发送函数
+      await sendVerificationEmail({
         to: user.email,
-        template,
+        verificationUrl: newUrls,
       });
     },
   },

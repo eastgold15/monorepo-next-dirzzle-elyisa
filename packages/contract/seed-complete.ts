@@ -2,50 +2,50 @@ import { relations } from "@repo/contract";
 import {
   // Auth相关
   accountTable,
-  sessionTable,
-  verificationTable,
-  // 基础数据
-  roleTable,
-  permissionTable,
-  rolePermissionsTable,
-  usersTable,
+  adsTable,
+  attributeTable,
+  attributeTemplateTable,
+  attributeValueTable,
+  // 客户和询盘
+  CustomerTable,
+  // 其他
+  dailyInquiryCounterTable,
   // 业务数据
   exportersTable,
   factoriesTable,
-  MasterTable,
-  salespersonsTable,
-  salespersonAffiliationsTable,
-  salespersonCategoriesTable,
-  // 产品相关
-  productsTable,
-  skusTable,
-  productTemplateTable,
+  heroCardsTable,
+  inquiryItemsTable,
+  inquiryTable,
+  masterTable,
+  mediaMetadataTable,
+  mediaTable,
+  permissionTable,
   productMasterCategoriesTable,
   productMediaTable,
-  attributeTemplateTable,
-  attributeTable,
-  attributeValueTable,
-  skuMediaTable,
-  // 客户和询盘
-  CustomerTable,
-  inquiryTable,
-  inquiryItemsTable,
-  quotationsTable,
+  // 产品相关
+  productsTable,
+  productTemplateTable,
   quotationItemsTable,
+  quotationsTable,
+  rolePermissionsTable,
+  // 基础数据
+  roleTable,
+  salespersonAffiliationsTable,
+  salespersonCategoriesTable,
+  salespersonsTable,
+  sessionTable,
+  siteCategoriesTable,
+  siteConfigTable,
+  siteProductsTable,
   // 站点和媒体
   sitesTable,
-  siteCategoriesTable,
-  siteProductsTable,
-  siteConfigTable,
-  heroCardsTable,
-  adsTable,
-  mediaTable,
-  mediaMetadataTable,
-  // 其他
-  dailyInquiryCounterTable,
+  skuMediaTable,
+  skusTable,
   translationDictTable,
   // 用户站点角色
   userSiteRolesTable,
+  usersTable,
+  verificationTable,
 } from "@repo/contract/table";
 import { randomUUIDv7 } from "bun";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -59,44 +59,44 @@ const db = drizzle(
 
 // 获取所有数据库表名并生成对应的权限
 const getAllTableNames = () => [
-  'users',
-  'account',
-  'session',
-  'verification',
-  'roles',
-  'permissions',
-  'role_permissions',
-  'user_site_roles',
-  'exporters',
-  'master_categories',
-  'factories',
-  'salespersons',
-  'salesperson_affiliations',
-  'salesperson_categories',
-  'media',
-  'media_metadata',
-  'advertisements',
-  'hero_cards',
-  'products_table',
-  'product_master_categories',
-  'product_media',
-  'attribute_templates',
-  'attributes_table',
-  'attribute_values_table',
-  'product_template_table',
-  'skus_table',
-  'sku_media',
-  'customer',
-  'inquiries',
-  'inquiry_items',
-  'quotations',
-  'quotation_items',
-  'site_config',
-  'daily_inquiry_counter',
-  'translation_dict',
-  'sites',
-  'site_categories',
-  'site_products',
+  "users",
+  "account",
+  "session",
+  "verification",
+  "roles",
+  "permissions",
+  "role_permissions",
+  "user_site_roles",
+  "exporters",
+  "master_categories",
+  "factories",
+  "salespersons",
+  "salesperson_affiliations",
+  "salesperson_categories",
+  "media",
+  "media_metadata",
+  "advertisements",
+  "hero_cards",
+  "products_table",
+  "product_master_categories",
+  "product_media",
+  "attribute_templates",
+  "attributes_table",
+  "attribute_values_table",
+  "product_template_table",
+  "skus_table",
+  "sku_media",
+  "customer",
+  "inquiries",
+  "inquiry_items",
+  "quotations",
+  "quotation_items",
+  "site_config",
+  "daily_inquiry_counter",
+  "translation_dict",
+  "sites",
+  "site_categories",
+  "site_products",
 ];
 
 // 生成标准CRUD权限
@@ -111,65 +111,65 @@ const generateCRUDPermissions = (resource: string) => [
 const ROLE_PERMISSIONS: Record<string, string[]> = {
   super_admin: [
     // 超级管理员拥有所有权限
-    ...getAllTableNames().flatMap(table => generateCRUDPermissions(table)),
-    'SITES_MANAGE',  // 站点管理特殊权限
+    ...getAllTableNames().flatMap((table) => generateCRUDPermissions(table)),
+    "SITES_MANAGE", // 站点管理特殊权限
   ],
   exporter_admin: [
     // 出口商管理员权限
-    ...generateCRUDPermissions('users'),
-    ...generateCRUDPermissions('exporters'),
-    ...generateCRUDPermissions('factories'),
-    ...generateCRUDPermissions('products_table'),
-    ...generateCRUDPermissions('skus_table'),
-    ...generateCRUDPermissions('media'),
-    ...generateCRUDPermissions('sites'),
-    ...generateCRUDPermissions('site_categories'),
-    ...generateCRUDPermissions('site_products'),
-    ...generateCRUDPermissions('site_config'),
-    ...generateCRUDPermissions('customer'),
-    ...generateCRUDPermissions('inquiries'),
-    ...generateCRUDPermissions('quotations'),
-    ...generateCRUDPermissions('hero_cards'),
-    ...generateCRUDPermissions('advertisements'),
-    'SITES_VIEW',
-    'SITES_CREATE',
-    'SITES_EDIT',
+    ...generateCRUDPermissions("users"),
+    ...generateCRUDPermissions("exporters"),
+    ...generateCRUDPermissions("factories"),
+    ...generateCRUDPermissions("products_table"),
+    ...generateCRUDPermissions("skus_table"),
+    ...generateCRUDPermissions("media"),
+    ...generateCRUDPermissions("sites"),
+    ...generateCRUDPermissions("site_categories"),
+    ...generateCRUDPermissions("site_products"),
+    ...generateCRUDPermissions("site_config"),
+    ...generateCRUDPermissions("customer"),
+    ...generateCRUDPermissions("inquiries"),
+    ...generateCRUDPermissions("quotations"),
+    ...generateCRUDPermissions("hero_cards"),
+    ...generateCRUDPermissions("advertisements"),
+    "SITES_VIEW",
+    "SITES_CREATE",
+    "SITES_EDIT",
   ],
   factory_admin: [
     // 工厂管理员权限
-    ...generateCRUDPermissions('users'),
-    ...generateCRUDPermissions('factories'),
-    ...generateCRUDPermissions('products_table'),
-    ...generateCRUDPermissions('skus_table'),
-    ...generateCRUDPermissions('media'),
-    ...generateCRUDPermissions('sites'),
-    ...generateCRUDPermissions('site_categories'),
-    ...generateCRUDPermissions('site_products'),
-    ...generateCRUDPermissions('customer'),
-    ...generateCRUDPermissions('inquiries'),
-    ...generateCRUDPermissions('quotations'),
-    'SITES_VIEW',
-    'SITES_EDIT',
+    ...generateCRUDPermissions("users"),
+    ...generateCRUDPermissions("factories"),
+    ...generateCRUDPermissions("products_table"),
+    ...generateCRUDPermissions("skus_table"),
+    ...generateCRUDPermissions("media"),
+    ...generateCRUDPermissions("sites"),
+    ...generateCRUDPermissions("site_categories"),
+    ...generateCRUDPermissions("site_products"),
+    ...generateCRUDPermissions("customer"),
+    ...generateCRUDPermissions("inquiries"),
+    ...generateCRUDPermissions("quotations"),
+    "SITES_VIEW",
+    "SITES_EDIT",
   ],
   salesperson: [
     // 业务员权限
-    ...generateCRUDPermissions('customer'),
-    'PRODUCTS_TABLE_VIEW',
-    'PRODUCTS_TABLE_CREATE',
-    'PRODUCTS_TABLE_EDIT',
-    'SKUS_TABLE_VIEW',
-    'MEDIA_VIEW',
-    'MEDIA_CREATE',
-    'MEDIA_DELETE',
-    'SITES_VIEW',
-    'SITE_CATEGORIES_VIEW',
-    'SITE_PRODUCTS_VIEW',
-    'INQUIRIES_VIEW',
-    'INQUIRIES_CREATE',
-    'INQUIRIES_EDIT',
-    'QUOTATIONS_VIEW',
-    'QUOTATIONS_CREATE',
-    'QUOTATIONS_EDIT',
+    ...generateCRUDPermissions("customer"),
+    "PRODUCTS_TABLE_VIEW",
+    "PRODUCTS_TABLE_CREATE",
+    "PRODUCTS_TABLE_EDIT",
+    "SKUS_TABLE_VIEW",
+    "MEDIA_VIEW",
+    "MEDIA_CREATE",
+    "MEDIA_DELETE",
+    "SITES_VIEW",
+    "SITE_CATEGORIES_VIEW",
+    "SITE_PRODUCTS_VIEW",
+    "INQUIRIES_VIEW",
+    "INQUIRIES_CREATE",
+    "INQUIRIES_EDIT",
+    "QUOTATIONS_VIEW",
+    "QUOTATIONS_CREATE",
+    "QUOTATIONS_EDIT",
   ],
 };
 
@@ -215,20 +215,38 @@ const generatePermissions = () => {
   const allTables = getAllTableNames();
 
   // 为每个表生成CRUD权限
-  allTables.forEach(table => {
+  allTables.forEach((table) => {
     const resource = table.toUpperCase();
     permissions.push(
-      { id: randomUUIDv7(), name: `${resource}_VIEW`, description: `查看${table}` },
-      { id: randomUUIDv7(), name: `${resource}_CREATE`, description: `创建${table}` },
-      { id: randomUUIDv7(), name: `${resource}_EDIT`, description: `编辑${table}` },
-      { id: randomUUIDv7(), name: `${resource}_DELETE`, description: `删除${table}` }
+      {
+        id: randomUUIDv7(),
+        name: `${resource}_VIEW`,
+        description: `查看${table}`,
+      },
+      {
+        id: randomUUIDv7(),
+        name: `${resource}_CREATE`,
+        description: `创建${table}`,
+      },
+      {
+        id: randomUUIDv7(),
+        name: `${resource}_EDIT`,
+        description: `编辑${table}`,
+      },
+      {
+        id: randomUUIDv7(),
+        name: `${resource}_DELETE`,
+        description: `删除${table}`,
+      }
     );
   });
 
   // 添加特殊权限
-  permissions.push(
-    { id: randomUUIDv7(), name: "SITES_MANAGE", description: "管理站点" }
-  );
+  permissions.push({
+    id: randomUUIDv7(),
+    name: "SITES_MANAGE",
+    description: "管理站点",
+  });
 
   return permissions;
 };
@@ -895,7 +913,7 @@ async function clearDatabase() {
     // 其他数据
     dailyInquiryCounterTable,
     translationDictTable,
-    MasterTable,
+    masterTable,
 
     // Auth相关
     accountTable,
@@ -909,13 +927,15 @@ async function clearDatabase() {
   for (const table of tables) {
     try {
       if (!table) {
-        console.log(`表不存在，跳过`);
+        console.log("表不存在，跳过");
         continue;
       }
       await db.delete(table);
     } catch (error) {
       // 忽略表不存在的错误
-      console.log(`注意：表 ${table?._?.name || '未知'} 可能不存在: ${error.message}`);
+      console.log(
+        `注意：表 ${table?._?.name || "未知"} 可能不存在: ${error.message}`
+      );
     }
   }
 }
@@ -969,7 +989,7 @@ async function seedCompleteDatabase() {
 
     // 4. 插入产品分类数据
     console.log("📦 插入产品分类数据...");
-    await db.insert(MasterTable).values(categories);
+    await db.insert(masterTable).values(categories);
 
     // 5. 设置属性模板的分类ID并插入
     console.log("📋 插入属性模板数据...");

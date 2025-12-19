@@ -10,9 +10,7 @@ import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 
 import * as controllers from "./controllers";
-import { AdsController } from "./modules/advertisement/advertisement";
-import { HeroCardsController } from "./modules/hero-cards/hero-cards";
-import { mediaRoute } from "./modules/media/media";
+
 import { authGuardMid } from "./middleware/auth";
 /**
  * Main API router
