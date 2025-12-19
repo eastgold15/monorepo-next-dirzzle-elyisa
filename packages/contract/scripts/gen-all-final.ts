@@ -84,8 +84,8 @@ function generate() {
     const contractContent = `
 import { t } from "elysia";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
-import { ${key} } from "../../table.schema";
-import { PaginationParams, SortParams } from "~/helper/query-types.t.model";
+import { ${key} } from "~/table.schema";
+import { PaginationParams, SortParams } from "~/helper/query-types.model";
 
 const _Select = createSelectSchema(${key});
 const _Insert = createInsertSchema(${key});
@@ -132,33 +132,33 @@ export class ${capitalized}BaseService extends BaseService<typeof ${key}, typeof
     const controllerContent = `
 import { Elysia, t } from "elysia";
 import { ${capitalized}Contract } from "@repo/contract";
-import { ${instanceName}Service } from "../../modules/services";
-import { authGuard } from "../../middleware/auth";
+import { ${instanceName}Service } from "~/modules/index";
+import { authGuardMid } from "~/middleware/auth";
 
 export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
-  .use(authGuard)
-  .get("/", ({ query, permissions }) => {
+  .use(authGuardMid)
+  .get("/", ({ query, permissions,auth }) => {
     if (!permissions.includes("${rawTableName.toUpperCase()}_VIEW")) throw new Error("Forbidden");
-    return ${instanceName}Service.findAll(query);
+    return ${instanceName}Service.findAll(query,auth);
   }, {
     query: ${capitalized}Contract.ListQuery
   })
-  .post("/", ({ body, permissions }) => {
+  .post("/", ({ body, permissions,auth }) => {
     if (!permissions.includes("${rawTableName.toUpperCase()}_CREATE")) throw new Error("Forbidden");
-    return ${instanceName}Service.create(body);
+    return ${instanceName}Service.create(body,auth);
   }, {
     body: ${capitalized}Contract.Create
   })
-  .patch("/:id", ({ params, body, permissions }) => {
+  .patch("/:id", ({ params, body, permissions,auth }) => {
     if (!permissions.includes("${rawTableName.toUpperCase()}_EDIT")) throw new Error("Forbidden");
-    return ${instanceName}Service.update(params.id, body);
+    return ${instanceName}Service.update(params.id, body,auth);
   }, {
     params: t.Object({ id: t.String() }),
     body: ${capitalized}Contract.Patch
   })
-  .delete("/:id", ({ params, permissions }) => {
+  .delete("/:id", ({ params, permissions,auth }) => {
     if (!permissions.includes("${rawTableName.toUpperCase()}_DELETE")) throw new Error("Forbidden");
-    return ${instanceName}Service.delete(params.id);
+    return ${instanceName}Service.delete(params.id,auth);
   }, {
     params: t.Object({ id: t.String() })
   });

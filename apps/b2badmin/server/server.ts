@@ -2,7 +2,7 @@ import { cors } from "@elysiajs/cors";
 
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
-import { adminAuthPlugin } from "~/plugins/admin-auth.plugin";
+
 import { localeMiddleware } from "~/plugins/locale";
 import { loggerPlugin } from "~/plugins/logger";
 import { errorPlugin } from "~/utils/err/err.plugin";
@@ -13,6 +13,7 @@ import * as controllers from "./controllers";
 import { AdsController } from "./modules/advertisement/advertisement";
 import { HeroCardsController } from "./modules/hero-cards/hero-cards";
 import { mediaRoute } from "./modules/media/media";
+import { authGuardMid } from "./middleware/auth";
 /**
  * Main API router
  * Combines auth and user routes under the '/api' prefix
@@ -35,7 +36,7 @@ export const server = new Elysia({ name: "server" })
     })
   )
   .mount("/", auth.handler) // 使用 Better Auth 认证中间件
-  .use(adminAuthPlugin)
+  .use(authGuardMid)
   .group("/v1", (app) => {
     // 自动挂载所有生成的路由
     Object.values(controllers).forEach(controller => app.use(controller));
@@ -50,10 +51,10 @@ export const server = new Elysia({ name: "server" })
   // 3. Problem JSON 插件 (将最终的 HttpError 转换为 RFC 7807 响应)
   .use(httpProblemJsonPlugin())
   .use(dbPlugin)
-  .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
-  // .use(categoriesController)
-  .use(AdsController)
-  .use(HeroCardsController) // 添加首页展示卡片控制器
+// .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
+// .use(categoriesController)
+// .use(AdsController)
+// .use(HeroCardsController) // 添加首页展示卡片控制器
 // .use(siteConfigsController)
 // .use(product2Route)
 // .use(productTemplateRoute)

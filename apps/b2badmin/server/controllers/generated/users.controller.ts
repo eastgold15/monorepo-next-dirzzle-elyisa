@@ -1,32 +1,32 @@
 import { Elysia, t } from "elysia";
 import { UsersContract } from "@repo/contract";
-import { usersService } from "../../modules/services";
-import { authGuard } from "../../middleware/auth";
+import { usersService } from "~/modules/index";
+import { authGuardMid } from "~/middleware/auth";
 
 export const usersController = new Elysia({ prefix: "/users" })
-  .use(authGuard)
-  .get("/", ({ query, permissions }) => {
+  .use(authGuardMid)
+  .get("/", ({ query, permissions,auth }) => {
     if (!permissions.includes("USERS_VIEW")) throw new Error("Forbidden");
-    return usersService.findAll(query);
+    return usersService.findAll(query,auth);
   }, {
     query: UsersContract.ListQuery
   })
-  .post("/", ({ body, permissions }) => {
+  .post("/", ({ body, permissions,auth }) => {
     if (!permissions.includes("USERS_CREATE")) throw new Error("Forbidden");
-    return usersService.create(body);
+    return usersService.create(body,auth);
   }, {
     body: UsersContract.Create
   })
-  .patch("/:id", ({ params, body, permissions }) => {
+  .patch("/:id", ({ params, body, permissions,auth }) => {
     if (!permissions.includes("USERS_EDIT")) throw new Error("Forbidden");
-    return usersService.update(params.id, body);
+    return usersService.update(params.id, body,auth);
   }, {
     params: t.Object({ id: t.String() }),
     body: UsersContract.Patch
   })
-  .delete("/:id", ({ params, permissions }) => {
+  .delete("/:id", ({ params, permissions,auth }) => {
     if (!permissions.includes("USERS_DELETE")) throw new Error("Forbidden");
-    return usersService.delete(params.id);
+    return usersService.delete(params.id,auth);
   }, {
     params: t.Object({ id: t.String() })
   });

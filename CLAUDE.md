@@ -30,6 +30,43 @@ tools to resolve library id and get library docs without me having to explicitly
 
 扩展逻辑：如果需要复杂逻辑，请在 src/modules/custom/ 下创建同名 .contract.ts 文件，脚本会自动切换路由引用。
 
+
+ 1. 自动化契约生成系统
+
+  - 脚本从 table.schema.ts 的数据库表定义自动生成所有契约
+  - 生成的契约包含标准的 CRUD 类型定义（Response, Create, Update, Patch, ListQuery, ListResponse）
+  - 支持 custom/ 目录覆盖自动生成的契约，实现业务扩展
+
+  2. 多租户架构设计
+
+  从 table.schema.ts 发现了完整的租户隔离机制：
+  export const tenantCols = {
+    exporterId: p.uuid("exporter_id").references(() => exportersTable.id),  // 出口商
+    factoryId: p.uuid("factory_id").references(() => factoriesTable.id),    // 工厂
+    ownerId: p.uuid("owner_id").references(() => usersTable.id),            // 业务员
+    isPublic: p.boolean("is_public").default(false),                        // 公海数据
+  }
+
+  3. 实体关系图谱
+
+  发现了核心的业务关系链：
+  出口商 (exporters)
+      ↓ 1:N
+  工厂 (factories)
+      ↓
+  用户 (users) ↔ 角色 (roles) ↔ 权限 (permissions)
+      ↓
+  站点 (sites) → 分类 (categories) → 产品 (products) → SKU → 媒体
+      ↓
+  询价 (inquiry) → 询价项目 (inquiryItems) → 报价 (quotations)
+
+  4. 系统的优势
+
+  - 类型安全：使用 drizzle-typebox 确保前后端类型一致
+  - 标准化：所有契约遵循统一结构
+  - 可扩展：通过 custom 目录支持业务定制
+  - 自动化：减少手写类型定义的工作量
+
 ### 根目录命令
 - `bun dev` - 启动所有应用的开发服务器
 - `bun build` - 构建所有应用

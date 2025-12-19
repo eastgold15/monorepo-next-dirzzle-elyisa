@@ -1,32 +1,32 @@
 import { Elysia, t } from "elysia";
 import { InquiryContract } from "@repo/contract";
-import { inquiryService } from "../../modules/services";
-import { authGuard } from "../../middleware/auth";
+import { inquiryService } from "~/modules/index";
+import { authGuardMid } from "~/middleware/auth";
 
 export const inquiryController = new Elysia({ prefix: "/inquiry" })
-  .use(authGuard)
-  .get("/", ({ query, permissions }) => {
+  .use(authGuardMid)
+  .get("/", ({ query, permissions,auth }) => {
     if (!permissions.includes("INQUIRY_VIEW")) throw new Error("Forbidden");
-    return inquiryService.findAll(query);
+    return inquiryService.findAll(query,auth);
   }, {
     query: InquiryContract.ListQuery
   })
-  .post("/", ({ body, permissions }) => {
+  .post("/", ({ body, permissions,auth }) => {
     if (!permissions.includes("INQUIRY_CREATE")) throw new Error("Forbidden");
-    return inquiryService.create(body);
+    return inquiryService.create(body,auth);
   }, {
     body: InquiryContract.Create
   })
-  .patch("/:id", ({ params, body, permissions }) => {
+  .patch("/:id", ({ params, body, permissions,auth }) => {
     if (!permissions.includes("INQUIRY_EDIT")) throw new Error("Forbidden");
-    return inquiryService.update(params.id, body);
+    return inquiryService.update(params.id, body,auth);
   }, {
     params: t.Object({ id: t.String() }),
     body: InquiryContract.Patch
   })
-  .delete("/:id", ({ params, permissions }) => {
+  .delete("/:id", ({ params, permissions,auth }) => {
     if (!permissions.includes("INQUIRY_DELETE")) throw new Error("Forbidden");
-    return inquiryService.delete(params.id);
+    return inquiryService.delete(params.id,auth);
   }, {
     params: t.Object({ id: t.String() })
   });

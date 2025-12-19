@@ -1,32 +1,32 @@
 import { Elysia, t } from "elysia";
 import { QuotationsContract } from "@repo/contract";
-import { quotationsService } from "../../modules/services";
-import { authGuard } from "../../middleware/auth";
+import { quotationsService } from "~/modules/index";
+import { authGuardMid } from "~/middleware/auth";
 
 export const quotationsController = new Elysia({ prefix: "/quotations" })
-  .use(authGuard)
-  .get("/", ({ query, permissions }) => {
+  .use(authGuardMid)
+  .get("/", ({ query, permissions,auth }) => {
     if (!permissions.includes("QUOTATIONS_VIEW")) throw new Error("Forbidden");
-    return quotationsService.findAll(query);
+    return quotationsService.findAll(query,auth);
   }, {
     query: QuotationsContract.ListQuery
   })
-  .post("/", ({ body, permissions }) => {
+  .post("/", ({ body, permissions,auth }) => {
     if (!permissions.includes("QUOTATIONS_CREATE")) throw new Error("Forbidden");
-    return quotationsService.create(body);
+    return quotationsService.create(body,auth);
   }, {
     body: QuotationsContract.Create
   })
-  .patch("/:id", ({ params, body, permissions }) => {
+  .patch("/:id", ({ params, body, permissions,auth }) => {
     if (!permissions.includes("QUOTATIONS_EDIT")) throw new Error("Forbidden");
-    return quotationsService.update(params.id, body);
+    return quotationsService.update(params.id, body,auth);
   }, {
     params: t.Object({ id: t.String() }),
     body: QuotationsContract.Patch
   })
-  .delete("/:id", ({ params, permissions }) => {
+  .delete("/:id", ({ params, permissions,auth }) => {
     if (!permissions.includes("QUOTATIONS_DELETE")) throw new Error("Forbidden");
-    return quotationsService.delete(params.id);
+    return quotationsService.delete(params.id,auth);
   }, {
     params: t.Object({ id: t.String() })
   });
