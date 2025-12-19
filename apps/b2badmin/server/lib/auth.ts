@@ -36,6 +36,7 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    disableOriginCheck: true
   },
   emailAndPassword: {
     enabled: true,
@@ -73,6 +74,11 @@ export const auth = betterAuth({
       enabled: !!(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET),
     },
   },
+  trustedOrigins: [
+    "http://localhost:9012", // 前端开发服务器
+    "http://localhost:9013", // Vite 默认端口
+    "http://localhost:4000",
+  ],
 
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

@@ -37,7 +37,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "../../packages/contract/clear-database.ts", "../../packages/contract/seed-complete.ts"  ],
   "exclude": [
     "node_modules"
   ]
