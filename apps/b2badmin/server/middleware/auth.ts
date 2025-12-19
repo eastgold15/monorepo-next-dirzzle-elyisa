@@ -79,6 +79,7 @@ export const authGuardMid = new Elysia({ name: 'authGuard' })
             exporterId: currentSite.exporterId, // 如果是出口商站，这里有值
             factoryId: currentSite.factoryId,   // 如果是工厂站，这里有值
             siteType: currentSite.siteType,
+
             role,
             auth: {
                 role: role.name,

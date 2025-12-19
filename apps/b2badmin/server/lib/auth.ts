@@ -32,7 +32,11 @@ export const auth = betterAuth({
       verification: verificationTable, // ✅ "verification"
     },
   }),
-  generateId: false, // 关闭自动生成 ID，使用数据库默认值
+  advanced: {
+    database: {
+      generateId: false,
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
