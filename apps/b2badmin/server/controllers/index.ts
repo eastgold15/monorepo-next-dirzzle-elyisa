@@ -1,8 +1,8 @@
-// 🛡️ 自动生成的 Controller 入口
+// 🛡️ 自动生成的 Controller 入口，支持 custom 覆盖
 export * from "./generated/customer.controller";
 export * from "./generated/master.controller";
 export * from "./generated/account.controller";
-export * from "./generated/ads.controller";
+export * from "./custom/ads.controller";
 export * from "./generated/attribute.controller";
 export * from "./generated/attributetemplate.controller";
 export * from "./generated/attributevalue.controller";

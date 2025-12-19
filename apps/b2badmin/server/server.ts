@@ -9,21 +9,10 @@ import { errorPlugin } from "~/utils/err/err.plugin";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 
+import * as controllers from "./controllers";
 import { AdsController } from "./modules/advertisement/advertisement";
-import { factoryRoute } from "./modules/factory/factory";
 import { HeroCardsController } from "./modules/hero-cards/hero-cards";
-import { masterCategoryRoute } from "./modules/master-category/master-category";
 import { mediaRoute } from "./modules/media/media";
-import { attributeRoute } from "./modules/product/attribute";
-import { attributeValueRoute } from "./modules/product/attribute-value";
-import { productRoute } from "./modules/product/product";
-import { templateRoute } from "./modules/product/template";
-import { siteRoute } from "./modules/site/site";
-import { siteProductsRoute } from "./modules/site/site-products";
-import { siteCategoryRoute } from "./modules/site/siteCategory";
-import { userRoute } from "./modules/user/user";
-import { userManagementController } from "./modules/user/user-management";
-
 /**
  * Main API router
  * Combines auth and user routes under the '/api' prefix
@@ -47,6 +36,11 @@ export const server = new Elysia({ name: "server" })
   )
   .mount("/", auth.handler) // 使用 Better Auth 认证中间件
   .use(adminAuthPlugin)
+  .group("/v1", (app) => {
+    // 自动挂载所有生成的路由
+    Object.values(controllers).forEach(controller => app.use(controller));
+    return app;
+  })
 
 
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
@@ -60,22 +54,22 @@ export const server = new Elysia({ name: "server" })
   // .use(categoriesController)
   .use(AdsController)
   .use(HeroCardsController) // 添加首页展示卡片控制器
-  // .use(siteConfigsController)
-  // .use(product2Route)
-  // .use(productTemplateRoute)
-  // .use(skuRoute)
-  // .use(translateRoute)
-  .use(masterCategoryRoute)
-  .use(siteRoute)
-  .use(siteCategoryRoute)
-  .use(productRoute)
-  .use(userRoute)
-  .use(userManagementController)
-  .use(factoryRoute)
-  // .use(product)
-  // .use(sku)
-  // .use(productMedia)
-  .use(siteProductsRoute)
-  .use(attributeRoute)
-  .use(attributeValueRoute)
-  .use(templateRoute);
+// .use(siteConfigsController)
+// .use(product2Route)
+// .use(productTemplateRoute)
+// .use(skuRoute)
+// .use(translateRoute)
+// .use(masterCategoryRoute)
+// .use(siteRoute)
+// .use(siteCategoryRoute)
+// .use(productRoute)
+// .use(userRoute)
+// .use(userManagementController)
+// .use(factoryRoute)
+// .use(product)
+// .use(sku)
+// .use(productMedia)
+// .use(siteProductsRoute)
+// .use(attributeRoute)
+// .use(attributeValueRoute)
+// .use(templateRoute);

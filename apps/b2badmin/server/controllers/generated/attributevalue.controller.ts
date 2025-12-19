@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { AttributeValueContract } from "@repo/contract";
-import { attributeValueService } from "../../modules/generated";
+import { attributeValueService } from "../../modules/services";
 import { authGuard } from "../../middleware/auth";
 
 export const attributevalueController = new Elysia({ prefix: "/attributevalue" })

@@ -2,7 +2,7 @@
 
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
-import { XxxContract as Generated } from "../generated/xxx.contract";
+// import { XxxContract as Generated } from "../generated/xxx.contract";
 
 // 2. 导入你可能需要关联的其他契约
 // import { OtherContract } from "../generated/other.contract";
