@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { SalespersonAffiliationsContract } from "@repo/contract";
 import { salespersonAffiliationsService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const salespersonaffiliationsController = new Elysia({ prefix: "/salespersonaffiliations" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return salespersonAffiliationsService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return salespersonAffiliationsService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: SalespersonAffiliationsContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const salespersonaffiliationsController = new Elysia({ prefix: "/salesper
       tags: ["SalespersonAffiliations"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return salespersonAffiliationsService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return salespersonAffiliationsService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: SalespersonAffiliationsContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const salespersonaffiliationsController = new Elysia({ prefix: "/salesper
       tags: ["SalespersonAffiliations"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return salespersonAffiliationsService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return salespersonAffiliationsService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: SalespersonAffiliationsContract.Patch,
@@ -36,8 +56,14 @@ export const salespersonaffiliationsController = new Elysia({ prefix: "/salesper
       tags: ["SalespersonAffiliations"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return salespersonAffiliationsService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return salespersonAffiliationsService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

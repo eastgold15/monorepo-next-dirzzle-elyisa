@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { ProductMasterCategoriesContract } from "@repo/contract";
 import { productMasterCategoriesService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const productmastercategoriesController = new Elysia({ prefix: "/productmastercategories" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return productMasterCategoriesService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return productMasterCategoriesService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: ProductMasterCategoriesContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const productmastercategoriesController = new Elysia({ prefix: "/productm
       tags: ["ProductMasterCategories"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return productMasterCategoriesService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return productMasterCategoriesService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: ProductMasterCategoriesContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const productmastercategoriesController = new Elysia({ prefix: "/productm
       tags: ["ProductMasterCategories"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return productMasterCategoriesService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return productMasterCategoriesService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: ProductMasterCategoriesContract.Patch,
@@ -36,8 +56,14 @@ export const productmastercategoriesController = new Elysia({ prefix: "/productm
       tags: ["ProductMasterCategories"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return productMasterCategoriesService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return productMasterCategoriesService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

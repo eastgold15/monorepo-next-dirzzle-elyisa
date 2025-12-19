@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { SkusContract } from "@repo/contract";
 import { skusService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const skusController = new Elysia({ prefix: "/skus" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return skusService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return skusService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: SkusContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const skusController = new Elysia({ prefix: "/skus" })
       tags: ["Skus"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return skusService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return skusService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: SkusContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const skusController = new Elysia({ prefix: "/skus" })
       tags: ["Skus"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return skusService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return skusService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: SkusContract.Patch,
@@ -36,8 +56,14 @@ export const skusController = new Elysia({ prefix: "/skus" })
       tags: ["Skus"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return skusService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return skusService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { RolePermissionsContract } from "@repo/contract";
 import { rolePermissionsService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const rolepermissionsController = new Elysia({ prefix: "/rolepermissions" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return rolePermissionsService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return rolePermissionsService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: RolePermissionsContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const rolepermissionsController = new Elysia({ prefix: "/rolepermissions"
       tags: ["RolePermissions"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return rolePermissionsService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return rolePermissionsService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: RolePermissionsContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const rolepermissionsController = new Elysia({ prefix: "/rolepermissions"
       tags: ["RolePermissions"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return rolePermissionsService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return rolePermissionsService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: RolePermissionsContract.Patch,
@@ -36,8 +56,14 @@ export const rolepermissionsController = new Elysia({ prefix: "/rolepermissions"
       tags: ["RolePermissions"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return rolePermissionsService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return rolePermissionsService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

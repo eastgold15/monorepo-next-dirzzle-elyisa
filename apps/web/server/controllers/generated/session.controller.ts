@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { SessionContract } from "@repo/contract";
 import { sessionService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const sessionController = new Elysia({ prefix: "/session" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return sessionService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return sessionService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: SessionContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const sessionController = new Elysia({ prefix: "/session" })
       tags: ["Session"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return sessionService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return sessionService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: SessionContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const sessionController = new Elysia({ prefix: "/session" })
       tags: ["Session"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return sessionService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return sessionService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: SessionContract.Patch,
@@ -36,8 +56,14 @@ export const sessionController = new Elysia({ prefix: "/session" })
       tags: ["Session"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return sessionService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return sessionService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

@@ -1,123 +1,178 @@
-import { and, asc, count, desc, eq } from "drizzle-orm";
-import type { db } from "../db/connection";
+import { and, eq, or, type SQL, sql } from "drizzle-orm";
+import type { PgTableWithColumns } from "drizzle-orm/pg-core";
+import { db } from "../db/connection";
 
 export interface ServiceContext {
   db: typeof db;
-  user: any;
+  siteId: string;
+  siteType: string;
+  factoryId?: string;
+  exporterId?: string;
 }
 
 export class BaseService<
-  T extends Record<string, any>,
-  C extends Record<string, any>,
+  T extends PgTableWithColumns<any>,
+  C extends { Create: any; Update: any; Response: any; ListQuery: any },
 > {
   constructor(
-    private table: T,
-    private contract: C
+    protected table: T,
+    protected contract: C
   ) { }
 
-  async findAll(query: any, context: ServiceContext) {
+  /**
+   * 🛡️ 收集站点隔离条件 (Site Scope Collector)
+   * 根据站点类型和关联的工厂/出口商ID进行数据隔离
+   */
+  protected getScopeFilters(context: ServiceContext): SQL[] {
+    const { siteType, factoryId, exporterId } = context;
+    const filters: SQL[] = [];
+    const tableAny = this.table as any;
+
+    // 根据站点类型进行数据隔离
+    if (siteType === "factory" && tableAny.factoryId) {
+      filters.push(eq(tableAny.factoryId, factoryId));
+    } else if (siteType === "exporter" && tableAny.exporterId) {
+      filters.push(eq(tableAny.exporterId, exporterId));
+    }
+
+    // 对于站点关联的表（如 siteCategories, siteProducts），使用 siteId
+    if (tableAny.siteId) {
+      filters.push(eq(tableAny.siteId, context.siteId));
+    }
+
+    return filters;
+  }
+
+  /**
+   * 动态 Where 辅助函数
+   */
+  private buildWhere(filters: SQL[]): SQL | undefined {
+    return filters.length > 0 ? and(...filters) : undefined;
+  }
+
+  // --- 核心业务方法 ---
+
+  /**
+   * 增强版 findAll
+   * @param query 查询参数
+   * @param context 上下文（包含站点信息）
+   * @param extraFilters 额外的过滤条件
+   * @param orderBy 排序条件
+   */
+  async findAll(
+    query: { page?: number; limit?: number; [key: string]: any },
+    context: ServiceContext,
+    extraFilters: SQL[] = [],
+    orderBy?: SQL
+  ) {
     const { db } = context;
-    const {
-      page = 1,
-      pageSize = 10,
-      sortBy,
-      sortOrder = "asc",
-      search,
-      ...filters
-    } = query;
+    const { page = 1, limit = 10, sortBy, sortOrder = "desc" } = query;
 
-    const offset = (Number(page) - 1) * Number(pageSize);
-    const limit = Number(pageSize);
+    // 获取站点隔离条件
+    const scopeFilters = this.getScopeFilters(context);
 
-    // 构建查询条件
-    const conditions = [];
-
-    // 添加搜索条件
-    if (search) {
-      // 假设所有表都有 name 字段，如果没有需要根据实际情况修改
-      if ("name" in this.table) {
-        conditions.push((this.table as any).name.like(`%${search}%`));
+    // 构建搜索条件
+    const searchFilters: SQL[] = [];
+    if (query.search) {
+      // 假设所有表都有 name 字段
+      if ((this.table as any).name) {
+        searchFilters.push(sql`(name ILIKE ${`%${query.search}%`})`);
       }
     }
 
-    // 添加过滤条件
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && key in this.table) {
-        conditions.push(eq((this.table as any)[key], value));
-      }
-    });
+    // 合并所有过滤条件
+    const allFilters = [...scopeFilters, ...searchFilters, ...extraFilters];
 
-    // 构建排序条件
-    let orderBy;
-    if (sortBy && sortBy in this.table) {
+    // 构建排序
+    let finalOrderBy = orderBy;
+    if (!finalOrderBy && sortBy && (this.table as any)[sortBy]) {
       const column = (this.table as any)[sortBy];
-      orderBy = sortOrder === "desc" ? desc(column) : asc(column);
-    } else {
-      // 默认按创建时间倒序
-      orderBy = desc((this.table as any).createdAt);
+      finalOrderBy = sortOrder === "desc" ? sql`${column} desc` : sql`${column} asc`;
+    }
+    if (!finalOrderBy) {
+      finalOrderBy = sql`created_at desc`; // 默认排序
     }
 
     // 执行查询
-    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const data = await db
+      .select()
+      // @ts-expect-error
+      .from(this.table)
+      .$dynamic()
+      .where(this.buildWhere(allFilters))
+      .orderBy(finalOrderBy)
+      .limit(limit)
+      .offset((page - 1) * limit);
 
-    const [data, totalResult] = await Promise.all([
-      db
-        .select()
-        .from(this.table)
-        .where(where)
-        .orderBy(orderBy)
-        .limit(limit)
-        .offset(offset),
-      db.select({ count: count() }).from(this.table).where(where),
-    ]);
-
-    const total = totalResult[0]?.count || 0;
+    // 获取总数
+    // @ts-expect-error
+    const total = await db.$count(this.table, this.buildWhere(allFilters));
 
     return {
-      data,
+      data: data as (typeof this.contract.Response.static)[],
       total,
       page: Number(page),
-      pageSize: Number(pageSize),
-      totalPages: Math.ceil(total / Number(pageSize)),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / Number(limit)),
     };
   }
 
-  async findById(id: string, context: ServiceContext) {
+  async findOne(id: string, context: ServiceContext) {
     const { db } = context;
-    const result = await db
+    const filters = this.getScopeFilters(context);
+    filters.push(eq((this.table as any).id, id));
+
+    const [result] = await db
       .select()
+      // @ts-expect-error
       .from(this.table)
-      .where(eq((this.table as any).id, id))
-      .limit(1);
+      .$dynamic()
+      .where(this.buildWhere(filters));
 
-    return result[0] || null;
+    return result as typeof this.contract.Response.static;
   }
 
-  async create(body: any, context: ServiceContext) {
-    const { db } = context;
-    const result = await db.insert(this.table).values(body).returning();
+  async create(data: any, context: ServiceContext) {
+    const { db, siteId, siteType, factoryId, exporterId } = context;
 
-    return result[0] || null;
+    // 强制补全站点归属信息
+    const payload = {
+      ...data,
+      // 根据表结构添加相应的站点字段
+      ...(siteType === "factory" && { factoryId }),
+      ...(siteType === "exporter" && { exporterId }),
+      // 如果表有 siteId 字段，则添加
+      ...((this.table as any).siteId && { siteId }),
+    };
+
+    // @ts-expect-error
+    const [result] = await db.insert(this.table).values(payload).returning();
+    return result as typeof this.contract.Response.static;
   }
 
-  async update(id: string, body: any, context: ServiceContext) {
+  async update(id: string, data: any, context: ServiceContext) {
     const { db } = context;
-    const result = await db
+    const filters = this.getScopeFilters(context);
+
+    const [result] = await db
+      // @ts-expect-error
       .update(this.table)
-      .set({ ...body, updatedAt: new Date() })
-      .where(eq((this.table as any).id, id))
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq((this.table as any).id, id), ...filters))
       .returning();
 
-    return result[0] || null;
+    return result as typeof this.contract.Response.static;
   }
 
   async delete(id: string, context: ServiceContext) {
     const { db } = context;
-    const result = await db
-      .delete(this.table)
-      .where(eq((this.table as any).id, id))
-      .returning();
+    const filters = this.getScopeFilters(context);
 
-    return result[0] || null;
+    await db
+      // @ts-expect-error
+      .delete(this.table)
+      .where(and(eq((this.table as any).id, id), ...filters));
+
+    return { success: true };
   }
 }

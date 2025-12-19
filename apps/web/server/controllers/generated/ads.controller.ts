@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { AdsContract } from "@repo/contract";
 import { adsService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const adsController = new Elysia({ prefix: "/ads" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return adsService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return adsService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: AdsContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const adsController = new Elysia({ prefix: "/ads" })
       tags: ["Ads"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return adsService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return adsService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: AdsContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const adsController = new Elysia({ prefix: "/ads" })
       tags: ["Ads"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return adsService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return adsService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: AdsContract.Patch,
@@ -36,8 +56,14 @@ export const adsController = new Elysia({ prefix: "/ads" })
       tags: ["Ads"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return adsService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return adsService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

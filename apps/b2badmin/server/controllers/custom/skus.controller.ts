@@ -420,7 +420,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
         }
 
         // 获取有权限的商品ID列表
-        const productIdsSet = new Set();
+        const productIdsSet = new Set<string>();
         for (const affiliation of affiliations) {
           if (affiliation.entityType === "factory") {
             // 工厂业务员：获取该工厂所有站点的商品
@@ -454,6 +454,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
         }
 
         baseConditions.push(
+
           inArray(skusTable.productId, Array.from(productIdsSet))
         );
       }
@@ -558,10 +559,9 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
       return items.map((item) => ({
         ...item,
         image: imageMap[item.id] || null,
-        specJson: item.specJson ? JSON.parse(item.specJson) : null,
+        specJson: item.specJson ?? null,
         extraAttributes: item.extraAttributes
-          ? JSON.parse(item.extraAttributes)
-          : null,
+          ?? null,
         price: Number.parseFloat(item.price || "0"),
         marketPrice: item.marketPrice
           ? Number.parseFloat(item.marketPrice)
@@ -666,9 +666,9 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
         values: [], // 暂时返回空数组
         images: images.filter((img) => img.url), // 过滤掉没有URL的图片
         mainImage: images.find((img) => img.isMain) || images[0] || null, // 主图或第一张图
-        specJson: sku.specJson ? JSON.parse(sku.specJson) : null,
+        specJson: sku.specJson ? sku.specJson : null,
         extraAttributes: sku.extraAttributes
-          ? JSON.parse(sku.extraAttributes)
+          ? sku.extraAttributes
           : null,
         price: Number.parseFloat(sku.price || "0"),
         marketPrice: sku.marketPrice
@@ -765,7 +765,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
           images: skuImages,
           mainImage:
             skuImages.find((img) => img.isMain) || skuImages[0] || null,
-          specJson: sku.specJson ? JSON.parse(sku.specJson) : null,
+          specJson: sku.specJson ? sku.specJson : null,
           price: Number.parseFloat(sku.price || "0"),
           marketPrice: sku.marketPrice
             ? Number.parseFloat(sku.marketPrice)

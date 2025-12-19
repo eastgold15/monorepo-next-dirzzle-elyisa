@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { VerificationContract } from "@repo/contract";
 import { verificationService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const verificationController = new Elysia({ prefix: "/verification" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return verificationService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return verificationService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: VerificationContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const verificationController = new Elysia({ prefix: "/verification" })
       tags: ["Verification"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return verificationService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return verificationService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: VerificationContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const verificationController = new Elysia({ prefix: "/verification" })
       tags: ["Verification"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return verificationService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return verificationService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: VerificationContract.Patch,
@@ -36,8 +56,14 @@ export const verificationController = new Elysia({ prefix: "/verification" })
       tags: ["Verification"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return verificationService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return verificationService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

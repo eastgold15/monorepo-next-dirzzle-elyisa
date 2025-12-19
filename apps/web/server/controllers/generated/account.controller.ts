@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { AccountContract } from "@repo/contract";
 import { accountService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const accountController = new Elysia({ prefix: "/account" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return accountService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return accountService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: AccountContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const accountController = new Elysia({ prefix: "/account" })
       tags: ["Account"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return accountService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return accountService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: AccountContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const accountController = new Elysia({ prefix: "/account" })
       tags: ["Account"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return accountService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return accountService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: AccountContract.Patch,
@@ -36,8 +56,14 @@ export const accountController = new Elysia({ prefix: "/account" })
       tags: ["Account"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return accountService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return accountService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

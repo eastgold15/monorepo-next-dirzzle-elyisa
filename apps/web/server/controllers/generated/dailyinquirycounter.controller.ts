@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { DailyInquiryCounterContract } from "@repo/contract";
 import { dailyInquiryCounterService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const dailyinquirycounterController = new Elysia({ prefix: "/dailyinquirycounter" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return dailyInquiryCounterService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return dailyInquiryCounterService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: DailyInquiryCounterContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const dailyinquirycounterController = new Elysia({ prefix: "/dailyinquiry
       tags: ["DailyInquiryCounter"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return dailyInquiryCounterService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return dailyInquiryCounterService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: DailyInquiryCounterContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const dailyinquirycounterController = new Elysia({ prefix: "/dailyinquiry
       tags: ["DailyInquiryCounter"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return dailyInquiryCounterService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return dailyInquiryCounterService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: DailyInquiryCounterContract.Patch,
@@ -36,8 +56,14 @@ export const dailyinquirycounterController = new Elysia({ prefix: "/dailyinquiry
       tags: ["DailyInquiryCounter"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return dailyInquiryCounterService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return dailyInquiryCounterService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

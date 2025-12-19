@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { MasterContract } from "@repo/contract";
 import { masterService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const masterController = new Elysia({ prefix: "/master" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return masterService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return masterService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: MasterContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const masterController = new Elysia({ prefix: "/master" })
       tags: ["Master"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return masterService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return masterService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: MasterContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const masterController = new Elysia({ prefix: "/master" })
       tags: ["Master"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return masterService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return masterService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: MasterContract.Patch,
@@ -36,8 +56,14 @@ export const masterController = new Elysia({ prefix: "/master" })
       tags: ["Master"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return masterService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return masterService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

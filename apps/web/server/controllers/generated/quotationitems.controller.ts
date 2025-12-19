@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { QuotationItemsContract } from "@repo/contract";
 import { quotationItemsService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const quotationitemsController = new Elysia({ prefix: "/quotationitems" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return quotationItemsService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return quotationItemsService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: QuotationItemsContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const quotationitemsController = new Elysia({ prefix: "/quotationitems" }
       tags: ["QuotationItems"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return quotationItemsService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return quotationItemsService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: QuotationItemsContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const quotationitemsController = new Elysia({ prefix: "/quotationitems" }
       tags: ["QuotationItems"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return quotationItemsService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return quotationItemsService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: QuotationItemsContract.Patch,
@@ -36,8 +56,14 @@ export const quotationitemsController = new Elysia({ prefix: "/quotationitems" }
       tags: ["QuotationItems"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return quotationItemsService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return quotationItemsService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

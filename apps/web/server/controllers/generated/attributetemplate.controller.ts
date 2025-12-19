@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { AttributeTemplateContract } from "@repo/contract";
 import { attributeTemplateService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const attributetemplateController = new Elysia({ prefix: "/attributetemplate" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return attributeTemplateService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeTemplateService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: AttributeTemplateContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const attributetemplateController = new Elysia({ prefix: "/attributetempl
       tags: ["AttributeTemplate"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return attributeTemplateService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeTemplateService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: AttributeTemplateContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const attributetemplateController = new Elysia({ prefix: "/attributetempl
       tags: ["AttributeTemplate"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return attributeTemplateService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeTemplateService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: AttributeTemplateContract.Patch,
@@ -36,8 +56,14 @@ export const attributetemplateController = new Elysia({ prefix: "/attributetempl
       tags: ["AttributeTemplate"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return attributeTemplateService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeTemplateService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

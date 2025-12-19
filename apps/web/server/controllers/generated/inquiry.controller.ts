@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { InquiryContract } from "@repo/contract";
 import { inquiryService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const inquiryController = new Elysia({ prefix: "/inquiry" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return inquiryService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return inquiryService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: InquiryContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const inquiryController = new Elysia({ prefix: "/inquiry" })
       tags: ["Inquiry"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return inquiryService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return inquiryService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: InquiryContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const inquiryController = new Elysia({ prefix: "/inquiry" })
       tags: ["Inquiry"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return inquiryService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return inquiryService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: InquiryContract.Patch,
@@ -36,8 +56,14 @@ export const inquiryController = new Elysia({ prefix: "/inquiry" })
       tags: ["Inquiry"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return inquiryService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return inquiryService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

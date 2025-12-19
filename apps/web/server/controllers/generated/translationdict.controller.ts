@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { TranslationDictContract } from "@repo/contract";
 import { translationDictService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const translationdictController = new Elysia({ prefix: "/translationdict" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return translationDictService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return translationDictService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: TranslationDictContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const translationdictController = new Elysia({ prefix: "/translationdict"
       tags: ["TranslationDict"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return translationDictService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return translationDictService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: TranslationDictContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const translationdictController = new Elysia({ prefix: "/translationdict"
       tags: ["TranslationDict"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return translationDictService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return translationDictService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: TranslationDictContract.Patch,
@@ -36,8 +56,14 @@ export const translationdictController = new Elysia({ prefix: "/translationdict"
       tags: ["TranslationDict"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return translationDictService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return translationDictService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

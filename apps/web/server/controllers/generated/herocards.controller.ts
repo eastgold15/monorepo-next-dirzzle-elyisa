@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { HeroCardsContract } from "@repo/contract";
 import { heroCardsService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const herocardsController = new Elysia({ prefix: "/herocards" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return heroCardsService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return heroCardsService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: HeroCardsContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const herocardsController = new Elysia({ prefix: "/herocards" })
       tags: ["HeroCards"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return heroCardsService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return heroCardsService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: HeroCardsContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const herocardsController = new Elysia({ prefix: "/herocards" })
       tags: ["HeroCards"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return heroCardsService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return heroCardsService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: HeroCardsContract.Patch,
@@ -36,8 +56,14 @@ export const herocardsController = new Elysia({ prefix: "/herocards" })
       tags: ["HeroCards"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return heroCardsService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return heroCardsService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

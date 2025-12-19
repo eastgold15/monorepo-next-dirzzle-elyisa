@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { PermissionContract } from "@repo/contract";
 import { permissionService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const permissionController = new Elysia({ prefix: "/permission" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return permissionService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return permissionService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: PermissionContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const permissionController = new Elysia({ prefix: "/permission" })
       tags: ["Permission"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return permissionService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return permissionService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: PermissionContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const permissionController = new Elysia({ prefix: "/permission" })
       tags: ["Permission"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return permissionService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return permissionService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: PermissionContract.Patch,
@@ -36,8 +56,14 @@ export const permissionController = new Elysia({ prefix: "/permission" })
       tags: ["Permission"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return permissionService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return permissionService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

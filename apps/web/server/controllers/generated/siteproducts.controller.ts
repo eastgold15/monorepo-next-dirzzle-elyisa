@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { SiteProductsContract } from "@repo/contract";
 import { siteProductsService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const siteproductsController = new Elysia({ prefix: "/siteproducts" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return siteProductsService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return siteProductsService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: SiteProductsContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const siteproductsController = new Elysia({ prefix: "/siteproducts" })
       tags: ["SiteProducts"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return siteProductsService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return siteProductsService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: SiteProductsContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const siteproductsController = new Elysia({ prefix: "/siteproducts" })
       tags: ["SiteProducts"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return siteProductsService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return siteProductsService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: SiteProductsContract.Patch,
@@ -36,8 +56,14 @@ export const siteproductsController = new Elysia({ prefix: "/siteproducts" })
       tags: ["SiteProducts"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return siteProductsService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return siteProductsService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

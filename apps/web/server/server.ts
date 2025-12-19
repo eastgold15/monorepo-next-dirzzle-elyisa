@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { validateEmailConfig } from "./modules/email/startup-check";
 import { dbPlugin } from "./db/connection";
+import { siteMiddleware } from "./middleware/site";
 import * as controllers from "./controllers";
 
 /**
@@ -36,6 +37,7 @@ export const server = new Elysia({ name: "server" })
     environment: process.env.NODE_ENV || "development",
   })
   .use(dbPlugin)
+  .use(siteMiddleware)
   .use(httpProblemJsonPlugin())
   // 自动挂载所有控制器（包括自定义和生成的）
   .group("/v1", (app) => {

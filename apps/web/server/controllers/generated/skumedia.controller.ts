@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { SkuMediaContract } from "@repo/contract";
 import { skuMediaService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const skumediaController = new Elysia({ prefix: "/skumedia" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return skuMediaService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return skuMediaService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: SkuMediaContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const skumediaController = new Elysia({ prefix: "/skumedia" })
       tags: ["SkuMedia"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return skuMediaService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return skuMediaService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: SkuMediaContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const skumediaController = new Elysia({ prefix: "/skumedia" })
       tags: ["SkuMedia"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return skuMediaService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return skuMediaService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: SkuMediaContract.Patch,
@@ -36,8 +56,14 @@ export const skumediaController = new Elysia({ prefix: "/skumedia" })
       tags: ["SkuMedia"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return skuMediaService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return skuMediaService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

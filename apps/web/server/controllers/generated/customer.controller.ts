@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { CustomerContract } from "@repo/contract";
 import { customerService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const customerController = new Elysia({ prefix: "/customer" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return customerService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return customerService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: CustomerContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const customerController = new Elysia({ prefix: "/customer" })
       tags: ["Customer"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return customerService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return customerService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: CustomerContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const customerController = new Elysia({ prefix: "/customer" })
       tags: ["Customer"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return customerService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return customerService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: CustomerContract.Patch,
@@ -36,8 +56,14 @@ export const customerController = new Elysia({ prefix: "/customer" })
       tags: ["Customer"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return customerService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return customerService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

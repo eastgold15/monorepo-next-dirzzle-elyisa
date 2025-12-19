@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { UsersContract } from "@repo/contract";
 import { usersService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const usersController = new Elysia({ prefix: "/users" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return usersService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return usersService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: UsersContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const usersController = new Elysia({ prefix: "/users" })
       tags: ["Users"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return usersService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return usersService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: UsersContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const usersController = new Elysia({ prefix: "/users" })
       tags: ["Users"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return usersService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return usersService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: UsersContract.Patch,
@@ -36,8 +56,14 @@ export const usersController = new Elysia({ prefix: "/users" })
       tags: ["Users"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return usersService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return usersService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

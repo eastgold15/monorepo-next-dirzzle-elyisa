@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { MediaMetadataContract } from "@repo/contract";
 import { mediaMetadataService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const mediametadataController = new Elysia({ prefix: "/mediametadata" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return mediaMetadataService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaMetadataService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: MediaMetadataContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const mediametadataController = new Elysia({ prefix: "/mediametadata" })
       tags: ["MediaMetadata"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return mediaMetadataService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaMetadataService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: MediaMetadataContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const mediametadataController = new Elysia({ prefix: "/mediametadata" })
       tags: ["MediaMetadata"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return mediaMetadataService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaMetadataService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: MediaMetadataContract.Patch,
@@ -36,8 +56,14 @@ export const mediametadataController = new Elysia({ prefix: "/mediametadata" })
       tags: ["MediaMetadata"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return mediaMetadataService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaMetadataService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

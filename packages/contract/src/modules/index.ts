@@ -32,7 +32,7 @@ export * from "./generated/siteconfig.contract";
 export * from "./generated/siteproducts.contract";
 export * from "./generated/sites.contract";
 export * from "./generated/skumedia.contract";
-export * from "./generated/skus.contract";
+export * from "./custom/skus.contract";
 export * from "./generated/translationdict.contract";
 export * from "./generated/usersiteroles.contract";
 export * from "./generated/users.contract";

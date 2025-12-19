@@ -44,6 +44,25 @@ const CustomCreate = t.Composite([
         ),
         // 允许指定产品
         productId: t.String(),
+        mediaId: t.Optional(t.String()),
+    }),
+]);
+
+const CustomUpdate = t.Composite([
+    Generated.Create,
+    t.Object({
+        // 允许创建时同时提供属性值
+        attributeValues: t.Optional(
+            t.Array(
+                t.Object({
+                    attributeId: t.String(),
+                    value: t.String(),
+                })
+            )
+        ),
+        // 允许指定产品
+        productId: t.String(),
+        mediaId: t.Optional(t.String()),
     }),
 ]);
 
@@ -70,6 +89,7 @@ export const SkusContract = {
     ...Generated, // 默认继承所有：Update, Patch
     Response: CustomResponse, // 覆盖为自定义详情响应
     Create: CustomCreate, // 覆盖为自定义创建请求
+    Update: CustomUpdate, // 保持默认更新契约
     ListQuery: CustomListQuery, // 覆盖为自定义列表查询
 } as const;
 

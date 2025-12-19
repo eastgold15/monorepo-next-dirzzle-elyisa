@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { AttributeValueContract } from "@repo/contract";
 import { attributeValueService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const attributevalueController = new Elysia({ prefix: "/attributevalue" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return attributeValueService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeValueService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: AttributeValueContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const attributevalueController = new Elysia({ prefix: "/attributevalue" }
       tags: ["AttributeValue"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return attributeValueService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeValueService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: AttributeValueContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const attributevalueController = new Elysia({ prefix: "/attributevalue" }
       tags: ["AttributeValue"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return attributeValueService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeValueService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: AttributeValueContract.Patch,
@@ -36,8 +56,14 @@ export const attributevalueController = new Elysia({ prefix: "/attributevalue" }
       tags: ["AttributeValue"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return attributeValueService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return attributeValueService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {

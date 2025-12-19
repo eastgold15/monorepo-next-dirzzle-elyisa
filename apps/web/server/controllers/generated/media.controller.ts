@@ -2,11 +2,19 @@ import { Elysia, t } from "elysia";
 import { MediaContract } from "@repo/contract";
 import { mediaService } from "~/modules/index";
 import { dbPlugin } from "~/db/connection";
+import { siteMiddleware } from "~/middleware/site";
 
 export const mediaController = new Elysia({ prefix: "/media" })
   .use(dbPlugin)
-  .get("/", ({ query, db }) => {
-    return mediaService.findAll(query, { db, user: null });
+  .use(siteMiddleware)
+  .get("/", ({ query, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaService.findAll(query, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     query: MediaContract.ListQuery,
     detail: {
@@ -15,8 +23,14 @@ export const mediaController = new Elysia({ prefix: "/media" })
       tags: ["Media"]
     }
   })
-  .post("/", ({ body, db }) => {
-    return mediaService.create(body, { db, user: null });
+  .post("/", ({ body, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaService.create(body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     body: MediaContract.Create,
     detail: {
@@ -25,8 +39,14 @@ export const mediaController = new Elysia({ prefix: "/media" })
       tags: ["Media"]
     }
   })
-  .patch("/:id", ({ params, body, db }) => {
-    return mediaService.update(params.id, body, { db, user: null });
+  .patch("/:id", ({ params, body, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaService.update(params.id, body, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     body: MediaContract.Patch,
@@ -36,8 +56,14 @@ export const mediaController = new Elysia({ prefix: "/media" })
       tags: ["Media"]
     }
   })
-  .delete("/:id", ({ params, db }) => {
-    return mediaService.delete(params.id, { db, user: null });
+  .delete("/:id", ({ params, db, siteId, siteType, factoryId, exporterId }) => {
+    return mediaService.delete(params.id, {
+      db,
+      siteId,
+      siteType,
+      factoryId,
+      exporterId
+    });
   }, {
     params: t.Object({ id: t.String() }),
     detail: {
