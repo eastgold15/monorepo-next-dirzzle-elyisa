@@ -5,16 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import {
-  DailyInquiryCounterContract,
-  dailyInquiryCounterTable,
-} from "@repo/contract";
+import { dailyInquiryCounterTable, DailyInquiryCounterContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class DailyInquiryCounterGeneratedService extends B2BBaseService<
-  typeof dailyInquiryCounterTable,
-  typeof DailyInquiryCounterContract
-> {
+export class DailyInquiryCounterGeneratedService extends B2BBaseService<typeof dailyInquiryCounterTable, typeof DailyInquiryCounterContract> {
   constructor() {
     super(dailyInquiryCounterTable, DailyInquiryCounterContract);
   }

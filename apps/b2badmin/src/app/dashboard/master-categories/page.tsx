@@ -604,7 +604,7 @@ export default function MasterCategoryManager() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-1 items-center gap-4">
                 <div className="relative max-w-md flex-1">
-                  <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-slate-400" />
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     className="pl-10"
                     onChange={(e) => setSearchTerm(e.target.value)}

@@ -2,9 +2,9 @@
 // 用于分类管理
 
 import { t } from "elysia";
+import { ProductmastercategoriesContract as GeneratedProduct } from "../_generated/productmastercategories.contract";
 // 1. 导入自动生成的原始契约
 import { SitecategoriesContract as GeneratedSite } from "../_generated/sitecategories.contract";
-import { ProductmastercategoriesContract as GeneratedProduct } from "../_generated/productmastercategories.contract";
 
 /**
  * 自定义扩展契约：Categories
@@ -46,23 +46,27 @@ const SiteCategoryQuery = t.Object({
   hasProducts: t.Optional(t.Boolean()),
   level: t.Optional(t.Number()),
   search: t.Optional(t.String()),
-  sortBy: t.Optional(t.Union([
-    t.Literal("sortOrder"),
-    t.Literal("name"),
-    t.Literal("createdAt"),
-    t.Literal("productCount"),
-  ])),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortBy: t.Optional(
+    t.UnionEnum([
+      "sortOrder",
+      "name",
+      "createdAt",
+      "productCount",
+    ])
+  ),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
 
 // 批量更新分类排序
 const SiteCategorySortUpdate = t.Object({
   siteId: t.String(),
-  categories: t.Array(t.Object({
-    id: t.String(),
-    sortOrder: t.Number(),
-    parentId: t.Optional(t.String()),
-  })),
+  categories: t.Array(
+    t.Object({
+      id: t.String(),
+      sortOrder: t.Number(),
+      parentId: t.Optional(t.String()),
+    })
+  ),
 });
 
 // --- 产品主分类 ---
@@ -104,13 +108,15 @@ const ProductCategoryQuery = t.Object({
   hasTemplate: t.Optional(t.Boolean()),
   isActive: t.Optional(t.Boolean()),
   search: t.Optional(t.String()),
-  sortBy: t.Optional(t.Union([
-    t.Literal("sortOrder"),
-    t.Literal("name"),
-    t.Literal("createdAt"),
-    t.Literal("productCount"),
-  ])),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortBy: t.Optional(
+    t.UnionEnum([
+      "sortOrder",
+      "name",
+      "createdAt",
+      "productCount",
+    ])
+  ),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
 
 // 分类树结构

@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { SessionContract, sessionTable } from "@repo/contract";
+import { sessionTable, SessionContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class SessionGeneratedService extends B2BBaseService<
-  typeof sessionTable,
-  typeof SessionContract
-> {
+export class SessionGeneratedService extends B2BBaseService<typeof sessionTable, typeof SessionContract> {
   constructor() {
     super(sessionTable, SessionContract);
   }

@@ -4,9 +4,6 @@
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
 import { SitesContract as Generated } from "../_generated/sites.contract";
-import { UsersContract } from "../_generated/users.contract";
-import { FactoriesContract } from "../_generated/factories.contract";
-import { ExportersContract } from "../_generated/exporters.contract";
 
 /**
  * 自定义扩展契约：Sites
@@ -61,43 +58,43 @@ const CustomCreate = t.Composite([
 const SiteQuery = t.Object({
   factoryId: t.Optional(t.String()),
   exporterId: t.Optional(t.String()),
-  type: t.Optional(t.Union([
-    t.Literal("b2b"),
-    t.Literal("b2c"),
-    t.Literal("marketplace"),
-  ])),
-  status: t.Optional(t.Union([
-    t.Literal("active"),
-    t.Literal("inactive"),
-    t.Literal("suspended"),
-  ])),
+  type: t.Optional(
+    t.UnionEnum(["b2b", "b2c", "marketplace"])
+  ),
+  status: t.Optional(
+    t.UnionEnum([
+      "active",
+      "inactive",
+      "suspended",
+    ])
+  ),
   domain: t.Optional(t.String()),
   search: t.Optional(t.String()),
   hasCustomDomain: t.Optional(t.Boolean()),
-  sortBy: t.Optional(t.Union([
-    t.Literal("createdAt"),
-    t.Literal("updatedAt"),
-    t.Literal("name"),
-    t.Literal("domain"),
-    t.Literal("status"),
-  ])),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortBy: t.Optional(
+    t.UnionEnum([
+      "createdAt",
+      "updatedAt",
+      "name",
+      "domain",
+      "status",
+    ])
+  ),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
 
 // 站点用户管理
 const SiteUserManagement = t.Object({
   siteId: t.String(),
   userIds: t.Array(t.String()),
-  action: t.Union([
-    t.Literal("add"),
-    t.Literal("remove"),
-    t.Literal("changeRole"),
+  action: t.UnionEnum([
+    "add",
+    "remove",
+    "changeRole",
   ]),
-  role: t.Optional(t.Union([
-    t.Literal("admin"),
-    t.Literal("editor"),
-    t.Literal("viewer"),
-  ])),
+  role: t.Optional(
+    t.UnionEnum(["admin", "editor", "viewer"])
+  ),
 });
 
 // 站点配置更新
@@ -112,41 +109,55 @@ const SiteConfigUpdate = t.Object({
     favicon: t.Optional(t.String()),
 
     // 主题设置
-    theme: t.Optional(t.Object({
-      primaryColor: t.String(),
-      secondaryColor: t.String(),
-      fontFamily: t.String(),
-      layout: t.Union([t.Literal("modern"), t.Literal("classic"), t.Literal("minimal")]),
-    })),
+    theme: t.Optional(
+      t.Object({
+        primaryColor: t.String(),
+        secondaryColor: t.String(),
+        fontFamily: t.String(),
+        layout: t.UnionEnum([
+          "modern",
+          "classic",
+          "minimal",
+        ]),
+      })
+    ),
 
     // 功能开关
-    features: t.Optional(t.Object({
-      enableInquiry: t.Boolean(),
-      enableQuotation: t.Boolean(),
-      enableRegistration: t.Boolean(),
-      enableMultiLanguage: t.Boolean(),
-      enableAnalytics: t.Boolean(),
-    })),
+    features: t.Optional(
+      t.Object({
+        enableInquiry: t.Boolean(),
+        enableQuotation: t.Boolean(),
+        enableRegistration: t.Boolean(),
+        enableMultiLanguage: t.Boolean(),
+        enableAnalytics: t.Boolean(),
+      })
+    ),
 
     // 域名设置
-    domain: t.Optional(t.Object({
-      customDomain: t.Optional(t.String()),
-      enableSSL: t.Boolean(),
-      enableCDN: t.Boolean(),
-    })),
+    domain: t.Optional(
+      t.Object({
+        customDomain: t.Optional(t.String()),
+        enableSSL: t.Boolean(),
+        enableCDN: t.Boolean(),
+      })
+    ),
 
     // 邮件设置
-    email: t.Optional(t.Object({
-      senderName: t.String(),
-      senderEmail: t.String({ format: "email" }),
-      replyTo: t.Optional(t.String({ format: "email" })),
-    })),
+    email: t.Optional(
+      t.Object({
+        senderName: t.String(),
+        senderEmail: t.String({ format: "email" }),
+        replyTo: t.Optional(t.String({ format: "email" })),
+      })
+    ),
 
     // 其他设置
-    maintenance: t.Optional(t.Object({
-      enabled: t.Boolean(),
-      message: t.String(),
-    })),
+    maintenance: t.Optional(
+      t.Object({
+        enabled: t.Boolean(),
+        message: t.String(),
+      })
+    ),
   }),
 });
 
@@ -156,27 +167,35 @@ const SiteStats = t.Object({
   activeSites: t.Number(),
   inactiveSites: t.Number(),
   suspendedSites: t.Number(),
-  factoryDistribution: t.Array(t.Object({
-    factoryId: t.String(),
-    factoryName: t.String(),
-    siteCount: t.Number(),
-  })),
-  typeDistribution: t.Array(t.Object({
-    type: t.String(),
-    count: t.Number(),
-  })),
-  recentActivity: t.Array(t.Object({
-    siteId: t.String(),
-    siteName: t.String(),
-    activity: t.String(),
-    timestamp: t.String({ format: "date-time" }),
-  })),
-  topPerformers: t.Array(t.Object({
-    siteId: t.String(),
-    siteName: t.String(),
-    inquiries: t.Number(),
-    visitors: t.Number(),
-  })),
+  factoryDistribution: t.Array(
+    t.Object({
+      factoryId: t.String(),
+      factoryName: t.String(),
+      siteCount: t.Number(),
+    })
+  ),
+  typeDistribution: t.Array(
+    t.Object({
+      type: t.String(),
+      count: t.Number(),
+    })
+  ),
+  recentActivity: t.Array(
+    t.Object({
+      siteId: t.String(),
+      siteName: t.String(),
+      activity: t.String(),
+      timestamp: t.String({ format: "date-time" }),
+    })
+  ),
+  topPerformers: t.Array(
+    t.Object({
+      siteId: t.String(),
+      siteName: t.String(),
+      inquiries: t.Number(),
+      visitors: t.Number(),
+    })
+  ),
 });
 
 // 站点克隆

@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { PermissionContract, permissionTable } from "@repo/contract";
+import { permissionTable, PermissionContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class PermissionGeneratedService extends B2BBaseService<
-  typeof permissionTable,
-  typeof PermissionContract
-> {
+export class PermissionGeneratedService extends B2BBaseService<typeof permissionTable, typeof PermissionContract> {
   constructor() {
     super(permissionTable, PermissionContract);
   }

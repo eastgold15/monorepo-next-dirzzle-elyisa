@@ -125,7 +125,7 @@ export default function ProductList() {
               <div className="flex gap-4 border-b p-4">
                 <div className="relative max-w-md flex-1">
                   <Search
-                    className="-translate-y-1/2 absolute top-1/2 left-3 text-slate-400"
+                    className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
                     size={18}
                   />
                   <input

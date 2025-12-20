@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { HeroCardsContract, heroCardsTable } from "@repo/contract";
+import { heroCardsTable, HeroCardsContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class HeroCardsGeneratedService extends B2BBaseService<
-  typeof heroCardsTable,
-  typeof HeroCardsContract
-> {
+export class HeroCardsGeneratedService extends B2BBaseService<typeof heroCardsTable, typeof HeroCardsContract> {
   constructor() {
     super(heroCardsTable, HeroCardsContract);
   }

@@ -93,7 +93,7 @@ export default function MediaLibrary() {
             <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">
               <div className="relative flex-1">
                 <Search
-                  className="-translate-y-1/2 absolute top-1/2 left-3 text-slate-400"
+                  className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
                   size={18}
                 />
                 <input

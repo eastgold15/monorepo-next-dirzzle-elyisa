@@ -4,12 +4,9 @@
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
 import { InquiryContract as Generated } from "../_generated/inquiry.contract";
-import { InquiryitemsContract } from "../_generated/inquiryitems.contract";
 import { MediaContract } from "../_generated/media.contract";
 import { ProductsContract } from "../_generated/products.contract";
 import { SkusContract } from "../_generated/skus.contract";
-import { CustomersContract } from "../_generated/customers.contract";
-import { SalespersonsContract } from "../_generated/salespersons.contract";
 
 /**
  * 自定义扩展契约：Inquiry
@@ -76,11 +73,11 @@ const CustomListQuery = t.Composite([
     customerPhone: t.Optional(t.String()),
     // 按状态筛选
     status: t.Optional(
-      t.Union([
-        t.Literal("pending"),
-        t.Literal("processing"),
-        t.Literal("completed"),
-        t.Literal("cancelled"),
+      t.UnionEnum([
+        "pending",
+        "processing",
+        "completed",
+        "cancelled",
       ])
     ),
     // 按商品ID筛选

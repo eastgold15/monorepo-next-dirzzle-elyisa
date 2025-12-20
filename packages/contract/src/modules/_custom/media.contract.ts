@@ -4,7 +4,6 @@
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
 import { MediaContract as Generated } from "../_generated/media.contract";
-import { MediametadataContract } from "../_generated/mediametadata.contract";
 
 // 2. 导入你可能需要关联的其他契约
 // import { UserContract } from "../generated/user.contract";
@@ -84,14 +83,18 @@ const MediaQuery = t.Object({
   mimeType: t.Optional(t.String()),
   uploaderId: t.Optional(t.String()),
   tags: t.Optional(t.Array(t.String())),
-  dateRange: t.Optional(t.Object({
-    start: t.String({ format: "date-time" }),
-    end: t.String({ format: "date-time" }),
-  })),
-  sizeRange: t.Optional(t.Object({
-    min: t.Number({ minimum: 0 }),
-    max: t.Number({ minimum: 0 }),
-  })),
+  dateRange: t.Optional(
+    t.Object({
+      start: t.String({ format: "date-time" }),
+      end: t.String({ format: "date-time" }),
+    })
+  ),
+  sizeRange: t.Optional(
+    t.Object({
+      min: t.Number({ minimum: 0 }),
+      max: t.Number({ minimum: 0 }),
+    })
+  ),
   isPublic: t.Optional(t.Boolean()),
   hasMetadata: t.Optional(t.Boolean()),
 });
@@ -100,31 +103,37 @@ const MediaQuery = t.Object({
 const MediaStats = t.Object({
   totalCount: t.Number(),
   totalSize: t.Number(),
-  categoryStats: t.Array(t.Object({
-    category: t.String(),
-    count: t.Number(),
-    size: t.Number(),
-  })),
+  categoryStats: t.Array(
+    t.Object({
+      category: t.String(),
+      count: t.Number(),
+      size: t.Number(),
+    })
+  ),
   recentUploads: t.Number(),
-  popularTags: t.Array(t.Object({
-    tag: t.String(),
-    count: t.Number(),
-  })),
+  popularTags: t.Array(
+    t.Object({
+      tag: t.String(),
+      count: t.Number(),
+    })
+  ),
 });
 
 // 媒体处理请求
 const ProcessMediaRequest = t.Object({
   mediaId: t.String(),
-  operations: t.Array(t.Object({
-    type: t.Union([
-      t.Literal("resize"),
-      t.Literal("crop"),
-      t.Literal("compress"),
-      t.Literal("watermark"),
-      t.Literal("format"),
-    ]),
-    params: t.Object({}, { additionalProperties: true }),
-  })),
+  operations: t.Array(
+    t.Object({
+      type: t.UnionEnum([
+        "resize",
+        "crop",
+        "compress",
+        "watermark",
+        "format",
+      ]),
+      params: t.Object({}, { additionalProperties: true }),
+    })
+  ),
 });
 
 // --- D. 组装并导出 ---

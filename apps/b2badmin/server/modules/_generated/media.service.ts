@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { MediaContract, mediaTable } from "@repo/contract";
+import { mediaTable, MediaContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class MediaGeneratedService extends B2BBaseService<
-  typeof mediaTable,
-  typeof MediaContract
-> {
+export class MediaGeneratedService extends B2BBaseService<typeof mediaTable, typeof MediaContract> {
   constructor() {
     super(mediaTable, MediaContract);
   }

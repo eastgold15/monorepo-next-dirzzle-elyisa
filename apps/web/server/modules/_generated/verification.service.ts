@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { VerificationContract, verificationTable } from "@repo/contract";
+import { verificationTable, VerificationContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class VerificationGeneratedService extends WEBBaseService<
-  typeof verificationTable,
-  typeof VerificationContract
-> {
+export class VerificationGeneratedService extends WEBBaseService<typeof verificationTable, typeof VerificationContract> {
   constructor() {
     super(verificationTable, VerificationContract);
   }

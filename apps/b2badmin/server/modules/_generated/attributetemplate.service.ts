@@ -5,16 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import {
-  AttributeTemplateContract,
-  attributeTemplateTable,
-} from "@repo/contract";
+import { attributeTemplateTable, AttributeTemplateContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class AttributeTemplateGeneratedService extends B2BBaseService<
-  typeof attributeTemplateTable,
-  typeof AttributeTemplateContract
-> {
+export class AttributeTemplateGeneratedService extends B2BBaseService<typeof attributeTemplateTable, typeof AttributeTemplateContract> {
   constructor() {
     super(attributeTemplateTable, AttributeTemplateContract);
   }

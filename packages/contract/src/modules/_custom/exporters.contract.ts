@@ -4,9 +4,6 @@
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
 import { ExportersContract as Generated } from "../_generated/exporters.contract";
-import { FactoriesContract } from "../_generated/factories.contract";
-import { UsersContract } from "../_generated/users.contract";
-import { SitesContract } from "../_generated/sites.contract";
 
 /**
  * 自定义扩展契约：Exporters
@@ -51,11 +48,13 @@ const CustomCreate = t.Composite([
     shippingMethods: t.Optional(t.Array(t.String())),
     businessLicense: t.Optional(t.String()),
     establishedYear: t.Optional(t.Number({ minimum: 1800 })),
-    annualRevenue: t.Optional(t.Object({
-      amount: t.Number({ minimum: 0 }),
-      currency: t.String(),
-      year: t.Number({ minimum: 2000 }),
-    })),
+    annualRevenue: t.Optional(
+      t.Object({
+        amount: t.Number({ minimum: 0 }),
+        currency: t.String(),
+        year: t.Number({ minimum: 2000 }),
+      })
+    ),
     // website: t.Optional(t.String({ format: "uri" })),
     // description: t.Optional(t.String()),
     // logo: t.Optional(t.String()),
@@ -79,15 +78,17 @@ const ExporterQuery = t.Object({
   exportMarkets: t.Optional(t.Array(t.String())),
   paymentMethods: t.Optional(t.Array(t.String())),
   search: t.Optional(t.String()),
-  sortBy: t.Optional(t.Union([
-    t.Literal("createdAt"),
-    t.Literal("updatedAt"),
-    t.Literal("name"),
-    t.Literal("code"),
-    t.Literal("factories"),
-    t.Literal("revenue"),
-  ])),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortBy: t.Optional(
+    t.UnionEnum([
+      "createdAt",
+      "updatedAt",
+      "name",
+      "code",
+      "factories",
+      "revenue",
+    ])
+  ),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
 
 // 出口商状态更新
@@ -104,12 +105,12 @@ const ExporterCertification = t.Object({
   certificationNumber: t.String(),
   issuedBy: t.String(),
   issuedDate: t.String({ format: "date" }),
-  expiryDate: t.Optional(t.String({ format: "date" }),
+  expiryDate: t.Optional(t.String({ format: "date" })),
   certificateUrl: t.Optional(t.String()),
-  status: t.Union([
-    t.Literal("pending"),
-    t.Literal("verified"),
-    t.Literal("expired"),
+  status: t.UnionEnum([
+    "pending",
+    "verified",
+    "expired"
   ]),
 });
 
@@ -119,45 +120,61 @@ const ExporterStats = t.Object({
   activeExporters: t.Number(),
   inactiveExporters: t.Number(),
   certifiedExporters: t.Number(),
-  countryDistribution: t.Array(t.Object({
-    country: t.String(),
-    count: t.Number(),
-    percentage: t.Number(),
-  })),
-  marketDistribution: t.Array(t.Object({
-    market: t.String(),
-    count: t.Number(),
-  })),
-  sizeDistribution: t.Array(t.Object({
-    size: t.Union([t.Literal("small"), t.Literal("medium"), t.Literal("large")]),
-    count: t.Number(),
-  })),
+  countryDistribution: t.Array(
+    t.Object({
+      country: t.String(),
+      count: t.Number(),
+      percentage: t.Number(),
+    })
+  ),
+  marketDistribution: t.Array(
+    t.Object({
+      market: t.String(),
+      count: t.Number(),
+    })
+  ),
+  sizeDistribution: t.Array(
+    t.Object({
+      size: t.UnionEnum([
+        "small",
+        "medium",
+        "large",
+      ]),
+      count: t.Number(),
+    })
+  ),
   recentRegistrations: t.Number(),
-  topPerformers: t.Array(t.Object({
-    exporterId: t.String(),
-    name: t.String(),
-    orders: t.Number(),
-    revenue: t.Number(),
-    factories: t.Number(),
-  })),
+  topPerformers: t.Array(
+    t.Object({
+      exporterId: t.String(),
+      name: t.String(),
+      orders: t.Number(),
+      revenue: t.Number(),
+      factories: t.Number(),
+    })
+  ),
 });
 
 // 出口商审核
 const ExporterVerification = t.Object({
   exporterId: t.String(),
-  status: t.Union([
-    t.Literal("pending"),
-    t.Literal("approved"),
-    t.Literal("rejected"),
+  status: t.UnionEnum([
+    "pending",
+    "approved",
+    "rejected",
   ]),
   verifiedBy: t.Optional(t.String()),
   verifiedAt: t.Optional(t.String({ format: "date-time" })),
   comments: t.String(),
-  documents: t.Optional(t.Array(t.Object({
-    type: t.String(),
-    url: t.String(),
-    name: t.String(),
-  }))),
+  documents: t.Optional(
+    t.Array(
+      t.Object({
+        type: t.String(),
+        url: t.String(),
+        name: t.String(),
+      })
+    )
+  ),
 });
 
 // --- D. 组装并导出 ---

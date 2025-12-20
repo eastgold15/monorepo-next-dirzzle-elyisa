@@ -5,16 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import {
-  ProductMasterCategoriesContract,
-  productMasterCategoriesTable,
-} from "@repo/contract";
+import { productMasterCategoriesTable, ProductMasterCategoriesContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class ProductMasterCategoriesGeneratedService extends B2BBaseService<
-  typeof productMasterCategoriesTable,
-  typeof ProductMasterCategoriesContract
-> {
+export class ProductMasterCategoriesGeneratedService extends B2BBaseService<typeof productMasterCategoriesTable, typeof ProductMasterCategoriesContract> {
   constructor() {
     super(productMasterCategoriesTable, ProductMasterCategoriesContract);
   }

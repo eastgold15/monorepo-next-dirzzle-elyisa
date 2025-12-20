@@ -15,7 +15,7 @@ import { type Static, Type as t } from "@sinclair/typebox";
 // 1. 排序参数（通用，可复用）
 export const SortParams = t.Object({
   sort: t.Optional(t.String()),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
 export type SortParams = Static<typeof SortParams>;
 

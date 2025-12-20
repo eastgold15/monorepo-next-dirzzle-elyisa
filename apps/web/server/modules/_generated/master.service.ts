@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { MasterContract, masterTable } from "@repo/contract";
+import { masterTable, MasterContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class MasterGeneratedService extends WEBBaseService<
-  typeof masterTable,
-  typeof MasterContract
-> {
+export class MasterGeneratedService extends WEBBaseService<typeof masterTable, typeof MasterContract> {
   constructor() {
     super(masterTable, MasterContract);
   }

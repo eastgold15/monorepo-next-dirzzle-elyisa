@@ -5,28 +5,15 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-
-import { SkuMediaContract } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "~/db/connection";
-import { authGuardMid } from "~/middleware/auth";
+import { SkuMediaContract } from "@repo/contract";
 import { skuMediaService } from "../../modules/index";
+import { authGuardMid } from "~/middleware/auth";
+import { dbPlugin } from "~/db/connection";
 
 export const skumediaController = new Elysia({ prefix: "/skumedia" })
   .use(dbPlugin)
   .use(authGuardMid)
-  .get(
-    "/",
-    ({ query, auth, db }) => skuMediaService.findAll(query, { db, auth }),
-    { query: SkuMediaContract.ListQuery }
-  )
-  .post(
-    "/",
-    ({ body, auth, db }) => skuMediaService.create(body, { db, auth }),
-    { body: SkuMediaContract.Create }
-  )
-  .delete(
-    "/:id",
-    ({ params, auth, db }) => skuMediaService.delete(params.id, { db, auth }),
-    { params: t.Object({ id: t.String() }) }
-  );
+  .get("/", ({ query, auth, db }) => skuMediaService.findAll(query, { db, auth }), { query: SkuMediaContract.ListQuery })
+  .post("/", ({ body, auth, db }) => skuMediaService.create(body, { db, auth }), { body: SkuMediaContract.Create })
+  .delete("/:id", ({ params, auth, db }) => skuMediaService.delete(params.id, { db, auth }), { params: t.Object({ id: t.String() }) });

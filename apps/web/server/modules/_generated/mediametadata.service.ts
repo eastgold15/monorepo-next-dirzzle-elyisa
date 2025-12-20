@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { MediaMetadataContract, mediaMetadataTable } from "@repo/contract";
+import { mediaMetadataTable, MediaMetadataContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class MediaMetadataGeneratedService extends WEBBaseService<
-  typeof mediaMetadataTable,
-  typeof MediaMetadataContract
-> {
+export class MediaMetadataGeneratedService extends WEBBaseService<typeof mediaMetadataTable, typeof MediaMetadataContract> {
   constructor() {
     super(mediaMetadataTable, MediaMetadataContract);
   }

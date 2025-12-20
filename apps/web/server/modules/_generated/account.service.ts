@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { AccountContract, accountTable } from "@repo/contract";
+import { accountTable, AccountContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class AccountGeneratedService extends WEBBaseService<
-  typeof accountTable,
-  typeof AccountContract
-> {
+export class AccountGeneratedService extends WEBBaseService<typeof accountTable, typeof AccountContract> {
   constructor() {
     super(accountTable, AccountContract);
   }

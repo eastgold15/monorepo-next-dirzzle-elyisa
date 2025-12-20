@@ -260,7 +260,7 @@ export default function ProductCreator() {
             {/* Stepper */}
             <div className="mb-8">
               <div className="relative flex items-center justify-between">
-                <div className="-z-10 absolute top-1/2 right-0 left-0 h-0.5 bg-slate-200" />
+                <div className="absolute top-1/2 right-0 left-0 -z-10 h-0.5 bg-slate-200" />
                 {steps.map((label, idx) => (
                   <div
                     className={`flex flex-col items-center gap-2 bg-slate-50 px-2 ${idx <= currentStep ? "text-indigo-600" : "text-slate-400"}`}

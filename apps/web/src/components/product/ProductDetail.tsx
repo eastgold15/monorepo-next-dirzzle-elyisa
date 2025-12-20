@@ -340,7 +340,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             {/* Main Image with Nav */}
             <div className="group relative mb-8 aspect-4/3 w-full">
               <button
-                className="-translate-y-1/2 absolute top-1/2 left-0 z-10 p-2 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute top-1/2 left-0 z-10 -translate-y-1/2 p-2 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={prevImage}
               >
                 <ChevronLeft className="h-6 w-6 text-gray-400" />
@@ -372,7 +372,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
               )}
 
               <button
-                className="-translate-y-1/2 absolute top-1/2 right-0 z-10 p-2 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute top-1/2 right-0 z-10 -translate-y-1/2 p-2 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={next}
               >
                 <ChevronRight className="h-6 w-6 text-gray-400" />
@@ -508,7 +508,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 h-4 w-4 text-gray-500" />
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-gray-500" />
                 </div>
               </div>
             </div>

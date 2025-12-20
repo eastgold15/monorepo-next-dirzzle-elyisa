@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { RolePermissionsContract, rolePermissionsTable } from "@repo/contract";
+import { rolePermissionsTable, RolePermissionsContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class RolePermissionsGeneratedService extends WEBBaseService<
-  typeof rolePermissionsTable,
-  typeof RolePermissionsContract
-> {
+export class RolePermissionsGeneratedService extends WEBBaseService<typeof rolePermissionsTable, typeof RolePermissionsContract> {
   constructor() {
     super(rolePermissionsTable, RolePermissionsContract);
   }

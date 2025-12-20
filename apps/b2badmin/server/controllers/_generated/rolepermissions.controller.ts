@@ -5,32 +5,15 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-
-import { RolePermissionsContract } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "~/db/connection";
-import { authGuardMid } from "~/middleware/auth";
+import { RolePermissionsContract } from "@repo/contract";
 import { rolePermissionsService } from "../../modules/index";
+import { authGuardMid } from "~/middleware/auth";
+import { dbPlugin } from "~/db/connection";
 
-export const rolepermissionsController = new Elysia({
-  prefix: "/rolepermissions",
-})
+export const rolepermissionsController = new Elysia({ prefix: "/rolepermissions" })
   .use(dbPlugin)
   .use(authGuardMid)
-  .get(
-    "/",
-    ({ query, auth, db }) =>
-      rolePermissionsService.findAll(query, { db, auth }),
-    { query: RolePermissionsContract.ListQuery }
-  )
-  .post(
-    "/",
-    ({ body, auth, db }) => rolePermissionsService.create(body, { db, auth }),
-    { body: RolePermissionsContract.Create }
-  )
-  .delete(
-    "/:id",
-    ({ params, auth, db }) =>
-      rolePermissionsService.delete(params.id, { db, auth }),
-    { params: t.Object({ id: t.String() }) }
-  );
+  .get("/", ({ query, auth, db }) => rolePermissionsService.findAll(query, { db, auth }), { query: RolePermissionsContract.ListQuery })
+  .post("/", ({ body, auth, db }) => rolePermissionsService.create(body, { db, auth }), { body: RolePermissionsContract.Create })
+  .delete("/:id", ({ params, auth, db }) => rolePermissionsService.delete(params.id, { db, auth }), { params: t.Object({ id: t.String() }) });

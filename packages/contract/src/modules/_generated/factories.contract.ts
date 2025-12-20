@@ -5,15 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-
-import {
-  createInsertSchema,
-  createSelectSchema,
-  createUpdateSchema,
-} from "drizzle-typebox";
 import { t } from "elysia";
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
 import { factoriesTable } from "../../table.schema";
+import { PaginationParams, SortParams } from "../../helper/query-types.model";
 
 const _Select = createSelectSchema(factoriesTable);
 const _Insert = createInsertSchema(factoriesTable);

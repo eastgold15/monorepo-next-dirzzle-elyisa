@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { FactoriesContract, factoriesTable } from "@repo/contract";
+import { factoriesTable, FactoriesContract } from "@repo/contract";
 import { B2BBaseService } from "../_lib/base-service";
 
-export class FactoriesGeneratedService extends B2BBaseService<
-  typeof factoriesTable,
-  typeof FactoriesContract
-> {
+export class FactoriesGeneratedService extends B2BBaseService<typeof factoriesTable, typeof FactoriesContract> {
   constructor() {
     super(factoriesTable, FactoriesContract);
   }

@@ -66,7 +66,7 @@ const SubscribeModal: React.FC<SubscribeModalProps> = ({ isOpen, onClose }) => {
                   value={email}
                 />
                 <button
-                  className="-translate-y-1/2 absolute top-1/2 right-0 text-black hover:opacity-70"
+                  className="absolute top-1/2 right-0 -translate-y-1/2 text-black hover:opacity-70"
                   type="submit"
                 >
                   <ArrowRight className="h-4 w-4" />

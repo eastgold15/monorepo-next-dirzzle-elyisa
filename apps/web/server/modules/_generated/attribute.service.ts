@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { AttributeContract, attributeTable } from "@repo/contract";
+import { attributeTable, AttributeContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class AttributeGeneratedService extends WEBBaseService<
-  typeof attributeTable,
-  typeof AttributeContract
-> {
+export class AttributeGeneratedService extends WEBBaseService<typeof attributeTable, typeof AttributeContract> {
   constructor() {
     super(attributeTable, AttributeContract);
   }

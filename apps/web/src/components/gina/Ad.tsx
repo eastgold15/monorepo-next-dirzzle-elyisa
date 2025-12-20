@@ -61,7 +61,7 @@ const Ad: React.FC = () => {
 
         {/* 指示器 */}
         {ads.length > 1 && (
-          <div className="-translate-x-1/2 absolute bottom-8 left-1/2 z-10 flex gap-2">
+          <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 gap-2">
             {ads.map((_, index) => (
               <button
                 className={`h-2 w-2 rounded-full transition-all ${

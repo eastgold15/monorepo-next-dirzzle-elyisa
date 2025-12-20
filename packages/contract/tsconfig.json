@@ -7,17 +7,10 @@
     "sourceMap": true,
     "rootDir": "./src",
     "paths": {
-      "~/*": [
-        "./src/*"
-      ]
+      "~/*": ["./src/*"]
     },
-    "strictNullChecks": true,
+    "strictNullChecks": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "dist",
-    "node_modules"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

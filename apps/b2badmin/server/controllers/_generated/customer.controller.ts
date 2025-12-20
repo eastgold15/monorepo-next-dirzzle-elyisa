@@ -5,28 +5,15 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-
-import { CustomerContract } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "~/db/connection";
-import { authGuardMid } from "~/middleware/auth";
+import { CustomerContract } from "@repo/contract";
 import { customerService } from "../../modules/index";
+import { authGuardMid } from "~/middleware/auth";
+import { dbPlugin } from "~/db/connection";
 
 export const customerController = new Elysia({ prefix: "/customer" })
   .use(dbPlugin)
   .use(authGuardMid)
-  .get(
-    "/",
-    ({ query, auth, db }) => customerService.findAll(query, { db, auth }),
-    { query: CustomerContract.ListQuery }
-  )
-  .post(
-    "/",
-    ({ body, auth, db }) => customerService.create(body, { db, auth }),
-    { body: CustomerContract.Create }
-  )
-  .delete(
-    "/:id",
-    ({ params, auth, db }) => customerService.delete(params.id, { db, auth }),
-    { params: t.Object({ id: t.String() }) }
-  );
+  .get("/", ({ query, auth, db }) => customerService.findAll(query, { db, auth }), { query: CustomerContract.ListQuery })
+  .post("/", ({ body, auth, db }) => customerService.create(body, { db, auth }), { body: CustomerContract.Create })
+  .delete("/:id", ({ params, auth, db }) => customerService.delete(params.id, { db, auth }), { params: t.Object({ id: t.String() }) });

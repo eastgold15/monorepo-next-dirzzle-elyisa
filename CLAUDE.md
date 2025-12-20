@@ -7,7 +7,7 @@ Role: 你是一个资深的 TypeScript 全栈架构师，精通 ElysiaJS、Drizz
 
 Context: 我们的项目使用 Schema 驱动开发。目录结构如下：
 
-packages/contract: 定义 TypeBox 契约。
+packages/contract: 定义 TypeBox 契约，是整个项目的类型中心。
 
 apps/[web|b2badmin]/server/modules: 后端核心逻辑。
 
@@ -27,13 +27,13 @@ Schema 优先: 所有的业务改动必须先从 table.schema.ts 开始。
 
 类型安全: 严禁使用 any。必须利用 typeof Contract.ListQuery.static 等方式提取类型。
 
+契约使用: 必须使用 *Contract 类型。通过 import { XxxContract } from "@/modules" 访问契约。
+
 Task: 当我给你一个业务需求时，请按照以下步骤思考：
 
-设计或修改 table.schema.ts。
-
-设计 Contract 定义。
-
-如果需要自定义逻辑，提供 modules/_custom/xxx.service.ts 中的重写代码。
+1. 设计或修改 table.schema.ts
+2. 设计 Contract 定义（如果需要扩展，创建 _custom/xxx.contract.ts）
+3. 如果需要自定义逻辑，提供 modules/_custom/xxx.service.ts 中的重写代码
 
 ## 项目概述
 
@@ -197,6 +197,50 @@ apps/b2badmin/src/server/
 - 使用 **Ultracite**（基于 Biome）进行代码格式化和检查
 - 严格遵循 TypeScript 类型安全
 - 模块化设计，清晰分离关注点
+
+## 最新架构更新 
+
+### 契约层重构
+- 从旧的 `.t.model.ts` 格式完全迁移到新的 `.contract.ts` 格式
+- 清理了所有旧的类型定义文件，目录结构更加清爽
+- 新的契约格式特点：
+  - 继承自动生成的基础契约（Response, Create, Update, Patch, ListQuery）
+  - 扩展响应结构，增加关联数据
+  - 丰富的业务类型（批量操作、统计、导入导出等）
+  - 完整的 DTO 类型导出
+
+### 目录结构
+```
+packages/contract/src/modules/
+├── _custom/              # 自定义扩展契约（手动维护）
+│   ├── ads.contract.ts
+│   ├── auth.contract.ts
+│   ├── categories.contract.ts
+│   ├── exporters.contract.ts
+│   ├── factories.contract.ts
+│   ├── inquiry.contract.ts
+│   ├── media.contract.ts
+│   ├── products.contract.ts
+│   ├── sites.contract.ts
+│   └── skus.contract.ts
+├── _generated/           # 自动生成的契约（由脚本生成）
+│   ├── account.contract.ts
+│   ├── ads.contract.ts
+│   ├── ...（其他所有表的契约）
+└── index.ts              # 主索引文件（由脚本自动更新）
+```
+
+### 错误处理和日志系统
+- Web 项目已集成与 B2B Admin 相同的错误处理和日志系统
+- 统一的错误处理插件 `errorPlugin`
+- 数据库错误到 HTTP 状态码的智能映射
+- 使用 `logixlysia` 进行请求日志记录
+
+### 环境变量配置
+- 为开发和生产环境创建了完整的环境变量配置
+- Web 项目：`.env.development`（本地数据库）、`.env.production`（服务器数据库）
+- B2B Admin 项目：同样的配置结构
+- 添加了 `BETTER_AUTH_BASE_URL` 环境变量支持
 
 ## 开发注意事项
 

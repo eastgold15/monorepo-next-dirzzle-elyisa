@@ -5,28 +5,15 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-
-import { InquiryContract } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "~/db/connection";
-import { authGuardMid } from "~/middleware/auth";
+import { InquiryContract } from "@repo/contract";
 import { inquiryService } from "../../modules/index";
+import { authGuardMid } from "~/middleware/auth";
+import { dbPlugin } from "~/db/connection";
 
 export const inquiryController = new Elysia({ prefix: "/inquiry" })
   .use(dbPlugin)
   .use(authGuardMid)
-  .get(
-    "/",
-    ({ query, auth, db }) => inquiryService.findAll(query, { db, auth }),
-    { query: InquiryContract.ListQuery }
-  )
-  .post(
-    "/",
-    ({ body, auth, db }) => inquiryService.create(body, { db, auth }),
-    { body: InquiryContract.Create }
-  )
-  .delete(
-    "/:id",
-    ({ params, auth, db }) => inquiryService.delete(params.id, { db, auth }),
-    { params: t.Object({ id: t.String() }) }
-  );
+  .get("/", ({ query, auth, db }) => inquiryService.findAll(query, { db, auth }), { query: InquiryContract.ListQuery })
+  .post("/", ({ body, auth, db }) => inquiryService.create(body, { db, auth }), { body: InquiryContract.Create })
+  .delete("/:id", ({ params, auth, db }) => inquiryService.delete(params.id, { db, auth }), { params: t.Object({ id: t.String() }) });

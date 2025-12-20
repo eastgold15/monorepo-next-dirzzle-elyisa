@@ -4,9 +4,6 @@
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
 import { ProductsContract as Generated } from "../_generated/products.contract";
-import { SkusContract } from "../_generated/skus.contract";
-import { ProductmediaContract } from "../_generated/productmedia.contract";
-import { AttributeContract } from "../_generated/attribute.contract";
 
 /**
  * 自定义扩展契约：Products
@@ -53,36 +50,48 @@ const CustomCreate = t.Composite([
 const ProductQuery = t.Object({
   categoryId: t.Optional(t.String()),
   factoryId: t.Optional(t.String()),
-  status: t.Optional(t.Union([
-    t.Literal("draft"),
-    t.Literal("active"),
-    t.Literal("inactive"),
-    t.Literal("archived"),
-  ])),
-  priceRange: t.Optional(t.Object({
-    min: t.Number({ minimum: 0 }),
-    max: t.Number({ minimum: 0 }),
-  })),
-  stockRange: t.Optional(t.Object({
-    min: t.Number({ minimum: 0 }),
-    max: t.Number({ minimum: 0 }),
-  })),
-  attributes: t.Optional(t.Array(t.Object({
-    attributeId: t.String(),
-    value: t.Union([t.String(), t.Number(), t.Boolean()]),
-  }))),
+  status: t.Optional(
+    t.UnionEnum([
+      "draft",
+      "active",
+      "inactive",
+      "archived",
+    ])
+  ),
+  priceRange: t.Optional(
+    t.Object({
+      min: t.Number({ minimum: 0 }),
+      max: t.Number({ minimum: 0 }),
+    })
+  ),
+  stockRange: t.Optional(
+    t.Object({
+      min: t.Number({ minimum: 0 }),
+      max: t.Number({ minimum: 0 }),
+    })
+  ),
+  attributes: t.Optional(
+    t.Array(
+      t.Object({
+        attributeId: t.String(),
+        value: t.Union([t.String(), t.Number(), t.Boolean()]),
+      })
+    )
+  ),
   tags: t.Optional(t.Array(t.String())),
   search: t.Optional(t.String()),
-  sortBy: t.Optional(t.Union([
-    t.Literal("createdAt"),
-    t.Literal("updatedAt"),
-    t.Literal("name"),
-    t.Literal("price"),
-    t.Literal("stock"),
-    t.Literal("sales"),
-    t.Literal("rating"),
-  ])),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortBy: t.Optional(
+    t.UnionEnum([
+      "createdAt",
+      "updatedAt",
+      "name",
+      "price",
+      "stock",
+      "sales",
+      "rating",
+    ])
+  ),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
   hasImages: t.Optional(t.Boolean()),
   hasSkus: t.Optional(t.Boolean()),
 });
@@ -99,18 +108,18 @@ const CloneProductRequest = t.Object({
 // 产品批量操作
 const BatchProductOperation = t.Object({
   productIds: t.Array(t.String({ minimum: 1 })),
-  operation: t.Union([
-    t.Literal("activate"),
-    t.Literal("deactivate"),
-    t.Literal("archive"),
-    t.Literal("delete"),
+  operation: t.UnionEnum([
+    "activate",
+    "deactivate",
+    "archive",
+    "delete",
   ]),
   // reason: t.Optional(t.String()),
 });
 
 // 产品导入
 const ImportProductsRequest = t.Object({
-  format: t.Union([t.Literal("csv"), t.Literal("json"), t.Literal("excel")]),
+  format: t.UnionEnum(["csv", "json", "excel"]),
   data: t.Union([
     t.String(),
     t.Array(t.Object({}, { additionalProperties: true })),
@@ -124,7 +133,7 @@ const ImportProductsRequest = t.Object({
 
 // 产品导出
 const ExportProductsRequest = t.Object({
-  format: t.Union([t.Literal("csv"), t.Literal("json"), t.Literal("excel")]),
+  format: t.UnionEnum(["csv", "json", "excel"]),
   filters: t.Optional(ProductQuery),
   fields: t.Optional(t.Array(t.String())),
   includeRelations: t.Optional(t.Boolean()),
@@ -139,23 +148,27 @@ const ProductStats = t.Object({
   totalStock: t.Number(),
   lowStockCount: t.Number(),
   outOfStockCount: t.Number(),
-  categoryStats: t.Array(t.Object({
-    categoryId: t.String(),
-    categoryName: t.String(),
-    count: t.Number(),
-  })),
+  categoryStats: t.Array(
+    t.Object({
+      categoryId: t.String(),
+      categoryName: t.String(),
+      count: t.Number(),
+    })
+  ),
   priceStats: t.Object({
     min: t.Number(),
     max: t.Number(),
     average: t.Number(),
   }),
   recentSales: t.Number(),
-  topProducts: t.Array(t.Object({
-    productId: t.String(),
-    name: t.String(),
-    sales: t.Number(),
-    revenue: t.Number(),
-  })),
+  topProducts: t.Array(
+    t.Object({
+      productId: t.String(),
+      name: t.String(),
+      sales: t.Number(),
+      revenue: t.Number(),
+    })
+  ),
 });
 
 // --- D. 组装并导出 ---

@@ -4,9 +4,6 @@
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
 import { FactoriesContract as Generated } from "../_generated/factories.contract";
-import { ExportersContract } from "../_generated/exporters.contract";
-import { UsersContract } from "../_generated/users.contract";
-import { SitesContract } from "../_generated/sites.contract";
 
 /**
  * 自定义扩展契约：Factories
@@ -47,11 +44,13 @@ const CustomCreate = t.Composite([
   t.Object({
     // 例如：增加"认证信息"和"生产能力"这些额外的业务字段
     certifications: t.Optional(t.Array(t.String())),
-    productionCapacity: t.Optional(t.Object({
-      daily: t.Number({ minimum: 0 }),
-      monthly: t.Number({ minimum: 0 }),
-      unit: t.String(),
-    })),
+    productionCapacity: t.Optional(
+      t.Object({
+        daily: t.Number({ minimum: 0 }),
+        monthly: t.Number({ minimum: 0 }),
+        unit: t.String(),
+      })
+    ),
     specialties: t.Optional(t.Array(t.String())),
     marketRegions: t.Optional(t.Array(t.String())),
     establishedYear: t.Optional(t.Number({ minimum: 1800 })),
@@ -73,19 +72,23 @@ const FactoryQuery = t.Object({
   hasCertifications: t.Optional(t.Boolean()),
   specialties: t.Optional(t.Array(t.String())),
   marketRegions: t.Optional(t.Array(t.String())),
-  employeeRange: t.Optional(t.Object({
-    min: t.Number({ minimum: 0 }),
-    max: t.Number({ minimum: 0 }),
-  })),
+  employeeRange: t.Optional(
+    t.Object({
+      min: t.Number({ minimum: 0 }),
+      max: t.Number({ minimum: 0 }),
+    })
+  ),
   search: t.Optional(t.String()),
-  sortBy: t.Optional(t.Union([
-    t.Literal("createdAt"),
-    t.Literal("updatedAt"),
-    t.Literal("name"),
-    t.Literal("code"),
-    t.Literal("employees"),
-  ])),
-  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sortBy: t.Optional(
+    t.UnionEnum([
+      "createdAt",
+      "updatedAt",
+      "name",
+      "code",
+      "employees",
+    ])
+  ),
+  sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
 
 // 工厂状态更新
@@ -104,10 +107,10 @@ const FactoryCertification = t.Object({
   issuedDate: t.String({ format: "date" }),
   expiryDate: t.Optional(t.String({ format: "date" })),
   certificateUrl: t.Optional(t.String()),
-  status: t.Union([
-    t.Literal("pending"),
-    t.Literal("verified"),
-    t.Literal("expired"),
+  status: t.UnionEnum([
+    "pending",
+    "verified",
+    "expired",
   ]),
 });
 
@@ -117,45 +120,61 @@ const FactoryStats = t.Object({
   activeFactories: t.Number(),
   inactiveFactories: t.Number(),
   certifiedFactories: t.Number(),
-  countryDistribution: t.Array(t.Object({
-    country: t.String(),
-    count: t.Number(),
-    percentage: t.Number(),
-  })),
-  specialtyDistribution: t.Array(t.Object({
-    specialty: t.String(),
-    count: t.Number(),
-  })),
-  sizeDistribution: t.Array(t.Object({
-    size: t.Union([t.Literal("small"), t.Literal("medium"), t.Literal("large")]),
-    count: t.Number(),
-  })),
+  countryDistribution: t.Array(
+    t.Object({
+      country: t.String(),
+      count: t.Number(),
+      percentage: t.Number(),
+    })
+  ),
+  specialtyDistribution: t.Array(
+    t.Object({
+      specialty: t.String(),
+      count: t.Number(),
+    })
+  ),
+  sizeDistribution: t.Array(
+    t.Object({
+      size: t.UnionEnum([
+        "small",
+        "medium",
+        "large",
+      ]),
+      count: t.Number(),
+    })
+  ),
   recentRegistrations: t.Number(),
-  topPerformers: t.Array(t.Object({
-    factoryId: t.String(),
-    name: t.String(),
-    orders: t.Number(),
-    revenue: t.Number(),
-    rating: t.Number(),
-  })),
+  topPerformers: t.Array(
+    t.Object({
+      factoryId: t.String(),
+      name: t.String(),
+      orders: t.Number(),
+      revenue: t.Number(),
+      rating: t.Number(),
+    })
+  ),
 });
 
 // 工厂审核
 const FactoryVerification = t.Object({
   factoryId: t.String(),
-  status: t.Union([
-    t.Literal("pending"),
-    t.Literal("approved"),
-    t.Literal("rejected"),
+  status: t.UnionEnum([
+    "pending",
+    "approved",
+    "rejected",
   ]),
   verifiedBy: t.Optional(t.String()),
   verifiedAt: t.Optional(t.String({ format: "date-time" })),
   comments: t.String(),
-  documents: t.Optional(t.Array(t.Object({
-    type: t.String(),
-    url: t.String(),
-    name: t.String(),
-  }))),
+  documents: t.Optional(
+    t.Array(
+      t.Object({
+        type: t.String(),
+        url: t.String(),
+        name: t.String(),
+      })
+    )
+  ),
 });
 
 // --- D. 组装并导出 ---

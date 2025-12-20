@@ -5,13 +5,10 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-import { SiteConfigContract, siteConfigTable } from "@repo/contract";
+import { siteConfigTable, SiteConfigContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
-export class SiteConfigGeneratedService extends WEBBaseService<
-  typeof siteConfigTable,
-  typeof SiteConfigContract
-> {
+export class SiteConfigGeneratedService extends WEBBaseService<typeof siteConfigTable, typeof SiteConfigContract> {
   constructor() {
     super(siteConfigTable, SiteConfigContract);
   }

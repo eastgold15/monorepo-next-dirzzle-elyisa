@@ -39,7 +39,6 @@ export const server = new Elysia({ name: "server" })
     return app;
   });
 
-
 console.log("env.NODE_ENV", env.NODE_ENV);
 /**
  * Export the app type for use with RPC clients (e.g., edenTreaty)

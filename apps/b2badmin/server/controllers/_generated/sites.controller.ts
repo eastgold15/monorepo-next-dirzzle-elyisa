@@ -5,26 +5,15 @@
  * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
  * --------------------------------------------------------
  */
-
-import { SitesContract } from "@repo/contract";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "~/db/connection";
-import { authGuardMid } from "~/middleware/auth";
+import { SitesContract } from "@repo/contract";
 import { sitesService } from "../../modules/index";
+import { authGuardMid } from "~/middleware/auth";
+import { dbPlugin } from "~/db/connection";
 
 export const sitesController = new Elysia({ prefix: "/sites" })
   .use(dbPlugin)
   .use(authGuardMid)
-  .get(
-    "/",
-    ({ query, auth, db }) => sitesService.findAll(query, { db, auth }),
-    { query: SitesContract.ListQuery }
-  )
-  .post("/", ({ body, auth, db }) => sitesService.create(body, { db, auth }), {
-    body: SitesContract.Create,
-  })
-  .delete(
-    "/:id",
-    ({ params, auth, db }) => sitesService.delete(params.id, { db, auth }),
-    { params: t.Object({ id: t.String() }) }
-  );
+  .get("/", ({ query, auth, db }) => sitesService.findAll(query, { db, auth }), { query: SitesContract.ListQuery })
+  .post("/", ({ body, auth, db }) => sitesService.create(body, { db, auth }), { body: SitesContract.Create })
+  .delete("/:id", ({ params, auth, db }) => sitesService.delete(params.id, { db, auth }), { params: t.Object({ id: t.String() }) });
