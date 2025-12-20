@@ -14,6 +14,7 @@
     "prepare": "husky",
     "generate-types": "bunx openapi-typescript apps/b2badmin/src/types/temp-schema.json  -o ./apps/b2badmin/src/types/api-schema.d.ts",
     "fix": "npx ultracite fix",
+    "docker:compose": "docker compose up -d",
     "gen:ai-docs": "bun run  scripts/gen-ai-docs.ts",
     "gen:final": "bun run packages/contract/scripts/gen-all-final.ts",
     "postgen:final": "bun run fix"

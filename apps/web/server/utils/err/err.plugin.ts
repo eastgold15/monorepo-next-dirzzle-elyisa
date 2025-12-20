@@ -54,7 +54,7 @@ function createSeparator(title: string, width = 80): string {
 }
 
 export const errorPlugin = new Elysia()
-  .onError(({ code, error, path, request }) => {
+  .onError(({ code, error, path, request, set }) => {
     const method = request?.method || "UNKNOWN";
     const url = request?.url || path;
 
@@ -102,6 +102,35 @@ export const errorPlugin = new Elysia()
     // 3. 未知错误 → 包装为 500
     else {
       errorSource = "unknown";
+
+      // 在开发环境中，先尝试直接抛出原始错误，以便看到完整的错误信息
+      if (env.NODE_ENV === "development" && error instanceof Error) {
+        // 先打印原始错误的完整信息
+        console.error(`\n${createSeparator("🔍 ORIGINAL ERROR DETAILS")}`);
+        console.error(chalk.red(`Error Name: ${chalk.yellow(error.name)}`));
+        console.error(chalk.red(`Error Message: ${chalk.white(error.message)}`));
+        if (error.stack) {
+          console.error(chalk.red("Original Stack Trace:"));
+          formatStack(error.stack).forEach((line) => console.error(line));
+        }
+        console.error(`${chalk.red("═".repeat(80))}\n`);
+
+        // 如果是 AggregateError，显示所有错误
+        if (error instanceof AggregateError && error.errors.length > 0) {
+          console.error(chalk.red(`\n📋 AggregateError contains ${error.errors.length} errors:`));
+          error.errors.forEach((err, index) => {
+            console.error(chalk.red(`\n--- Error ${index + 1} ---`));
+            console.error(chalk.red(`Name: ${chalk.yellow(err.name)}`));
+            console.error(chalk.red(`Message: ${chalk.white(err.message)}`));
+            if (err.stack) {
+              console.error(chalk.red("Stack:"));
+              formatStack(err.stack).forEach((line) => console.error(line));
+            }
+          });
+          console.error(`${chalk.red("═".repeat(80))}\n`);
+        }
+      }
+
       processedError = new HttpError.InternalServerError(
         (error as any)?.message || "服务器内部错误"
       );

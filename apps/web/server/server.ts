@@ -1,11 +1,12 @@
-import { env } from "@/env";
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
+import { env } from "@/env";
 import { appRouter } from "./controllers/app-router";
 import { dbPlugin } from "./db/connection";
 import { loggerPlugin } from "./middleware/logger";
 import { siteMiddleware } from "./middleware/site";
+import { checkDatabase } from "./modules/_health/checkers/db";
 import { errorPlugin } from "./utils/err/err.plugin";
 
 /**
@@ -19,6 +20,20 @@ import { errorPlugin } from "./utils/err/err.plugin";
  * 4. dbPlugin - 提供数据库连接
  */
 export const server = new Elysia({ name: "server" })
+  .use(dbPlugin)
+  .onStart(async ({ db }) => {
+    console.log("🚀 正在执行系统自检...");
+    const dbStatus = await checkDatabase(db);
+
+    if (dbStatus.status === "FAIL") {
+      console.error("❌ 数据库自检失败!");
+      console.error(`原因: ${dbStatus.message}`);
+      console.error(`建议: ${dbStatus.suggestion}`);
+      // 开发环境下可以不退出，但给予醒目提示
+    } else {
+      console.log("✅ 数据库连接正常");
+    }
+  })
   .decorate("myProperty", "myValue")
   .state({
     version: "1.0.0",
@@ -53,9 +68,7 @@ export const server = new Elysia({ name: "server" })
   .use(errorPlugin)
   // 3. Problem JSON 插件 - 标准化错误响应
   .use(httpProblemJsonPlugin())
-  // 4. 数据库插件
-  .use(dbPlugin)
-  // 5. 站点中间件
+  // 4. 站点中间件
   .use(siteMiddleware)
   // 自动挂载所有控制器（包括自定义和生成的）
   .group("/v1", (app) => app.use(appRouter));
