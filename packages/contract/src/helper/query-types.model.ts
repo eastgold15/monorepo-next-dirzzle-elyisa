@@ -8,7 +8,8 @@
  * 4. TypeBox 集成：与 Elysia 框架完全兼容的验证系统
  */
 
-import { type Static, Type as t } from "@sinclair/typebox";
+import { type Static } from "@sinclair/typebox";
+import { t } from "elysia";
 
 // ==================== 基础系统参数 ====================
 

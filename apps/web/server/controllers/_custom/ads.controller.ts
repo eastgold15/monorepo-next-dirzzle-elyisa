@@ -3,10 +3,13 @@ import { and, eq, gte, lte } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "~/db/connection";
 import { localeMiddleware } from "~/middleware/locale";
+import { siteMiddleware } from "~/middleware/site";
 
 export const adsController = new Elysia({ prefix: "/ads" })
   .use(localeMiddleware)
   .use(dbPlugin)
+  .use(siteMiddleware)
+  // 自定义路由：获取当前有效广告
   .get(
     "/current",
     async ({ db }) => {

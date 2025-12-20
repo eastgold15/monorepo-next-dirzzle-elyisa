@@ -3,10 +3,11 @@ import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "~/db/connection";
 import { localeMiddleware } from "~/middleware/locale";
-
+import { siteMiddleware } from "~/middleware/site";
 export const heroCardsController = new Elysia({ prefix: "/hero-cards" })
   .use(localeMiddleware)
   .use(dbPlugin)
+  .use(siteMiddleware)
   .get(
     "/current",
     async ({ db }) => {

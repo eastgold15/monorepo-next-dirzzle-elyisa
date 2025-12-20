@@ -3,10 +3,11 @@ import { asc, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { dbPlugin } from "~/db/connection";
 import { localeMiddleware } from "~/middleware/locale";
-
+import { siteMiddleware } from "~/middleware/site";
 export const mediaController = new Elysia({ prefix: "/media" }) // 获取图片 - 前端用户使用
   .use(localeMiddleware)
   .use(dbPlugin)
+  .use(siteMiddleware)
   .get(
     "/url/:id",
     async ({ locale, db, params: { id } }) => {
