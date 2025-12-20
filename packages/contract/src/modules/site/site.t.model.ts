@@ -1,7 +1,4 @@
-import {
-  siteProductsTable,
-  sitesTable
-} from "@repo/contract/table";
+import { siteProductsTable, sitesTable } from "@repo/contract/table";
 
 import {
   createInsertSchema,
@@ -18,8 +15,6 @@ const Select = createSelectSchema(sitesTable);
 
 const Create = t.Omit(Insert, ["id", "createdAt", "updatedAt"]);
 
-
-
 const SiteProductInsert = createInsertSchema(siteProductsTable);
 const SiteProductUpdate = createUpdateSchema(siteProductsTable);
 const SiteProductSelect = createSelectSchema(siteProductsTable);
@@ -32,7 +27,6 @@ const SiteEntity = t.Composite([
     exporter: t.Optional(ExporterTModel.Entity),
   }),
 ]);
-
 
 // Query Types
 const SiteListQuery = t.Object({
@@ -78,16 +72,18 @@ const SiteSwitchResponse = t.Object({
 
 // Get Accessible Sites Response
 const AccessibleSitesResponse = t.Object({
-  sites: t.Array(t.Composite([
-    SiteEntity,
-    t.Object({
-      role: t.Object({
-        name: t.String(),
+  sites: t.Array(
+    t.Composite([
+      SiteEntity,
+      t.Object({
+        role: t.Object({
+          name: t.String(),
+          priority: t.Number(),
+        }),
         priority: t.Number(),
       }),
-      priority: t.Number(),
-    })
-  ])),
+    ])
+  ),
 });
 
 // Context Types
@@ -116,7 +112,6 @@ export const SiteTModel = {
   ProductSelect: SiteProductSelect,
   ProductListQuery: SiteProductListQuery,
 
-
   PermissionCreate: UserSitePermissionCreateBody,
 
   // Site switching types
@@ -144,7 +139,6 @@ export type SiteTModel = {
   ProductUpdate: typeof SiteProductUpdate.static;
   ProductSelect: typeof SiteProductSelect.static;
   ProductListQuery: typeof SiteProductListQuery.static;
-
 
   PermissionCreate: typeof UserSitePermissionCreateBody.static;
 

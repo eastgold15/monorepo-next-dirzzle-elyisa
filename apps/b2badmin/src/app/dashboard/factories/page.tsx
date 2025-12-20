@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { HasRole } from "@/components/auth";
 import { CreateFactoryModal } from "@/components/factory/CreateFactoryModal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +22,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useFactoriesQuery } from "@/hooks/api/use-factories";
-import { HasRole } from "@/components/auth";
 
 export default function FactoryManager() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -83,8 +83,6 @@ export default function FactoryManager() {
                 </Button>
               </HasRole>
             </div>
-
-            
 
             {isLoading ? (
               <div className="flex items-center justify-center py-12">

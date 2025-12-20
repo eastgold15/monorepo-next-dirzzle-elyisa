@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Activity,
   AlertCircle,
   Building2,
   Factory,
@@ -11,10 +10,9 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useMe } from "@/hooks/api/use-user-api";
-import { useCurrentSiteId } from "@/stores/site-store";
 import { HasRole } from "@/components/auth";
+import { useMe } from "@/hooks/api/use-user-api";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // 统计卡片组件
 const StatCard = ({
@@ -41,7 +39,13 @@ const StatCard = ({
 
 // 统计内容组件
 const StatsContent = () => {
-  const { user, isSuperAdmin, isExporterAdmin, isFactoryAdmin, getCurrentSiteId } = usePermissions();
+  const {
+    user,
+    isSuperAdmin,
+    isExporterAdmin,
+    isFactoryAdmin,
+    getCurrentSiteId,
+  } = usePermissions();
   const currentSiteId = getCurrentSiteId();
 
   // 超级管理员统计
@@ -173,7 +177,8 @@ const StatsContent = () => {
 
 // 角色特定的通知组件
 const RoleSpecificNotifications = () => {
-  const { isSuperAdmin, isExporterAdmin, isFactoryAdmin, getUserDisplayName } = usePermissions();
+  const { isSuperAdmin, isExporterAdmin, isFactoryAdmin, getUserDisplayName } =
+    usePermissions();
 
   if (isSuperAdmin()) {
     return (
@@ -235,9 +240,9 @@ export default function UserDashboard() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-slate-200 rounded-xl"></div>
+              <div className="h-32 rounded-xl bg-slate-200" key={i} />
             ))}
           </div>
         </div>
@@ -249,25 +254,23 @@ export default function UserDashboard() {
     <div className="space-y-6 p-6">
       {/* 欢迎信息 */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className="font-bold text-3xl text-slate-900">
           欢迎回来，{getUserDisplayName()}
         </h1>
-        <p className="text-slate-600 mt-1">
-          当前角色：{getUserRoleDisplay()}
-        </p>
+        <p className="mt-1 text-slate-600">当前角色：{getUserRoleDisplay()}</p>
       </div>
 
       {/* 统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatsContent />
       </div>
 
       {/* 通知和快速操作 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* 通知 */}
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-semibold text-slate-900">通知</h2>
+            <h2 className="mb-4 font-semibold text-lg text-slate-900">通知</h2>
             <RoleSpecificNotifications />
           </div>
         </div>
@@ -275,7 +278,9 @@ export default function UserDashboard() {
         {/* 快速操作 */}
         <HasRole role={["super_admin", "exporter_admin", "factory_admin"]}>
           <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-semibold text-slate-900">快速操作</h2>
+            <h2 className="mb-4 font-semibold text-lg text-slate-900">
+              快速操作
+            </h2>
             <div className="space-y-3">
               <HasRole role="super_admin">
                 <button className="w-full rounded-lg bg-purple-500 px-4 py-2 text-white hover:bg-purple-600">

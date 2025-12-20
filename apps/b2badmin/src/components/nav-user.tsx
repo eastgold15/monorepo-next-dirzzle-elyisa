@@ -25,8 +25,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useCurrentUser, useIsUserLoading } from "@/stores/user-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCurrentUser, useIsUserLoading } from "@/stores/user-store";
 
 export function NavUser() {
   const user = useCurrentUser();

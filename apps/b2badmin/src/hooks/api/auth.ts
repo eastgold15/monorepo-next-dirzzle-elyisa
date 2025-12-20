@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { createAuthClient } from "better-auth/react";
-import { handleEden } from "@/lib/utils/base";
 
 // 注册数据的类型定义
 interface RegisterData {

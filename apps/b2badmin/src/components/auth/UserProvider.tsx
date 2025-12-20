@@ -1,10 +1,10 @@
 "use client";
 
 import { createContext, type ReactNode, useContext, useEffect } from "react";
-import { useMe } from "@/hooks/api/use-user-api";
-import { useUserStore } from "@/stores/user-store";
-import { useSiteStore } from "@/stores/site-store";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMe } from "@/hooks/api/use-user-api";
+import { useSiteStore } from "@/stores/site-store";
+import { useUserStore } from "@/stores/user-store";
 
 // 创建用户上下文（为了向后兼容，主要逻辑已移到 Zustand store）
 const UserContext = createContext<{
@@ -35,7 +35,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   // 确保有了用户信息且确定了 siteId 再渲染子组件
-  if (!data || !currentSiteId) {
+  if (!(data && currentSiteId)) {
     return null;
   }
 

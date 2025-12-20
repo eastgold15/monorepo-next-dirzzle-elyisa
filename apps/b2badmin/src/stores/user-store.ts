@@ -60,7 +60,9 @@ export const useUserStore = create<UserState>()(
         // 设置可访问站点（保留此功能用于站点切换器）
         setAccessibleSites: (sites: SiteInfo[]) => {
           set((state) => ({
-            userInfo: state.userInfo ? { ...state.userInfo, allSites: sites } : null,
+            userInfo: state.userInfo
+              ? { ...state.userInfo, allSites: sites }
+              : null,
           }));
         },
 
@@ -108,7 +110,9 @@ export const useCurrentRole = () => {
   const currentSite = useCurrentSite();
 
   // 从可访问站点列表中找到当前站点的角色
-  const currentSiteInfo = allSites.find(site => site.site?.id === currentSite?.id);
+  const currentSiteInfo = allSites.find(
+    (site) => site.site?.id === currentSite?.id
+  );
   return currentSiteInfo?.role?.name;
 };
 

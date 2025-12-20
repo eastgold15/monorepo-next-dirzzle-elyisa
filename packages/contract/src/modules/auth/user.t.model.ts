@@ -94,4 +94,3 @@ export type UserTModel = {
   EntityWithPermissions: typeof EntityWithPermissions.static;
   BusinessQuery: typeof BusinessQuery.static;
 };
-

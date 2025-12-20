@@ -1,6 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 
-const db = drizzle("postgres://gina_user:gina_password@localhost:5432/gina_dev");
+const db = drizzle(
+  "postgres://gina_user:gina_password@localhost:5432/gina_dev"
+);
 
 async function resetDatabase() {
   console.log("🗑️ 开始重置数据库...");
@@ -13,8 +15,8 @@ async function resetDatabase() {
       WHERE schemaname = 'public'
     `);
 
-    console.log('tablesResult:', tablesResult)
-    const tables = tablesResult.rows.map(row => row.tablename);
+    console.log("tablesResult:", tablesResult);
+    const tables = tablesResult.rows.map((row) => row.tablename);
     console.log("发现的表:", tables);
 
     // 先禁用所有外键约束
@@ -44,10 +46,12 @@ async function resetDatabase() {
   }
 }
 
-resetDatabase().then(() => {
-  console.log("🎉 数据库重置成功！");
-  process.exit(0);
-}).catch(error => {
-  console.error("💥 重置失败:", error);
-  process.exit(1);
-});
+resetDatabase()
+  .then(() => {
+    console.log("🎉 数据库重置成功！");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("💥 重置失败:", error);
+    process.exit(1);
+  });

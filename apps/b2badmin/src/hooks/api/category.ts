@@ -101,9 +101,7 @@ export function useCategoriesTree() {
 export function useCategory(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["category", id],
-    queryFn: async () => {
-      return await handleEden(rpc.api.category[id].get());
-    },
+    queryFn: async () => await handleEden(rpc.api.category[id].get()),
     enabled: options?.enabled ?? true,
     staleTime: 5 * 60 * 1000, // 5分钟
     retry: 2,

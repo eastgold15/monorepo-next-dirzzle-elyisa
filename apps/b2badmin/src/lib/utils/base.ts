@@ -56,8 +56,8 @@ export async function handleEden<T, E>(
     // 这里的 error 类型对应你给出的 { status, value }
     const val = (error as any).value;
     const errorMessage =
-      val?.message ||        // 对应 403 和 422 的 message
-      val?.summary ||        // 对应 422 可能存在的 summary
+      val?.message || // 对应 403 和 422 的 message
+      val?.summary || // 对应 422 可能存在的 summary
       (error as any).status || // 兜底显示状态码
       "请求失败";
 
@@ -71,8 +71,6 @@ export async function handleEden<T, E>(
   // 4. 只有成功且 data 存在时才返回
   return data as NonNullable<T>;
 }
-
-
 
 /**
  * Safe parsing utility for TypeBox schemas that returns a discriminated union result

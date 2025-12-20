@@ -15,12 +15,16 @@ const CreateSalespersonRequest = t.Object({
     minLength: 6,
     description: "登录密码",
   }),
-  phone: t.Optional(t.String({
-    description: "联系电话",
-  })),
-  position: t.Optional(t.String({
-    description: "职位",
-  })),
+  phone: t.Optional(
+    t.String({
+      description: "联系电话",
+    })
+  ),
+  position: t.Optional(
+    t.String({
+      description: "职位",
+    })
+  ),
   factoryId: t.String({
     description: "所属工厂ID",
   }),
@@ -35,28 +39,40 @@ const UpdateUserStatusRequest = t.Object({
 
 // 用户列表查询参数
 const UserListQuery = t.Object({
-  page: t.Optional(t.Numeric({
-    default: 1,
-    description: "页码",
-  })),
-  limit: t.Optional(t.Numeric({
-    default: 20,
-    description: "每页数量",
-  })),
-  search: t.Optional(t.String({
-    description: "搜索关键词（姓名或邮箱）",
-  })),
-  role: t.Optional(t.Union([
-    t.Literal("exporter_admin"),
-    t.Literal("factory_admin"),
-    t.Literal("salesperson"),
-  ])),
-  isActive: t.Optional(t.Boolean({
-    description: "用户状态筛选",
-  })),
-  factoryId: t.Optional(t.String({
-    description: "工厂ID筛选",
-  })),
+  page: t.Optional(
+    t.Numeric({
+      default: 1,
+      description: "页码",
+    })
+  ),
+  limit: t.Optional(
+    t.Numeric({
+      default: 20,
+      description: "每页数量",
+    })
+  ),
+  search: t.Optional(
+    t.String({
+      description: "搜索关键词（姓名或邮箱）",
+    })
+  ),
+  role: t.Optional(
+    t.Union([
+      t.Literal("exporter_admin"),
+      t.Literal("factory_admin"),
+      t.Literal("salesperson"),
+    ])
+  ),
+  isActive: t.Optional(
+    t.Boolean({
+      description: "用户状态筛选",
+    })
+  ),
+  factoryId: t.Optional(
+    t.String({
+      description: "工厂ID筛选",
+    })
+  ),
 });
 
 // 用户列表响应

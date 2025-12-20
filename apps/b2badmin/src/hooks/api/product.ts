@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
-import { handleEden } from "@/lib/utils/base";
 
 // 获取商品列表
 export function useProductsList(query?: {
@@ -32,7 +31,10 @@ export function useProductTemplatesBySiteCategory(siteCategoryId: string) {
     queryFn: async () => {
       if (!siteCategoryId) return [];
 
-      const response = await rpc.api.product["templates"]["by-site-category"][siteCategoryId].get();
+      const response =
+        await rpc.api.product["templates"]["by-site-category"][
+          siteCategoryId
+        ].get();
       if (response.error) {
         throw new Error(response.error.message || "获取模板列表失败");
       }

@@ -473,7 +473,7 @@
 ### 🏷️ Update
 | 来源/字段 | 类型 | 状态 | 详细说明 |
 | :--- | :--- | :--- | :--- |
-| `Table: MasterTable` | `Database` | Update | 直接映射自数据库表 MasterTable |
+| `Table: masterTable` | `Database` | Update | 直接映射自数据库表 masterTable |
 
 ### 🏷️ Patch
 | 来源/字段 | 类型 | 状态 | 详细说明 |
@@ -715,6 +715,7 @@
 | `Inherit: PaginationParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
 | `Inherit: SortParams` | `Object` | 混合 | 继承该公共模块的所有字段 |
 | `search` | `Optional` | 可选 | t.Optional(t.String()) |
+| `categoryId` | `Optional` | 可选 | t.Optional(t.String()) |
 
 ### 🏷️ ListResponse
 | 来源/字段 | 类型 | 状态 | 详细说明 |

@@ -184,11 +184,8 @@ class StorageFactory {
       case "local":
         baseConfig.config = {
           baseDir:
-            customConfig.baseDir ||
-            env.LOCAL_STORAGE_DIR ||
-            "public/uploads",
-          baseUrl:
-            customConfig.baseUrl || env.LOCAL_STORAGE_URL || "/uploads",
+            customConfig.baseDir || env.LOCAL_STORAGE_DIR || "public/uploads",
+          baseUrl: customConfig.baseUrl || env.LOCAL_STORAGE_URL || "/uploads",
           maxFileSize:
             customConfig.maxFileSize ||
             Number.parseInt(env.MAX_FILE_SIZE || "10485760", 10), // 10MB

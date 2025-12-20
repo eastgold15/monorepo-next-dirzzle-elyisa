@@ -2,7 +2,8 @@
 
 import { translationDictTable } from "@repo/contract/table";
 import { eq } from "drizzle-orm";
-import { db } from "@/server/db/connection";
+import { db } from "~/db/connection";
+
 import type { TranslateProvider } from "../interfaces/translation-provider.interface";
 
 export class DictionaryTranslationProvider implements TranslateProvider {

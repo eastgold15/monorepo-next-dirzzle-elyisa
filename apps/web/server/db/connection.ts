@@ -6,7 +6,7 @@ import { env } from "@/env";
 // You can specify any property from the node-postgres connection options
 // export const db = drizzle({
 //   connection: {
-//     connectionString: env.DATABASE_URL,
+//     connectionString: ,
 //   },
 //   schema: dbTable,
 // });

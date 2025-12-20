@@ -1,17 +1,5 @@
 "use client";
 
-import { NavGroup } from "@/components/nav-group";
-import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar";
-import { PERMISSIONS } from "@/config/permissions";
-import { usePermissions } from "@/hooks/usePermissions";
 import {
   BarChart3,
   Building2,
@@ -28,11 +16,20 @@ import {
   Users,
 } from "lucide-react";
 import type * as React from "react";
+import { NavGroup } from "@/components/nav-group";
+import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/team-switcher";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { PERMISSIONS } from "@/config/permissions";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
- 
- 
-
   // Dashboard - 始终显示在最前面
   const getDashboardItems = () => [
     {
@@ -163,7 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 创建权限控制的 NavGroup 组件
   const PermissionNavGroup = ({
     title,
-    items
+    items,
   }: {
     title: string;
     items: Array<{
@@ -178,7 +175,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { can, hasRole } = usePermissions();
 
     // 过滤出用户有权限的菜单项
-    const filteredItems = items.filter(item => {
+    const filteredItems = items.filter((item) => {
       if (item.permission && !can(item.permission)) {
         return false;
       }
@@ -193,7 +190,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return null;
     }
 
-    return <NavGroup title={title} items={filteredItems} />;
+    return <NavGroup items={filteredItems} title={title} />;
   };
 
   return (

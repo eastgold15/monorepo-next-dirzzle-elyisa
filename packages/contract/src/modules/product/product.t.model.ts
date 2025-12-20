@@ -10,7 +10,7 @@ import { t } from "elysia";
 import {
   productsTable,
   siteProductsTable,
-  skusTable
+  skusTable,
 } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
@@ -21,8 +21,6 @@ const Select = createSelectSchema(productsTable);
 
 // 创建商品
 // 商品信息+ siteid + siteproduct sitecategory
-
-
 
 // === 业务 Schema ===
 const Create = t.Intersect([
@@ -36,14 +34,16 @@ const Create = t.Intersect([
     units: t.Optional(t.String()),
 
     // 分类关联
-    categoryIds: t.Optional(t.Array(t.String({ format: "uuid" }), { minItems: 1 })),
+    categoryIds: t.Optional(
+      t.Array(t.String({ format: "uuid" }), { minItems: 1 })
+    ),
 
     // 图片关联
     imageIds: t.Optional(t.Array(t.String({ format: "uuid" }))),
     mainImageId: t.Optional(t.String({ format: "uuid" })),
     // 站点商品相关字段（当业务员创建商品时使用）
     price: t.Optional(t.Number()), // 站点商品价格
-    siteName: t.Optional(t.String({ maxLength: 200 }),), // 站点自定义商品名
+    siteName: t.Optional(t.String({ maxLength: 200 })), // 站点自定义商品名
     siteDescription: t.Optional(t.String()), // 站点自定义商品描述
     siteCategoryId: t.Optional(t.String({ format: "uuid" })), // 站点分类ID
     seoTitle: t.Optional(t.String({ maxLength: 200 })), // SEO标题
@@ -121,7 +121,13 @@ const SiteProductCreate = t.Intersect([
 ]);
 
 const SiteProductUpdateBody = t.Intersect([
-  t.Omit(SiteProductUpdate, ["id", "createdAt", "updatedAt", "siteId", "productId"]),
+  t.Omit(SiteProductUpdate, [
+    "id",
+    "createdAt",
+    "updatedAt",
+    "siteId",
+    "productId",
+  ]),
   t.Object({
     sitePrice: t.Optional(t.Number()),
     siteName: t.Optional(t.String()),

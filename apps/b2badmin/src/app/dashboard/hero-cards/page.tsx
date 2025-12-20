@@ -193,9 +193,7 @@ export default function HeroCardsPage() {
     if (selectedCards.length === cardsData?.length) {
       setSelectedCards([]);
     } else {
-      setSelectedCards(
-        cardsData?.map((card: HeroCard) => card.id) || []
-      );
+      setSelectedCards(cardsData?.map((card: HeroCard) => card.id) || []);
     }
   };
 

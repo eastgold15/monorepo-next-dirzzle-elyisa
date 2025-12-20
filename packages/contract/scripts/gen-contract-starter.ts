@@ -8,24 +8,26 @@ const __dirname = path.dirname(__filename);
 const OUTPUT_DIR = path.resolve(__dirname, "../src/modules/generated");
 
 if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
 const SYSTEM_FIELDS = ["id", "createdAt", "updatedAt"];
 
 function generate() {
-    console.log("🚀 开始生成契约...");
-    let count = 0;
+  console.log("🚀 开始生成契约...");
+  let count = 0;
 
-    Object.entries(dbSchema).forEach(([key, table]) => {
-        // 改进后的判断：变量名包含 Table，且是一个对象
-        const isTable = key.endsWith("Table") && typeof table === "object" && table !== null;
+  Object.entries(dbSchema).forEach(([key, table]) => {
+    // 改进后的判断：变量名包含 Table，且是一个对象
+    const isTable =
+      key.endsWith("Table") && typeof table === "object" && table !== null;
 
-        if (isTable) {
-            const tableName = key.replace("Table", "");
-            const capitalized = tableName.charAt(0).toUpperCase() + tableName.slice(1);
+    if (isTable) {
+      const tableName = key.replace("Table", "");
+      const capitalized =
+        tableName.charAt(0).toUpperCase() + tableName.slice(1);
 
-            const fileContent = `
+      const fileContent = `
 import { t } from "elysia";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
 import { ${key} } from "../../table.schema";
@@ -65,14 +67,16 @@ export type ${capitalized}DTO = {
 };
 `;
 
+      fs.writeFileSync(
+        path.join(OUTPUT_DIR, `${tableName.toLowerCase()}.contract.ts`),
+        fileContent
+      );
+      console.log(`✅ 契约已生成: ${capitalized} (${key})`);
+      count++;
+    }
+  });
 
-            fs.writeFileSync(path.join(OUTPUT_DIR, `${tableName.toLowerCase()}.contract.ts`), fileContent);
-            console.log(`✅ 契约已生成: ${capitalized} (${key})`);
-            count++;
-        }
-    });
-
-    console.log(`\n✨ 完成！共生成 ${count} 个契约文件。`);
+  console.log(`\n✨ 完成！共生成 ${count} 个契约文件。`);
 }
 
 generate();

@@ -1,6 +1,6 @@
 import { dailyInquiryCounterTable } from "@repo/contract/table";
 import { eq } from "drizzle-orm";
-import { db } from "@/server/db/connection";
+import { db } from "~/db/connection";
 
 /**
  * 获取或创建每日询价计数

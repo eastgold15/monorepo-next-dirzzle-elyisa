@@ -35,9 +35,8 @@ export function useCreateSiteCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: SiteCategoryTModel["Create"]) => {
-      return await handleEden(rpc.api.site.category.post(data));
-    },
+    mutationFn: async (data: SiteCategoryTModel["Create"]) =>
+      await handleEden(rpc.api.site.category.post(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -56,9 +55,7 @@ export function useUpdateSiteCategory() {
     }: {
       id: string;
       data: SiteCategoryTModel["Update"];
-    }) => {
-      return await handleEden(rpc.api.site.category.update({ id }).put(data));
-    },
+    }) => await handleEden(rpc.api.site.category.update({ id }).put(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -71,9 +68,8 @@ export function useDeleteSiteCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return await handleEden(rpc.api.site.category.delete({ id }).delete());
-    },
+    mutationFn: async (id: string) =>
+      await handleEden(rpc.api.site.category.delete({ id }).delete()),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -152,9 +148,10 @@ export function useBatchDeleteSiteCategories() {
     mutationFn: async ({ ids }: { ids: string[] }) => {
       // 由于 Elysia 的限制，我们需要逐个删除
       // 在实际应用中，可能需要创建一个批量删除的接口
-      const deletePromises = ids.map(async (id) => {
-        return await handleEden(rpc.api.site.category.delete({ id }).delete());
-      });
+      const deletePromises = ids.map(
+        async (id) =>
+          await handleEden(rpc.api.site.category.delete({ id }).delete())
+      );
 
       await Promise.all(deletePromises);
       return ids; // 返回删除的ID列表

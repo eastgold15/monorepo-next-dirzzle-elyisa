@@ -6,13 +6,12 @@ import { handleEden } from "@/lib/utils/base";
 export function useAdsList(params?: Record<string, any>) {
   return useQuery({
     queryKey: ["ads", "list", params],
-    queryFn: async () => {
-      return await handleEden(
+    queryFn: async () =>
+      await handleEden(
         rpc.api.advertisements.get({
-          query: params || {}
+          query: params || {},
         })
-      );
-    },
+      ),
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 }
@@ -21,9 +20,8 @@ export function useAdsCreate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: any) => {
-      return await handleEden(rpc.api.advertisements.post(data));
-    },
+    mutationFn: async (data: any) =>
+      await handleEden(rpc.api.advertisements.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
     },
@@ -34,9 +32,8 @@ export function useAdsUpdate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      return await handleEden(rpc.api.advertisements({ id }).put(data));
-    },
+    mutationFn: async ({ id, data }: { id: string; data: any }) =>
+      await handleEden(rpc.api.advertisements({ id }).put(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
     },
@@ -47,9 +44,8 @@ export function useAdsDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return await handleEden(rpc.api.advertisements({ id }).delete());
-    },
+    mutationFn: async (id: string) =>
+      await handleEden(rpc.api.advertisements({ id }).delete()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
     },
@@ -60,13 +56,12 @@ export function useAdsBatchDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (ids: string[]) => {
-      return await handleEden(
+    mutationFn: async (ids: string[]) =>
+      await handleEden(
         rpc.api.advertisements.batchDel.delete({
-          ids
+          ids,
         })
-      );
-    },
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
     },

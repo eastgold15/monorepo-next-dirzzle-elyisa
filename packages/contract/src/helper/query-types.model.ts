@@ -14,22 +14,22 @@ import { type Static, Type as t } from "@sinclair/typebox";
 
 // 1. 排序参数（通用，可复用）
 export const SortParams = t.Object({
-    sort: t.Optional(t.String()),
-    sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
+  sort: t.Optional(t.String()),
+  sortOrder: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
 });
 export type SortParams = Static<typeof SortParams>;
 
 // 2. 分页参数（仅用于分页场景）
 export const PaginationParams = t.Object({
-    page: t.Number({ minimum: 1, default: 1 }),
-    limit: t.Number({ minimum: 1, maximum: 1000, default: 10 }),
+  page: t.Number({ minimum: 1, default: 1 }),
+  limit: t.Number({ minimum: 1, maximum: 1000, default: 10 }),
 });
 export type PaginationParams = Static<typeof PaginationParams>;
 
 // 3. 基础查询参数（搜索、字段选择等）
 export const BaseQueryParams = t.Object({
-    search: t.Optional(t.String()),
-    fields: t.Optional(t.String()),
+  search: t.Optional(t.String()),
+  fields: t.Optional(t.String()),
 });
 export type BaseQueryParams = Static<typeof BaseQueryParams>;
 
@@ -37,14 +37,14 @@ export type BaseQueryParams = Static<typeof BaseQueryParams>;
 
 // 提取业务查询参数的类型（排除系统参数）
 export type ExtractBusinessQuery<T> = Omit<
-    T,
-    keyof PaginationParams | keyof SortParams | keyof BaseQueryParams
+  T,
+  keyof PaginationParams | keyof SortParams | keyof BaseQueryParams
 >;
 
 // 提取分页参数的类型
 export type ExtractPaginationParams<T> = Pick<
-    T,
-    keyof T & keyof PaginationParams
+  T,
+  keyof T & keyof PaginationParams
 >;
 
 // 提取排序参数的类型
@@ -52,8 +52,8 @@ export type ExtractSortParams<T> = Pick<T, keyof T & keyof SortParams>;
 
 // 提取基础查询参数的类型
 export type ExtractBaseQueryParams<T> = Pick<
-    T,
-    keyof T & keyof BaseQueryParams
+  T,
+  keyof T & keyof BaseQueryParams
 >;
 
 // ==================== 运行时工具函数 ====================
@@ -64,37 +64,37 @@ export type ExtractBaseQueryParams<T> = Pick<
  * @returns 拆分后的各部分对象
  */
 export function splitListQuery<T extends Record<string, any>>(query: T) {
-    // 提取分页参数
-    const pagination = PaginationParams.parse(query);
+  // 提取分页参数
+  const pagination = PaginationParams.parse(query);
 
-    // 提取排序参数
-    const sort = SortParams.parse(query);
+  // 提取排序参数
+  const sort = SortParams.parse(query);
 
-    // 其余的作为业务查询参数
-    const {
-        page: _page,
-        limit: _limit,
-        sort: _sort,
-        sortOrder: _sortOrder,
-        ...business
-    } = query;
+  // 其余的作为业务查询参数
+  const {
+    page: _page,
+    limit: _limit,
+    sort: _sort,
+    sortOrder: _sortOrder,
+    ...business
+  } = query;
 
-    return {
-        business: business as ExtractBusinessQuery<T>,
-        pagination: pagination as PaginationParams,
-        sort: sort as SortParams,
-    };
+  return {
+    business: business as ExtractBusinessQuery<T>,
+    pagination: pagination as PaginationParams,
+    sort: sort as SortParams,
+  };
 }
 
 export function splitListQueryNoPage<T extends Record<string, any>>(query: T) {
-    // 提取排序参数
-    const sort = SortParams.parse(query);
+  // 提取排序参数
+  const sort = SortParams.parse(query);
 
-    // 其余的作为业务查询参数
-    const { sort: _sort, sortOrder: _sortOrder, ...business } = query;
+  // 其余的作为业务查询参数
+  const { sort: _sort, sortOrder: _sortOrder, ...business } = query;
 
-    return {
-        business: business as ExtractBusinessQuery<T>,
-        sort: sort as SortParams,
-    };
+  return {
+    business: business as ExtractBusinessQuery<T>,
+    sort: sort as SortParams,
+  };
 }

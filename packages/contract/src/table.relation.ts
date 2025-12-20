@@ -27,12 +27,12 @@ export const relations = defineRelations(schema, (r) => ({
     site: r.one.sitesTable({
       from: [r.userSiteRolesTable.siteId],
       to: [r.sitesTable.id],
-      optional: false
+      optional: false,
     }),
     role: r.one.roleTable({
       from: [r.userSiteRolesTable.roleId],
       to: [r.roleTable.id],
-      optional: false
+      optional: false,
     }),
   },
 
@@ -236,8 +236,7 @@ export const relations = defineRelations(schema, (r) => ({
 
   // --- Inquiries ---
   inquiryTable: {
-    items: r.many.inquiryItemsTable({
-    }),
+    items: r.many.inquiryItemsTable({}),
     // 🔥 新增站点关系
     site: r.one.sitesTable({
       from: [r.inquiryTable.siteId],
@@ -314,23 +313,21 @@ export const relations = defineRelations(schema, (r) => ({
     // }),
   },
 
-
-
   salespersonAffiliationsTable: {
     salesperson: r.one.salespersonsTable({
       from: r.salespersonAffiliationsTable.salespersonId,
       to: r.salespersonsTable.id,
-      alias: 'salesperson',
+      alias: "salesperson",
     }),
     factory: r.one.factoriesTable({
       from: r.salespersonAffiliationsTable.factoryId,
       to: r.factoriesTable.id,
-      alias: 'factory',
+      alias: "factory",
     }),
     exporter: r.one.exportersTable({
       from: r.salespersonAffiliationsTable.exporterId,
       to: r.exportersTable.id,
-      alias: 'exporter',
+      alias: "exporter",
     }),
     // category: r.one.MasterTable({
     //   from: r.salespersonCategoriesTable.categoryId,
@@ -351,7 +348,7 @@ export const relations = defineRelations(schema, (r) => ({
     productMedia: r.many.productMediaTable({}),
     skuMedia: r.one.skuMediaTable({
       from: r.mediaTable.id,
-      to: r.skuMediaTable.mediaId
+      to: r.skuMediaTable.mediaId,
     }),
     // factory: r.one.factoriesTable({
     //   from: r.mediaTable.factoryId,

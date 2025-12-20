@@ -9,7 +9,7 @@
     "start": "bun --bun next start",
     "check": "npx ultracite check",
     "fix": "npx ultracite fix",
-   
+
     "codegen": "bun run codegen.ts"
   },
   "dependencies": {
@@ -48,7 +48,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "catalog:",
     "drizzle-seed": "^0.3.1",
-    "drizzle-typebox": "^0.3.3",
+    "drizzle-typebox": "catalog:",
     "elysia": "catalog:",
     "elysia-http-problem-json": "^0.1.4",
     "exceljs": "^4.4.0",

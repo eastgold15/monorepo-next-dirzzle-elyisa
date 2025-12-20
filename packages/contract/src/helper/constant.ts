@@ -35,8 +35,6 @@ export const FOLDDER_TYPE = {
 export type Folder_Type = keyof typeof FOLDDER_TYPE;
 export type SUPPORTED_IMAGE_TYPES = (typeof SUPPORTED_IMAGE_TYPES)[number];
 
-
-
 // === 枚举 ===
 export const FileType = t.Union([
   t.Literal("image"),
@@ -45,7 +43,6 @@ export const FileType = t.Union([
   t.Literal("audio"),
   t.Literal("other"),
 ]);
-
 
 export type FileType = typeof FileType.static;
 

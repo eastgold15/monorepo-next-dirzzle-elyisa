@@ -2,126 +2,126 @@
 export const PERMISSIONS = {
   // 用户管理权限
   USER: {
-    CREATE: 'user:create',
-    READ: 'user:read',
-    UPDATE: 'user:update',
-    DELETE: 'user:delete',
-    LIST: 'user:list',
-    MANAGE_ROLES: 'user:manage_roles',
+    CREATE: "user:create",
+    READ: "user:read",
+    UPDATE: "user:update",
+    DELETE: "user:delete",
+    LIST: "user:list",
+    MANAGE_ROLES: "user:manage_roles",
   },
 
   // 商品管理权限
   PRODUCT: {
-    CREATE: 'product:create',
-    READ: 'product:read',
-    UPDATE: 'product:update',
-    DELETE: 'product:delete',
-    LIST: 'product:list',
-    MANAGE_TEMPLATES: 'product:manage_templates',
-    MANAGE_CATEGORIES: 'product:manage_categories',
+    CREATE: "product:create",
+    READ: "product:read",
+    UPDATE: "product:update",
+    DELETE: "product:delete",
+    LIST: "product:list",
+    MANAGE_TEMPLATES: "product:manage_templates",
+    MANAGE_CATEGORIES: "product:manage_categories",
   },
 
   // SKU 管理权限
   SKU: {
-    CREATE: 'sku:create',
-    READ: 'sku:read',
-    UPDATE: 'sku:update',
-    DELETE: 'sku:delete',
-    LIST: 'sku:list',
-    MANAGE_STOCK: 'sku:manage_stock',
+    CREATE: "sku:create",
+    READ: "sku:read",
+    UPDATE: "sku:update",
+    DELETE: "sku:delete",
+    LIST: "sku:list",
+    MANAGE_STOCK: "sku:manage_stock",
   },
 
   // 订单管理权限
   ORDER: {
-    CREATE: 'order:create',
-    READ: 'order:read',
-    UPDATE: 'order:update',
-    DELETE: 'order:delete',
-    LIST: 'order:list',
-    MANAGE_STATUS: 'order:manage_status',
-    EXPORT: 'order:export',
+    CREATE: "order:create",
+    READ: "order:read",
+    UPDATE: "order:update",
+    DELETE: "order:delete",
+    LIST: "order:list",
+    MANAGE_STATUS: "order:manage_status",
+    EXPORT: "order:export",
   },
 
   // 站点管理权限
   SITE: {
-    CREATE: 'site:create',
-    READ: 'site:read',
-    UPDATE: 'site:update',
-    DELETE: 'site:delete',
-    LIST: 'site:list',
-    MANAGE_CONFIG: 'site:manage_config',
-    SWITCH: 'site:switch',
+    CREATE: "site:create",
+    READ: "site:read",
+    UPDATE: "site:update",
+    DELETE: "site:delete",
+    LIST: "site:list",
+    MANAGE_CONFIG: "site:manage_config",
+    SWITCH: "site:switch",
   },
 
   // 站点分类权限
   SITE_CATEGORY: {
-    CREATE: 'site_category:create',
-    READ: 'site_category:read',
-    UPDATE: 'site_category:update',
-    DELETE: 'site_category:delete',
-    LIST: 'site_category:list',
+    CREATE: "site_category:create",
+    READ: "site_category:read",
+    UPDATE: "site_category:update",
+    DELETE: "site_category:delete",
+    LIST: "site_category:list",
   },
 
   // 媒体文件权限
   MEDIA: {
-    UPLOAD: 'media:upload',
-    READ: 'media:read',
-    UPDATE: 'media:update',
-    DELETE: 'media:delete',
-    LIST: 'media:list',
-    MANAGE_STORAGE: 'media:manage_storage',
+    UPLOAD: "media:upload",
+    READ: "media:read",
+    UPDATE: "media:update",
+    DELETE: "media:delete",
+    LIST: "media:list",
+    MANAGE_STORAGE: "media:manage_storage",
   },
 
   // 首页卡片权限
   HERO_CARDS: {
-    CREATE: 'hero_cards:create',
-    READ: 'hero_cards:read',
-    UPDATE: 'hero_cards:update',
-    DELETE: 'hero_cards:delete',
-    LIST: 'hero_cards:list',
-    MANAGE_ORDER: 'hero_cards:manage_order',
+    CREATE: "hero_cards:create",
+    READ: "hero_cards:read",
+    UPDATE: "hero_cards:update",
+    DELETE: "hero_cards:delete",
+    LIST: "hero_cards:list",
+    MANAGE_ORDER: "hero_cards:manage_order",
   },
 
   // 广告管理权限
   ADVERTISEMENT: {
-    CREATE: 'advertisement:create',
-    READ: 'advertisement:read',
-    UPDATE: 'advertisement:update',
-    DELETE: 'advertisement:delete',
-    LIST: 'advertisement:list',
-    MANAGE_POSITIONS: 'advertisement:manage_positions',
+    CREATE: "advertisement:create",
+    READ: "advertisement:read",
+    UPDATE: "advertisement:update",
+    DELETE: "advertisement:delete",
+    LIST: "advertisement:list",
+    MANAGE_POSITIONS: "advertisement:manage_positions",
   },
 
   // 工厂管理权限
   FACTORY: {
-    CREATE: 'factory:create',
-    READ: 'factory:read',
-    UPDATE: 'factory:update',
-    DELETE: 'factory:delete',
-    LIST: 'factory:list',
-    MANAGE_AFFILIATIONS: 'factory:manage_affiliations',
+    CREATE: "factory:create",
+    READ: "factory:read",
+    UPDATE: "factory:update",
+    DELETE: "factory:delete",
+    LIST: "factory:list",
+    MANAGE_AFFILIATIONS: "factory:manage_affiliations",
   },
 
   // 出口商管理权限
   EXPORTER: {
-    CREATE: 'exporter:create',
-    READ: 'exporter:read',
-    UPDATE: 'exporter:update',
-    DELETE: 'exporter:delete',
-    LIST: 'exporter:list',
-    MANAGE_AFFILIATIONS: 'exporter:manage_affiliations',
+    CREATE: "exporter:create",
+    READ: "exporter:read",
+    UPDATE: "exporter:update",
+    DELETE: "exporter:delete",
+    LIST: "exporter:list",
+    MANAGE_AFFILIATIONS: "exporter:manage_affiliations",
   },
 
   // 系统管理权限
   SYSTEM: {
-    DASHBOARD: 'system:dashboard',
-    LOGS: 'system:logs',
-    CONFIG: 'system:config',
-    HEALTH: 'system:health',
+    DASHBOARD: "system:dashboard",
+    LOGS: "system:logs",
+    CONFIG: "system:config",
+    HEALTH: "system:health",
   },
 
   // 超级管理员权限
-  SUPER: '*', // 所有权限
+  SUPER: "*", // 所有权限
 } as const;
 
 // 权限分组，方便快速判断
@@ -207,10 +207,10 @@ export const PERMISSION_GROUPS = {
 
 // 角色定义
 export const ROLES = {
-  SUPER_ADMIN: 'super_admin',
-  EXPORTER_ADMIN: 'exporter_admin',
-  FACTORY_ADMIN: 'factory_admin',
-  SALESPERSON: 'salesperson',
+  SUPER_ADMIN: "super_admin",
+  EXPORTER_ADMIN: "exporter_admin",
+  FACTORY_ADMIN: "factory_admin",
+  SALESPERSON: "salesperson",
 } as const;
 
 // 角色默认权限配置

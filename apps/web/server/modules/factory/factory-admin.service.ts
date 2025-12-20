@@ -12,7 +12,7 @@ import {
   salespersonsTable,
 } from "@repo/contract/table";
 import { and, eq } from "drizzle-orm";
-import { db } from "@/server/db/connection";
+import { db } from "~/db/connection";
 
 /**
  * 获取工厂的商品列表（业务员只能看到自己工厂的商品）

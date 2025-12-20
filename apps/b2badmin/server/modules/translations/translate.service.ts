@@ -105,10 +105,10 @@ export class TranslateService {
     const hitRate =
       this.stats.totalTranslations > 0
         ? (
-          ((this.stats.cacheHits + this.stats.databaseHits) /
-            this.stats.totalTranslations) *
-          100
-        ).toFixed(2)
+            ((this.stats.cacheHits + this.stats.databaseHits) /
+              this.stats.totalTranslations) *
+            100
+          ).toFixed(2)
         : "0";
 
     return {

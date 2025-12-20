@@ -1,11 +1,9 @@
 // scripts/exec-ai.ts（执行AI逻辑）
 
-
 import OpenAI from "openai";
 
-
 const openai = new OpenAI({
-  baseURL: 'https://api.deepseek.com',
+  baseURL: "https://api.deepseek.com",
   apiKey: "sk-51f8ebd2e0bf48cbbccd90789e095283",
 });
 // 执行AI：基于筛选后的上下文生成代码
@@ -22,7 +20,7 @@ export const generateCode = async (
     3. 遵循TypeScript类型规范。
 
     精准上下文（仅相关文件）：
-    ${filteredContext.files.map((f: { path: any; content: any; }) => `### ${f.path}\n${f.content}`).join("\n\n")}
+    ${filteredContext.files.map((f: { path: any; content: any }) => `### ${f.path}\n${f.content}`).join("\n\n")}
 
     用户需求：${userPrompt}
   `.trim();

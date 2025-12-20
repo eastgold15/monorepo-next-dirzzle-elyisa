@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,12 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./server/*"
-      ]
+      "@/*": ["./src/*"],
+      "~/*": ["./server/*"]
     }
   },
   "include": [
@@ -36,9 +28,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-, "../../packages/contract/clear-database.ts", "../../packages/contract/seed-complete.ts"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    ".next/dev/types/**/*.ts",
+    "../../packages/contract/clear-database.ts",
+    "../../packages/contract/seed-complete.ts"
+  ],
+  "exclude": ["node_modules"]
 }

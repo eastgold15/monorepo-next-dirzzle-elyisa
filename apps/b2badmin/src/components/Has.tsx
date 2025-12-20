@@ -7,8 +7,12 @@ interface HasPermissionProps {
   fallback?: React.ReactNode;
 }
 
-export const HasPermission = ({ permission, children, fallback }: HasPermissionProps) => {
-  const can = useAuthStore(store => store.can);
+export const HasPermission = ({
+  permission,
+  children,
+  fallback,
+}: HasPermissionProps) => {
+  const can = useAuthStore((store) => store.can);
 
   if (!can(permission)) {
     return <>{fallback}</>;
@@ -24,10 +28,14 @@ interface HasAnyPermissionProps {
   fallback?: React.ReactNode;
 }
 
-export const HasAnyPermission = ({ permissions, children, fallback }: HasAnyPermissionProps) => {
-  const can = useAuthStore(store => store.can);
+export const HasAnyPermission = ({
+  permissions,
+  children,
+  fallback,
+}: HasAnyPermissionProps) => {
+  const can = useAuthStore((store) => store.can);
 
-  const hasAny = permissions.some(permission => can(permission));
+  const hasAny = permissions.some((permission) => can(permission));
 
   if (!hasAny) {
     return <>{fallback}</>;
@@ -43,10 +51,14 @@ interface HasAllPermissionsProps {
   fallback?: React.ReactNode;
 }
 
-export const HasAllPermissions = ({ permissions, children, fallback }: HasAllPermissionsProps) => {
-  const can = useAuthStore(store => store.can);
+export const HasAllPermissions = ({
+  permissions,
+  children,
+  fallback,
+}: HasAllPermissionsProps) => {
+  const can = useAuthStore((store) => store.can);
 
-  const hasAll = permissions.every(permission => can(permission));
+  const hasAll = permissions.every((permission) => can(permission));
 
   if (!hasAll) {
     return <>{fallback}</>;
@@ -63,7 +75,7 @@ interface HasRoleProps {
 }
 
 export const HasRole = ({ role, children, fallback }: HasRoleProps) => {
-  const { user } = useAuthStore(store => ({ user: store.user }));
+  const { user } = useAuthStore((store) => ({ user: store.user }));
 
   if (!user) {
     return <>{fallback}</>;
@@ -72,7 +84,7 @@ export const HasRole = ({ role, children, fallback }: HasRoleProps) => {
   const userRole = user.role?.name;
   const requiredRoles = Array.isArray(role) ? role : [role];
 
-  if (!userRole || !requiredRoles.includes(userRole)) {
+  if (!(userRole && requiredRoles.includes(userRole))) {
     return <>{fallback}</>;
   }
 

@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import "./src/env.ts"
+import "./src/env.ts";
 const nextConfig: NextConfig = {
   /* config options here */
   poweredByHeader: false,
@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     fetches: {
       fullUrl: true,
     },
-  }
+  },
 };
 
 export default nextConfig;

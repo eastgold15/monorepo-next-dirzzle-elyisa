@@ -6,7 +6,6 @@ import {
 } from "drizzle-typebox";
 import { mediaMetadataTable } from "../../table.schema";
 
-
 // === 基础 Schema ===
 const Insert = createInsertSchema(mediaMetadataTable);
 const UpdateBase = createUpdateSchema(mediaMetadataTable);

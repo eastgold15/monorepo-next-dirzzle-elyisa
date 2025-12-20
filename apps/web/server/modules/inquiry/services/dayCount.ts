@@ -1,6 +1,7 @@
+import { dailyInquiryCounterTable } from "@repo/contract";
 import { eq, sql } from "drizzle-orm";
-import { db } from "@/server/db/connection";
-import { dailyInquiryCounterTable } from "@/server/db/schema"; // 你的 schema 路径
+
+import { db } from "~/db/connection";
 
 function getYYMMDD(date: Date = new Date()): string {
   const y = String(date.getFullYear()).slice(-2);
@@ -23,7 +24,9 @@ export async function generateInquiryNumber(): Promise<string> {
     .values({ date: dateKey, count: 1 })
     .onConflictDoUpdate({
       target: dailyInquiryCounterTable.date,
-      set: { count: sql`${dailyInquiryCounterTable.count} + 1` },
+      set: {
+        count: sql`${dailyInquiryCounterTable.count} + 1`,
+      },
     });
 
   // 获取当前 count

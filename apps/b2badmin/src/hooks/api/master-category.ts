@@ -39,9 +39,8 @@ export function useCreateMasterCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: MasterCategoryTModel["Create"]) => {
-      return await handleEden(rpc.api["master-category"].post(data));
-    },
+    mutationFn: async (data: MasterCategoryTModel["Create"]) =>
+      await handleEden(rpc.api["master-category"].post(data)),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -60,13 +59,7 @@ export function useUpdateMasterCategory() {
     }: {
       id: string;
       data: MasterCategoryTModel["Update"];
-    }) => {
-      return await handleEden(
-        rpc.api["master-category"]
-          .update({ id })
-          .put(data)
-      );
-    },
+    }) => await handleEden(rpc.api["master-category"].update({ id }).put(data)),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -79,9 +72,8 @@ export function useDeleteMasterCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return await handleEden(rpc.api["master-category"].delete({ ids: [id] }));
-    },
+    mutationFn: async (id: string) =>
+      await handleEden(rpc.api["master-category"].delete({ ids: [id] })),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -94,9 +86,8 @@ export function useBatchDeleteMasterCategories() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ ids }: { ids: string[] }) => {
-      return await handleEden(rpc.api["master-category"].delete({ ids }));
-    },
+    mutationFn: async ({ ids }: { ids: string[] }) =>
+      await handleEden(rpc.api["master-category"].delete({ ids })),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -108,9 +99,8 @@ export function useBatchDeleteMasterCategories() {
 export function useMasterCategory(id: string) {
   return useQuery({
     queryKey: ["master-category", id],
-    queryFn: async () => {
-      return await handleEden(rpc.api["master-category"].detail({ id }).get());
-    },
+    queryFn: async () =>
+      await handleEden(rpc.api["master-category"].detail({ id }).get()),
     enabled: !!id,
   });
 }

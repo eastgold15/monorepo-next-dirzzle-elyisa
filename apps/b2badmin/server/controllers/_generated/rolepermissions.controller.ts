@@ -1,0 +1,36 @@
+/**
+ * 🤖 【B2B Controller - 自动生成】
+ * --------------------------------------------------------
+ * 🛠️ 该文件由自动化脚本生成。手动修改将被下次运行覆盖。
+ * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
+ * --------------------------------------------------------
+ */
+
+import { RolePermissionsContract } from "@repo/contract";
+import { Elysia, t } from "elysia";
+import { dbPlugin } from "~/db/connection";
+import { authGuardMid } from "~/middleware/auth";
+import { rolePermissionsService } from "../../modules/index";
+
+export const rolepermissionsController = new Elysia({
+  prefix: "/rolepermissions",
+})
+  .use(dbPlugin)
+  .use(authGuardMid)
+  .get(
+    "/",
+    ({ query, auth, db }) =>
+      rolePermissionsService.findAll(query, { db, auth }),
+    { query: RolePermissionsContract.ListQuery }
+  )
+  .post(
+    "/",
+    ({ body, auth, db }) => rolePermissionsService.create(body, { db, auth }),
+    { body: RolePermissionsContract.Create }
+  )
+  .delete(
+    "/:id",
+    ({ params, auth, db }) =>
+      rolePermissionsService.delete(params.id, { db, auth }),
+    { params: t.Object({ id: t.String() }) }
+  );

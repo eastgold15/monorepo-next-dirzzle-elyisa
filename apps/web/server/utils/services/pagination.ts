@@ -1,6 +1,6 @@
 import { and, asc, desc, type SQL } from "drizzle-orm";
 import type { PgSelectQueryBuilder } from "drizzle-orm/pg-core";
-import { db } from "@/server/db/connection";
+import { db } from "~/db/connection";
 import type { PaginationOptionsType } from "../Res";
 import { QueryScopeEnum } from "../soft-delete/types";
 import { createSoftDeleteCondition } from "../soft-delete/utils";

@@ -47,7 +47,7 @@ export class OSSStorage extends AbstractStorage {
     const accessKeyId = env.ACCESS_KEY_ID;
     const secretAccessKey = env.SECRET_ACCESS_KEY;
     const bucket = env.BUCKET;
-    const region = env
+    const region = env;
     const endpoint = env.ENDPOINT;
     const domain = env.DOMAIN;
 

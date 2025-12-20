@@ -8,15 +8,15 @@ import { t } from "elysia";
 import type { TreeNode } from "../../helper/utils.types";
 
 const Insert = createInsertSchema(siteCategoriesTable);
-const UpdateBase = createUpdateSchema(siteCategoriesTable)
+const UpdateBase = createUpdateSchema(siteCategoriesTable);
 const Select = createSelectSchema(siteCategoriesTable);
 
 // 创建站点分类（siteId由服务端自动添加）
 const Create = t.Intersect([
-  t.Omit(Insert, ["id", "createdAt", "updatedAt", "siteId"])
+  t.Omit(Insert, ["id", "createdAt", "updatedAt", "siteId"]),
 ]);
 
-const Update = t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "siteId"])
+const Update = t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "siteId"]);
 
 const Entity = Select;
 

@@ -21,9 +21,8 @@ export function useCreateFactory() {
   const router = require("next/navigation").useRouter();
 
   return useMutation({
-    mutationFn: async (body: any) => {
-      return await handleEden(rpc.api.factory.post(body));
-    },
+    mutationFn: async (body: any) =>
+      await handleEden(rpc.api.factory.post(body)),
     onSuccess: () => {
       toast.success("工厂创建成功");
       queryClient.invalidateQueries({ queryKey: ["factories"] });
@@ -41,13 +40,8 @@ export function useUpdateFactory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ factoryId, ...body }: { factoryId: string } & any) => {
-      return await handleEden(
-        rpc.api.factory
-          .factoryId({ factoryId })
-          .patch(body)
-      );
-    },
+    mutationFn: async ({ factoryId, ...body }: { factoryId: string } & any) =>
+      await handleEden(rpc.api.factory.factoryId({ factoryId }).patch(body)),
     onSuccess: () => {
       toast.success("工厂信息更新成功");
       queryClient.invalidateQueries({ queryKey: ["factories"] });

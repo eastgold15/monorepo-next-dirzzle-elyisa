@@ -7,9 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import {
-  attributeTemplateTable,
-} from "../../table.schema";
+import { attributeTemplateTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // ============================================================================
@@ -26,9 +24,7 @@ const Create = t.Omit(Insert, ["id", "createdAt"]);
 
 const Update = t.Omit(UpdateBase, ["id", "createdAt"]);
 
-const Patch = t.Partial(
-  t.Omit(UpdateBase, ["id", "createdAt"])
-);
+const Patch = t.Partial(t.Omit(UpdateBase, ["id", "createdAt"]));
 
 const BusinessQuery = t.Object({
   categoryId: t.Optional(t.String()),

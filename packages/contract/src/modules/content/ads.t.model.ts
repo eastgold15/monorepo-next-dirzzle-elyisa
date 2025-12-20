@@ -25,7 +25,7 @@ const Create = t.Intersect([
     "updatedAt",
     "startDate",
     "endDate",
-    "siteId"
+    "siteId",
   ]),
   t.Object({
     startDate: t.String({ format: "date-time" }),
@@ -33,16 +33,9 @@ const Create = t.Intersect([
   }),
 ]);
 
-
 // Update ads - 完整更新，排除自动字段，转换 image_id 为数组
 const Update = t.Intersect([
-  t.Omit(UpdateBase, [
-    "id",
-    "createdAt",
-    "updatedAt",
-    "startDate",
-    "endDate",
-  ]),
+  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "startDate", "endDate"]),
   t.Object({
     startDate: t.String({ format: "date-time" }),
     endDate: t.String({ format: "date-time" }),
@@ -51,13 +44,7 @@ const Update = t.Intersect([
 
 // Patch - 部分更新，所有字段可选
 const Patch = t.Intersect([
-  t.Omit(UpdateBase, [
-    "id",
-    "createdAt",
-    "updatedAt",
-    "startDate",
-    "endDate",
-  ]),
+  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "startDate", "endDate"]),
   t.Object({
     startDate: t.Optional(t.String({ format: "date-time" })),
     endDate: t.Optional(t.String({ format: "date-time" })),
@@ -73,12 +60,7 @@ const BusinessQuery = t.Intersect([
 ]);
 
 // ListQuery - 组合业务查询、分页和排序
-const ListQuery = t.Composite([
-  BusinessQuery,
-  PaginationParams,
-  SortParams,
-]);
-
+const ListQuery = t.Composite([BusinessQuery, PaginationParams, SortParams]);
 
 // Entity - 返回实体模型，包含关联的图片URL
 const Entity = t.Intersect([

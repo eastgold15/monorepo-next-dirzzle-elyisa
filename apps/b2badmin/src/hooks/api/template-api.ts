@@ -6,13 +6,12 @@ import { handleEden } from "@/lib/utils/base";
 export function useTemplates(search?: string) {
   return useQuery({
     queryKey: ["templates", search],
-    queryFn: async () => {
-      return await handleEden(
+    queryFn: async () =>
+      await handleEden(
         rpc.api.product.templates.get({
           query: { search },
         })
-      );
-    },
+      ),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
@@ -37,11 +36,8 @@ export function useTemplatesBySiteCategory(siteCategoryId?: string) {
 export function useTemplate(id: string) {
   return useQuery({
     queryKey: ["template", id],
-    queryFn: async () => {
-      return await handleEden(
-        rpc.api.product.templates.detail({ id }).get()
-      );
-    },
+    queryFn: async () =>
+      await handleEden(rpc.api.product.templates.detail({ id }).get()),
     enabled: !!id,
   });
 }
@@ -64,9 +60,7 @@ export function useCreateTemplate() {
         options?: string[];
         sortOrder?: number;
       }>;
-    }) => {
-      return await handleEden(rpc.api.product.templates.post(data));
-    },
+    }) => await handleEden(rpc.api.product.templates.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
@@ -98,9 +92,7 @@ export function useUpdateTemplate() {
           sortOrder?: number;
         }>;
       };
-    }) => {
-      return await handleEden(rpc.api.product.templates[id].put(data));
-    },
+    }) => await handleEden(rpc.api.product.templates[id].put(data)),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       queryClient.invalidateQueries({ queryKey: ["template", id] });
@@ -113,13 +105,12 @@ export function useDeleteTemplates() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (ids: string[]) => {
-      return await handleEden(
+    mutationFn: async (ids: string[]) =>
+      await handleEden(
         rpc.api.product.templates.delete({
           ids,
         })
-      );
-    },
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },

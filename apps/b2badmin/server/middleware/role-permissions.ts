@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import { db } from "@/server/db/connection";
+import { db } from "~/db/connection";
 
 // 角色权限检查插件
 export const rolePermissionsPlugin = new Elysia({ name: "role-permissions" })

@@ -17,14 +17,14 @@ const Select = createSelectSchema(heroCardsTable);
 
 // === 业务 Schema ===
 const Create = t.Intersect([
-  t.Omit(Insert, ["id", "createdAt", "updatedAt", "mediaId", 'siteId']),
+  t.Omit(Insert, ["id", "createdAt", "updatedAt", "mediaId", "siteId"]),
   t.Object({
     mediaId: t.String(),
   }),
 ]);
 
 const Update = t.Intersect([
-  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "mediaId", 'siteId']),
+  t.Omit(UpdateBase, ["id", "createdAt", "updatedAt", "mediaId", "siteId"]),
   t.Object({
     mediaId: t.Optional(t.String()),
   }),
@@ -37,11 +37,7 @@ const BusinessQuery = t.Object({
   isActive: t.Optional(t.Boolean()),
 });
 
-const ListQuery = t.Composite([
-  BusinessQuery,
-  PaginationParams,
-  SortParams
-]);
+const ListQuery = t.Composite([BusinessQuery, PaginationParams, SortParams]);
 
 const Entity = t.Intersect([
   Select,
@@ -70,7 +66,7 @@ export const HeroCardsTModel = {
   Entity,
   BusinessQuery,
   BatchStatusUpdate,
-  BatchDelete
+  BatchDelete,
 } as const;
 
 // === 2. 编译时类型集合（类型）===

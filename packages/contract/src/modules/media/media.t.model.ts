@@ -23,8 +23,8 @@ const Insert = createInsertSchema(mediaTable);
 const UpdateBase = createUpdateSchema(mediaTable);
 const Select = createSelectSchema(mediaTable);
 
-import { mediaTable } from "../../table.schema";
 import { FileType } from "../../helper/constant";
+import { mediaTable } from "../../table.schema";
 import { MediaMetaTModel } from "./meta.t.model";
 
 // === 业务 Schema ===

@@ -147,7 +147,9 @@ export async function verifyEmailConnection() {
 /**
  * 创建邮箱验证邮件模板
  */
-function createEmailVerificationTemplate(verificationUrl: string): EmailTemplate {
+function createEmailVerificationTemplate(
+  verificationUrl: string
+): EmailTemplate {
   return {
     subject: "验证您的邮箱地址",
     text: `请点击以下链接验证您的邮箱：${verificationUrl}`,

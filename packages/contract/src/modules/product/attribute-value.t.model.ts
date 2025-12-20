@@ -7,9 +7,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 import { t } from "elysia";
-import {
-  attributeValueTable,
-} from "../../table.schema";
+import { attributeValueTable } from "../../table.schema";
 import { PaginationParams, SortParams } from "../helper/query-types.t.model";
 
 // ============================================================================

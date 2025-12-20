@@ -9,7 +9,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
 import { env } from "@/env";
 import { db } from "../db/connection";
-import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from "./email/email";
+import { sendPasswordResetEmail, sendVerificationEmail } from "./email/email";
 
 // 将正则表达式移到顶层以提高性能
 const URL_REPLACE_REGEX = /^(\w+:\/\/[^/]+)(\/.*)$/;
@@ -32,7 +32,7 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
-    disableOriginCheck: true
+    disableOriginCheck: true,
   },
   emailAndPassword: {
     enabled: true,

@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/sidebar";
 import { usePermissions } from "@/hooks/usePermissions";
 import { cn } from "@/lib/utils";
-import { useSiteStore } from "@/stores/site-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useSiteStore } from "@/stores/site-store";
 import { useUserInfo } from "@/stores/user-store";
 
 export function TeamSwitcher() {
@@ -249,19 +249,22 @@ export function TeamSwitcher() {
                             <p className="font-medium">
                               {getSiteDisplayName(site)}
                             </p>
-                            {(site.site?.siteType === "factory" || site.siteType === "factory") && (
+                            {(site.site?.siteType === "factory" ||
+                              site.siteType === "factory") && (
                               <span className="rounded bg-blue-100 px-1.5 py-0.5 text-blue-800 text-xs">
                                 工厂
                               </span>
                             )}
-                            {(site.site?.siteType === "exporter" || site.siteType === "exporter") && (
+                            {(site.site?.siteType === "exporter" ||
+                              site.siteType === "exporter") && (
                               <span className="rounded bg-green-100 px-1.5 py-0.5 text-green-800 text-xs">
                                 出口商
                               </span>
                             )}
                           </div>
                           <p className="text-muted-foreground text-xs">
-                            {site.role?.name || currentRole} · {getSiteCode(site)}
+                            {site.role?.name || currentRole} ·{" "}
+                            {getSiteCode(site)}
                           </p>
                         </div>
                         {isCurrentlySwitching && (

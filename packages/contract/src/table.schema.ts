@@ -19,7 +19,7 @@ const Audit = {
   id: idUuid,
   createdAt,
   updatedAt,
-}
+};
 // 定义一个“租户组合”
 export const tenantCols = {
   // 1. 物理归属：属于哪个出口商
@@ -61,10 +61,7 @@ export const InputTypeEnum = p.pgEnum("input_type", [
   "richtext",
 ]);
 
-export const entityTypeEnum = p.pgEnum("entity_type", [
-  "exporter",
-  "factory",
-]);
+export const entityTypeEnum = p.pgEnum("entity_type", ["exporter", "factory"]);
 
 // --- Tables ---
 export const usersTable = p.pgTable("user_table", {
@@ -73,7 +70,7 @@ export const usersTable = p.pgTable("user_table", {
   email: p.text("email").notNull().unique(),
   emailVerified: p.boolean("email_verified").default(false).notNull(),
   image: p.text("image"),
-  // 
+  //
   isSuperAdmin: p.boolean("is_super_admin").default(false).notNull(),
   isActive: p.boolean("is_active").default(true).notNull(),
   phone: p.text("phone"),
@@ -82,7 +79,6 @@ export const usersTable = p.pgTable("user_table", {
 });
 
 export const accountTable = p.pgTable("account", {
-
   ...Audit,
   accountId: p.text("account_id").notNull(),
   providerId: p.text("provider_id").notNull(),
@@ -118,14 +114,15 @@ export const verificationTable = p.pgTable("verification", {
   expiresAt: p.timestamp("expires_at").notNull(),
 });
 
-
-
 export const roleTable = p.pgTable("roles", {
   id: idUuid,
   name: p.text("name").notNull().unique(),
   description: p.text("description"),
   // 🔥 新增：区分这是"系统内置角色"还是"用户自定义角色"
-  type: p.varchar("type", { enum: ["system", "custom"] }).default("custom").notNull(),
+  type: p
+    .varchar("type", { enum: ["system", "custom"] })
+    .default("custom")
+    .notNull(),
 
   // 🔥 新增：权重值
   // 100 = Owner, 80 = Admin, 50 = Editor, 10 = Viewer
@@ -140,7 +137,6 @@ export const permissionTable = p.pgTable("permissions", {
   name: p.text("name").notNull(),
   description: p.text("description"),
 });
-
 
 export const rolePermissionsTable = p.pgTable(
   "role_permissions",
@@ -159,12 +155,23 @@ export const rolePermissionsTable = p.pgTable(
 
 // 5. 🔥 核心：用户-站点-角色 关联表 (工牌表)
 // 这张表决定了 "谁" 在 "哪个站" 是 "什么身份"
-export const userSiteRolesTable = p.pgTable("user_site_roles", {
-  userId: p.uuid("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
-  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
-  roleId: p.uuid("role_id").notNull().references(() => roleTable.id, { onDelete: "restrict" }),
-  createdAt: p.timestamp("created_at").defaultNow(),
-},
+export const userSiteRolesTable = p.pgTable(
+  "user_site_roles",
+  {
+    userId: p
+      .uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    siteId: p
+      .uuid("site_id")
+      .notNull()
+      .references(() => sitesTable.id, { onDelete: "cascade" }),
+    roleId: p
+      .uuid("role_id")
+      .notNull()
+      .references(() => roleTable.id, { onDelete: "restrict" }),
+    createdAt: p.timestamp("created_at").defaultNow(),
+  },
   (t) => [p.primaryKey({ columns: [t.userId, t.siteId] })] // 一个用户在一个站点只能有一个角色(通常足够)，若需兼职可去掉此主键限制
 );
 
@@ -244,23 +251,24 @@ export const salespersonsTable = p.pgTable("salespersons", {
   lastAssignedAt: p.timestamp("last_assigned_at"),
 });
 
-export const salespersonAffiliationsTable = p.pgTable("salesperson_affiliations", {
-  ...Audit,
-  salespersonId: p
-    .uuid("salesperson_id")
-    .notNull()
-    .references(() => salespersonsTable.id, { onDelete: "cascade" }),
-  // 只能有一个非空
-  factoryId: p.uuid("factory_id").references(() => factoriesTable.id, {
-    onDelete: "cascade",
-  }),
-  exporterId: p.uuid("exporter_id").references(() => exportersTable.id, {
-    onDelete: "cascade",
-  }),
-  entityType: entityTypeEnum("entity_type").notNull(),
-})
-
-
+export const salespersonAffiliationsTable = p.pgTable(
+  "salesperson_affiliations",
+  {
+    ...Audit,
+    salespersonId: p
+      .uuid("salesperson_id")
+      .notNull()
+      .references(() => salespersonsTable.id, { onDelete: "cascade" }),
+    // 只能有一个非空
+    factoryId: p.uuid("factory_id").references(() => factoriesTable.id, {
+      onDelete: "cascade",
+    }),
+    exporterId: p.uuid("exporter_id").references(() => exportersTable.id, {
+      onDelete: "cascade",
+    }),
+    entityType: entityTypeEnum("entity_type").notNull(),
+  }
+);
 
 export const salespersonCategoriesTable = p.pgTable(
   "salesperson_categories",
@@ -309,7 +317,10 @@ export const adsTable = p.pgTable("advertisements", {
   title: p.varchar("title", { length: 255 }).notNull(),
   description: p.varchar("description", { length: 255 }).notNull(),
   type: adsTypeEnum("type").notNull(),
-  mediaId: p.uuid("media_id").notNull().references(() => mediaTable.id),
+  mediaId: p
+    .uuid("media_id")
+    .notNull()
+    .references(() => mediaTable.id),
   link: p.varchar("link", { length: 500 }).notNull(),
   position: adsPositionEnum("ads_position").default("home-top"),
   sortOrder: p.integer("sort_order").default(0),
@@ -317,7 +328,10 @@ export const adsTable = p.pgTable("advertisements", {
   startDate: p.timestamp("start_date").notNull(),
   endDate: p.timestamp("end_date").notNull(),
   // 🔥 必须新增：属于哪个站点
-  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
+  siteId: p
+    .uuid("site_id")
+    .notNull()
+    .references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const heroCardsTable = p.pgTable("hero_cards", {
@@ -334,7 +348,10 @@ export const heroCardsTable = p.pgTable("hero_cards", {
 
   mediaId: p.uuid("media_id").references(() => mediaTable.id),
   // 🔥 必须新增：属于哪个站点
-  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
+  siteId: p
+    .uuid("site_id")
+    .notNull()
+    .references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const productsTable = p.pgTable("products_table", {
@@ -438,13 +455,15 @@ export const skusTable = p.pgTable("skus_table", {
   specJson: p.json("spec_json").notNull(),
   extraAttributes: p.json("extra_attributes"),
   status: p.integer("status").notNull().default(1),
-  productId: p.uuid("product_id").references(() => productsTable.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }).notNull(),
+  productId: p
+    .uuid("product_id")
+    .references(() => productsTable.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
 
   ...tenantCols,
-
 });
 
 export const skuMediaTable = p.pgTable(
@@ -465,7 +484,6 @@ export const skuMediaTable = p.pgTable(
   },
   (t) => [p.primaryKey({ columns: [t.skuId, t.mediaId] })]
 );
-
 
 export const CustomerTable = p.pgTable("customer", {
   ...Audit,
@@ -562,7 +580,10 @@ export const siteConfigTable = p.pgTable("site_config", {
   translatable: p.boolean("translatable").default(true),
   visible: p.boolean("visible").default(false),
   // 🔥 必须新增：属于哪个站点
-  siteId: p.uuid("site_id").notNull().references(() => sitesTable.id, { onDelete: "cascade" }),
+  siteId: p
+    .uuid("site_id")
+    .notNull()
+    .references(() => sitesTable.id, { onDelete: "cascade" }),
 });
 
 export const dailyInquiryCounterTable = p.pgTable("daily_inquiry_counter", {
@@ -580,7 +601,6 @@ export const translationDictTable = p.pgTable("translation_dict", {
   translations: p.json("translations").notNull().$type<Record<string, any>>(),
   isActive: p.boolean("is_active").default(true),
   sortOrder: p.integer("sort_order").default(0),
-
 });
 
 // --- Multi-site Support Tables ---
@@ -594,7 +614,7 @@ export const sitesTable = p.pgTable("sites", {
   isActive: p.boolean("is_active").default(true),
 
   // 站点类型：factory 或 exporter
-  siteType: entityTypeEnum('site_type').notNull(),
+  siteType: entityTypeEnum("site_type").notNull(),
   factoryId: p.uuid("factory_id").references(() => factoriesTable.id),
   exporterId: p.uuid("exporter_id").references(() => exportersTable.id),
 });
@@ -607,15 +627,20 @@ export const siteCategoriesTable = p.pgTable("site_categories", {
   parentId: p.uuid("parent_id"),
   sortOrder: p.integer("sort_order").default(0),
 
-  siteId: p.uuid("site_id").references(() => sitesTable.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }).notNull(),
+  siteId: p
+    .uuid("site_id")
+    .references(() => sitesTable.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
   // 分类可以关联到全局分类（可选，用于数据聚合）
-  masterCategoryId: p.uuid("master_category_id").references(() => masterTable.id, {
-    onDelete: "set null",
-    onUpdate: "cascade",
-  }),
+  masterCategoryId: p
+    .uuid("master_category_id")
+    .references(() => masterTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
 });
 
 // 站点商品关联表 - 每个站点展示的商品
@@ -625,7 +650,7 @@ export const siteProductsTable = p.pgTable("site_products", {
   // 站点级别的商品配置
   sitePrice: p.decimal("site_price", { precision: 10, scale: 2 }),
   siteName: p.varchar("site_name", { length: 200 }), // 站点可以自定义商品名
-  siteDescription: p.text('site_description'), // 站点可以自定义商品描述
+  siteDescription: p.text("site_description"), // 站点可以自定义商品描述
 
   // 展示控制
   isFeatured: p.boolean("is_featured").default(false),
@@ -635,19 +660,25 @@ export const siteProductsTable = p.pgTable("site_products", {
   // SEO
   seoTitle: p.varchar("seo_title", { length: 200 }),
 
-  siteId: p.uuid("site_id").references(() => sitesTable.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }).notNull(),
-  productId: p.uuid("product_id").references(() => productsTable.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }).notNull(),
+  siteId: p
+    .uuid("site_id")
+    .references(() => sitesTable.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
+  productId: p
+    .uuid("product_id")
+    .references(() => productsTable.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
   // 关联站点分类
-  siteCategoryId: p.uuid("site_category_id").references(() => siteCategoriesTable.id, {
-    onDelete: "set null",
-    onUpdate: "cascade",
-  }),
+  siteCategoryId: p
+    .uuid("site_category_id")
+    .references(() => siteCategoriesTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
 });
-
-

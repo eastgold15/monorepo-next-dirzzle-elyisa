@@ -55,7 +55,6 @@
 //       activeRelation = userRoleSites[0];
 //     }
 
-
 //     const { site: currentSite, role } = activeRelation;
 
 //     // 4️⃣ 查库获取该角色在“当前站点”上下文下的权限
@@ -143,7 +142,6 @@
 //     })
 //   })
 
-
 //   .get("/permissions", ({ user, currentSite, role, t }) => {
 
 //   }, {
@@ -151,8 +149,6 @@
 //     allRoles: ["admin"],
 //     allPermission: "*",
 //   })
-
-
 
 // .macro({
 //   auth: {

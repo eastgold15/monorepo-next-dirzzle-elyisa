@@ -1,7 +1,5 @@
-import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import { sitesTable } from "@repo/contract";
 import { dbPlugin } from "../db/connection";
 
 /**
@@ -18,7 +16,9 @@ export const siteMiddleware = new Elysia({ name: "site-middleware" })
 
     // 查找对应的站点
     const site = await db.query.sitesTable.findFirst({
-      where: eq(sitesTable.domain, domain),
+      where: {
+        domain,
+      },
       columns: {
         id: true,
         name: true,
@@ -36,12 +36,20 @@ export const siteMiddleware = new Elysia({ name: "site-middleware" })
     if (!site.isActive) {
       throw new HttpError.Forbidden(`Site is not active: ${domain}`);
     }
+    const {
+      id: siteId,
+      name: siteName,
+      siteType,
+      factoryId,
+      exporterId,
+    } = site;
 
     return {
-      siteId: site.id,
-      siteName: site.name,
-      siteType: site.siteType,
-      factoryId: site.factoryId,
-      exporterId: site.exporterId,
+      siteId,
+      siteName,
+      siteType,
+      /** 工厂和出口商id*/
+      tenantId: factoryId ?? (exporterId as string),
     };
-  });
+  })
+  .as("global");

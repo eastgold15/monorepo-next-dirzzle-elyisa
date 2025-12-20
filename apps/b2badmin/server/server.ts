@@ -6,10 +6,9 @@ import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { localeMiddleware } from "~/plugins/locale";
 import { loggerPlugin } from "~/plugins/logger";
 import { errorPlugin } from "~/utils/err/err.plugin";
+import * as controllers from "./controllers";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
-
-import * as controllers from "./controllers";
 
 import { authGuardMid } from "./middleware/auth";
 /**
@@ -37,10 +36,9 @@ export const server = new Elysia({ name: "server" })
   .use(authGuardMid)
   .group("/v1", (app) => {
     // 自动挂载所有生成的路由
-    Object.values(controllers).forEach(controller => app.use(controller));
+    Object.values(controllers).forEach((controller) => app.use(controller));
     return app;
   })
-
 
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
   .use(loggerPlugin)
@@ -48,7 +46,7 @@ export const server = new Elysia({ name: "server" })
   .use(errorPlugin)
   // 3. Problem JSON 插件 (将最终的 HttpError 转换为 RFC 7807 响应)
   .use(httpProblemJsonPlugin())
-  .use(dbPlugin)
+  .use(dbPlugin);
 // .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
 // .use(categoriesController)
 // .use(AdsController)

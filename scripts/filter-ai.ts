@@ -5,12 +5,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
 
-
 const openai = new OpenAI({
-  baseURL: 'https://api.deepseek.com',
+  baseURL: "https://api.deepseek.com",
   apiKey: "sk-51f8ebd2e0bf48cbbccd90789e095283",
 });
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

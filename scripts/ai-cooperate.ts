@@ -18,8 +18,6 @@ const runCooperate = async () => {
   // 1. 预生成文件元数据（首次运行执行，后续可缓存）
   await generateFileMeta(path.join(__dirname, "../packages"));
 
-
-
   // 2. 筛选AI提取精准上下文
   const filteredContext = await filterContext(userPrompt);
   console.log(

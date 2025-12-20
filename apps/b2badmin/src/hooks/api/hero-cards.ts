@@ -43,9 +43,7 @@ export function useHeroCardsCreate() {
       backgroundClass?: string;
       isActive?: boolean;
       sortOrder?: number;
-    }) => {
-      return await handleEden(rpc.api["hero-cards"].post(data));
-    },
+    }) => await handleEden(rpc.api["hero-cards"].post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
     },
@@ -56,7 +54,10 @@ export function useHeroCardsUpdate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
       id: string;
       data: {
         title?: string;
@@ -68,9 +69,7 @@ export function useHeroCardsUpdate() {
         isActive?: boolean;
         sortOrder?: number;
       };
-    }) => {
-      return await handleEden(rpc.api["hero-cards"]({ id }).put(data));
-    },
+    }) => await handleEden(rpc.api["hero-cards"]({ id }).put(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
     },
@@ -81,9 +80,8 @@ export function useHeroCardsDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return await handleEden(rpc.api["hero-cards"]({ id }).delete());
-    },
+    mutationFn: async (id: string) =>
+      await handleEden(rpc.api["hero-cards"]({ id }).delete()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
     },
@@ -94,13 +92,12 @@ export function useHeroCardsBatchDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (ids: string[]) => {
-      return await handleEden(
+    mutationFn: async (ids: string[]) =>
+      await handleEden(
         rpc.api["hero-cards"].delete({
           body: { ids },
         })
-      );
-    },
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
     },

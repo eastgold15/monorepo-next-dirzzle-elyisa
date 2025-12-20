@@ -1,114 +1,116 @@
-// 🛡️ 自动生成的 Web Service 索引
-import { CustomerBaseService } from "./generated/customer.service";
-export const customerService = new CustomerBaseService();
+// 🛡️ 自动生成的模块实例导出
+import { CustomerService } from "./_custom/customer.service";
+export const customerService = new CustomerService();
 
-import { AccountBaseService } from "./generated/account.service";
-export const accountService = new AccountBaseService();
+import { AccountService } from "./_custom/account.service";
+export const accountService = new AccountService();
 
-import { AdsBaseService } from "./generated/ads.service";
-export const adsService = new AdsBaseService();
+import { AdsService } from "./_custom/ads.service";
+export const adsService = new AdsService();
 
-import { AttributeBaseService } from "./generated/attribute.service";
-export const attributeService = new AttributeBaseService();
+import { AttributeService } from "./_custom/attribute.service";
+export const attributeService = new AttributeService();
 
-import { AttributeTemplateBaseService } from "./generated/attributetemplate.service";
-export const attributeTemplateService = new AttributeTemplateBaseService();
+import { AttributeTemplateService } from "./_custom/attributetemplate.service";
+export const attributeTemplateService = new AttributeTemplateService();
 
-import { AttributeValueBaseService } from "./generated/attributevalue.service";
-export const attributeValueService = new AttributeValueBaseService();
+import { AttributeValueService } from "./_custom/attributevalue.service";
+export const attributeValueService = new AttributeValueService();
 
-import { DailyInquiryCounterBaseService } from "./generated/dailyinquirycounter.service";
-export const dailyInquiryCounterService = new DailyInquiryCounterBaseService();
+import { DailyInquiryCounterService } from "./_custom/dailyinquirycounter.service";
+export const dailyInquiryCounterService = new DailyInquiryCounterService();
 
-import { ExportersBaseService } from "./generated/exporters.service";
-export const exportersService = new ExportersBaseService();
+import { ExportersService } from "./_custom/exporters.service";
+export const exportersService = new ExportersService();
 
-import { FactoriesBaseService } from "./generated/factories.service";
-export const factoriesService = new FactoriesBaseService();
+import { FactoriesService } from "./_custom/factories.service";
+export const factoriesService = new FactoriesService();
 
-import { HeroCardsBaseService } from "./generated/herocards.service";
-export const heroCardsService = new HeroCardsBaseService();
+import { HeroCardsService } from "./_custom/herocards.service";
+export const heroCardsService = new HeroCardsService();
 
-import { InquiryItemsBaseService } from "./generated/inquiryitems.service";
-export const inquiryItemsService = new InquiryItemsBaseService();
+import { InquiryItemsService } from "./_custom/inquiryitems.service";
+export const inquiryItemsService = new InquiryItemsService();
 
-import { InquiryBaseService } from "./generated/inquiry.service";
-export const inquiryService = new InquiryBaseService();
+import { InquiryService } from "./_custom/inquiry.service";
+export const inquiryService = new InquiryService();
 
-import { MasterBaseService } from "./generated/master.service";
-export const masterService = new MasterBaseService();
+import { MasterService } from "./_custom/master.service";
+export const masterService = new MasterService();
 
-import { MediaMetadataBaseService } from "./generated/mediametadata.service";
-export const mediaMetadataService = new MediaMetadataBaseService();
+import { MediaMetadataService } from "./_custom/mediametadata.service";
+export const mediaMetadataService = new MediaMetadataService();
 
-import { MediaBaseService } from "./generated/media.service";
-export const mediaService = new MediaBaseService();
+import { MediaService } from "./_custom/media.service";
+export const mediaService = new MediaService();
 
-import { PermissionBaseService } from "./generated/permission.service";
-export const permissionService = new PermissionBaseService();
+import { PermissionService } from "./_custom/permission.service";
+export const permissionService = new PermissionService();
 
-import { ProductMasterCategoriesBaseService } from "./generated/productmastercategories.service";
-export const productMasterCategoriesService = new ProductMasterCategoriesBaseService();
+import { ProductMasterCategoriesService } from "./_custom/productmastercategories.service";
+export const productMasterCategoriesService =
+  new ProductMasterCategoriesService();
 
-import { ProductMediaBaseService } from "./generated/productmedia.service";
-export const productMediaService = new ProductMediaBaseService();
+import { ProductMediaService } from "./_custom/productmedia.service";
+export const productMediaService = new ProductMediaService();
 
-import { ProductTemplateBaseService } from "./generated/producttemplate.service";
-export const productTemplateService = new ProductTemplateBaseService();
+import { ProductTemplateService } from "./_custom/producttemplate.service";
+export const productTemplateService = new ProductTemplateService();
 
-import { ProductsBaseService } from "./generated/products.service";
-export const productsService = new ProductsBaseService();
+import { ProductsService } from "./_custom/products.service";
+export const productsService = new ProductsService();
 
-import { QuotationItemsBaseService } from "./generated/quotationitems.service";
-export const quotationItemsService = new QuotationItemsBaseService();
+import { QuotationItemsService } from "./_custom/quotationitems.service";
+export const quotationItemsService = new QuotationItemsService();
 
-import { QuotationsBaseService } from "./generated/quotations.service";
-export const quotationsService = new QuotationsBaseService();
+import { QuotationsService } from "./_custom/quotations.service";
+export const quotationsService = new QuotationsService();
 
-import { RolePermissionsBaseService } from "./generated/rolepermissions.service";
-export const rolePermissionsService = new RolePermissionsBaseService();
+import { RolePermissionsService } from "./_custom/rolepermissions.service";
+export const rolePermissionsService = new RolePermissionsService();
 
-import { RoleBaseService } from "./generated/role.service";
-export const roleService = new RoleBaseService();
+import { RoleService } from "./_custom/role.service";
+export const roleService = new RoleService();
 
-import { SalespersonAffiliationsBaseService } from "./generated/salespersonaffiliations.service";
-export const salespersonAffiliationsService = new SalespersonAffiliationsBaseService();
+import { SalespersonAffiliationsService } from "./_custom/salespersonaffiliations.service";
+export const salespersonAffiliationsService =
+  new SalespersonAffiliationsService();
 
-import { SalespersonCategoriesBaseService } from "./generated/salespersoncategories.service";
-export const salespersonCategoriesService = new SalespersonCategoriesBaseService();
+import { SalespersonCategoriesService } from "./_custom/salespersoncategories.service";
+export const salespersonCategoriesService = new SalespersonCategoriesService();
 
-import { SalespersonsBaseService } from "./generated/salespersons.service";
-export const salespersonsService = new SalespersonsBaseService();
+import { SalespersonsService } from "./_custom/salespersons.service";
+export const salespersonsService = new SalespersonsService();
 
-import { SessionBaseService } from "./generated/session.service";
-export const sessionService = new SessionBaseService();
+import { SessionService } from "./_custom/session.service";
+export const sessionService = new SessionService();
 
-import { SiteCategoriesBaseService } from "./generated/sitecategories.service";
-export const siteCategoriesService = new SiteCategoriesBaseService();
+import { SiteCategoriesService } from "./_custom/sitecategories.service";
+export const siteCategoriesService = new SiteCategoriesService();
 
-import { SiteConfigBaseService } from "./generated/siteconfig.service";
-export const siteConfigService = new SiteConfigBaseService();
+import { SiteConfigService } from "./_custom/siteconfig.service";
+export const siteConfigService = new SiteConfigService();
 
-import { SiteProductsBaseService } from "./generated/siteproducts.service";
-export const siteProductsService = new SiteProductsBaseService();
+import { SiteProductsService } from "./_custom/siteproducts.service";
+export const siteProductsService = new SiteProductsService();
 
-import { SitesBaseService } from "./generated/sites.service";
-export const sitesService = new SitesBaseService();
+import { SitesService } from "./_custom/sites.service";
+export const sitesService = new SitesService();
 
-import { SkuMediaBaseService } from "./generated/skumedia.service";
-export const skuMediaService = new SkuMediaBaseService();
+import { SkuMediaService } from "./_custom/skumedia.service";
+export const skuMediaService = new SkuMediaService();
 
-import { SkusBaseService } from "./generated/skus.service";
-export const skusService = new SkusBaseService();
+import { SkusService } from "./_custom/skus.service";
+export const skusService = new SkusService();
 
-import { TranslationDictBaseService } from "./generated/translationdict.service";
-export const translationDictService = new TranslationDictBaseService();
+import { TranslationDictService } from "./_custom/translationdict.service";
+export const translationDictService = new TranslationDictService();
 
-import { UserSiteRolesBaseService } from "./generated/usersiteroles.service";
-export const userSiteRolesService = new UserSiteRolesBaseService();
+import { UserSiteRolesService } from "./_custom/usersiteroles.service";
+export const userSiteRolesService = new UserSiteRolesService();
 
-import { UsersBaseService } from "./generated/users.service";
-export const usersService = new UsersBaseService();
+import { UsersService } from "./_custom/users.service";
+export const usersService = new UsersService();
 
-import { VerificationBaseService } from "./generated/verification.service";
-export const verificationService = new VerificationBaseService();
+import { VerificationService } from "./_custom/verification.service";
+export const verificationService = new VerificationService();

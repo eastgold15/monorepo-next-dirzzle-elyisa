@@ -4,7 +4,11 @@
 
 import { t } from "elysia";
 
-export type UserRole = "super_admin" | "exporter_admin" | "factory_admin" | "salesperson";
+export type UserRole =
+  | "super_admin"
+  | "exporter_admin"
+  | "factory_admin"
+  | "salesperson";
 
 export interface UserPermission {
   role: UserRole;
@@ -16,8 +20,7 @@ export interface UserPermission {
   salespersonId?: string;
   // 权限范围
   permissions: Permission[];
-}// === 权限类型定义 ===
-
+} // === 权限类型定义 ===
 
 export type Permission =
   // 用户管理
@@ -53,7 +56,6 @@ export type Permission =
   | "view_categories"
   | "edit_categories"
   | "assign_categories";
-
 
 // 角色权限映射
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
@@ -113,7 +115,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "delete_media",
     "view_orders", // 只能查看自己的订单
   ],
-  super_admin: []
+  super_admin: [],
 };
 
 // 数据过滤范围
@@ -153,7 +155,7 @@ export const ROLE_DATA_SCOPE: Record<UserRole, DataScope> = {
     users: "all", // 可以查看所有用户
     factories: "all", // 可以查看所有工厂
     orders: "all", // 可以查看所有订单
-  }
+  },
 }; // 权限相关类型定义
 
 // === 权限 Schema ===
@@ -200,4 +202,3 @@ export type PermissionTModel = {
   Entity: typeof Entity.static;
   Query: typeof Query.static;
 };
-

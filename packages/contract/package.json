@@ -21,10 +21,8 @@
     "db:generate": "bun x drizzle-kit generate",
     "db:migrate": "bun x drizzle-kit migrate",
     "db:studio": "bun x drizzle-kit studio",
-     "seed": "bun run seed-complete.ts",
-     "seed:reset": "bun run reset-database.ts",
-    "gen:ai-docs": "bun run  scripts/gen-ai-docs.ts",
-    "gen:final": "bun run scripts/gen-all-final.ts"
+    "seed": "bun run seed-complete.ts",
+    "seed:reset": "bun run reset-database.ts"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",
