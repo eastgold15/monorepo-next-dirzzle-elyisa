@@ -1,9 +1,10 @@
 import {
   CustomerTable,
   factoriesTable,
-  InquiryTModel,
   inquiryItemsTable,
   inquiryTable,
+  InquiryContract,
+  InquiryDTO,
   productsTable,
   salespersonCategoriesTable,
   salespersonsTable,
@@ -12,7 +13,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "@/server/db/connection";
-import { sendEmail } from "../email/email";
+import { sendEmail } from "../../lib/email/email";
 import {
   type QuotationData,
   quotationDefaultData,
@@ -215,10 +216,10 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
           // 图片
           photoForRefer: photoBuffer
             ? {
-                buffer: photoBuffer,
-                mimeType,
-                name: `product-${productId}-${Date.now()}`,
-              }
+              buffer: photoBuffer,
+              mimeType,
+              name: `product-${productId}-${Date.now()}`,
+            }
             : null,
 
           // 商品行
@@ -275,7 +276,7 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
           })
           .slice(0, 3);
 
-        const inquiryWithItems: InquiryTModel["InqueryWithItem"] = {
+        const inquiryWithItems: InquiryDTO["Create"] = {
           customerName,
           customerCompany,
           customerEmail,
@@ -362,7 +363,7 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
       }
     },
     {
-      body: InquiryTModel.InquriryOrder,
+      body: InquiryContract.Create,
       detail: {
         tags: ["inquiry"],
         summary: "提交用户询价单",

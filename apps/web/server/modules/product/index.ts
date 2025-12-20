@@ -1,6 +1,6 @@
 import {
   mediaTable,
-  ProductTModel,
+  ProductsContract,
   productMasterCategoriesTable,
   productMediaTable,
   productsTable,
@@ -116,7 +116,7 @@ export const productRoute = new Elysia({ prefix: "product" })
       );
     },
     {
-      query: ProductTModel.ListQuery,
+      query: ProductsContract.ListQuery,
       detail: {
         tags: ["Products"],
         summary: "获取商品列表",

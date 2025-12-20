@@ -14,7 +14,7 @@ import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "~/db/connection";
 import { siteMiddleware } from "~/middleware/site";
-import { sendEmail } from "../../modules/email/email";
+import { sendEmail } from "../../lib/email/email";
 import {
   type QuotationData,
   quotationDefaultData,
@@ -246,10 +246,10 @@ export const inquiryController = new Elysia({ prefix: "/inquiry" })
           // 图片
           photoForRefer: photoBuffer
             ? {
-                buffer: photoBuffer,
-                mimeType,
-                name: `product-${productId}-${Date.now()}`,
-              }
+              buffer: photoBuffer,
+              mimeType,
+              name: `product-${productId}-${Date.now()}`,
+            }
             : null,
 
           // 商品行

@@ -3,8 +3,8 @@ import { cors } from "@elysiajs/cors";
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 
-import { localeMiddleware } from "~/plugins/locale";
-import { loggerPlugin } from "~/plugins/logger";
+import { localeMiddleware } from "~/middleware/locale";
+import { loggerPlugin } from "~/middleware/logger";
 import { errorPlugin } from "~/utils/err/err.plugin";
 import * as controllers from "./controllers";
 import { dbPlugin } from "./db/connection";

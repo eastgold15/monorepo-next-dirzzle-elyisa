@@ -7,6 +7,7 @@ import { InquiryContract as Generated } from "../_generated/inquiry.contract";
 import { MediaContract } from "../_generated/media.contract";
 import { ProductsContract } from "../_generated/products.contract";
 import { SkusContract } from "../_generated/skus.contract";
+import { InquiryItemsContract } from "../_generated/inquiryitems.contract";
 
 /**
  * 自定义扩展契约：Inquiry

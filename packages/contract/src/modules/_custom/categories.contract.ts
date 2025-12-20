@@ -2,9 +2,9 @@
 // 用于分类管理
 
 import { t } from "elysia";
-import { ProductmastercategoriesContract as GeneratedProduct } from "../_generated/productmastercategories.contract";
+import { ProductMasterCategoriesContract as GeneratedProduct } from "../_generated/productmastercategories.contract";
 // 1. 导入自动生成的原始契约
-import { SitecategoriesContract as GeneratedSite } from "../_generated/sitecategories.contract";
+import { SiteCategoriesContract as GeneratedSite } from "../_generated/sitecategories.contract";
 
 /**
  * 自定义扩展契约：Categories

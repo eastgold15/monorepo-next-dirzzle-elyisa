@@ -2,7 +2,7 @@ import { heroCardsTable } from "@repo/contract/table";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "~/db/connection";
-import { localeMiddleware } from "~/plugins/locale";
+import { localeMiddleware } from "~/middleware/locale";
 
 export const heroCardsController = new Elysia({ prefix: "/hero-cards" })
   .use(localeMiddleware)

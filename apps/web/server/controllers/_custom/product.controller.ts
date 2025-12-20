@@ -9,7 +9,7 @@ import {
 import { and, eq, exists, like, type SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { dbPlugin } from "~/db/connection";
-import { localeMiddleware } from "~/plugins/locale";
+import { localeMiddleware } from "~/middleware/locale";
 import { buildPageMeta, paginate } from "~/utils/services/pagination";
 
 export const productController = new Elysia({ prefix: "/product" })

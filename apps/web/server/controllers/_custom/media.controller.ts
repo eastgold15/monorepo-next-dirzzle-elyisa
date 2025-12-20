@@ -2,7 +2,7 @@ import { mediaTable } from "@repo/contract/table";
 import { asc, eq, inArray } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { dbPlugin } from "~/db/connection";
-import { localeMiddleware } from "~/plugins/locale";
+import { localeMiddleware } from "~/middleware/locale";
 
 export const mediaController = new Elysia({ prefix: "/media" }) // 获取图片 - 前端用户使用
   .use(localeMiddleware)

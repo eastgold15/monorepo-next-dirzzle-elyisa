@@ -3,7 +3,7 @@ import { and, asc, eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { dbPlugin } from "~/db/connection";
 import { siteMiddleware } from "~/middleware/site";
-import { localeMiddleware } from "~/plugins/locale";
+import { localeMiddleware } from "~/middleware/locale";
 import { buildTree } from "~/utils/buildTree";
 
 export const categoryController = new Elysia({ prefix: "/category" }) // 获取分类树形列表 - 前端用户使用

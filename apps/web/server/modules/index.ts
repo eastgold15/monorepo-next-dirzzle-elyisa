@@ -48,8 +48,7 @@ import { PermissionService } from "./_custom/permission.service";
 export const permissionService = new PermissionService();
 
 import { ProductMasterCategoriesService } from "./_custom/productmastercategories.service";
-export const productMasterCategoriesService =
-  new ProductMasterCategoriesService();
+export const productMasterCategoriesService = new ProductMasterCategoriesService();
 
 import { ProductMediaService } from "./_custom/productmedia.service";
 export const productMediaService = new ProductMediaService();
@@ -73,8 +72,7 @@ import { RoleService } from "./_custom/role.service";
 export const roleService = new RoleService();
 
 import { SalespersonAffiliationsService } from "./_custom/salespersonaffiliations.service";
-export const salespersonAffiliationsService =
-  new SalespersonAffiliationsService();
+export const salespersonAffiliationsService = new SalespersonAffiliationsService();
 
 import { SalespersonCategoriesService } from "./_custom/salespersoncategories.service";
 export const salespersonCategoriesService = new SalespersonCategoriesService();

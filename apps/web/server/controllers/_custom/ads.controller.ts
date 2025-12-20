@@ -2,7 +2,7 @@ import { adsTable } from "@repo/contract/table";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "~/db/connection";
-import { localeMiddleware } from "~/plugins/locale";
+import { localeMiddleware } from "~/middleware/locale";
 
 export const adsController = new Elysia({ prefix: "/ads" })
   .use(localeMiddleware)

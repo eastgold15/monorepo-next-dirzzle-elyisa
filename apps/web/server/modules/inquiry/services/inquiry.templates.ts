@@ -4,7 +4,7 @@
  */
 
 import type { InquiryTModel, SalesPersonTModel } from "@repo/contract";
-import type { EmailAttachment, EmailTemplate } from "../../email/email.types";
+import type { EmailAttachment, EmailTemplate } from "../../../lib/email/email.types";
 
 /**
  * 创建客户确认邮件模板

@@ -4,7 +4,7 @@ import { env } from "@/env";
 import * as controllers from "./controllers";
 import { dbPlugin } from "./db/connection";
 import { siteMiddleware } from "./middleware/site";
-import { loggerPlugin } from "./plugins/logger";
+import { loggerPlugin } from "./middleware/logger";
 import { errorPlugin } from "./utils/err/err.plugin";
 
 /**
