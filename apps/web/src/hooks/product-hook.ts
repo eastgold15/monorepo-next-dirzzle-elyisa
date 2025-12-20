@@ -59,4 +59,4 @@ export function useProductQuery(id: string) {
 }
 // 👇 新增：导出 product 数据的类型（自动推导！）
 type ComProduct = Awaited<ReturnType<typeof useProductQuery>>["data"];
-export type BackendProduct = ComProduct
+export type BackendProduct = ComProduct;

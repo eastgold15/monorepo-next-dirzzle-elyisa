@@ -10,11 +10,11 @@ export const siteMiddleware = new Elysia({ name: "site-middleware" })
   .derive(async ({ db, request }) => {
     // 从请求头获取域名
     const hostname = request.headers.get("host") || "localhost";
-    console.log('hostname:', hostname)
+    console.log("hostname:", hostname);
 
     // 移除端口号（如果存在）
     const domain = hostname.split(":")[0];
-    console.log('domain:', domain)
+    console.log("domain:", domain);
 
     // 查找对应的站点
     const site = await db.query.sitesTable.findFirst({
@@ -31,7 +31,7 @@ export const siteMiddleware = new Elysia({ name: "site-middleware" })
       },
     });
 
-    console.log('site:', site)
+    console.log("site:", site);
 
     if (!site) {
       throw new HttpError.NotFound(`Site not found for domain: ${domain}`);

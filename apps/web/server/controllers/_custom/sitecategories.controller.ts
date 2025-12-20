@@ -4,7 +4,9 @@ import { localeMiddleware } from "~/middleware/locale";
 import { siteMiddleware } from "~/middleware/site";
 import { siteCategoriesService } from "~/modules";
 
-export const sitecategoriesController = new Elysia({ prefix: "/sitecategories" }) // 获取分类树形列表 - 前端用户使用
+export const sitecategoriesController = new Elysia({
+  prefix: "/sitecategories",
+}) // 获取分类树形列表 - 前端用户使用
   .use(localeMiddleware)
   .use(dbPlugin)
   .use(siteMiddleware)

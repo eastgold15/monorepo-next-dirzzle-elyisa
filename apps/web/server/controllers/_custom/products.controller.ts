@@ -6,7 +6,7 @@ import { siteMiddleware } from "~/middleware/site";
 import { productsService } from "~/modules";
 import { buildPageMeta } from "~/utils/services/pagination";
 
-export const productController = new Elysia({ prefix: "/product" })
+export const productsController = new Elysia({ prefix: "/products" })
   .use(localeMiddleware)
   .use(dbPlugin)
   .use(siteMiddleware)

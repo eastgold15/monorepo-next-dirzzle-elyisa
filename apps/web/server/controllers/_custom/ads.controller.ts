@@ -16,7 +16,8 @@ export const adsController = new Elysia({ prefix: "/ads" })
       detail: {
         tags: ["Advertisements"],
         summary: "获取当前有效广告",
-        description: "获取当前站点在有效时间段内的广告列表，用于首页展示和推广位填充",
+        description:
+          "获取当前站点在有效时间段内的广告列表，用于首页展示和推广位填充",
       },
     }
   );
