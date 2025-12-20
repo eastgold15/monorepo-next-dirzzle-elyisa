@@ -85,8 +85,9 @@ const ProductQuery = t.Object({
     ])
   ),
   sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
-  hasImages: t.Optional(t.Boolean()),
-  hasSkus: t.Optional(t.Boolean()),
+
+  limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+  page: t.Optional(t.Number({ minimum: 1 })),
 });
 
 // 产品克隆请求

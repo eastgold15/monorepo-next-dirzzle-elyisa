@@ -1,9 +1,8 @@
-import { adsTable } from "@repo/contract/table";
-import { and, eq, gte, lte } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { dbPlugin } from "~/db/connection";
 import { localeMiddleware } from "~/middleware/locale";
 import { siteMiddleware } from "~/middleware/site";
+import { adsService } from "~/modules";
 
 export const adsController = new Elysia({ prefix: "/ads" })
   .use(localeMiddleware)
@@ -12,28 +11,12 @@ export const adsController = new Elysia({ prefix: "/ads" })
   // 自定义路由：获取当前有效广告
   .get(
     "/current",
-    async ({ db }) => {
-      const now = new Date();
-
-      const ads = await db
-        .select()
-        .from(adsTable)
-        .where(
-          and(
-            eq(adsTable.isActive, true),
-            lte(adsTable.startDate, now),
-            gte(adsTable.endDate, now)
-          )
-        )
-        .limit(4);
-
-      return ads;
-    },
+    async ({ db, siteId }) => adsService.findCurrent({ db, siteId }),
     {
       detail: {
         tags: ["Advertisements"],
         summary: "获取当前有效广告",
-        description: "获取当前时间段内有效的广告",
+        description: "获取当前站点在有效时间段内的广告列表，用于首页展示和推广位填充",
       },
     }
   );
