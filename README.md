@@ -16,5 +16,7 @@ cd  apps/backend && docker-compose up  -d
 5. bun dev
 启动项目
 
+# 自动脚本生成controller 和service
 
+[视频](./docs/video/自动生成.mp4)
 

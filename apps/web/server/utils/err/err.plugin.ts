@@ -108,7 +108,9 @@ export const errorPlugin = new Elysia()
         // 先打印原始错误的完整信息
         console.error(`\n${createSeparator("🔍 ORIGINAL ERROR DETAILS")}`);
         console.error(chalk.red(`Error Name: ${chalk.yellow(error.name)}`));
-        console.error(chalk.red(`Error Message: ${chalk.white(error.message)}`));
+        console.error(
+          chalk.red(`Error Message: ${chalk.white(error.message)}`)
+        );
         if (error.stack) {
           console.error(chalk.red("Original Stack Trace:"));
           formatStack(error.stack).forEach((line) => console.error(line));
@@ -117,7 +119,11 @@ export const errorPlugin = new Elysia()
 
         // 如果是 AggregateError，显示所有错误
         if (error instanceof AggregateError && error.errors.length > 0) {
-          console.error(chalk.red(`\n📋 AggregateError contains ${error.errors.length} errors:`));
+          console.error(
+            chalk.red(
+              `\n📋 AggregateError contains ${error.errors.length} errors:`
+            )
+          );
           error.errors.forEach((err, index) => {
             console.error(chalk.red(`\n--- Error ${index + 1} ---`));
             console.error(chalk.red(`Name: ${chalk.yellow(err.name)}`));
