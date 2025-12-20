@@ -89,7 +89,7 @@ export async function generateQuotationExcel(quotationData: QuotationData) {
           replaceRegex,
           (match, fieldName) => {
             const dataValue = quotationData[fieldName as keyof QuotationData];
-            return dataValue != null ? String(dataValue) : "";
+            return dataValue !== null ? String(dataValue) : "";
           }
         );
         cell.value = newValue;
@@ -108,7 +108,7 @@ export async function generateQuotationExcel(quotationData: QuotationData) {
           replaceRegex,
           (match, fieldName) => {
             const dataValue = quotationData[fieldName as keyof QuotationData];
-            return dataValue != null ? String(dataValue) : "";
+            return dataValue !== null ? String(dataValue) : "";
           }
         );
 

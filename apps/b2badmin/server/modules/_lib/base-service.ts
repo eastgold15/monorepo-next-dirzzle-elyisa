@@ -9,8 +9,14 @@ import type {
 
 export interface ServiceContext {
   db: any;
-  auth: any;
-  tenantId?: string;
+  auth: {
+    userId: string;
+    siteId: string;
+    tenantId: string;
+    factoryId?: string | null; // 👈 工厂特定 ID
+    exporterId?: string | null; // 👈 出口商特定 ID
+    role: string;
+  };
 }
 
 export abstract class B2BBaseService<
@@ -24,10 +30,20 @@ export abstract class B2BBaseService<
 
   protected getScopeFilters(ctx: ServiceContext): SQL[] {
     const filters: SQL[] = [];
-    const tableAny = this.table as any;
-    if (tableAny.siteId && (ctx as any).siteId) {
-      filters.push(eq(tableAny.siteId, (ctx as any).siteId));
+    const table = this.table as any;
+    const { siteId, factoryId } = ctx.auth;
+
+    // 1. 基础站点隔离 (Tenant Level)
+    if (table.siteId && siteId) {
+      filters.push(eq(table.siteId, siteId));
     }
+
+    // 2. 核心：工厂深度隔离 (Factory Level)
+    // 如果当前用户是工厂身份 (有 factoryId)，且表中有 factoryId 字段，强制过滤
+    if (table.factoryId && factoryId) {
+      filters.push(eq(table.factoryId, factoryId));
+    }
+
     return filters;
   }
 
@@ -65,13 +81,17 @@ export abstract class B2BBaseService<
     return { data, total, page, limit };
   }
 
+  // 修改 create 方法，确保保存时自动注入 factoryId
   async create(data: Static<C["Create"]>, ctx: ServiceContext) {
-    const tableAny = this.table as any;
+    const table = this.table as any;
+    const { siteId, factoryId } = ctx.auth;
+
     const payload = {
       ...data,
-      ...(tableAny.siteId &&
-        (ctx as any).siteId && { siteId: (ctx as any).siteId }),
+      ...(table.siteId && { siteId }),
+      ...(table.factoryId && factoryId && { factoryId }), // 👈 强制注入自己的工厂 ID
     };
+
     const [result] = await ctx.db
       .insert(this.table)
       .values(payload)

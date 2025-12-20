@@ -180,7 +180,6 @@ export class OSSImageStorage extends AbstractImageStorage {
             Key: key,
           });
           break;
-        case "GET":
         default:
           command = new GetObjectCommand({
             Bucket: this.bucket,

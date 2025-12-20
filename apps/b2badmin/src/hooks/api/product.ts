@@ -32,7 +32,7 @@ export function useProductTemplatesBySiteCategory(siteCategoryId: string) {
       if (!siteCategoryId) return [];
 
       const response =
-        await rpc.api.product["templates"]["by-site-category"][
+        await rpc.api.product.templates["by-site-category"][
           siteCategoryId
         ].get();
       if (response.error) {

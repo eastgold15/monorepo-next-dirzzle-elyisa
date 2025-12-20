@@ -41,7 +41,7 @@ export function TeamSwitcher() {
   const [isSwitching, setIsSwitching] = useState<string | null>(null);
 
   // 处理站点切换
-  const handleSwitchSite = async (siteId: string) => {
+  const handleSwitchSite = (siteId: string) => {
     if (!currentSite || siteId === currentSite?.id) return;
 
     setIsSwitching(siteId);

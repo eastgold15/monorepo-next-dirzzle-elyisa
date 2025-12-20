@@ -18,7 +18,7 @@ export type BunS3Config = {
 };
 
 export class BunS3Storage extends AbstractImageStorage {
-  private client: S3Client;
+  private readonly client: S3Client;
   private readonly bucket: string;
   readonly config: BunS3Config;
 

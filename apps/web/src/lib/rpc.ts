@@ -1,5 +1,6 @@
 import { edenTreaty } from "@elysiajs/eden";
 import type { App } from "@/app/api/[[...route]]/route";
+import { env } from "@/env";
 
 /**
  * Creates an RPC client using edenTreaty.
@@ -13,6 +14,6 @@ import type { App } from "@/app/api/[[...route]]/route";
  */
 export const rpc = edenTreaty<App>(
   typeof window === "undefined"
-    ? `http://localhost:${process.env.PORT || 3000}`
+    ? `http://localhost:${env.APP_PORT || 3000}`
     : window.location.origin
 );

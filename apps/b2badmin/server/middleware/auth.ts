@@ -83,14 +83,14 @@ export const authGuardMid = new Elysia({ name: "authGuard" })
       exporterId: currentSite.exporterId, // 如果是出口商站，这里有值
       factoryId: currentSite.factoryId, // 如果是工厂站，这里有值
       siteType: currentSite.siteType,
-
       role,
       auth: {
         role: role.name,
         userId: user.id,
-        siteId: currentSite.id,
-        factoryId: currentSite.factoryId, // 如果是工厂站，这里有值
-        exporterId: currentSite.exporterId, // 如果是出口商站，这里有值
+        siteId: currentSite.id, // 👈 站点隔离
+        factoryId: currentSite.factoryId, // 👈 工厂隔离 (如果是工厂员工)
+        exporterId: currentSite.exporterId, // 👈 出口商隔离
+        tenantId: currentSite.id, // 👈 统一租户 ID，通常就是 siteId
       },
       permissions, // 自动注入到后续的所有 Hook 中
     };

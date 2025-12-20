@@ -159,8 +159,20 @@ import { Static } from "@sinclair/typebox";
 
 export interface ServiceContext {
   db: any;
-  ${env.name === "WEB" ? "siteId: string;" : "auth: any;"}
-  tenantId?: string;
+  ${
+    env.name === "WEB"
+      ? "siteId: string;"
+      : `
+  auth: {
+    userId: string;
+    siteId: string;
+    tenantId: string;
+    factoryId?: string;   // 👈 工厂特定 ID
+    exporterId?: string;  // 👈 出口商特定 ID
+    role: string;
+  };
+  `
+  }
 }
 
 export abstract class ${env.name}BaseService<

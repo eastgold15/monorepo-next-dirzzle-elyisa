@@ -140,7 +140,7 @@ export default function ProductCreator() {
       generateSkus();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep]);
+  }, [currentStep, generateSkus]);
 
   const handleNext = () => {
     if (currentStep === 0 && !selectedTemplateId)

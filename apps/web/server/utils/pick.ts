@@ -34,7 +34,7 @@ export function pickNonNullable<
   if (mapping) {
     // 模式 2：只处理 mapping 中的字段
     for (const sourceKey in mapping) {
-      if (Object.hasOwn(obj, sourceKey) && obj[sourceKey] != null) {
+      if (Object.hasOwn(obj, sourceKey) && obj[sourceKey] !== null) {
         const targetKey = mapping[sourceKey];
         if (targetKey) {
           result[targetKey] = obj[sourceKey]; // ✅ 安全访问且类型正确
@@ -44,7 +44,7 @@ export function pickNonNullable<
   } else {
     // 模式 1：处理所有字段
     for (const key in obj) {
-      if (obj[key] != null) {
+      if (obj[key] !== null) {
         result[key] = obj[key];
       }
     }

@@ -12,6 +12,7 @@ import { herocardsController } from "./_custom/herocards.controller";
 import { masterController } from "./_custom/master.controller";
 import { mediaController } from "./_custom/media.controller";
 import { productsController } from "./_custom/products.controller";
+import { sitecategoriesController } from "./_custom/sitecategories.controller";
 import { siteconfigController } from "./_custom/siteconfig.controller";
 import { sitesController } from "./_custom/sites.controller";
 import { skusController } from "./_custom/skus.controller";
@@ -39,7 +40,6 @@ import { salespersonaffiliationsController } from "./_generated/salespersonaffil
 import { salespersoncategoriesController } from "./_generated/salespersoncategories.controller";
 import { salespersonsController } from "./_generated/salespersons.controller";
 import { sessionController } from "./_generated/session.controller";
-import { sitecategoriesController } from "./_generated/sitecategories.controller";
 import { siteproductsController } from "./_generated/siteproducts.controller";
 import { skumediaController } from "./_generated/skumedia.controller";
 import { translationdictController } from "./_generated/translationdict.controller";
