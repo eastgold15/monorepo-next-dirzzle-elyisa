@@ -18,5 +18,9 @@ cd  apps/backend && docker-compose up  -d
 
 # 自动脚本生成controller 和service
 
-[视频](./docs/video/自动生成.mp4)
 
+<!-- 完整配置：指定高度、封面图、禁用循环 -->
+<video width="800" height="450" controls >
+  <source src="./docs/video/自动生成.mp4" type="video/mp4">
+  你的浏览器不支持 HTML5 视频播放。
+</video>
