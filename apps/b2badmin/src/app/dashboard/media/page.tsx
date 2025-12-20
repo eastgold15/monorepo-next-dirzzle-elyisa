@@ -12,6 +12,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useMediaList } from "@/hooks/api";
+import Image from "next/image";
 
 interface UploadFile {
   id: string;
@@ -129,7 +130,7 @@ export default function MediaLibrary() {
                   >
                     <div className="relative aspect-square bg-slate-100">
                       {asset.url && asset.mimeType.startsWith("image/") ? (
-                        <img
+                        <Image
                           alt={asset.originalName}
                           className="h-full w-full object-cover"
                           src={asset.url}

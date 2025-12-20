@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
 import { useState } from "react";
 
@@ -94,7 +95,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
               key={asset.id}
               onClick={() => setSelectedId(asset.id)}
             >
-              <img
+              <Image
                 alt={asset.name}
                 className="h-full w-full object-cover"
                 src={asset.url}

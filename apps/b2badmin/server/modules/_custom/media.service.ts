@@ -13,8 +13,8 @@ export class MediaService extends MediaGeneratedService {
    * 利用基类的 create 方法自动注入 siteId 和 factoryId
    */
 
-  // biome-ignore lint/style/useDefaultParameterLast: <explanation>
-  async upload(file: File, category = "general", ctx: ServiceContext) {
+
+  async upload(file: File, ctx: ServiceContext, category = "general") {
     const storage = StorageFactory.createStorageFromEnv();
 
     // 1. 生成唯一文件名
