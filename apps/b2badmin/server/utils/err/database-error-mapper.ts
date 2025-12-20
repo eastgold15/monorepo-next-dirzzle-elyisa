@@ -15,7 +15,6 @@ class ServiceUnavailable extends HttpError.ServiceUnavailable {
 
 // 同理，创建支持 extensions 的 InternalServerError (500)
 class InternalServerError extends HttpError.InternalServerError {
-
   constructor(detail: string, extensions?: Record<string, any>) {
     super(detail);
   }

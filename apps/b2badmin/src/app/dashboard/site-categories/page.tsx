@@ -1,6 +1,5 @@
 "use client";
 
-import type { SiteCategoryTModel } from "@repo/contract";
 import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -39,18 +38,27 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useCreateSiteCategory,
   useDeleteSiteCategory,
   useSiteCategoriesTree,
+  useToggleCategoryStatus,
   useUpdateSiteCategory,
 } from "@/hooks/api/site-category";
-import { useCurrentSite } from "@/stores/user-store";
 
-// 将契约层的实体类型转换为前端使用的带children的类型
-type SiteCategory = SiteCategoryTModel["Entity"] & {
+interface SiteCategory {
+  id: string;
+  name: string;
+  description?: string;
+  parentId?: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
   children?: SiteCategory[];
-};
+}
 
 // 树形节点组件
 function CategoryTreeNode({
@@ -193,9 +201,10 @@ function CategoryDialog({
 }) {
   const [formData, setFormData] = useState({
     name: category?.name || "",
-    parentId: category?.parentId || null,
+    description: category?.description || "",
+    parentId: category?.parentId || "",
     sortOrder: category?.sortOrder || 0,
-    masterCategoryId: category?.masterCategoryId || null,
+    isActive: category?.isActive ?? true,
   });
 
   const createMutation = useCreateSiteCategory();
@@ -210,19 +219,22 @@ function CategoryDialog({
     }
 
     try {
+      const submitData = {
+        name: formData.name,
+        description: formData.description || undefined,
+        parentId: formData.parentId || undefined,
+        sortOrder: formData.sortOrder,
+        isActive: formData.isActive,
+      };
+
       if (isEdit && category) {
         await updateMutation.mutateAsync({
           id: category.id,
-          data: {
-            name: formData.name,
-            parentId: formData.parentId,
-            sortOrder: formData.sortOrder,
-            masterCategoryId: formData.masterCategoryId,
-          },
+          data: submitData,
         });
         toast.success("分类更新成功");
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(submitData);
         toast.success("分类创建成功");
       }
       onClose();
@@ -255,12 +267,25 @@ function CategoryDialog({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="description">分类描述</Label>
+            <Textarea
+              id="description"
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder="请输入分类描述（可选）"
+              rows={3}
+              value={formData.description}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="parent">父分类</Label>
             <Select
               onValueChange={(value) =>
-                setFormData({ ...formData, parentId: value || null })
+                setFormData({ ...formData, parentId: value || "" })
               }
-              value={formData.parentId || ""}
+              value={formData.parentId}
             >
               <SelectTrigger>
                 <SelectValue placeholder="选择父分类（可选）" />
@@ -278,41 +303,32 @@ function CategoryDialog({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="sortOrder">排序</Label>
-              <Input
-                className="focus:ring-2 focus:ring-indigo-500"
-                id="sortOrder"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sortOrder: Number.parseInt(e.target.value, 10) || 0,
-                  })
-                }
-                placeholder="0"
-                type="number"
-                value={formData.sortOrder}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="sortOrder">排序</Label>
+            <Input
+              className="focus:ring-2 focus:ring-indigo-500"
+              id="sortOrder"
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  sortOrder: Number.parseInt(e.target.value, 10) || 0,
+                })
+              }
+              placeholder="0"
+              type="number"
+              value={formData.sortOrder}
+            />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="masterCategory">主分类</Label>
-              <Select
-                onValueChange={(value) =>
-                  setFormData({ ...formData, masterCategoryId: value || null })
-                }
-                value={formData.masterCategoryId || ""}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="选择主分类（可选）" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">无主分类</SelectItem>
-                  {/* 这里可以添加主分类选项 */}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={formData.isActive}
+              id="isActive"
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, isActive: checked })
+              }
+            />
+            <Label htmlFor="isActive">启用分类</Label>
           </div>
         </div>
 
@@ -386,8 +402,8 @@ function findCategoryById(
 
 export default function SiteCategoryManager() {
   const { data: flatCategories, isLoading } = useSiteCategoriesTree();
-  const currentSite = useCurrentSite();
   const deleteMutation = useDeleteSiteCategory();
+  const toggleStatusMutation = useToggleCategoryStatus();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<
@@ -406,6 +422,15 @@ export default function SiteCategoryManager() {
       toast.success("分类删除成功");
     } catch (error) {
       toast.error("分类删除失败");
+    }
+  };
+
+  // 切换分类状态
+  const handleToggleStatus = async (id: string) => {
+    try {
+      await toggleStatusMutation.mutateAsync(id);
+    } catch (error) {
+      toast.error("操作失败");
     }
   };
 
@@ -489,7 +514,7 @@ export default function SiteCategoryManager() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-bold text-3xl text-slate-900">
-                {currentSite?.site.name || "当前站点"} - 分类管理
+                站点分类管理
               </h1>
               <p className="mt-2 text-slate-600">
                 管理当前站点的商品分类，支持多级分类结构。

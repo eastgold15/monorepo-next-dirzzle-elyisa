@@ -19,14 +19,7 @@ export const adsController = new Elysia({
       return await adsService.findAllWithMedia(query, { db, auth });
     },
     {
-      query: t.Object({
-        page: t.Optional(t.Number()),
-        limit: t.Optional(t.Number()),
-        search: t.Optional(t.String()),
-        type: t.Optional(t.String()),
-        position: t.Optional(t.String()),
-        isActive: t.Optional(t.Boolean()),
-      }),
+      query: AdsContract.ListQuery,
       detail: {
         summary: "获取广告列表",
         description: "获取当前站点的所有广告，包含媒体信息",
@@ -45,18 +38,7 @@ export const adsController = new Elysia({
       return await adsService.createAd(adData, mediaId, { db, auth });
     },
     {
-      body: t.Object({
-        title: t.String(),
-        description: t.Optional(t.String()),
-        type: t.Optional(t.String()),
-        link: t.Optional(t.String()),
-        position: t.Optional(t.String()),
-        startDate: t.Optional(t.String()),
-        endDate: t.Optional(t.String()),
-        sortOrder: t.Optional(t.Number()),
-        isActive: t.Optional(t.Boolean()),
-        mediaId: t.Optional(t.String()),
-      }),
+      body: AdsContract.Create,
       detail: {
         summary: "创建广告",
         description: "创建新的广告，可关联媒体文件",
@@ -125,23 +107,6 @@ export const adsController = new Elysia({
       detail: {
         summary: "批量删除广告",
         description: "批量删除广告",
-        tags: ["Ads"],
-      },
-    }
-  )
-
-  // 标准的 CRUD 操作
-  .get(
-    "/",
-    ({ query, permissions, auth, db }) => {
-      if (!permissions.includes("ADS_VIEW")) throw new Error("Forbidden");
-      return adsService.findAll(query, { db, auth });
-    },
-    {
-      query: AdsContract.ListQuery,
-      detail: {
-        summary: "获取广告列表",
-        description: "分页获取广告列表（需要权限）",
         tags: ["Ads"],
       },
     }

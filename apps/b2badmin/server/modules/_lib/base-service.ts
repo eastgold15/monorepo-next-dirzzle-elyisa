@@ -26,7 +26,7 @@ export abstract class B2BBaseService<
   constructor(
     protected table: T,
     protected contract: C
-  ) {}
+  ) { }
 
   protected getScopeFilters(ctx: ServiceContext): SQL[] {
     const filters: SQL[] = [];
@@ -58,7 +58,7 @@ export abstract class B2BBaseService<
   }
 
   async findAll(query: Static<C["ListQuery"]>, ctx: ServiceContext) {
-    const { page = 1, limit = 10, search } = query as any;
+    const { page = 1, limit = 99_999, search } = query as any;
     const tableAny = this.table as any;
     const extra: SQL[] = [];
     if (search && tableAny.name)

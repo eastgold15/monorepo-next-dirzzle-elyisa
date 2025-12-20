@@ -1,18 +1,30 @@
 "use client";
 
-import type { SiteCategoryTModel } from "@repo/contract";
+import type { SiteCategoriesContractDTO as SiteCategoriesContractDto } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
+
+interface SiteCategory {
+  id: string;
+  name: string;
+  description?: string;
+  parentId?: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  children?: SiteCategory[];
+}
 
 // 获取当前站点的分类树
 export function useSiteCategoriesTree() {
   return useQuery({
     queryKey: ["site-categories", "tree"],
     queryFn: async () => {
-      const data = await handleEden(rpc.api.site.category.get());
+      const data = await handleEden(rpc.api.v1.sitecategories.tree.get());
       // 确保返回数组，即使是空数组
-      return (data || []) as SiteCategoryTModel["Entity"][];
+      return (data || []) as SiteCategory[];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -23,8 +35,8 @@ export function useSiteCategories() {
   return useQuery({
     queryKey: ["site-categories", "flat"],
     queryFn: async () => {
-      const categories = await handleEden(rpc.api.site.category.get());
-      return categories || [];
+      const categories = await handleEden(rpc.api.v1.sitecategories.get());
+      return categories?.data || [];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -35,8 +47,13 @@ export function useCreateSiteCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: SiteCategoryTModel["Create"]) =>
-      await handleEden(rpc.api.site.category.post(data)),
+    mutationFn: async (data: {
+      name: string;
+      description?: string;
+      parentId?: string;
+      sortOrder?: number;
+      isActive?: boolean;
+    }) => await handleEden(rpc.api.v1.sitecategories.post(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -54,8 +71,14 @@ export function useUpdateSiteCategory() {
       data,
     }: {
       id: string;
-      data: SiteCategoryTModel["Update"];
-    }) => await handleEden(rpc.api.site.category.update({ id }).put(data)),
+      data: {
+        name?: string;
+        description?: string;
+        parentId?: string;
+        sortOrder?: number;
+        isActive?: boolean;
+      };
+    }) => await handleEden(rpc.api.v1.sitecategories({ id }).patch(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -69,7 +92,7 @@ export function useDeleteSiteCategory() {
 
   return useMutation({
     mutationFn: async (id: string) =>
-      await handleEden(rpc.api.site.category.delete({ id }).delete()),
+      await handleEden(rpc.api.v1.sitecategories({ id }).delete()),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -77,13 +100,61 @@ export function useDeleteSiteCategory() {
   });
 }
 
+// 移动分类
+export function useMoveCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      newParentId,
+    }: {
+      id: string;
+      newParentId?: string;
+    }) =>
+      await handleEden(
+        rpc.api.v1.sitecategories({ id }).move.patch({ newParentId })
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+  });
+}
+
+// 批量更新排序
+export function useUpdateCategoriesSort() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (items: Array<{ id: string; sortOrder: number }>) =>
+      await handleEden(rpc.api.v1.sitecategories.sort.patch({ items })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+  });
+}
+
+// 切换激活状态
+export function useToggleCategoryStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) =>
+      await handleEden(rpc.api.v1.sitecategories({ id }).toggle.patch()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+  });
+}
+
 // 获取分类的完整路径（如：一级分类 > 二级分类 > 三级分类）
 export function getCategoryPath(
-  category: SiteCategoryTModel["TreeEntity"],
-  allCategories: SiteCategoryTModel["TreeEntity"][]
+  category: SiteCategoriesContractDto['TreeResponse'],
+  allCategories: SiteCategoriesContractDto['TreeResponse'][]
 ): string {
   const path: string[] = [];
-  let currentCategory: SiteCategoryTModel["TreeEntity"] | undefined = category;
+  let currentCategory: SiteCategoriesContractDto['TreeResponse'] | undefined =
+    category;
 
   while (currentCategory) {
     path.unshift(currentCategory.name);
@@ -103,8 +174,8 @@ export function getCategoryPath(
 // 根据ID查找分类
 function findCategoryById(
   id: string,
-  categories: SiteCategoryTModel["TreeEntity"][]
-): SiteCategoryTModel["TreeEntity"] | undefined {
+  categories: SiteCategoriesContractDto['TreeResponse'][]
+): SiteCategoriesContractDto['TreeResponse'] | undefined {
   for (const category of categories) {
     if (category.id === id) {
       return category;
@@ -121,15 +192,15 @@ function findCategoryById(
 
 // 检查分类是否有子分类
 export function hasChildren(
-  category: SiteCategoryTModel["TreeEntity"]
+  category: SiteCategoriesContractDto['TreeResponse']
 ): boolean {
   return !!(category.children && category.children.length > 0);
 }
 
 // 检查是否可以删除分类（没有子分类）
 export function canDeleteCategory(
-  category: SiteCategoryTModel["TreeEntity"],
-  allCategories: SiteCategoryTModel["TreeEntity"][]
+  category: SiteCategoriesContractDto['TreeResponse'],
+  allCategories: SiteCategoriesContractDto['TreeResponse'][]
 ): boolean {
   // 检查是否有子分类
   if (hasChildren(category)) {
@@ -150,7 +221,7 @@ export function useBatchDeleteSiteCategories() {
       // 在实际应用中，可能需要创建一个批量删除的接口
       const deletePromises = ids.map(
         async (id) =>
-          await handleEden(rpc.api.site.category.delete({ id }).delete())
+          await handleEden(rpc.api.v1.sitecategories({ id }).delete())
       );
 
       await Promise.all(deletePromises);

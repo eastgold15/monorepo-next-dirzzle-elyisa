@@ -44,20 +44,22 @@ import {
   useHeroCardsCreate,
   useHeroCardsDelete,
   useHeroCardsList,
+  useHeroCardsToggleStatus,
   useHeroCardsUpdate,
 } from "@/hooks/api/hero-cards";
 
 interface HeroCard {
   id: string;
   title: string;
-  description: string;
-  buttonText: string;
-  buttonUrl: string | null;
-  backgroundClass: string | null;
-  mediaId: string | null;
-  url?: string | null;
-  sortOrder: number | null;
-  isActive: boolean | null;
+  subtitle?: string;
+  description?: string;
+  buttonLabel?: string;
+  buttonUrl?: string;
+  backgroundClass?: string;
+  mediaId?: string;
+  imageUrl?: string | null;
+  sortOrder: number;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -68,24 +70,18 @@ export default function HeroCardsPage() {
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
+    subtitle: "",
     description: "",
-    buttonText: "",
+    buttonLabel: "",
     buttonUrl: "",
     backgroundClass: "bg-blue-50",
     sortOrder: 0,
     isActive: true,
-    mediaId: [] as string[],
+    mediaId: "",
   });
 
   // 获取首页展示卡片列表
-  const {
-    data: cardsData,
-    isLoading,
-    refetch,
-  } = useHeroCardsList({
-    sortBy: "sortOrder",
-    sortOrder: "asc",
-  });
+  const { data: cardsData, isLoading, refetch } = useHeroCardsList();
 
   // 创建首页展示卡片
   const createMutation = useHeroCardsCreate();
@@ -99,17 +95,21 @@ export default function HeroCardsPage() {
   // 批量删除首页展示卡片
   const batchDeleteMutation = useHeroCardsBatchDelete();
 
+  // 切换激活状态
+  const toggleStatusMutation = useHeroCardsToggleStatus();
+
   // 重置表单
   const resetForm = () => {
     setFormData({
       title: "",
+      subtitle: "",
       description: "",
-      buttonText: "",
+      buttonLabel: "",
       buttonUrl: "",
       backgroundClass: "bg-blue-50",
       sortOrder: 0,
       isActive: true,
-      mediaId: [],
+      mediaId: "",
     });
     setEditingCard(null);
   };
@@ -119,27 +119,40 @@ export default function HeroCardsPage() {
     setEditingCard(card);
     setFormData({
       title: card.title,
-      description: card.description,
-      buttonText: card.buttonText,
+      subtitle: card.subtitle || "",
+      description: card.description || "",
+      buttonLabel: card.buttonLabel || "",
       buttonUrl: card.buttonUrl || "",
       backgroundClass: card.backgroundClass || "bg-blue-50",
       sortOrder: card.sortOrder,
       isActive: card.isActive,
-      mediaId: card.mediaId ? [card.mediaId] : [],
+      mediaId: card.mediaId || "",
     });
   };
 
   // 保存首页展示卡片
   const handleSave = async () => {
     try {
+      const data = {
+        title: formData.title,
+        subtitle: formData.subtitle || undefined,
+        description: formData.description || undefined,
+        buttonLabel: formData.buttonLabel || undefined,
+        buttonUrl: formData.buttonUrl || undefined,
+        backgroundClass: formData.backgroundClass || undefined,
+        sortOrder: formData.sortOrder,
+        isActive: formData.isActive,
+        mediaId: formData.mediaId || undefined,
+      };
+
       if (editingCard) {
         await updateMutation.mutateAsync({
           id: editingCard.id,
-          data: formData,
+          data,
         });
         toast.success("首页展示卡片更新成功");
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(data);
         toast.success("首页展示卡片创建成功");
       }
       resetForm();
@@ -148,6 +161,17 @@ export default function HeroCardsPage() {
     } catch (error) {
       console.error("保存失败:", error);
       toast.error("保存失败");
+    }
+  };
+
+  // 切换激活状态
+  const handleToggleStatus = async (id: string) => {
+    try {
+      await toggleStatusMutation.mutateAsync(id);
+      refetch();
+    } catch (error) {
+      console.error("切换状态失败:", error);
+      toast.error("切换状态失败");
     }
   };
 
@@ -285,23 +309,38 @@ export default function HeroCardsPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="buttonText">按钮文本 *</Label>
+                          <Label htmlFor="subtitle">副标题</Label>
                           <Input
-                            id="buttonText"
+                            id="subtitle"
                             onChange={(e) =>
                               setFormData({
                                 ...formData,
-                                buttonText: e.target.value,
+                                subtitle: e.target.value,
                               })
                             }
-                            placeholder="请输入按钮文本"
-                            value={formData.buttonText}
+                            placeholder="请输入副标题（可选）"
+                            value={formData.subtitle}
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="description">描述 *</Label>
+                        <Label htmlFor="buttonLabel">按钮文本</Label>
+                        <Input
+                          id="buttonLabel"
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              buttonLabel: e.target.value,
+                            })
+                          }
+                          placeholder="请输入按钮文本（可选）"
+                          value={formData.buttonLabel}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="description">描述</Label>
                         <Textarea
                           id="description"
                           onChange={(e) =>
@@ -364,13 +403,16 @@ export default function HeroCardsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>图片 *</Label>
+                        <Label>图片</Label>
                         <MediaUpload
                           maxCount={1}
                           onChange={(mediaIds) =>
-                            setFormData({ ...formData, mediaId: mediaIds })
+                            setFormData({
+                              ...formData,
+                              mediaId: mediaIds[0] || "",
+                            })
                           }
-                          value={formData.mediaId}
+                          value={formData.mediaId ? [formData.mediaId] : []}
                         />
                       </div>
 
@@ -398,12 +440,7 @@ export default function HeroCardsPage() {
                       </Button>
                       <Button
                         disabled={
-                          !(
-                            formData.title &&
-                            formData.description &&
-                            formData.buttonText
-                          ) ||
-                          formData.mediaId.length === 0 ||
+                          !formData.title ||
                           createMutation.isPending ||
                           updateMutation.isPending
                         }
@@ -464,26 +501,35 @@ export default function HeroCardsPage() {
                               type="checkbox"
                             />
                             <GripVertical className="mt-1 h-5 w-5 text-muted-foreground" />
-                            {card.url && (
+                            {card.imageUrl && (
                               <Image
                                 alt={card.title}
                                 className="h-16 w-16 rounded object-cover"
-                                src={card.url}
+                                src={card.imageUrl}
                               />
                             )}
                             <div className="flex-1">
                               <h3 className="font-semibold text-lg">
                                 {card.title}
                               </h3>
-                              <p className="mt-1 text-muted-foreground text-sm">
-                                {card.description}
-                              </p>
+                              {card.subtitle && (
+                                <p className="text-muted-foreground text-sm">
+                                  {card.subtitle}
+                                </p>
+                              )}
+                              {card.description && (
+                                <p className="mt-1 text-muted-foreground text-sm">
+                                  {card.description}
+                                </p>
+                              )}
                               <div className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
-                                <span>按钮: {card.buttonText}</span>
+                                {card.buttonLabel && (
+                                  <span>按钮: {card.buttonLabel}</span>
+                                )}
                                 {card.buttonUrl && (
                                   <span>链接: {card.buttonUrl}</span>
                                 )}
-                                <span>排序: {card.sortOrder ?? 0}</span>
+                                <span>排序: {card.sortOrder}</span>
                               </div>
                               <div className="mt-2 flex items-center gap-2">
                                 <Badge
@@ -502,6 +548,13 @@ export default function HeroCardsPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            <Button
+                              onClick={() => handleToggleStatus(card.id)}
+                              size="sm"
+                              variant={card.isActive ? "default" : "outline"}
+                            >
+                              {card.isActive ? "启用" : "禁用"}
+                            </Button>
                             <Button
                               onClick={() => handleEdit(card)}
                               size="sm"

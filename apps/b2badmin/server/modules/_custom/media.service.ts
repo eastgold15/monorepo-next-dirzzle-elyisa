@@ -13,7 +13,6 @@ export class MediaService extends MediaGeneratedService {
    * 利用基类的 create 方法自动注入 siteId 和 factoryId
    */
 
-
   async upload(file: File, ctx: ServiceContext, category = "general") {
     const storage = StorageFactory.createStorageFromEnv();
 

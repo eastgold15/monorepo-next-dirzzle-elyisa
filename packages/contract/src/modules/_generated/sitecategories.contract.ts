@@ -20,7 +20,7 @@ export const SiteCategoriesContract = {
   Patch: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])),
   ListQuery: t.Object({
     ...t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])).properties,
-    ...PaginationParams.properties,
+    ...t.Partial(PaginationParams).properties,
     ...SortParams.properties,
     search: t.Optional(t.String()),
   }),

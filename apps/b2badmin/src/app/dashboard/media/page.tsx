@@ -1,6 +1,7 @@
 "use client";
 
 import { Filter, Search, Tag, Upload } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MediaUpload } from "@/components/MediaUpload";
@@ -12,7 +13,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useMediaList } from "@/hooks/api";
-import Image from "next/image";
 
 interface UploadFile {
   id: string;

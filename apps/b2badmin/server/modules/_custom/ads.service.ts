@@ -14,6 +14,9 @@ import { AdsGeneratedService } from "../_generated/ads.service";
 import type { ServiceContext } from "../_lib/base-service";
 
 export class AdsService extends AdsGeneratedService {
+  findOne(): any {
+    throw new Error("Method not implemented.");
+  }
   /**
    * 🛡️ 核心：获取所有广告（后台管理）
    * 包含媒体信息和筛选功能
@@ -115,7 +118,6 @@ export class AdsService extends AdsGeneratedService {
         sortOrder: data.sortOrder ?? 0,
         isActive: data.isActive ?? true,
         mediaId,
-        siteId: ctx.auth.siteId,
       },
       ctx
     );

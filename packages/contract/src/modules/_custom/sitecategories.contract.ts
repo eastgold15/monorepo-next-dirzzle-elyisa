@@ -1,8 +1,18 @@
-//这是模板
+/**
+ * 🤖 【Contract - 自动生成】
+ * --------------------------------------------------------
+ * 🛠️ 该文件由自动化脚本生成。手动修改将被下次运行覆盖。
+ * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
+ * --------------------------------------------------------
+ */
 
 import { t } from "elysia";
+import type { TreeNode } from "~/helper/utils.types";
 // 1. 导入自动生成的原始契约
-import { AdsContract as Generated } from "../_generated/ads.contract";
+import { SiteCategoriesContract as Generated } from "../_generated/sitecategories.contract";
+
+// 1. 导入自动生成的原始契约
+// import { XxxContract as Generated } from "../generated/xxx.contract";
 
 // 2. 导入你可能需要关联的其他契约
 // import { OtherContract } from "../generated/other.contract";
@@ -15,27 +25,29 @@ import { AdsContract as Generated } from "../_generated/ads.contract";
 // --- A. 扩展响应结构 (最常用：增加关联数据) ---
 const CustomResponse = t.Composite([
   Generated.Response, // 保持数据库字段同步
-  t.Object({
-    // 在这里添加关联字段，例如：
-    // creator: t.Optional(GeneratedUser.Response),
-    // tags: t.Array(t.String()),
-    name: t.Optional(t.Any()), // 预留临时扩展位
-  }),
 ]);
 
 // --- B. 扩展创建请求 (例如：增加前端特有的校验) ---
-const CustomCreate = t.Omit(Generated.Create, ["siteId"]);
+const CustomCreate = t.Composite([
+  Generated.Create,
+  t.Object({
+    // 例如：增加“确认密码”或“验证码”这种数据库没有的字段
+    // captcha: t.String(),
+  }),
+]);
 
 // --- C. 组装并导出 ---
-export const AdsContract = {
+export const SiteCategoriesContract = {
   ...Generated, // 默认继承所有：Update, Patch, ListQuery
   Response: CustomResponse, // 覆盖为自定义详情响应
   Create: CustomCreate, // 覆盖为自定义创建请求
 } as const;
+
 // --- D. 导出 DTO 类型给前端使用 ---
-export type AdsDTO = {
-  Response: typeof AdsContract.Response.static;
-  Create: typeof AdsContract.Create.static;
+export type SiteCategoriesContractDTO = {
+  Response: typeof SiteCategoriesContract.Response.static;
+  TreeResponse: TreeNode<typeof SiteCategoriesContract.Response.static>;
+  Create: typeof SiteCategoriesContract.Create.static;
   Update: typeof Generated.Update.static; // 未修改的直接透传
   Patch: typeof Generated.Patch.static;
   ListQuery: typeof Generated.ListQuery.static;

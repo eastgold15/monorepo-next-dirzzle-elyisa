@@ -1,6 +1,5 @@
 "use client";
 
-import type { AdsTModel } from "@repo/contract";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import {
@@ -15,6 +14,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
+import { MediaUpload } from "@/components/MediaUpload";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -52,12 +53,31 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  useAdsBatchDelete,
   useAdsCreate,
   useAdsDelete,
   useAdsList,
+  useAdsToggleStatus,
   useAdsUpdate,
 } from "@/hooks/api/ads";
-import { useCurrentSite } from "@/stores/user-store";
+
+// 广告类型
+interface Ad {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  link: string;
+  position: string;
+  startDate: string;
+  endDate: string;
+  sortOrder: number;
+  isActive: boolean;
+  mediaId?: string;
+  imageUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 // 广告类型映射
 const AD_TYPE_LABELS = {
@@ -79,15 +99,15 @@ function AdsDialog({
   isOpen,
   onClose,
 }: {
-  ad?: AdsTModel["Entity"];
+  ad?: Ad;
   isOpen: boolean;
   onClose: () => void;
 }) {
   const [formData, setFormData] = useState({
     title: ad?.title || "",
     description: ad?.description || "",
-    type: ad?.type || ("banner" as const),
-    position: ad?.position || ("home-top" as const),
+    type: ad?.type || "banner",
+    position: ad?.position || "home-top",
     link: ad?.link || "",
     sortOrder: ad?.sortOrder || 0,
     isActive: ad?.isActive ?? true,
@@ -97,7 +117,7 @@ function AdsDialog({
     endDate: ad?.endDate
       ? format(new Date(ad.endDate), "yyyy-MM-dd'T'HH:mm")
       : "",
-    mediaId: ad?.mediaId ? [ad.mediaId] : ([] as string[]),
+    mediaId: ad?.mediaId || "",
   });
 
   const createMutation = useAdsCreate();
@@ -110,32 +130,27 @@ function AdsDialog({
       toast.error("广告标题不能为空");
       return;
     }
-    if (!formData.description.trim()) {
-      toast.error("广告描述不能为空");
-      return;
-    }
     if (!formData.link.trim()) {
       toast.error("广告链接不能为空");
-      return;
-    }
-    if (formData.mediaId.length === 0) {
-      toast.error("请上传广告图片");
-      return;
-    }
-    if (!formData.startDate) {
-      toast.error("请选择开始时间");
-      return;
-    }
-    if (!formData.endDate) {
-      toast.error("请选择结束时间");
       return;
     }
 
     try {
       const submitData = {
-        ...formData,
-        startDate: new Date(formData.startDate).toISOString(),
-        endDate: new Date(formData.endDate).toISOString(),
+        title: formData.title,
+        description: formData.description || undefined,
+        type: formData.type,
+        link: formData.link,
+        position: formData.position,
+        startDate: formData.startDate
+          ? new Date(formData.startDate).toISOString()
+          : undefined,
+        endDate: formData.endDate
+          ? new Date(formData.endDate).toISOString()
+          : undefined,
+        sortOrder: formData.sortOrder,
+        isActive: formData.isActive,
+        mediaId: formData.mediaId || undefined,
       };
 
       if (isEdit && ad) {
@@ -300,30 +315,13 @@ function AdsDialog({
 
           <div className="space-y-2">
             <Label>广告图片</Label>
-            <div className="flex items-center gap-2">
-              {formData.mediaId.length > 0 ? (
-                <div className="flex items-center gap-2 text-green-600 text-sm">
-                  <ImageIcon className="h-4 w-4" />
-                  已选择图片 ({formData.mediaId.length})
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
-                  <ImageIcon className="h-4 w-4" />
-                  请上传图片
-                </div>
-              )}
-              <Button
-                onClick={() => {
-                  // TODO: 集成媒体库选择器
-                  toast.info("媒体库功能开发中...");
-                }}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                选择图片
-              </Button>
-            </div>
+            <MediaUpload
+              maxCount={1}
+              onChange={(mediaIds) =>
+                setFormData({ ...formData, mediaId: mediaIds[0] || "" })
+              }
+              value={formData.mediaId ? [formData.mediaId] : []}
+            />
           </div>
 
           <div className="flex items-center gap-2">
@@ -365,22 +363,24 @@ function AdsDialog({
 
 export default function AdsPage() {
   const { data: adsData, isLoading, refetch } = useAdsList();
-  const currentSite = useCurrentSite();
   const deleteMutation = useAdsDelete();
+  const batchDeleteMutation = useAdsBatchDelete();
+  const toggleStatusMutation = useAdsToggleStatus();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAd, setEditingAd] = useState<AdsTModel["Entity"] | undefined>();
+  const [editingAd, setEditingAd] = useState<Ad | undefined>();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const handleEdit = (ad: AdsTModel["Entity"]) => {
+  const handleEdit = (ad: Ad) => {
     setEditingAd(ad);
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (ad: AdsTModel["Entity"]) => {
+  const handleDelete = async (ad: Ad) => {
     try {
       await deleteMutation.mutateAsync(ad.id);
       toast.success("广告删除成功");
+      refetch();
     } catch (error) {
       toast.error("广告删除失败");
     }
@@ -393,9 +393,10 @@ export default function AdsPage() {
     }
 
     try {
-      await deleteMutation.mutateAsync(selectedIds);
+      await batchDeleteMutation.mutateAsync(Array.from(selectedIds));
       toast.success(`成功删除 ${selectedIds.size} 个广告`);
       setSelectedIds(new Set());
+      refetch();
     } catch (error) {
       toast.error("批量删除失败");
     }
@@ -419,14 +420,9 @@ export default function AdsPage() {
     setSelectedIds(newSelectedIds);
   };
 
-  const handleToggleActive = async (ad: AdsTModel["Entity"]) => {
-    const updateMutation = useAdsUpdate();
+  const handleToggleActive = async (ad: Ad) => {
     try {
-      await updateMutation.mutateAsync({
-        id: ad.id,
-        data: { isActive: !ad.isActive },
-      });
-      toast.success(`广告已${ad.isActive ? "禁用" : "启用"}`);
+      await toggleStatusMutation.mutateAsync(ad.id);
       refetch();
     } catch (error) {
       toast.error("操作失败");
@@ -468,11 +464,9 @@ export default function AdsPage() {
           {/* 页面头部 */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-bold text-3xl text-slate-900">
-                {currentSite?.site.name || "当前站点"} - 广告管理
-              </h1>
+              <h1 className="font-bold text-3xl text-slate-900">广告管理</h1>
               <p className="mt-2 text-slate-600">
-                管理当前站点的广告内容，支持横幅、轮播图和列表广告。
+                管理站点的广告内容，支持横幅、轮播图和列表广告。
               </p>
             </div>
 
@@ -552,7 +546,9 @@ export default function AdsPage() {
                         <Image
                           alt={ad.title}
                           className="h-full w-full object-cover"
+                          height={64}
                           src={ad.imageUrl}
+                          width={64}
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
@@ -566,22 +562,18 @@ export default function AdsPage() {
                         <h3 className="truncate font-medium text-slate-900">
                           {ad.title}
                         </h3>
-                        <span
-                          className={`rounded-full px-2 py-1 font-medium text-xs ${
-                            ad.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
+                        <Badge variant={ad.isActive ? "default" : "secondary"}>
                           {ad.isActive ? "启用" : "禁用"}
-                        </span>
-                        <span className="rounded-full bg-blue-100 px-2 py-1 font-medium text-blue-800 text-xs">
-                          {AD_TYPE_LABELS[ad.type]}
-                        </span>
+                        </Badge>
+                        <Badge variant="outline">
+                          {AD_TYPE_LABELS[ad.type] || ad.type}
+                        </Badge>
                       </div>
-                      <p className="mt-1 truncate text-slate-500 text-sm">
-                        {ad.description}
-                      </p>
+                      {ad.description && (
+                        <p className="mt-1 truncate text-slate-500 text-sm">
+                          {ad.description}
+                        </p>
+                      )}
                       <div className="mt-1 flex items-center gap-4 text-slate-400 text-xs">
                         <span>位置: {AD_POSITION_LABELS[ad.position]}</span>
                         <span>排序: {ad.sortOrder}</span>
