@@ -11,7 +11,7 @@ export const loggerPlugin = new Elysia({ name: "loggerPlugin" }).use(
       timestamp: { translateTime: "yyyy-mm-dd HH:MM:ss" },
 
       customLogFormat:
-        "🦊 {now} {level} {duration} {method} {pathname} {status} {message} {ip}",
+        "🦊 {now} {level} {duration} {method} {pathname} {status} {ip}",
       ip: true,
       logFilePath: "./logs/app.log",
       logFilter: {

@@ -1,14 +1,12 @@
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
-import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { env } from "@/env";
 import { appRouter } from "./controllers/app-router";
-import { dbPlugin } from "./db/connection";
+import { db, dbPlugin } from "./db/connection";
 import { loggerPlugin } from "./middleware/logger";
 import { siteMiddleware } from "./middleware/site";
 import { checkDatabase } from "./modules/_health/checkers/db";
-import { errorPlugin } from "./utils/err/err.plugin";
-
+import { errorSuite } from "./utils/err/errorSuite.plugin";
 /**
  * Main API router
  * Combines all routes under the '/api' prefix
@@ -21,7 +19,7 @@ import { errorPlugin } from "./utils/err/err.plugin";
  */
 export const server = new Elysia({ name: "server" })
   .use(dbPlugin)
-  .onStart(async ({ db }) => {
+  .onStart(async () => {
     console.log("🚀 正在执行系统自检...");
     const dbStatus = await checkDatabase(db);
 
@@ -65,9 +63,7 @@ export const server = new Elysia({ name: "server" })
   // 1. 日志插件 - 记录所有请求
   .use(loggerPlugin)
   // 2. 错误处理插件 - 统一错误处理
-  .use(errorPlugin)
-  // 3. Problem JSON 插件 - 标准化错误响应
-  .use(httpProblemJsonPlugin())
+  .use(errorSuite)
   // 4. 站点中间件
   .use(siteMiddleware)
   // 自动挂载所有控制器（包括自定义和生成的）

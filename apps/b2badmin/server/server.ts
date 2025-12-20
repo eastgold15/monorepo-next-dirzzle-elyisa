@@ -1,15 +1,16 @@
 import { cors } from "@elysiajs/cors";
 
 import { Elysia } from "elysia";
-import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 
 import { localeMiddleware } from "~/middleware/locale";
 import { loggerPlugin } from "~/middleware/logger";
-import { errorPlugin } from "~/utils/err/err.plugin";
+
 import { appRouter } from "./controllers/app-router";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 import { authGuardMid } from "./middleware/auth";
+import { errorSuite } from "./utils/err/errorSuite.plugin";
+
 /**
  * Main API router
  * Combines auth and user routes under the '/api' prefix
@@ -38,9 +39,7 @@ export const server = new Elysia({ name: "server" })
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
   .use(loggerPlugin)
   // 2. 核心错误处理插件 (拦截所有错误，进行转换和手动日志记录)
-  .use(errorPlugin)
-  // 3. Problem JSON 插件 (将最终的 HttpError 转换为 RFC 7807 响应)
-  .use(httpProblemJsonPlugin())
+  .use(errorSuite)
   .use(dbPlugin);
 // .use(mediaRoute) // 新的统一媒体控制器，替代upload和image控制器
 // .use(categoriesController)
