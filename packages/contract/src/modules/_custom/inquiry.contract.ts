@@ -1,9 +1,15 @@
+// Inquiry module contract - 自定义扩展
+// 用于询价管理
+
 import { t } from "elysia";
+// 1. 导入自动生成的原始契约
 import { InquiryContract as Generated } from "../_generated/inquiry.contract";
-import { InquiryItemsContract } from "../_generated/inquiryitems.contract";
+import { InquiryitemsContract } from "../_generated/inquiryitems.contract";
 import { MediaContract } from "../_generated/media.contract";
 import { ProductsContract } from "../_generated/products.contract";
 import { SkusContract } from "../_generated/skus.contract";
+import { CustomersContract } from "../_generated/customers.contract";
+import { SalespersonsContract } from "../_generated/salespersons.contract";
 
 /**
  * 自定义扩展契约：Inquiry
