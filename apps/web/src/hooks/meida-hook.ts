@@ -17,7 +17,7 @@ export function useCurrentMediaQuery(id: string) {
     enabled: !!id, // 仅在 id 存在时执行查询
   });
 }
-export function useCurrentMediasQuery(ids: number[]) {
+export function useCurrentMediasQuery(ids: string[]) {
   return useQuery({
     queryKey: queryKeys.media.urls(ids),
     queryFn: async () => {
@@ -32,6 +32,6 @@ export function useCurrentMediasQuery(ids: number[]) {
     staleTime: 5 * 60 * 1000, // 5分钟缓存
     retry: 2,
     refetchOnWindowFocus: false,
-    enabled: false,
+    enabled: ids.length > 0,
   });
 }
