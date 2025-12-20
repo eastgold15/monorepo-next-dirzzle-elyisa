@@ -3,6 +3,7 @@ import { server } from "~/server";
 export type App = typeof server;
 
 import { fromTypes, openapi } from "@elysiajs/openapi";
+import { env } from "@/env";
 
 /**
  * 使用 server.ts 中定义的服务器实例
@@ -20,7 +21,7 @@ const app = new Elysia({ prefix: "/api" })
         tags: [],
       },
       references: fromTypes(
-        process.env.NODE_ENV === "production"
+        env.NODE_ENV === "production"
           ? "dist/index.d.ts"
           : "server/server.ts",
         {
