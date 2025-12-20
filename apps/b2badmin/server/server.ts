@@ -6,10 +6,9 @@ import { httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { localeMiddleware } from "~/middleware/locale";
 import { loggerPlugin } from "~/middleware/logger";
 import { errorPlugin } from "~/utils/err/err.plugin";
-import * as controllers from "./controllers";
+import { appRouter } from "./controllers/app-router";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
-
 import { authGuardMid } from "./middleware/auth";
 /**
  * Main API router
@@ -34,11 +33,7 @@ export const server = new Elysia({ name: "server" })
   )
   .mount("/", auth.handler) // 使用 Better Auth 认证中间件
   .use(authGuardMid)
-  .group("/v1", (app) => {
-    // 自动挂载所有生成的路由
-    Object.values(controllers).forEach((controller) => app.use(controller));
-    return app;
-  })
+  .group("/v1", (app) => app.use(appRouter))
 
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
   .use(loggerPlugin)

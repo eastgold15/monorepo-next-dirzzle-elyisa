@@ -80,13 +80,7 @@ const FactoryQuery = t.Object({
   ),
   search: t.Optional(t.String()),
   sortBy: t.Optional(
-    t.UnionEnum([
-      "createdAt",
-      "updatedAt",
-      "name",
-      "code",
-      "employees",
-    ])
+    t.UnionEnum(["createdAt", "updatedAt", "name", "code", "employees"])
   ),
   sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
@@ -107,11 +101,7 @@ const FactoryCertification = t.Object({
   issuedDate: t.String({ format: "date" }),
   expiryDate: t.Optional(t.String({ format: "date" })),
   certificateUrl: t.Optional(t.String()),
-  status: t.UnionEnum([
-    "pending",
-    "verified",
-    "expired",
-  ]),
+  status: t.UnionEnum(["pending", "verified", "expired"]),
 });
 
 // 工厂统计
@@ -135,11 +125,7 @@ const FactoryStats = t.Object({
   ),
   sizeDistribution: t.Array(
     t.Object({
-      size: t.UnionEnum([
-        "small",
-        "medium",
-        "large",
-      ]),
+      size: t.UnionEnum(["small", "medium", "large"]),
       count: t.Number(),
     })
   ),
@@ -158,11 +144,7 @@ const FactoryStats = t.Object({
 // 工厂审核
 const FactoryVerification = t.Object({
   factoryId: t.String(),
-  status: t.UnionEnum([
-    "pending",
-    "approved",
-    "rejected",
-  ]),
+  status: t.UnionEnum(["pending", "approved", "rejected"]),
   verifiedBy: t.Optional(t.String()),
   verifiedAt: t.Optional(t.String({ format: "date-time" })),
   comments: t.String(),

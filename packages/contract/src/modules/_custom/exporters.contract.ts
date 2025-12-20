@@ -107,11 +107,7 @@ const ExporterCertification = t.Object({
   issuedDate: t.String({ format: "date" }),
   expiryDate: t.Optional(t.String({ format: "date" })),
   certificateUrl: t.Optional(t.String()),
-  status: t.UnionEnum([
-    "pending",
-    "verified",
-    "expired"
-  ]),
+  status: t.UnionEnum(["pending", "verified", "expired"]),
 });
 
 // 出口商统计
@@ -135,11 +131,7 @@ const ExporterStats = t.Object({
   ),
   sizeDistribution: t.Array(
     t.Object({
-      size: t.UnionEnum([
-        "small",
-        "medium",
-        "large",
-      ]),
+      size: t.UnionEnum(["small", "medium", "large"]),
       count: t.Number(),
     })
   ),
@@ -158,11 +150,7 @@ const ExporterStats = t.Object({
 // 出口商审核
 const ExporterVerification = t.Object({
   exporterId: t.String(),
-  status: t.UnionEnum([
-    "pending",
-    "approved",
-    "rejected",
-  ]),
+  status: t.UnionEnum(["pending", "approved", "rejected"]),
   verifiedBy: t.Optional(t.String()),
   verifiedAt: t.Optional(t.String({ format: "date-time" })),
   comments: t.String(),

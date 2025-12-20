@@ -47,12 +47,7 @@ const SiteCategoryQuery = t.Object({
   level: t.Optional(t.Number()),
   search: t.Optional(t.String()),
   sortBy: t.Optional(
-    t.UnionEnum([
-      "sortOrder",
-      "name",
-      "createdAt",
-      "productCount",
-    ])
+    t.UnionEnum(["sortOrder", "name", "createdAt", "productCount"])
   ),
   sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
@@ -109,12 +104,7 @@ const ProductCategoryQuery = t.Object({
   isActive: t.Optional(t.Boolean()),
   search: t.Optional(t.String()),
   sortBy: t.Optional(
-    t.UnionEnum([
-      "sortOrder",
-      "name",
-      "createdAt",
-      "productCount",
-    ])
+    t.UnionEnum(["sortOrder", "name", "createdAt", "productCount"])
   ),
   sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });

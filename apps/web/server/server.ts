@@ -1,12 +1,12 @@
+import { env } from "@/env";
+import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { httpProblemJsonPlugin } from "elysia-http-problem-json";
-import { env } from "@/env";
-import * as controllers from "./controllers/index";
+import { appRouter } from "./controllers/app-router";
 import { dbPlugin } from "./db/connection";
-import { siteMiddleware } from "./middleware/site";
 import { loggerPlugin } from "./middleware/logger";
+import { siteMiddleware } from "./middleware/site";
 import { errorPlugin } from "./utils/err/err.plugin";
-import { openapi, fromTypes } from "@elysiajs/openapi";
 
 /**
  * Main API router
@@ -18,7 +18,7 @@ import { openapi, fromTypes } from "@elysiajs/openapi";
  * 3. httpProblemJsonPlugin - 格式化最终错误响应
  * 4. dbPlugin - 提供数据库连接
  */
-export const server = new Elysia({ name: "server", prefix: "/api" })
+export const server = new Elysia({ name: "server" })
   .decorate("myProperty", "myValue")
   .state({
     version: "1.0.0",
@@ -58,14 +58,7 @@ export const server = new Elysia({ name: "server", prefix: "/api" })
   // 5. 站点中间件
   .use(siteMiddleware)
   // 自动挂载所有控制器（包括自定义和生成的）
-  .group("/v1", (app) => {
-    Object.values(controllers).forEach((controller) => {
-      // console.log('controller:', controller)
-      return app.use(controller)
-    });
-    return app;
-  })
-
+  .group("/v1", (app) => app.use(appRouter));
 
 console.log("env.NODE_ENV", env.NODE_ENV);
 /**

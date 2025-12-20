@@ -6,7 +6,7 @@ import { dbPlugin } from "~/db/connection";
 import { authGuardMid } from "~/middleware/auth";
 import { siteConfigService } from "~/modules/index";
 
-export const siteConfigController = new Elysia({
+export const siteconfigController = new Elysia({
   prefix: "/siteconfig",
   tags: ["Site Config"],
 })

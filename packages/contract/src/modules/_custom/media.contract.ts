@@ -124,13 +124,7 @@ const ProcessMediaRequest = t.Object({
   mediaId: t.String(),
   operations: t.Array(
     t.Object({
-      type: t.UnionEnum([
-        "resize",
-        "crop",
-        "compress",
-        "watermark",
-        "format",
-      ]),
+      type: t.UnionEnum(["resize", "crop", "compress", "watermark", "format"]),
       params: t.Object({}, { additionalProperties: true }),
     })
   ),

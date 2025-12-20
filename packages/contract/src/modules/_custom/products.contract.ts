@@ -50,14 +50,7 @@ const CustomCreate = t.Composite([
 const ProductQuery = t.Object({
   categoryId: t.Optional(t.String()),
   factoryId: t.Optional(t.String()),
-  status: t.Optional(
-    t.UnionEnum([
-      "draft",
-      "active",
-      "inactive",
-      "archived",
-    ])
-  ),
+  status: t.Optional(t.UnionEnum(["draft", "active", "inactive", "archived"])),
   priceRange: t.Optional(
     t.Object({
       min: t.Number({ minimum: 0 }),
@@ -108,12 +101,7 @@ const CloneProductRequest = t.Object({
 // 产品批量操作
 const BatchProductOperation = t.Object({
   productIds: t.Array(t.String({ minimum: 1 })),
-  operation: t.UnionEnum([
-    "activate",
-    "deactivate",
-    "archive",
-    "delete",
-  ]),
+  operation: t.UnionEnum(["activate", "deactivate", "archive", "delete"]),
   // reason: t.Optional(t.String()),
 });
 

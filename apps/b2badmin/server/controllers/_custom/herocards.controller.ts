@@ -6,7 +6,7 @@ import { dbPlugin } from "~/db/connection";
 import { authGuardMid } from "~/middleware/auth";
 import { heroCardsService } from "~/modules/index";
 
-export const heroCardsController = new Elysia({
+export const herocardsController = new Elysia({
   prefix: "/herocards",
   tags: ["HeroCards"],
 })

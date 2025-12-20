@@ -11,7 +11,7 @@ export function useCurrentAdsQuery() {
   return useQuery({
     queryKey: queryKeys.ads.current(),
     queryFn: async () => {
-      const result = handleEden(await rpc.api.ads.current.get());
+      const result = handleEden(await rpc.api.v1.ads.current.get());
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5分钟缓存

@@ -58,27 +58,13 @@ const CustomCreate = t.Composite([
 const SiteQuery = t.Object({
   factoryId: t.Optional(t.String()),
   exporterId: t.Optional(t.String()),
-  type: t.Optional(
-    t.UnionEnum(["b2b", "b2c", "marketplace"])
-  ),
-  status: t.Optional(
-    t.UnionEnum([
-      "active",
-      "inactive",
-      "suspended",
-    ])
-  ),
+  type: t.Optional(t.UnionEnum(["b2b", "b2c", "marketplace"])),
+  status: t.Optional(t.UnionEnum(["active", "inactive", "suspended"])),
   domain: t.Optional(t.String()),
   search: t.Optional(t.String()),
   hasCustomDomain: t.Optional(t.Boolean()),
   sortBy: t.Optional(
-    t.UnionEnum([
-      "createdAt",
-      "updatedAt",
-      "name",
-      "domain",
-      "status",
-    ])
+    t.UnionEnum(["createdAt", "updatedAt", "name", "domain", "status"])
   ),
   sortOrder: t.Optional(t.UnionEnum(["asc", "desc"])),
 });
@@ -87,14 +73,8 @@ const SiteQuery = t.Object({
 const SiteUserManagement = t.Object({
   siteId: t.String(),
   userIds: t.Array(t.String()),
-  action: t.UnionEnum([
-    "add",
-    "remove",
-    "changeRole",
-  ]),
-  role: t.Optional(
-    t.UnionEnum(["admin", "editor", "viewer"])
-  ),
+  action: t.UnionEnum(["add", "remove", "changeRole"]),
+  role: t.Optional(t.UnionEnum(["admin", "editor", "viewer"])),
 });
 
 // 站点配置更新
@@ -114,11 +94,7 @@ const SiteConfigUpdate = t.Object({
         primaryColor: t.String(),
         secondaryColor: t.String(),
         fontFamily: t.String(),
-        layout: t.UnionEnum([
-          "modern",
-          "classic",
-          "minimal",
-        ]),
+        layout: t.UnionEnum(["modern", "classic", "minimal"]),
       })
     ),
 

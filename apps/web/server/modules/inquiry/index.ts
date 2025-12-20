@@ -1,10 +1,10 @@
 import {
   CustomerTable,
   factoriesTable,
+  InquiryContract,
+  type InquiryDTO,
   inquiryItemsTable,
   inquiryTable,
-  InquiryContract,
-  InquiryDTO,
   productsTable,
   salespersonCategoriesTable,
   salespersonsTable,
@@ -216,10 +216,10 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
           // 图片
           photoForRefer: photoBuffer
             ? {
-              buffer: photoBuffer,
-              mimeType,
-              name: `product-${productId}-${Date.now()}`,
-            }
+                buffer: photoBuffer,
+                mimeType,
+                name: `product-${productId}-${Date.now()}`,
+              }
             : null,
 
           // 商品行
