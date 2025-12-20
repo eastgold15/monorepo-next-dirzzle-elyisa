@@ -29,7 +29,7 @@ export function useProductListQuery(
           delete queryParams[key as keyof typeof queryParams];
         }
       });
-      const result = await rpc.api.v1.product.get({
+      const result = await rpc.api.v1.products.get({
         $query: queryParams,
       });
       return handleEden(result);
@@ -49,7 +49,7 @@ export function useProductQuery(id: string) {
     queryKey: ["product", id],
     queryFn: async () => {
       if (!id) throw new Error("Product ID is required");
-      const result = handleEden(await rpc.api.v1.product[id].get());
+      const result = handleEden(await rpc.api.v1.products[id].);
       return result;
     },
     enabled: !!id,
