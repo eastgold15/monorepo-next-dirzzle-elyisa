@@ -11,10 +11,24 @@ build/
 .output/
 .turbo/
 
-# Environment variables
+# Environment variables - 绝对不要提交
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database.db
+*.sql
+dump.sql
 
 # Testing
 coverage/
@@ -60,6 +74,7 @@ package-lock.json
 # Temporary files
 *.tmp
 *.temp
+test-error.js
 
 # Deployment
 .vercel
@@ -99,3 +114,39 @@ minio/data/.minio.sys/buckets/.usage-cache.bin.bkp/7c3be5a9-e487-46d3-963b-43da9
 minio/data/.minio.sys/buckets/.usage.json/563418c1-4100-4c02-add3-38a0d13a7a38/xl.meta.bkp
 minio/*
 
+
+# 敏感文件 - 证书和密钥
+*.key
+*.pem
+*.crt
+*.cer
+*.p12
+*.pfx
+certificates/
+ssl/
+keys/
+
+# 数据库相关
+database/
+db_data/
+postgres-data/
+
+# 缓存目录
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 本地配置文件（可能包含敏感信息）
+config.local.js
+config.local.json
+local.json
+
+# 测试生成的文件
+test-error.js
+apps/web/server/modules/_health/
