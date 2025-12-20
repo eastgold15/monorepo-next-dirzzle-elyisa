@@ -49,7 +49,7 @@ export function useProductQuery(id: string) {
     queryKey: ["product", id],
     queryFn: async () => {
       if (!id) throw new Error("Product ID is required");
-      const result = handleEden(await rpc.api.v1.products[id].);
+      const result = handleEden(await rpc.api.v1.products[id].get());
       return result;
     },
     enabled: !!id,

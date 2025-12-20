@@ -1,6 +1,7 @@
 // 🛡️ 自动生成的路由导出
 
 export * from "./_custom/ads.controller";
+export * from "./_custom/herocards.controller";
 export * from "./_custom/inquiry.controller";
 export * from "./_custom/media.controller";
 export * from "./_custom/products.controller";
@@ -13,7 +14,6 @@ export * from "./_generated/customer.controller";
 export * from "./_generated/dailyinquirycounter.controller";
 export * from "./_generated/exporters.controller";
 export * from "./_generated/factories.controller";
-export * from "./_generated/herocards.controller";
 export * from "./_generated/inquiryitems.controller";
 export * from "./_generated/master.controller";
 export * from "./_generated/mediametadata.controller";

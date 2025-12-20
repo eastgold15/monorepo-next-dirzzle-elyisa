@@ -3,7 +3,7 @@ import { dbPlugin } from "~/db/connection";
 import { localeMiddleware } from "~/middleware/locale";
 import { siteMiddleware } from "~/middleware/site";
 import { heroCardsService } from "~/modules";
-export const heroCardsController = new Elysia({ prefix: "/hero-cards" })
+export const herocardsController = new Elysia({ prefix: "/herocards" })
   .use(localeMiddleware)
   .use(dbPlugin)
   .use(siteMiddleware)

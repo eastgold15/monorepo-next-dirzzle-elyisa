@@ -11,7 +11,7 @@ export function useCurrentHeroCardsQuery() {
   return useQuery({
     queryKey: queryKeys.heroCards.current(),
     queryFn: async () => {
-      const result = handleEden(await rpc.api.v1.herocards.get(1, 4));
+      const result = handleEden(await rpc.api.v1.herocards.current.get());
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5分钟缓存

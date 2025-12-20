@@ -7,6 +7,7 @@
  */
 import type { Elysia } from "elysia";
 import { adsController } from "./_custom/ads.controller";
+import { herocardsController } from "./_custom/herocards.controller";
 import { inquiryController } from "./_custom/inquiry.controller";
 import { mediaController } from "./_custom/media.controller";
 import { productsController } from "./_custom/products.controller";
@@ -19,7 +20,6 @@ import { customerController } from "./_generated/customer.controller";
 import { dailyinquirycounterController } from "./_generated/dailyinquirycounter.controller";
 import { exportersController } from "./_generated/exporters.controller";
 import { factoriesController } from "./_generated/factories.controller";
-import { herocardsController } from "./_generated/herocards.controller";
 import { inquiryitemsController } from "./_generated/inquiryitems.controller";
 import { masterController } from "./_generated/master.controller";
 import { mediametadataController } from "./_generated/mediametadata.controller";
