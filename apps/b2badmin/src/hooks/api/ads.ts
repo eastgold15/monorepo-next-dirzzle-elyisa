@@ -4,14 +4,7 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
 // 广告相关 hooks
-export function useAdsList(params?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  type?: string;
-  position?: string;
-  isActive?: boolean;
-}) {
+export function useAdsList(params?: AdsContract.ListQuery) {
   return useQuery({
     queryKey: ["ads", "list", params],
     queryFn: async () => {
