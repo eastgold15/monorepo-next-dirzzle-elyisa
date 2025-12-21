@@ -1,16 +1,23 @@
 import { useAuthStore } from "@/stores/auth-store";
+import type { PermissionType } from "@/types/permission";
 
 interface HasProps {
-  permission: string;
+  permission: PermissionType;
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
 /**
  * 权限控制组件
- * @param permission 需要的权限，如 'USERS_VIEW', 'PRODUCTS_CREATE' 等
+ * @param permission 需要的权限，如 PERMISSIONS.USERS_VIEW
  * @param children 有权限时显示的内容
  * @param fallback 无权限时显示的内容（默认为 null）
+ *
+ * @example
+ * import { PERMISSIONS } from "@/types/permission";
+ * <Has permission={PERMISSIONS.USERS_CREATE}>
+ *   <Button>创建用户</Button>
+ * </Has>
  */
 export function Has({ permission, children, fallback = null }: HasProps) {
   const hasPermission = useAuthStore((state) => state.hasPermission);
@@ -42,7 +49,7 @@ export function HasRole({ role, children, fallback = null }: HasRoleProps) {
     return <>{fallback}</>;
   }
 
-  const userRole = user.role?.name
+  const userRole = user.role?.name;
   const requiredRoles = Array.isArray(role) ? role : [role];
 
   if (!(userRole && requiredRoles.includes(userRole))) {

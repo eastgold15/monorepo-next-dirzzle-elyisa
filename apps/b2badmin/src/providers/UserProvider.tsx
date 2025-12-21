@@ -1,9 +1,9 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { useMe } from "@/hooks/api/use-user-api";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, type ReactNode, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMe } from "@/hooks/api/use-user-api";
 
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -18,14 +18,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const isPublicPage = pathname === "/login" || pathname === "/signup";
 
-
   // 1. 发起请求
   const { data, error, isLoading } = useMe();
 
-
   const setAuth = useAuthStore((s) => s.setAuth);
   const clearAuth = useAuthStore((s) => s.clearAuth);
-
 
   // 2. 结构化副作用处理：监听 data 和 error
   useEffect(() => {
@@ -48,4 +45,3 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
-

@@ -2,7 +2,6 @@
 import { useAuthStore } from "@/stores/auth-store";
 import type { PermissionType } from "@/types/permission";
 
-
 interface CanProps {
   permission?: PermissionType;
   anyPermission?: PermissionType[];
@@ -10,10 +9,14 @@ interface CanProps {
   fallback?: React.ReactNode;
 }
 
-
-export const Can = ({ permission, anyPermission, children, fallback = null }: CanProps) => {
-  const hasPermission = useAuthStore(state => state.hasPermission);
-  const hasAnyPermission = useAuthStore(state => state.hasAnyPermission);
+export const Can = ({
+  permission,
+  anyPermission,
+  children,
+  fallback = null,
+}: CanProps) => {
+  const hasPermission = useAuthStore((state) => state.hasPermission);
+  const hasAnyPermission = useAuthStore((state) => state.hasAnyPermission);
 
   let allowed = false;
 

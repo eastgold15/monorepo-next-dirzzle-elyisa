@@ -9,7 +9,7 @@ interface AuthState {
   currentSite: UserMeRes["currentSite"] | null; // 后端返回的完整站点对象
   currentSiteId: string | null; // 落地 localStorage 的 ID
   isSuperAdmin: boolean;
-
+  allSites: UserMeRes["allSites"] | []; // 所有站点列表
   // --- 操作方法 ---
   setAuth: (data: UserMeRes | null) => void;
   clearAuth: () => void;
@@ -29,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
       currentSite: null,
       currentSiteId: null,
       isSuperAdmin: false,
+      allSites: [], // 初始化时为空
 
       setAuth: (data) => {
         if (!data) {
@@ -42,6 +43,7 @@ export const useAuthStore = create<AuthState>()(
           // 只有当 data.currentSite 存在时才覆盖当前 ID
           currentSiteId: data.currentSite?.id || null,
           isSuperAdmin: !!data.user?.isSuperAdmin,
+          allSites: data.allSites || [],
         });
       },
 

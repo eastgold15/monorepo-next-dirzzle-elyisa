@@ -56,30 +56,27 @@ export async function handleEden<T, E>(
       // 2. 提取错误信息
       let errorMessage = "请求失败";
 
-      if (error && typeof error === 'object') {
+      if (error && typeof error === "object") {
         // 处理 EdenFetchError 结构
-        if ('value' in error) {
+        if ("value" in error) {
           const val = (error as any).value;
           // 如果 value 是对象，尝试提取 message 或其他信息
-          if (typeof val === 'object' && val !== null) {
+          if (typeof val === "object" && val !== null) {
             errorMessage =
-              val.message ||
-              val.summary ||
-              val.error ||
-              JSON.stringify(val);
-          } else if (typeof val === 'string') {
+              val.message || val.summary || val.error || JSON.stringify(val);
+          } else if (typeof val === "string") {
             errorMessage = val;
           }
         }
         // 处理 status 属性
-        if ('status' in error && typeof (error as any).status === 'number') {
+        if ("status" in error && typeof (error as any).status === "number") {
           errorMessage = `${errorMessage} (${(error as any).status})`;
         }
         // 处理 message 属性
-        if ('message' in error && typeof (error as any).message === 'string') {
+        if ("message" in error && typeof (error as any).message === "string") {
           errorMessage = (error as any).message;
         }
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMessage = error;
       }
 
