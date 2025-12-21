@@ -28,7 +28,7 @@
     "elysia-http-problem-json": "^0.1.4",
     "exceljs": "^4.4.0",
     "jose": "6.1.3",
-    "logixlysia": "^0.4.0",
+    "logixlysia": "catalog:",
     "lucide-react": "^0.562.0",
     "next": "16.1.0",
     "next-ws": "2.1.7",

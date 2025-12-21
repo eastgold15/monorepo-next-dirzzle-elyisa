@@ -32,17 +32,6 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
       }),
     }
   )
-
-  // 3. 标准 CRUD - 分页列表
-  .get(
-    "/",
-    ({ query, permissions, auth, db }) => {
-      if (!permissions.includes("MEDIA_VIEW")) throw new Error("Forbidden");
-      return mediaService.findAll(query, { db, auth });
-    },
-    { query: MediaContract.ListQuery }
-  )
-
   // 4. 更新
   .patch(
     "/:id",

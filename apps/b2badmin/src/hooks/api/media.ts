@@ -10,7 +10,10 @@ type MediaListQueryParams = MyInferQuery<typeof rpc.api.v1.media.get>;
 export function useMediaList(query: MediaListQueryParams) {
   return useQuery({
     queryKey: ["media", "list", query],
-    queryFn: async () => await handleEden(rpc.api.v1.media.get({ query })),
+    queryFn: async () => {
+      const res = await handleEden(rpc.api.v1.media.list.get({ query }));
+      return res;
+    },
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 }

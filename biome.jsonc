@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core", "ultracite/react"],
+  "extends": [
+    "ultracite/core",
+    "ultracite/react"
+  ],
   "files": {
     "ignoreUnknown": false,
     "includes": [
@@ -72,12 +75,20 @@
   },
   "json": {
     "parser": {
-      "allowComments": true
+      "allowComments": true, // 确保这是开启的
+      "allowTrailingCommas": true
+    },
+    "formatter": {
+      "enabled": true
     }
   },
   "overrides": [
     {
-      "includes": ["**/*.svelte", "**/*.astro", "**/*.vue"],
+      "includes": [
+        "**/*.svelte",
+        "**/*.astro",
+        "**/*.vue"
+      ],
       "linter": {
         "rules": {
           "style": {

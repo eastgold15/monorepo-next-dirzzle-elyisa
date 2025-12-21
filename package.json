@@ -8,7 +8,6 @@
     "dev": "turbo run dev",
     "start": "turbo run start",
     "check": "npx ultracite check",
-
     "check-type": "turbo run check-type",
     "clean": "bunx turbo@latest run clean  && rm -rf dist .turbo",
     "prepare": "husky",

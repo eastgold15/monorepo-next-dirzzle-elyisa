@@ -78,14 +78,6 @@ export class MediaService extends MediaGeneratedService {
     }
   }
 
-  async getMediaStorageInfo(ctx: ServiceContext) {
-    //
-
-    const select = ctx.db.select().from(this.table).$dynamic();
-    const files = await this.withScope(select, ctx, []);
-    return files;
-  }
-
   /**
    * 🛡️ 核心：物理删除
    */

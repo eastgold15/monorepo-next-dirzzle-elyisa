@@ -19,7 +19,7 @@ const CustomCreate = t.Composite([
   Generated.Create,
   t.Object({
     password: t.String(),
-    role: t.String()
+    role: t.String(),
   }),
 ]);
 
@@ -28,7 +28,6 @@ export const UsersContract = {
   ...Generated, // 默认继承所有：Update, Patch, ListQuery
   Response: CustomResponse, // 覆盖为自定义详情响应
   Create: CustomCreate, // 覆盖为自定义创建请求
-
 } as const;
 
 // --- D. 导出 DTO 类型给前端使用 ---

@@ -14,6 +14,5 @@ import { dbPlugin } from "~/db/connection";
 export const mediaController = new Elysia({ prefix: "/media" })
   .use(dbPlugin)
   .use(authGuardMid)
-  .get("/", ({ query, auth, db }) => mediaService.findAll(query, { db, auth }), { query: MediaContract.ListQuery })
   .post("/", ({ body, auth, db }) => mediaService.create(body, { db, auth }), { body: MediaContract.Create })
   .delete("/:id", ({ params, auth, db }) => mediaService.delete(params.id, { db, auth }), { params: t.Object({ id: t.String() }) });
