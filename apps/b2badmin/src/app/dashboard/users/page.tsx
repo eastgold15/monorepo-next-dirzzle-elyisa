@@ -37,11 +37,6 @@ import {
   useUpdateUserStatus,
 } from "@/hooks/api/use-user-api";
 import { useUsersWithSearch } from "@/hooks/api/use-users-with-search";
-import {
-  useIsExporterAdmin,
-  useIsFactoryAdmin,
-  useIsSuperAdmin,
-} from "@/stores/user-store";
 
 type CreateModalType = "salesperson" | "factory_admin";
 
@@ -49,12 +44,6 @@ export default function UsersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createModalType, setCreateModalType] =
     useState<CreateModalType>("salesperson");
-
-  // 权限检查
-  const isSuperAdmin = useIsSuperAdmin();
-  const isExporterAdmin = useIsExporterAdmin();
-  const isFactoryAdmin = useIsFactoryAdmin();
-  const canCreateUser = isSuperAdmin || isExporterAdmin || isFactoryAdmin;
 
   // 使用自定义hooks
   const {
@@ -118,12 +107,12 @@ export default function UsersPage() {
                 <h1 className="font-bold text-2xl text-slate-900">用户管理</h1>
                 <p className="mt-1 text-slate-500">管理业务员账号和权限设置</p>
               </div>
-              {canCreateUser && (
+              <Has permission={PERMISSIONS.USERS_CREATE}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="flex items-center gap-2">
                       <Plus size={18} />
-                      {isExporterAdmin ? "创建账号" : "创建业务员"}
+                      创建账号
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -137,7 +126,7 @@ export default function UsersPage() {
                       <Users className="mr-2 h-4 w-4" />
                       创建业务员
                     </DropdownMenuItem>
-                    {isExporterAdmin && (
+                    <HasRole role="exporter_admin">
                       <DropdownMenuItem
                         onClick={() => {
                           setCreateModalType("factory_admin");
@@ -147,10 +136,10 @@ export default function UsersPage() {
                         <Building2 className="mr-2 h-4 w-4" />
                         创建工厂管理员
                       </DropdownMenuItem>
-                    )}
+                    </HasRole>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              </Has>
             </div>
 
             {/* Search */}

@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
+import type { MyInferQuery } from "./utils";
 
 // 媒体文件相关 hooks
-export function useMediaList(query?: any) {
+// 使用
+type MediaListQueryParams = MyInferQuery<typeof rpc.api.v1.media.get>;
+
+export function useMediaList(query: MediaListQueryParams) {
   return useQuery({
     queryKey: ["media", "list", query],
     queryFn: async () => await handleEden(rpc.api.v1.media.get({ query })),
@@ -11,20 +15,14 @@ export function useMediaList(query?: any) {
   });
 }
 
-export function useMediaDetail(id: string) {
-  return useQuery({
-    queryKey: ["media", id],
-    queryFn: async () => await handleEden(rpc.api.v1.media({ id }).get()),
-    enabled: !!id,
-  });
-}
+type MediaUploadQueryParams = MyInferQuery<typeof rpc.api.v1.media.upload.post>;
 
 export function useMediaUpload() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: FormData) =>
-      await handleEden(rpc.api.v1.media.upload.post({ body: data })),
+    mutationFn: async (body: MediaUploadQueryParams) =>
+      await handleEden(rpc.api.v1.media.upload.post(body)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
     },
@@ -49,89 +47,9 @@ export function useMediaDelete() {
 
   return useMutation({
     mutationFn: async (ids: string[]) =>
-      await handleEden(rpc.api.v1.media.delete({ body: { ids } })),
+      await handleEden(rpc.api.v1.media.batch.delete({ ids })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
     },
-  });
-}
-
-// 获取存储信息
-export function useMediaStorageInfo() {
-  return useQuery({
-    queryKey: ["media", "storage", "info"],
-    queryFn: async () => await handleEden(rpc.api.v1.media.storage.info.get()),
-    staleTime: 10 * 60 * 1000, // 10分钟
-  });
-}
-
-// 直接上传文件 hook
-export function useDirectUploadMutation() {
-  return useMutation({
-    mutationFn: async (args: {
-      file: File;
-      category?: string;
-      userId?: string;
-    }) => {
-      // 构造 FormData
-      const formData = new FormData();
-      formData.append("file", args.file);
-
-      if (args.category) {
-        formData.append("category", args.category);
-      }
-      if (args.userId) {
-        formData.append("userId", args.userId);
-      }
-
-      return await handleEden(
-        rpc.api.v1.media.upload.post({
-          file: args.file,
-          category: args.category,
-          userId: args.userId,
-        })
-      );
-    },
-  });
-}
-
-// 媒体文件类型定义（兼容旧的 hooks）
-interface MediaFile {
-  id: string;
-  originalName: string;
-  mimeType: string;
-  category: string;
-  storageKey: string;
-  createdAt: string;
-  mediaType: string;
-  url?: string;
-}
-
-interface MediaListResponse {
-  files: MediaFile[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-// 获取媒体文件列表（兼容旧的 hook）
-export function useMediaListV2(params?: {
-  page?: number;
-  limit?: number;
-  category?: string;
-  search?: string;
-}) {
-  return useQuery({
-    queryKey: ["media", "list", params],
-    queryFn: async () =>
-      await handleEden(
-        rpc.api.v1.media.get({
-          query: params || {},
-        })
-      ),
-    staleTime: 1000 * 60 * 5, // 5分钟
   });
 }

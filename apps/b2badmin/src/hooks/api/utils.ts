@@ -79,3 +79,7 @@ export const retryConfig = {
   retryDelay: (attemptIndex: number) =>
     Math.min(1000 * 2 ** attemptIndex, 30_000),
 };
+// 通用提取工具
+export type MyInferQuery<T> = T extends (args: { query: infer Q }) => any
+  ? Q
+  : any;

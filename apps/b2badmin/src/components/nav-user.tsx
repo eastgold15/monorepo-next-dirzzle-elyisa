@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,6 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
 
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -51,7 +51,7 @@ export function NavUser() {
   // 3. 处理登出逻辑
   const handleLogout = async () => {
     try {
-      await authClient.signOut()
+      await authClient.signOut();
     } finally {
       // 无论后端成功与否，前端必须清理状态并跳转
       clearAuth();

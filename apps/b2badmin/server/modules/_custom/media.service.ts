@@ -52,25 +52,38 @@ export class MediaService extends MediaGeneratedService {
     query: { category?: string; search?: string },
     ctx: ServiceContext
   ) {
-    const filters: SQL[] = [];
-    const table = this.table as any;
+    console.debug("query:", query);
+    try {
+      const filters: SQL[] = [];
+      const table = this.table as any;
 
-    if (query.category) filters.push(eq(table.category, query.category));
-    if (query.search)
-      filters.push(like(table.originalName, `%${query.search}%`));
+      if (query.category) filters.push(eq(table.category, query.category));
+      if (query.search)
+        filters.push(like(table.originalName, `%${query.search}%`));
+
+      const select = ctx.db.select().from(this.table).$dynamic();
+
+      // 自动注入隔离：工厂用户只能看到自己工厂的，出口商看到全站的
+      const files = await this.withScope(select, ctx, filters).orderBy(
+        sql`${table.createdAt} desc`
+      );
+
+      const storage = StorageFactory.createStorageFromEnv();
+      return files.map((file: any) => ({
+        ...file,
+        url: storage.getPublicUrl(file.storageKey),
+      }));
+    } catch (error) {
+      console.log("error:", error);
+    }
+  }
+
+  async getMediaStorageInfo(ctx: ServiceContext) {
+    //
 
     const select = ctx.db.select().from(this.table).$dynamic();
-
-    // 自动注入隔离：工厂用户只能看到自己工厂的，出口商看到全站的
-    const files = await this.withScope(select, ctx, filters).orderBy(
-      sql`${table.createdAt} desc`
-    );
-
-    const storage = StorageFactory.createStorageFromEnv();
-    return files.map((file: any) => ({
-      ...file,
-      url: storage.getPublicUrl(file.storageKey),
-    }));
+    const files = await this.withScope(select, ctx, []);
+    return files;
   }
 
   /**

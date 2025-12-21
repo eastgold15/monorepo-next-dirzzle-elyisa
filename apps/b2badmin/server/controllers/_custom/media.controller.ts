@@ -13,7 +13,7 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
     "/upload",
     async ({ body, db, auth }) => {
       // 这里的 auth 已经包含了 siteId, factoryId 等
-      return await mediaService.upload(body.file, body.category, { db, auth });
+      return await mediaService.upload(body.file, { db, auth }, body.category);
     },
     {
       body: t.Object({ file: t.File(), category: t.Optional(t.String()) }),
@@ -64,8 +64,8 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
   )
 
   // 6. 批量删除
-  .post(
-    "/batch-delete",
+  .delete(
+    "/batch",
     async ({ body, db, auth, permissions }) => {
       if (!permissions.includes("MEDIA_DELETE")) throw new Error("Forbidden");
       return await mediaService.batchDeletePhysical(body.ids, { db, auth });

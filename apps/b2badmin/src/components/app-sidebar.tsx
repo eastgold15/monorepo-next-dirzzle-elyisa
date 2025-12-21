@@ -154,22 +154,32 @@ const SIDEBAR_CONFIG: NavSection[] = [
 
 // --- 2. 主组件 ---
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // 正确的方式：分别订阅每个值
   const hasPermission = useAuthStore((state) => state.hasPermission);
+  const permissions = useAuthStore((state) => state.permissions);
+  const isSuperAdmin = useAuthStore((state) => state.isSuperAdmin);
 
   // 核心逻辑：根据权限过滤菜单
   // 使用 useMemo 只有在权限改变时才重新计算，性能拉满
   const filteredNav = React.useMemo(() => {
+    // 🛡️ 保护伞：如果权限数据还没回来，直接返回空或基础菜单
+    // 假设你的 permissions 初始值是 null 或你有一个专门的 isLoading 标志
+    if (!(permissions || isSuperAdmin)) {
+      return [];
+    }
+
     return SIDEBAR_CONFIG.map((section) => ({
       ...section,
       items: section.items.filter((item) => {
-        // 如果没有设置 permission 要求，则所有人可见
+        if (isSuperAdmin) return true; // 超管无视一切
         if (!item.permission) return true;
-        // 否则检查权限
+
         return hasPermission(item.permission);
       }),
-    })).filter((section) => section.items.length > 0); // 如果分组下没菜单了，直接隐藏整个分组
-  }, [hasPermission]);
+    })).filter((section) => section.items.length > 0);
 
+    // 确保 isLoading 或 permissions 在依赖项里
+  }, [permissions, isSuperAdmin, hasPermission]);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

@@ -5,11 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-
-
+import { toast } from "sonner";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,7 +26,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 // 定义表单验证 Schema
 const loginFormSchema = z.object({
@@ -73,7 +69,8 @@ export function LoginForm({
 
       if (error) {
         // 显示具体的错误信息
-        const errorMessage = error?.message || error.message || "登录失败，请检查邮箱和密码";
+        const errorMessage =
+          error?.message || error.message || "登录失败，请检查邮箱和密码";
 
         // 根据错误类型显示不同的提示
         if (error.status === 401) {
@@ -114,10 +111,10 @@ export function LoginForm({
       setTimeout(() => {
         router.push("/dashboard");
       }, 500);
-
     } catch (err) {
       console.error("Login error:", err);
-      const errorMessage = err instanceof Error ? err.message : "网络错误，请稍后重试";
+      const errorMessage =
+        err instanceof Error ? err.message : "网络错误，请稍后重试";
 
       toast.error("网络错误", {
         description: errorMessage,

@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/select";
 import { useFactoriesQuery } from "@/hooks/api/use-factories";
 
-
 interface FactorySelectorProps {
   value?: string;
   onChange: (factoryId: string) => void;
@@ -21,8 +20,6 @@ export function FactorySelector({
   onChange,
   className,
 }: FactorySelectorProps) {
-
-
   // 获取工厂列表
   const { data: factories, isLoading } = useFactoriesQuery();
 

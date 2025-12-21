@@ -75,19 +75,13 @@ export const usersController = new Elysia({ prefix: "/users" })
         },
       });
 
-
-
-      const userSiteRole = await db.insert(userSiteRolesTable).values(
-        {
-          userId: user.user.id,
-          siteId: currentSite.id,
-          roleId: body.role,
-        }
-      );
+      const userSiteRole = await db.insert(userSiteRolesTable).values({
+        userId: user.user.id,
+        siteId: currentSite.id,
+        roleId: body.role,
+      });
 
       return userSiteRole;
-
-
     },
     {
       allPermissions: ["USERS_CREATE"],

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { UserMeRes } from "@/hooks/api";
+import type { PermissionType } from "@/types/permission";
 
 interface AuthState {
   // --- 原始状态 ---
@@ -13,9 +14,9 @@ interface AuthState {
   // --- 操作方法 ---
   setAuth: (data: UserMeRes | null) => void;
   clearAuth: () => void;
-  hasPermission: (permission: string) => boolean;
+  hasPermission: (permission: PermissionType) => boolean;
 
-  hasAnyPermission: (permissions: string[]) => boolean;
+  hasAnyPermission: (permissions: PermissionType[]) => boolean;
 
   /** 切换站点：更新 ID 并触发刷新以重新拉取对应站点的权限 */
   switchSite: (siteId: string) => void;
@@ -47,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      hasPermission: (perm) => {
+      hasPermission: (perm: PermissionType) => {
         const { permissions, isSuperAdmin } = get();
         return isSuperAdmin ? true : permissions.has(perm);
       },
