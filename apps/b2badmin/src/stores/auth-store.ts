@@ -1,131 +1,82 @@
-import { create } from "zustand/react";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { UserMeRes } from "@/hooks/api";
 
-// 定义用户信息类型
-interface User {
-  role: {
-    description: string | null;
-    name: string;
-    id: string;
-    type: "custom" | "system";
-    priority: number;
-    parentRoleId: string | null;
-  };
-  site: {
-    name: string;
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    isActive: boolean | null;
-    domain: string;
-    siteType: "exporter" | "factory";
-    exporterId: string | null;
-    factoryId: string | null;
-  };
-  name: string;
-  image: string | null;
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  email: string;
-  emailVerified: boolean;
-  isSuperAdmin: boolean;
-  isActive: boolean;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-}
-
-// 定义 store 状态类型
 interface AuthState {
-  // 用户信息
-  user: User | null;
-  permissions: string[];
+  // --- 原始状态 ---
+  user: UserMeRes["user"] | null;
+  permissions: Set<string>;
+  currentSite: UserMeRes["currentSite"] | null; // 后端返回的完整站点对象
+  currentSiteId: string | null; // 落地 localStorage 的 ID
+  isSuperAdmin: boolean;
 
-  // 权限检查
-  can: (requiredPermission: string) => boolean;
-  hasRole: (role: string | string[]) => boolean;
-  hasPermission: (permission: string | string[]) => boolean;
-
-  // 更新方法
-  setUser: (user: User | null) => void;
-  setPermissions: (permissions: string[]) => void;
+  // --- 操作方法 ---
+  setAuth: (data: UserMeRes | null) => void;
   clearAuth: () => void;
+  hasPermission: (permission: string) => boolean;
 
-  // 工具方法
-  isSuperAdmin: () => boolean;
-  isFactoryAdmin: () => boolean;
-  isExporterAdmin: () => boolean;
-  getCurrentSiteId: () => string | null;
+  hasAnyPermission: (permissions: string[]) => boolean;
+
+  /** 切换站点：更新 ID 并触发刷新以重新拉取对应站点的权限 */
+  switchSite: (siteId: string) => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  // 初始状态
-  user: null,
-  permissions: [],
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      permissions: new Set(),
+      currentSite: null,
+      currentSiteId: null,
+      isSuperAdmin: false,
 
-  // 设置用户信息
-  setUser: (user) => set({ user }),
+      setAuth: (data) => {
+        if (!data) {
+          get().clearAuth();
+          return;
+        }
+        set({
+          user: data.user,
+          permissions: new Set(data.permissions || []),
+          currentSite: data.currentSite,
+          // 只有当 data.currentSite 存在时才覆盖当前 ID
+          currentSiteId: data.currentSite?.id || null,
+          isSuperAdmin: !!data.user?.isSuperAdmin,
+        });
+      },
 
-  // 设置权限列表
-  setPermissions: (permissions) => set({ permissions }),
+      hasPermission: (perm) => {
+        const { permissions, isSuperAdmin } = get();
+        return isSuperAdmin ? true : permissions.has(perm);
+      },
 
-  // 清除认证信息
-  clearAuth: () => set({ user: null, permissions: [] }),
+      hasAnyPermission: (perms) => {
+        const { permissions, isSuperAdmin } = get();
+        if (isSuperAdmin) return true;
+        return perms.some((perm) => permissions.has(perm));
+      },
 
-  // 检查单个权限
-  can: (requiredPermission) => {
-    const { permissions } = get();
-    if (permissions.includes("*")) return true; // 超级管理员权限
+      clearAuth: () => {
+        set({
+          user: null,
+          permissions: new Set(),
+          currentSite: null,
+          currentSiteId: null, // 注销时通常建议连站点 ID 也清理
+          isSuperAdmin: false,
+        });
+      },
 
-    return permissions.some((p) => {
-      // 1. 完全匹配
-      if (p === requiredPermission) return true;
-      // 2. 通配符匹配 (例如 p 是 'sku:*'，required 是 'sku:create')
-      if (p.endsWith(":*")) {
-        const prefix = p.split(":")[0];
-        return requiredPermission.startsWith(`${prefix}:`);
-      }
-      return false;
-    });
-  },
-
-  // 检查角色
-  hasRole: (role) => {
-    const { user } = get();
-    if (!user?.role?.name) return false;
-
-    const requiredRoles = Array.isArray(role) ? role : [role];
-    return requiredRoles.includes(user.role.name);
-  },
-
-  // 检查权限（支持单个或多个）
-  hasPermission: (permission) => {
-    const { can } = get();
-    const permissions = Array.isArray(permission) ? permission : [permission];
-    return permissions.every((p) => can(p));
-  },
-
-  // 是否是超级管理员
-  isSuperAdmin: () => {
-    const { user } = get();
-    return user?.isSuperAdmin;
-  },
-
-  // 是否是工厂管理员
-  isFactoryAdmin: () => {
-    const { hasRole } = get();
-    return hasRole("factory_admin");
-  },
-
-  // 是否是出口商管理员
-  isExporterAdmin: () => {
-    const { hasRole } = get();
-    return hasRole("exporter_admin");
-  },
-
-  // 获取当前站点ID
-  getCurrentSiteId: () => {
-    const { user } = get();
-    return user?.site?.id || null;
-  },
-}));
+      switchSite: (siteId) => {
+        set({ currentSiteId: siteId });
+        // 站点 ID 变化后，需要重新从后端获取该站点的权限
+        // 最简单的办法是刷新页面，让根组件的 useMe 重新带着新 SiteId 发起请求
+        window.location.reload();
+      },
+    }),
+    {
+      name: "auth-storage",
+      // 【关键】只持久化 currentSiteId，不持久化用户信息和权限
+      partialize: (state) => ({ currentSiteId: state.currentSiteId }),
+    }
+  )
+);

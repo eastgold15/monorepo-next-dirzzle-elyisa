@@ -8,7 +8,7 @@ export function useTemplates(search?: string) {
     queryKey: ["templates", search],
     queryFn: async () =>
       await handleEden(
-        rpc.api.product.templates.get({
+        rpc.api.v1.producttemplates.get({
           query: { search },
         })
       ),
@@ -23,7 +23,9 @@ export function useTemplatesBySiteCategory(siteCategoryId?: string) {
     queryFn: async () => {
       if (!siteCategoryId) return [];
       const data = await handleEden(
-        rpc.api.product.templates["by-site-category"][":siteCategoryId"].get()
+        rpc.api.v1.producttemplates["by-site-category"]({
+          siteCategoryId,
+        }).get()
       );
       return data || [];
     },
@@ -37,7 +39,7 @@ export function useTemplate(id: string) {
   return useQuery({
     queryKey: ["template", id],
     queryFn: async () =>
-      await handleEden(rpc.api.product.templates.detail({ id }).get()),
+      await handleEden(rpc.api.v1.producttemplates({ id }).get()),
     enabled: !!id,
   });
 }
@@ -60,7 +62,7 @@ export function useCreateTemplate() {
         options?: string[];
         sortOrder?: number;
       }>;
-    }) => await handleEden(rpc.api.product.templates.post(data)),
+    }) => await handleEden(rpc.api.v1.producttemplates.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
@@ -92,7 +94,7 @@ export function useUpdateTemplate() {
           sortOrder?: number;
         }>;
       };
-    }) => await handleEden(rpc.api.product.templates[id].put(data)),
+    }) => await handleEden(rpc.api.v1.producttemplates({ id }).patch(data)),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       queryClient.invalidateQueries({ queryKey: ["template", id] });
@@ -107,7 +109,7 @@ export function useDeleteTemplates() {
   return useMutation({
     mutationFn: async (ids: string[]) =>
       await handleEden(
-        rpc.api.product.templates.delete({
+        rpc.api.v1.producttemplates.delete({
           ids,
         })
       ),

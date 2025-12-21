@@ -26,7 +26,7 @@ export abstract class B2BBaseService<
   constructor(
     protected table: T,
     protected contract: C
-  ) { }
+  ) {}
 
   protected getScopeFilters(ctx: ServiceContext): SQL[] {
     const filters: SQL[] = [];

@@ -1,9 +1,10 @@
-import { UsersContract } from "@repo/contract";
+import { UsersContract, userSiteRolesTable } from "@repo/contract";
 import { Elysia, t } from "elysia";
+
 import { dbPlugin } from "~/db/connection";
+import { auth as authserver } from "~/lib/auth";
 import { authGuardMid } from "~/middleware/auth";
 import { usersService } from "~/modules/index";
-
 export const usersController = new Elysia({ prefix: "/users" })
   .use(authGuardMid)
   .use(dbPlugin)
@@ -49,11 +50,10 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 获取用户列表
   .get(
     "/",
-    ({ query, permissions, auth }) => {
-      if (!permissions.includes("USERS_VIEW")) throw new Error("Forbidden");
-      return usersService.findAll(query, auth);
-    },
+    ({ query, permissions, auth, db }) =>
+      usersService.findAll(query, { db, auth }),
     {
+      permissions: ["USERS_VIEW"],
       query: UsersContract.ListQuery,
       detail: {
         summary: "获取用户列表",
@@ -66,11 +66,31 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 创建用户
   .post(
     "/",
-    ({ body, permissions, auth }) => {
+    async ({ body, permissions, auth, db, currentSite }) => {
       if (!permissions.includes("USERS_CREATE")) throw new Error("Forbidden");
-      return usersService.create(body, auth);
+      const user = await authserver.api.signInEmail({
+        body: {
+          email: body.email,
+          password: body.password,
+        },
+      });
+
+
+
+      const userSiteRole = await db.insert(userSiteRolesTable).values(
+        {
+          userId: user.user.id,
+          siteId: currentSite.id,
+          roleId: body.role,
+        }
+      );
+
+      return userSiteRole;
+
+
     },
     {
+      allPermissions: ["USERS_CREATE"],
       body: UsersContract.Create,
       detail: {
         summary: "创建新用户",
@@ -83,9 +103,9 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 更新用户信息
   .patch(
     "/:id",
-    ({ params, body, permissions, auth }) => {
+    ({ params, body, permissions, auth, db }) => {
       if (!permissions.includes("USERS_EDIT")) throw new Error("Forbidden");
-      return usersService.update(params.id, body, auth);
+      return usersService.update(params.id, body, { db, auth });
     },
     {
       params: t.Object({ id: t.String() }),
@@ -101,9 +121,9 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 删除用户
   .delete(
     "/:id",
-    ({ params, permissions, auth }) => {
+    ({ params, permissions, auth, db }) => {
       if (!permissions.includes("USERS_DELETE")) throw new Error("Forbidden");
-      return usersService.delete(params.id, auth);
+      return usersService.delete(params.id, { db, auth });
     },
     {
       params: t.Object({ id: t.String() }),

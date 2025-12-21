@@ -46,30 +46,60 @@ export declare class EdenFetchError<
 export async function handleEden<T, E>(
   promise: Promise<{ data: T; error: E }>
 ): Promise<NonNullable<T>> {
-  const { data, error } = await promise;
+  try {
+    const { data, error } = await promise;
 
-  if (error) {
-    // 1. 打印原始错误方便开发调试
-    console.error("[RPC Error]:", error);
+    if (error) {
+      // 1. 打印原始错误方便开发调试
+      console.error("[RPC Error]:", JSON.stringify(error, null, 2));
 
-    // 2. 按照你提供的结构深度提取 message
-    // 这里的 error 类型对应你给出的 { status, value }
-    const val = (error as any).value;
-    const errorMessage =
-      val?.message || // 对应 403 和 422 的 message
-      val?.summary || // 对应 422 可能存在的 summary
-      (error as any).status || // 兜底显示状态码
-      "请求失败";
+      // 2. 提取错误信息
+      let errorMessage = "请求失败";
 
-    // 3. 抛出统一的 Error 对象，供外部 try-catch 或全局错误处理捕获
-    throw new Error(errorMessage);
+      if (error && typeof error === 'object') {
+        // 处理 EdenFetchError 结构
+        if ('value' in error) {
+          const val = (error as any).value;
+          // 如果 value 是对象，尝试提取 message 或其他信息
+          if (typeof val === 'object' && val !== null) {
+            errorMessage =
+              val.message ||
+              val.summary ||
+              val.error ||
+              JSON.stringify(val);
+          } else if (typeof val === 'string') {
+            errorMessage = val;
+          }
+        }
+        // 处理 status 属性
+        if ('status' in error && typeof (error as any).status === 'number') {
+          errorMessage = `${errorMessage} (${(error as any).status})`;
+        }
+        // 处理 message 属性
+        if ('message' in error && typeof (error as any).message === 'string') {
+          errorMessage = (error as any).message;
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      // 3. 抛出统一的 Error 对象，供外部 try-catch 或全局错误处理捕获
+      throw new Error(errorMessage);
+    }
+
+    if (data === null || data === undefined) {
+      throw new Error("返回数据为空");
+    }
+    // 4. 只有成功且 data 存在时才返回
+    return data as NonNullable<T>;
+  } catch (err) {
+    // 如果捕获到的不是我们抛出的 Error，重新包装
+    if (err instanceof Error) {
+      throw err;
+    }
+    console.error("[Unexpected Error]:", JSON.stringify(err, null, 2));
+    throw new Error("未知错误");
   }
-
-  if (data === null || data === undefined) {
-    throw new Error("返回数据为空");
-  }
-  // 4. 只有成功且 data 存在时才返回
-  return data as NonNullable<T>;
 }
 
 /**

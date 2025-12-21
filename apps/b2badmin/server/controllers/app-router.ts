@@ -11,6 +11,7 @@ import { factoriesController } from "./_custom/factories.controller";
 import { herocardsController } from "./_custom/herocards.controller";
 import { masterController } from "./_custom/master.controller";
 import { mediaController } from "./_custom/media.controller";
+import { productmastercategoriesController } from "./_custom/productmastercategories.controller";
 import { productsController } from "./_custom/products.controller";
 import { sitecategoriesController } from "./_custom/sitecategories.controller";
 import { siteconfigController } from "./_custom/siteconfig.controller";
@@ -29,7 +30,6 @@ import { inquiryController } from "./_generated/inquiry.controller";
 import { inquiryitemsController } from "./_generated/inquiryitems.controller";
 import { mediametadataController } from "./_generated/mediametadata.controller";
 import { permissionController } from "./_generated/permission.controller";
-import { productmastercategoriesController } from "./_generated/productmastercategories.controller";
 import { productmediaController } from "./_generated/productmedia.controller";
 import { producttemplateController } from "./_generated/producttemplate.controller";
 import { quotationitemsController } from "./_generated/quotationitems.controller";
@@ -47,25 +47,25 @@ import { verificationController } from "./_generated/verification.controller";
 
 export const appRouter = (app: Elysia) =>
   app
-    .use(customerController)
-    .use(accountController)
-    .use(adsController)
-    .use(attributeController)
-    .use(attributetemplateController)
-    .use(attributevalueController)
-    .use(dailyinquirycounterController)
-    .use(exportersController)
-    .use(factoriesController)
-    .use(herocardsController)
-    .use(inquiryitemsController)
-    .use(inquiryController)
-    .use(masterController)
-    .use(mediametadataController)
-    .use(mediaController)
-    .use(permissionController)
-    .use(productmastercategoriesController)
-    .use(productmediaController)
-    .use(producttemplateController)
+    // .use(customerController)
+    // .use(accountController)
+    // .use(adsController)
+    // .use(attributeController)
+    // .use(attributetemplateController)
+    // .use(attributevalueController)
+    // .use(dailyinquirycounterController)
+    // .use(exportersController)
+    // .use(factoriesController)
+    // .use(herocardsController)
+    // .use(inquiryitemsController)
+    // .use(inquiryController)
+    // .use(masterController)
+    // .use(mediametadataController)
+    // .use(mediaController)
+    // .use(permissionController)
+    // .use(productmastercategoriesController)
+    // .use(productmediaController)
+    // .use(producttemplateController)
     .use(productsController)
     .use(quotationitemsController)
     .use(quotationsController)
@@ -74,14 +74,14 @@ export const appRouter = (app: Elysia) =>
     .use(salespersonaffiliationsController)
     .use(salespersoncategoriesController)
     .use(salespersonsController)
-    .use(sessionController)
-    .use(sitecategoriesController)
-    .use(siteconfigController)
-    .use(siteproductsController)
-    .use(sitesController)
-    .use(skumediaController)
-    .use(skusController)
+    // .use(sessionController)
+    // .use(sitecategoriesController)
+    // .use(siteconfigController)
+    // .use(siteproductsController)
+    // .use(sitesController)
+    // .use(skumediaController)
+    // .use(skusController)
     .use(translationdictController)
     .use(usersiterolesController)
     .use(usersController)
-    .use(verificationController);
+    // .use(verificationController);

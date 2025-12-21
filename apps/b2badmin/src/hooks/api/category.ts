@@ -65,11 +65,11 @@ export function useCategories() {
     queryKey: ["categories"],
     queryFn: async () => {
       const result = await handleEden(
-        rpc.api.category.get({
-          query: { limit: 1000 }, // 获取所有分类
+        rpc.api.v1.productmastercategories.get({
+          query: { limit: 1000, page: 1 }, // 获取所有分类
         })
       );
-      return result?.items || [];
+      return result || [];
     },
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -87,7 +87,9 @@ export function useCategoriesTree() {
       }
 
       // 缓存不存在或过期，从API获取
-      const data = await handleEden(rpc.api.categories.tree.get());
+      const data = await handleEden(
+        rpc.api.v1.productmastercategories.tree.get()
+      );
 
       // 保存到缓存
       saveCategoriesToCache(data as unknown as Category[]);
@@ -101,7 +103,8 @@ export function useCategoriesTree() {
 export function useCategory(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["category", id],
-    queryFn: async () => await handleEden(rpc.api.category[id].get()),
+    queryFn: async () =>
+      await handleEden(rpc.api.v1.productmastercategories({ id }).get()),
     enabled: options?.enabled ?? true,
     staleTime: 5 * 60 * 1000, // 5分钟
     retry: 2,

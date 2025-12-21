@@ -5,6 +5,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+
+
+
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 // 定义表单验证 Schema
 const loginFormSchema = z.object({
@@ -67,15 +71,59 @@ export function LoginForm({
         password: values.password,
       });
 
-      if (!data) {
-        return null;
+      if (error) {
+        // 显示具体的错误信息
+        const errorMessage = error?.message || error.message || "登录失败，请检查邮箱和密码";
+
+        // 根据错误类型显示不同的提示
+        if (error.status === 401) {
+          toast.error("登录失败", {
+            description: "邮箱或密码错误，请检查后重试",
+          });
+        } else if (error.status === 429) {
+          toast.error("登录失败", {
+            description: "请求过于频繁，请稍后再试",
+          });
+        } else if (error.status >= 500) {
+          toast.error("服务器错误", {
+            description: "服务器暂时无法响应，请稍后再试",
+          });
+        } else {
+          toast.error("登录失败", {
+            description: errorMessage,
+          });
+        }
+
+        form.setError("root", { message: errorMessage });
+        return;
       }
 
-      // 登录成功，跳转到dashboard
-      router.push("/dashboard");
+      if (!data) {
+        toast.error("登录失败", {
+          description: "未知的登录错误，请稍后重试",
+        });
+        return;
+      }
+
+      // 登录成功
+      toast.success("登录成功", {
+        description: "正在跳转到管理后台...",
+      });
+
+      // 等待一下让用户看到成功提示
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 500);
+
     } catch (err) {
       console.error("Login error:", err);
-      form.setError("root", { message: "网络错误，请稍后重试" });
+      const errorMessage = err instanceof Error ? err.message : "网络错误，请稍后重试";
+
+      toast.error("网络错误", {
+        description: errorMessage,
+      });
+
+      form.setError("root", { message: errorMessage });
     } finally {
       setIsLoading(false);
     }

@@ -8,11 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFactoriesQuery } from "@/hooks/api/use-factories";
-import {
-  useIsExporterAdmin,
-  useIsFactoryAdmin,
-  useTenantId,
-} from "@/stores/user-store";
+
 
 interface FactorySelectorProps {
   value?: string;
@@ -25,9 +21,7 @@ export function FactorySelector({
   onChange,
   className,
 }: FactorySelectorProps) {
-  const isExporterAdmin = useIsExporterAdmin();
-  const isFactoryAdmin = useIsFactoryAdmin();
-  const tenantId = useTenantId();
+
 
   // 获取工厂列表
   const { data: factories, isLoading } = useFactoriesQuery();

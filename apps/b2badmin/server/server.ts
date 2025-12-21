@@ -72,11 +72,10 @@ export const server = new Elysia({ name: "server" })
       credentials: true,
     })
   )
-  .use(authGuardMid)
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
   .use(loggerPlugin)
   // 2. 核心错误处理插件 (拦截所有错误，进行转换和手动日志记录)
   .use(errorSuite)
   .use(dbPlugin)
   .mount("/", auth.handler) // 使用 Better Auth 认证中间件
-  .group("/v1", (app) => app.use(appRouter));
+  .group("/v1", (app) => app.use(authGuardMid).use(appRouter));

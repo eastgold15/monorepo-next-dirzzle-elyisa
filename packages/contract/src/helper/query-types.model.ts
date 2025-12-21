@@ -22,8 +22,8 @@ export type SortParams = Static<typeof SortParams>;
 
 // 2. 分页参数（仅用于分页场景）
 export const PaginationParams = t.Object({
-  page: t.Number({ minimum: 1, default: 1 }),
-  limit: t.Number({ minimum: 1, maximum: 1000, default: 10 }),
+  page: t.Partial(t.Number({ minimum: 1, default: 1 })),
+  limit: t.Partial(t.Number({ minimum: 1, maximum: 1000, default: 10 })),
 });
 export type PaginationParams = Static<typeof PaginationParams>;
 

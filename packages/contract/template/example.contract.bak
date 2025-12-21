@@ -2,7 +2,7 @@
 
 import { t } from "elysia";
 // 1. 导入自动生成的原始契约
-// import { XxxContract as Generated } from "../generated/xxx.contract";
+import { UsersContract as Generated } from "../_generated/users.contract";
 
 // 2. 导入你可能需要关联的其他契约
 // import { OtherContract } from "../generated/other.contract";
@@ -46,7 +46,7 @@ export type XxxDTO = {
     Update: typeof Generated.Update.static; // 未修改的直接透传
     Patch: typeof Generated.Patch.static;
     ListQuery: typeof Generated.ListQuery.static;
-    ListResponse: t.Static<typeof Generated.ListResponse> & {
+    ListResponse: typeof Generated.ListResponse.static & {
         // 如果列表也需要扩展，可以在这里交叉类型
     };
 };

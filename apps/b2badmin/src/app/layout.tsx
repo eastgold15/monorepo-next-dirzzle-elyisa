@@ -1,5 +1,5 @@
-import { UserProvider } from "@/components/auth/UserProvider";
-import QueryProvider from "@/components/providers/query-provider";
+import { UserProvider } from "@/providers/UserProvider";
+import QueryProvider from "@/providers/query-provider";
 import "./globals.css";
 
 export default function RootLayout({

@@ -14,7 +14,7 @@ export function useProductsList(query?: {
   return useQuery({
     queryKey: ["products", "list", query],
     queryFn: async () => {
-      const result = await rpc.api.product.get({ $query: query || {} });
+      const result = await rpc.api.v1.products.get({ query: query || {} });
       if (result.error) {
         throw new Error(result.error.message || "获取商品列表失败");
       }
@@ -31,10 +31,9 @@ export function useProductTemplatesBySiteCategory(siteCategoryId: string) {
     queryFn: async () => {
       if (!siteCategoryId) return [];
 
-      const response =
-        await rpc.api.product.templates["by-site-category"][
-          siteCategoryId
-        ].get();
+      const response = await rpc.api.v1.products.templates["by-site-category"]({
+        siteCategoryId,
+      }).get();
       if (response.error) {
         throw new Error(response.error.message || "获取模板列表失败");
       }
@@ -49,7 +48,7 @@ export function useProductDetail(id: string) {
   return useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
-      const result = await rpc.api.product[id].get();
+      const result = await rpc.api.v1.products({ id }).get();
       if (result.error) {
         throw new Error(result.error.message || "获取商品详情失败");
       }
@@ -104,7 +103,7 @@ export function useProductCreate() {
         mainImageId: data.imageId,
       };
 
-      const response = await rpc.api.product.post(requestData);
+      const response = await rpc.api.v1.products.post(requestData);
       if (response.error) {
         throw new Error(response.error.message || "创建商品失败");
       }
@@ -124,7 +123,7 @@ export function useProductUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const result = await rpc.api.product[id].put({ data });
+      const result = await rpc.api.v1.products({ id }).patch(data);
       return result;
     },
     onSuccess: (_, { id }) => {
@@ -139,7 +138,7 @@ export function useProductDelete() {
 
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const result = await rpc.api.product.delete({ ids });
+      const result = await rpc.api.v1.products.delete({ body: { ids } });
       return result;
     },
     onSuccess: () => {
@@ -154,7 +153,7 @@ export function useSkusList(productId?: string) {
     queryKey: ["skus", "list", productId],
     queryFn: async () => {
       const query = productId ? { productId } : {};
-      const result = await rpc.api.sku.get({ $query: query });
+      const result = await rpc.api.v1.skus.get({ query });
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -166,7 +165,7 @@ export function useSkuCreate() {
 
   return useMutation({
     mutationFn: async (data: any) => {
-      const result = await rpc.api.sku.post({ data });
+      const result = await rpc.api.v1.skus.post(data);
       return result;
     },
     onSuccess: () => {
@@ -180,7 +179,7 @@ export function useSkuUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const result = await rpc.api.sku[id].put({ data });
+      const result = await rpc.api.v1.skus({ id }).patch(data);
       return result;
     },
     onSuccess: () => {
@@ -194,7 +193,7 @@ export function useSkuDelete() {
 
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const result = await rpc.api.sku.delete({ ids });
+      const result = await rpc.api.v1.skus.delete({ body: { ids } });
       return result;
     },
     onSuccess: () => {

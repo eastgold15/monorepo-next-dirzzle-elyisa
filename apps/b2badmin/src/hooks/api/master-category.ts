@@ -10,7 +10,7 @@ export function useMasterCategoriesTree() {
   return useQuery({
     queryKey: ["master-categories", "tree"],
     queryFn: async () => {
-      const data = await handleEden(rpc.api["master-category"].tree.get());
+      const data = await handleEden(rpc.api.v1.master.tree.get());
       // 确保返回数组，即使是空数组
       return (data || []) as MasterCategoryTModel["TreeEntity"][];
     },
@@ -24,7 +24,7 @@ export function useMasterCategories(parentId?: string) {
     queryKey: ["master-categories", "flat", parentId],
     queryFn: async () => {
       const categories = await handleEden(
-        rpc.api["master-category"].get({
+        rpc.api.v1.master.get({
           query: { parentId, page: 1, limit: 1000 }, // 获取所有数据用于下拉选择
         })
       );
@@ -40,7 +40,7 @@ export function useCreateMasterCategory() {
 
   return useMutation({
     mutationFn: async (data: MasterCategoryTModel["Create"]) =>
-      await handleEden(rpc.api["master-category"].post(data)),
+      await handleEden(rpc.api.v1.master.post(data)),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -59,7 +59,7 @@ export function useUpdateMasterCategory() {
     }: {
       id: string;
       data: MasterCategoryTModel["Update"];
-    }) => await handleEden(rpc.api["master-category"].update({ id }).put(data)),
+    }) => await handleEden(rpc.api.v1.master({ id }).patch(data)),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -73,7 +73,7 @@ export function useDeleteMasterCategory() {
 
   return useMutation({
     mutationFn: async (id: string) =>
-      await handleEden(rpc.api["master-category"].delete({ ids: [id] })),
+      await handleEden(rpc.api.v1.master.delete({ ids: [id] })),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -87,7 +87,7 @@ export function useBatchDeleteMasterCategories() {
 
   return useMutation({
     mutationFn: async ({ ids }: { ids: string[] }) =>
-      await handleEden(rpc.api["master-category"].delete({ ids })),
+      await handleEden(rpc.api.v1.master.delete({ ids })),
     onSuccess: () => {
       // 刷新主分类树和列表
       queryClient.invalidateQueries({ queryKey: ["master-categories"] });
@@ -99,8 +99,7 @@ export function useBatchDeleteMasterCategories() {
 export function useMasterCategory(id: string) {
   return useQuery({
     queryKey: ["master-category", id],
-    queryFn: async () =>
-      await handleEden(rpc.api["master-category"].detail({ id }).get()),
+    queryFn: async () => await handleEden(rpc.api.v1.master({ id }).get()),
     enabled: !!id,
   });
 }

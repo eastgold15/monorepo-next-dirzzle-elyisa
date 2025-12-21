@@ -6,7 +6,7 @@ import { handleEden } from "@/lib/utils/base";
 export function useMediaList(query?: any) {
   return useQuery({
     queryKey: ["media", "list", query],
-    queryFn: async () => await handleEden(rpc.api.media.get({ $query: query })),
+    queryFn: async () => await handleEden(rpc.api.v1.media.get({ query })),
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 }
@@ -14,7 +14,7 @@ export function useMediaList(query?: any) {
 export function useMediaDetail(id: string) {
   return useQuery({
     queryKey: ["media", id],
-    queryFn: async () => await handleEden(rpc.api.media[id].get()),
+    queryFn: async () => await handleEden(rpc.api.v1.media({ id }).get()),
     enabled: !!id,
   });
 }
@@ -24,7 +24,7 @@ export function useMediaUpload() {
 
   return useMutation({
     mutationFn: async (data: FormData) =>
-      await handleEden(rpc.api.media.upload.post({ body: data })),
+      await handleEden(rpc.api.v1.media.upload.post({ body: data })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
     },
@@ -36,7 +36,7 @@ export function useMediaUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) =>
-      await handleEden(rpc.api.media[id].put({ data })),
+      await handleEden(rpc.api.v1.media({ id }).patch(data)),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
       queryClient.invalidateQueries({ queryKey: ["media", id] });
@@ -49,7 +49,7 @@ export function useMediaDelete() {
 
   return useMutation({
     mutationFn: async (ids: string[]) =>
-      await handleEden(rpc.api.media.delete({ ids })),
+      await handleEden(rpc.api.v1.media.delete({ body: { ids } })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
     },
@@ -60,7 +60,7 @@ export function useMediaDelete() {
 export function useMediaStorageInfo() {
   return useQuery({
     queryKey: ["media", "storage", "info"],
-    queryFn: async () => await handleEden(rpc.api.media.storage.info.get()),
+    queryFn: async () => await handleEden(rpc.api.v1.media.storage.info.get()),
     staleTime: 10 * 60 * 1000, // 10分钟
   });
 }
@@ -85,7 +85,7 @@ export function useDirectUploadMutation() {
       }
 
       return await handleEden(
-        rpc.api.media.upload.post({
+        rpc.api.v1.media.upload.post({
           file: args.file,
           category: args.category,
           userId: args.userId,
@@ -128,9 +128,8 @@ export function useMediaListV2(params?: {
     queryKey: ["media", "list", params],
     queryFn: async () =>
       await handleEden(
-        rpc.api.media.list.get({
-          $query: params || {},
-          $header: {},
+        rpc.api.v1.media.get({
+          query: params || {},
         })
       ),
     staleTime: 1000 * 60 * 5, // 5分钟

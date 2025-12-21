@@ -149,11 +149,11 @@ export function useToggleCategoryStatus() {
 
 // 获取分类的完整路径（如：一级分类 > 二级分类 > 三级分类）
 export function getCategoryPath(
-  category: SiteCategoriesContractDto['TreeResponse'],
-  allCategories: SiteCategoriesContractDto['TreeResponse'][]
+  category: SiteCategoriesContractDto["TreeResponse"],
+  allCategories: SiteCategoriesContractDto["TreeResponse"][]
 ): string {
   const path: string[] = [];
-  let currentCategory: SiteCategoriesContractDto['TreeResponse'] | undefined =
+  let currentCategory: SiteCategoriesContractDto["TreeResponse"] | undefined =
     category;
 
   while (currentCategory) {
@@ -174,8 +174,8 @@ export function getCategoryPath(
 // 根据ID查找分类
 function findCategoryById(
   id: string,
-  categories: SiteCategoriesContractDto['TreeResponse'][]
-): SiteCategoriesContractDto['TreeResponse'] | undefined {
+  categories: SiteCategoriesContractDto["TreeResponse"][]
+): SiteCategoriesContractDto["TreeResponse"] | undefined {
   for (const category of categories) {
     if (category.id === id) {
       return category;
@@ -192,15 +192,15 @@ function findCategoryById(
 
 // 检查分类是否有子分类
 export function hasChildren(
-  category: SiteCategoriesContractDto['TreeResponse']
+  category: SiteCategoriesContractDto["TreeResponse"]
 ): boolean {
   return !!(category.children && category.children.length > 0);
 }
 
 // 检查是否可以删除分类（没有子分类）
 export function canDeleteCategory(
-  category: SiteCategoriesContractDto['TreeResponse'],
-  allCategories: SiteCategoriesContractDto['TreeResponse'][]
+  category: SiteCategoriesContractDto["TreeResponse"],
+  allCategories: SiteCategoriesContractDto["TreeResponse"][]
 ): boolean {
   // 检查是否有子分类
   if (hasChildren(category)) {

@@ -4,7 +4,7 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
 // 广告相关 hooks
-export function useAdsList(params?: AdsContract.ListQuery) {
+export function useAdsList(params?: typeof AdsContract.ListQuery.static) {
   return useQuery({
     queryKey: ["ads", "list", params],
     queryFn: async () => {
@@ -45,18 +45,7 @@ export function useAdsUpdate() {
       data,
     }: {
       id: string;
-      data: {
-        title?: string;
-        description?: string;
-        type?: string;
-        link?: string;
-        position?: string;
-        startDate?: string;
-        endDate?: string;
-        sortOrder?: number;
-        isActive?: boolean;
-        mediaId?: string;
-      };
+      data: typeof AdsContract.Update.static;
     }) => await handleEden(rpc.api.v1.ads({ id }).patch(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });

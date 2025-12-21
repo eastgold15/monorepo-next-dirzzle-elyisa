@@ -8,8 +8,8 @@ export function useFactoriesQuery() {
   return useQuery({
     queryKey: ["factories"],
     queryFn: async () => {
-      const data = await handleEden(rpc.api.factory.list.get());
-      return data.factories;
+      const data = await handleEden(rpc.api.v1.factories.get());
+      return data.items || [];
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -22,7 +22,7 @@ export function useCreateFactory() {
 
   return useMutation({
     mutationFn: async (body: any) =>
-      await handleEden(rpc.api.factory.post(body)),
+      await handleEden(rpc.api.v1.factories.post(body)),
     onSuccess: () => {
       toast.success("工厂创建成功");
       queryClient.invalidateQueries({ queryKey: ["factories"] });
@@ -41,7 +41,7 @@ export function useUpdateFactory() {
 
   return useMutation({
     mutationFn: async ({ factoryId, ...body }: { factoryId: string } & any) =>
-      await handleEden(rpc.api.factory.factoryId({ factoryId }).patch(body)),
+      await handleEden(rpc.api.v1.factories({ id: factoryId }).patch(body)),
     onSuccess: () => {
       toast.success("工厂信息更新成功");
       queryClient.invalidateQueries({ queryKey: ["factories"] });

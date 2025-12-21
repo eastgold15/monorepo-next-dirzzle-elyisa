@@ -1,19 +1,7 @@
 // API 工具函数
 
-import type { ApiResponse } from "@repo/contract";
 
-/**
- * 处理 API 响应
- */
-export async function handleApiResponse<T>(response: Response): Promise<T> {
-  const data: ApiResponse = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.message || "请求失败");
-  }
-
-  return data.data as T;
-}
 
 /**
  * 创建查询键

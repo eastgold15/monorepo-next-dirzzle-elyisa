@@ -151,4 +151,4 @@ export const authGuardMid = new Elysia({ name: "authGuard" })
       },
     }),
   })
-  .as("global");
+  .as('global')
