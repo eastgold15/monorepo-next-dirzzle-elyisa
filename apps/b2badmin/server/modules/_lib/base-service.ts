@@ -81,15 +81,16 @@ export abstract class B2BBaseService<
     return { data, total, page, limit };
   }
 
-  // 修改 create 方法，确保保存时自动注入 factoryId
+  // 修改 create 方法，确保保存时自动注入 factoryId 和 exporterId
   async create(data: Static<C["Create"]>, ctx: ServiceContext) {
     const table = this.table as any;
-    const { siteId, factoryId } = ctx.auth;
+    const { siteId, factoryId, exporterId } = ctx.auth;
 
     const payload = {
       ...data,
       ...(table.siteId && { siteId }),
       ...(table.factoryId && factoryId && { factoryId }), // 👈 强制注入自己的工厂 ID
+      ...(table.exporterId && exporterId && { exporterId }), // 👈 强制注入自己的出口商 ID
     };
 
     const [result] = await ctx.db

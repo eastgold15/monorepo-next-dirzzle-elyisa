@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -22,12 +18,8 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./server/*"
-      ]
+      "@/*": ["./src/*"],
+      "~/*": ["./server/*"]
     },
     // ✅ 增量编译（关键！）
     "incremental": true,
@@ -43,6 +35,7 @@
   "include": [
     "next-env.d.ts",
     "src/**/*", // ✅ 更精确地只包含源码
+    "server/**/*",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

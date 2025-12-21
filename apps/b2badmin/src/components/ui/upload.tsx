@@ -1,6 +1,13 @@
 "use client";
 
-import { File, Film, Image, Music, X } from "lucide-react";
+import {
+  File,
+  Film,
+  Image,
+  Music,
+  Upload as UploadIcon,
+  X,
+} from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -10,7 +17,8 @@ import { Progress } from "./progress";
 interface UploadFile {
   id: string;
   file: File;
-  name: string;
+  originalName: string; // 原始文件名
+  name: string; // 可编辑的显示名称
   size: number;
   type: string;
   preview?: string;
@@ -29,6 +37,7 @@ interface UploadProps {
   onError?: (error: string) => void;
   className?: string;
   disabled?: boolean;
+  autoUpload?: boolean; // 是否自动上传
 }
 
 export function Upload({
@@ -41,6 +50,7 @@ export function Upload({
   onError,
   className,
   disabled = false,
+  autoUpload = false,
 }: UploadProps) {
   const [files, setFiles] = React.useState<UploadFile[]>([]);
   const [isDragOver, setIsDragOver] = React.useState(false);
@@ -87,7 +97,7 @@ export function Upload({
       return;
     }
 
-    const uploadFiles: UploadFile[] = [];
+    const newUploadFiles: UploadFile[] = [];
 
     for (const file of fileList) {
       const error = validateFile(file);
@@ -97,10 +107,11 @@ export function Upload({
       }
 
       const preview = await createPreview(file);
-      uploadFiles.push({
+      newUploadFiles.push({
         id: Math.random().toString(36).substr(2, 9),
         file,
-        name: file.name,
+        originalName: file.name, // 保存原始文件名
+        name: file.name, // 可编辑的显示名
         size: file.size,
         type: file.type,
         preview,
@@ -109,59 +120,112 @@ export function Upload({
       });
     }
 
-    setFiles((prev) => [...prev, ...uploadFiles]);
+    setFiles((prev) => [...prev, ...newUploadFiles]);
+
+    // 自动上传模式：添加文件后自动开始上传
+    if (autoUpload && newUploadFiles.length > 0) {
+      // 使用 setTimeout 确保状态更新后再触发上传
+      setTimeout(() => {
+        handleUpload();
+      }, 100);
+    }
   };
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((file) => file.id !== id));
   };
 
-  const uploadFiles = async () => {
+  const handleUpload = async () => {
     const pendingFiles = files.filter((f) => f.status === "pending");
-    if (pendingFiles.length === 0) return;
+    if (pendingFiles.length === 0 || !onUpload) return;
 
-    for (const uploadFile of pendingFiles) {
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === uploadFile.id ? { ...f, status: "uploading" as const } : f
-        )
-      );
+    // 标记所有待上传文件为上传中状态
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.status === "pending"
+          ? { ...f, status: "uploading" as const, progress: 0 }
+          : f
+      )
+    );
 
-      try {
-        // 模拟上传进度
-        for (let progress = 0; progress <= 100; progress += 10) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      // 逐个上传文件，确保每个文件都被正确处理
+      const uploadFiles = pendingFiles.map((uploadFile) => {
+        // 创建新的 File 对象，使用编辑后的名称（如果名称被修改了）
+        const fileToUpload =
+          uploadFile.name !== uploadFile.originalName
+            ? new File([uploadFile.file], uploadFile.name, {
+                type: uploadFile.file.type,
+                lastModified: uploadFile.file.lastModified,
+              })
+            : uploadFile.file;
+
+        return { fileToUpload, uploadFile };
+      });
+
+      // 逐个处理上传
+      for (const { fileToUpload, uploadFile } of uploadFiles) {
+        try {
+          // 更新进度
           setFiles((prev) =>
-            prev.map((f) => (f.id === uploadFile.id ? { ...f, progress } : f))
+            prev.map((f) =>
+              f.id === uploadFile.id ? { ...f, progress: 50 } : f
+            )
+          );
+
+          // 调用上传回调（如果 onUpload 支持单个文件）
+          // 如果 onUpload 支持批量上传，需要修改这里的逻辑
+          await onUpload([fileToUpload]);
+
+          // 标记为成功
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadFile.id
+                ? { ...f, status: "success" as const, progress: 100 }
+                : f
+            )
+          );
+        } catch (error) {
+          // 单个文件失败，标记为错误但继续处理其他文件
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadFile.id
+                ? { ...f, status: "error" as const, error: "上传失败" }
+                : f
+            )
           );
         }
-
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id ? { ...f, status: "success" as const } : f
-          )
-        );
-      } catch (error) {
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id
-              ? { ...f, status: "error" as const, error: "上传失败" }
-              : f
-          )
-        );
-        onError?.(`上传 ${uploadFile.name} 失败`);
       }
-    }
 
-    const successfulFiles = files.filter((f) => f.status === "success");
-    if (successfulFiles.length > 0) {
-      onSuccess?.(successfulFiles);
-    }
+      // 检查是否有成功的文件
+      const successfulFiles = files.filter((f) => f.status === "success");
+      if (successfulFiles.length > 0) {
+        onSuccess?.(successfulFiles);
+      }
 
-    // 清理已上传的文件
-    setTimeout(() => {
-      setFiles((prev) => prev.filter((f) => f.status !== "success"));
-    }, 2000);
+      // 检查是否所有文件都失败了
+      const failedFiles = files.filter((f) => f.status === "error");
+      if (failedFiles.length === pendingFiles.length) {
+        onError?.("所有文件上传失败，请重试");
+      } else if (failedFiles.length > 0) {
+        onError?.(`${failedFiles.length} 个文件上传失败`);
+      }
+
+      // 清理已上传的文件
+      setTimeout(() => {
+        setFiles((prev) => prev.filter((f) => f.status !== "success"));
+      }, 2000);
+    } catch (error) {
+      // 整体上传失败
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.status === "uploading"
+            ? { ...f, status: "error" as const, error: "上传失败" }
+            : f
+        )
+      );
+      onError?.("上传失败，请重试");
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -195,7 +259,7 @@ export function Upload({
         onDrop={handleDrop}
       >
         <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-          <Upload className="mb-4 size-10 text-muted-foreground" />
+          <UploadIcon className="mb-4 size-10 text-muted-foreground" />
           <div className="mb-2 space-y-1">
             <p className="font-medium text-sm">拖拽文件到此处上传</p>
             <p className="text-muted-foreground text-xs">
@@ -227,38 +291,76 @@ export function Upload({
 
       {files.length > 0 && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-sm">待上传文件 ({files.length})</h4>
-            {hasPendingFiles && (
-              <Button disabled={disabled} onClick={uploadFiles} size="sm">
-                开始上传
-              </Button>
-            )}
-          </div>
+          {!autoUpload && (
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-sm">
+                待上传文件 ({files.length})
+              </h4>
+              {hasPendingFiles && (
+                <Button disabled={disabled} onClick={handleUpload} size="sm">
+                  开始上传
+                </Button>
+              )}
+            </div>
+          )}
+          {autoUpload && (
+            <h4 className="font-medium text-sm">
+              正在上传文件 ({files.filter((f) => f.status === "pending").length}
+              )
+            </h4>
+          )}
 
           <div className="space-y-2">
             {files.map((uploadFile) => (
               <Card className="p-3" key={uploadFile.id}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-3">
                   {uploadFile.preview ? (
                     <img
                       alt={uploadFile.name}
-                      className="size-10 rounded object-cover"
+                      className="mt-0.5 size-10 rounded object-cover"
                       src={uploadFile.preview}
                     />
                   ) : (
-                    <div className="flex size-10 items-center justify-center rounded-md bg-muted">
+                    <div className="mt-0.5 flex size-10 items-center justify-center rounded-md bg-muted">
                       {getFileIcon(uploadFile.type)}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="truncate font-medium text-sm">
-                        {uploadFile.name}
-                      </p>
+                    <div className="flex items-center justify-between gap-2">
+                      {/* 文件名编辑区域 */}
+                      <div className="min-w-0 flex-1">
+                        {uploadFile.status !== "uploading" ? (
+                          <input
+                            className="w-full truncate rounded border border-transparent bg-transparent px-2 py-1 font-medium text-sm transition-colors hover:border-gray-200 focus:border-primary focus:outline-none"
+                            disabled={uploadFile.status === "uploading"}
+                            onChange={(e) => {
+                              setFiles((prev) =>
+                                prev.map((f) =>
+                                  f.id === uploadFile.id
+                                    ? { ...f, name: e.target.value }
+                                    : f
+                                )
+                              );
+                            }}
+                            type="text"
+                            value={uploadFile.name}
+                          />
+                        ) : (
+                          <p className="truncate font-medium text-sm">
+                            {uploadFile.name}
+                          </p>
+                        )}
+                        {uploadFile.name !== uploadFile.originalName && (
+                          <p className="mt-0.5 text-muted-foreground text-xs">
+                            原始名称: {uploadFile.originalName}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 删除按钮 */}
                       <Button
-                        className="h-6 w-6"
+                        className="h-6 w-6 flex-shrink-0"
                         disabled={uploadFile.status === "uploading"}
                         onClick={() => removeFile(uploadFile.id)}
                         size="icon"
@@ -268,6 +370,7 @@ export function Upload({
                       </Button>
                     </div>
 
+                    {/* 文件信息 */}
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-muted-foreground text-xs">
                         {formatFileSize(uploadFile.size)}
@@ -281,12 +384,15 @@ export function Upload({
                         )}
                       >
                         {uploadFile.status === "pending" && "等待上传"}
-                        {uploadFile.status === "uploading" && "上传中..."}
+                        {uploadFile.status === "uploading" &&
+                          `上传中... ${uploadFile.progress}%`}
                         {uploadFile.status === "success" && "上传成功"}
-                        {uploadFile.status === "error" && uploadFile.error}
+                        {uploadFile.status === "error" &&
+                          (uploadFile.error || "上传失败")}
                       </span>
                     </div>
 
+                    {/* 上传进度条 */}
                     {uploadFile.status === "uploading" && (
                       <Progress
                         className="mt-2 h-1"
