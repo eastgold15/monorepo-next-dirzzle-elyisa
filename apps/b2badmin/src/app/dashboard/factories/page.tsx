@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { HasRole } from "@/components/auth";
-import { CreateFactoryModal } from "@/components/factory/CreateFactoryModal";
+import { CreateFactoryModal } from "@/components/form/CreateFactoryModal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {

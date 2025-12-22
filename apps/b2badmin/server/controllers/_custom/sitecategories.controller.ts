@@ -14,13 +14,10 @@ export const sitecategoriesController = new Elysia({
   // 获取树形结构的分类列表
   .get(
     "/tree",
-    async ({ db, auth, permissions }) => {
-      if (!permissions.includes("SITECATEGORIES_VIEW"))
-        throw new Error("Forbidden");
-
-      return await siteCategoriesService.getTree({ db, auth });
-    },
+    async ({ db, auth, permissions }) =>
+      await siteCategoriesService.getTree({ db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_VIEW",
       detail: {
         summary: "获取树形分类列表",
         description: "获取当前站点的树形结构分类列表",
@@ -32,13 +29,10 @@ export const sitecategoriesController = new Elysia({
   // 创建分类（支持层级关系）
   .post(
     "/",
-    async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("SITECATEGORIES_CREATE"))
-        throw new Error("Forbidden");
-
-      return await siteCategoriesService.createCategory(body, { db, auth });
-    },
+    async ({ body, db, auth, permissions }) =>
+      await siteCategoriesService.createCategory(body, { db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_CREATE",
       body: t.Object({
         name: t.String(),
         description: t.Optional(t.String()),
@@ -58,9 +52,6 @@ export const sitecategoriesController = new Elysia({
   .patch(
     "/:id/move",
     async ({ params, body, db, auth, permissions }) => {
-      if (!permissions.includes("SITECATEGORIES_EDIT"))
-        throw new Error("Forbidden");
-
       const { newParentId } = body;
       return await siteCategoriesService.moveCategory(
         params.id,
@@ -69,6 +60,7 @@ export const sitecategoriesController = new Elysia({
       );
     },
     {
+      allPermission: "SITE_CATEGORIES_EDIT",
       params: t.Object({
         id: t.String(),
       }),
@@ -86,16 +78,13 @@ export const sitecategoriesController = new Elysia({
   // 批量更新排序
   .patch(
     "/sort",
-    async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("SITECATEGORIES_EDIT"))
-        throw new Error("Forbidden");
-
-      return await siteCategoriesService.updateSortOrder(body.items, {
+    async ({ body, db, auth, permissions }) =>
+      await siteCategoriesService.updateSortOrder(body.items, {
         db,
         auth,
-      });
-    },
+      }),
     {
+      allPermission: "SITE_CATEGORIES_EDIT",
       body: t.Object({
         items: t.Array(
           t.Object({
@@ -115,13 +104,10 @@ export const sitecategoriesController = new Elysia({
   // 切换分类激活状态
   .patch(
     "/:id/toggle",
-    async ({ params, db, auth, permissions }) => {
-      if (!permissions.includes("SITECATEGORIES_EDIT"))
-        throw new Error("Forbidden");
-
-      return await siteCategoriesService.toggleStatus(params.id, { db, auth });
-    },
+    async ({ params, db, auth, permissions }) =>
+      await siteCategoriesService.toggleStatus(params.id, { db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_EDIT",
       params: t.Object({
         id: t.String(),
       }),
@@ -136,12 +122,10 @@ export const sitecategoriesController = new Elysia({
   // 标准的 CRUD 操作
   .get(
     "/",
-    ({ query, permissions, auth, db }) => {
-      if (!permissions.includes("SITECATEGORIES_VIEW"))
-        throw new Error("Forbidden");
-      return siteCategoriesService.findAll(query, { db, auth });
-    },
+    ({ query, permissions, auth, db }) =>
+      siteCategoriesService.findAll(query, { db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_VIEW",
       query: SiteCategoriesContract.ListQuery,
       detail: {
         summary: "获取分类列表",
@@ -153,12 +137,10 @@ export const sitecategoriesController = new Elysia({
 
   .get(
     "/:id",
-    ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("SITECATEGORIES_VIEW"))
-        throw new Error("Forbidden");
-      return siteCategoriesService.findOne(params.id, { db, auth });
-    },
+    ({ params, permissions, auth, db }) =>
+      siteCategoriesService.findOne(params.id, { db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_VIEW",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "获取分类详情",
@@ -170,12 +152,10 @@ export const sitecategoriesController = new Elysia({
 
   .patch(
     "/:id",
-    ({ params, body, permissions, auth, db }) => {
-      if (!permissions.includes("SITECATEGORIES_EDIT"))
-        throw new Error("Forbidden");
-      return siteCategoriesService.update(params.id, body, { db, auth });
-    },
+    ({ params, body, permissions, auth, db }) =>
+      siteCategoriesService.update(params.id, body, { db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_EDIT",
       params: t.Object({ id: t.String() }),
       body: SiteCategoriesContract.Patch,
       detail: {
@@ -188,12 +168,10 @@ export const sitecategoriesController = new Elysia({
 
   .delete(
     "/:id",
-    ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("SITECATEGORIES_DELETE"))
-        throw new Error("Forbidden");
-      return siteCategoriesService.delete(params.id, { db, auth });
-    },
+    ({ params, permissions, auth, db }) =>
+      siteCategoriesService.delete(params.id, { db, auth }),
     {
+      allPermission: "SITE_CATEGORIES_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除分类",

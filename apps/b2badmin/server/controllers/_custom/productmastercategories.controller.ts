@@ -35,13 +35,9 @@ export const productmastercategoriesController = new Elysia({
       productMasterCategoriesService.delete(params.id, { db, auth }),
     { params: t.Object({ id: t.String() }) }
   )
-  .get(
-    "/tree",
-    ({ auth, db }) => productMasterCategoriesService.findTree({ db, auth }),
-    {
-      detail: {
-        summary: "获取分类树",
-        description: "获取所有分类的树状结构",
-      },
-    }
-  );
+  .get("/tree", ({ auth, db }) => "无", {
+    detail: {
+      summary: "获取分类树",
+      description: "获取所有分类的树状结构",
+    },
+  });

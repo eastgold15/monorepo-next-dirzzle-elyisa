@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building2, Loader2 } from "lucide-react";
+import { FolderOpen, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,53 +22,59 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCreateFactory } from "@/hooks/api/use-factories";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useCreateMasterCategory } from "@/hooks/api/mastercategory";
+import { useMasterCategoryStore } from "@/stores/mastercategory-store";
 
 const formSchema = z.object({
-  name: z.string().min(2, "工厂名称至少需要2个字符"),
-  code: z.string().min(2, "工厂编码至少需要2个字符"),
-  description: z.string().optional(),
-  website: z.url("请输入有效的网站地址").or(z.literal("")),
-  address: z.string().min(5, "请输入详细地址"),
-  contactPhone: z.string().min(5, "请输入联系电话"),
-  employeeCount: z.number().optional(),
-  mainProducts: z.string().optional(),
-  annualRevenue: z.number().optional(),
+  name: z.string().min(1, "分类名称不能为空"),
+  slug: z
+    .string()
+    .min(1, "标识符不能为空")
+    .regex(/^[a-z0-9-]+$/, "标识符只能包含小写字母、数字和连字符"),
+  description: z.string().min(1, "描述不能为空"),
+  parentId: z.string().optional(),
+  sortOrder: z.number().optional().default(0),
+  isVisible: z.boolean().optional().default(true),
+  icon: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-interface CreateFactoryModalProps {
+interface CreateMasterCategoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
 
-export function CreateFactoryModal({
+export function CreateMasterCategoryModal({
   open,
   onOpenChange,
   onSuccess,
-}: CreateFactoryModalProps) {
-  const createFactory = useCreateFactory();
+}: CreateMasterCategoryModalProps) {
+  const createMasterCategory = useCreateMasterCategory();
+  const { masterCategories } = useMasterCategoryStore();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      code: "",
+      slug: "",
       description: "",
-      website: "",
-      address: "",
-      contactPhone: "",
-      employeeCount: undefined,
-      mainProducts: "",
-      annualRevenue: undefined,
+      parentId: undefined,
+      sortOrder: 0,
+      isVisible: true,
+      icon: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      await createFactory.mutateAsync(data);
+      await createMasterCategory.mutateAsync({
+        ...data,
+        sortOrder: data.sortOrder || 0,
+      });
       onSuccess?.();
       form.reset();
       onOpenChange(false);
@@ -84,16 +90,23 @@ export function CreateFactoryModal({
     onOpenChange(isOpen);
   };
 
+  // 生成 slug
+  const generateSlug = (name: string) =>
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            创建新工厂
+            <FolderOpen className="h-5 w-5" />
+            创建Master分类
           </DialogTitle>
           <DialogDescription>
-            填写工厂基本信息，创建新的制造工厂
+            创建全局Master分类，用于跨站点的分类标准化管理
           </DialogDescription>
         </DialogHeader>
 
@@ -105,9 +118,19 @@ export function CreateFactoryModal({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>工厂名称</FormLabel>
+                    <FormLabel>分类名称 *</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如：华为制造工厂" {...field} />
+                      <Input
+                        placeholder="请输入分类名称"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          // 自动生成 slug
+                          if (!form.getValues("slug")) {
+                            form.setValue("slug", generateSlug(e.target.value));
+                          }
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -116,12 +139,12 @@ export function CreateFactoryModal({
 
               <FormField
                 control={form.control}
-                name="code"
+                name="slug"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>工厂编码</FormLabel>
+                    <FormLabel>标识符 *</FormLabel>
                     <FormControl>
-                      <Input placeholder="例如：HW001" {...field} />
+                      <Input placeholder="category-slug" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -134,9 +157,13 @@ export function CreateFactoryModal({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>工厂描述</FormLabel>
+                  <FormLabel>描述 *</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入工厂的详细描述" {...field} />
+                    <Textarea
+                      placeholder="请输入分类描述"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,40 +172,18 @@ export function CreateFactoryModal({
 
             <FormField
               control={form.control}
-              name="website"
+              name="parentId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>官网地址 *</FormLabel>
+                  <FormLabel>父级分类</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>详细地址 *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="广东省深圳市南山区科技园" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="contactPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>联系电话 *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="例如：0755-88888888" {...field} />
+                    <MasterCategorySelect
+                      allowClear
+                      excludeId={field.value}
+                      onChange={field.onChange}
+                      placeholder="选择父级分类（可选）"
+                      value={field.value}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -188,17 +193,19 @@ export function CreateFactoryModal({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="employeeCount"
+                name="sortOrder"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>员工数量</FormLabel>
+                    <FormLabel>排序</FormLabel>
                     <FormControl>
                       <Input
                         min={0}
-                        placeholder="例如：500"
+                        placeholder="0"
                         type="number"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        onChange={(e) =>
+                          field.onChange(e.target.valueAsNumber || 0)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -208,15 +215,12 @@ export function CreateFactoryModal({
 
               <FormField
                 control={form.control}
-                name="mainProducts"
+                name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>主要产品</FormLabel>
+                    <FormLabel>图标</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="例如：电子元件、通信设备"
-                        {...field}
-                      />
+                      <Input placeholder="例如: shopping-bag" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -224,23 +228,44 @@ export function CreateFactoryModal({
               />
             </div>
 
+            <FormField
+              control={form.control}
+              name="isVisible"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">是否可见</FormLabel>
+                    <div className="text-muted-foreground text-sm">
+                      启用后该分类将在前端显示
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <DialogFooter>
               <Button
-                disabled={createFactory.isPending}
+                disabled={createMasterCategory.isPending}
                 onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
               >
                 取消
               </Button>
-              <Button disabled={createFactory.isPending} type="submit">
-                {createFactory.isPending ? (
+              <Button disabled={createMasterCategory.isPending} type="submit">
+                {createMasterCategory.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     创建中...
                   </>
                 ) : (
-                  "创建工厂"
+                  "创建分类"
                 )}
               </Button>
             </DialogFooter>

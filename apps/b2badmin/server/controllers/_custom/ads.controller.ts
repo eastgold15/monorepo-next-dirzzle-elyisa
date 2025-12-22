@@ -32,12 +32,11 @@ export const adsController = new Elysia({
   .post(
     "/",
     async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("ADS_CREATE")) throw new Error("Forbidden");
-
       const { mediaId, ...adData } = body;
       return await adsService.createAd(adData, mediaId, { db, auth });
     },
     {
+      allPermission: "ADS_CREATE",
       body: AdsContract.Create,
       detail: {
         summary: "创建广告",
@@ -107,22 +106,6 @@ export const adsController = new Elysia({
       detail: {
         summary: "批量删除广告",
         description: "批量删除广告",
-        tags: ["Ads"],
-      },
-    }
-  )
-
-  .get(
-    "/:id",
-    ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("ADS_VIEW")) throw new Error("Forbidden");
-      return adsService.findOne(params.id, { db, auth });
-    },
-    {
-      params: t.Object({ id: t.String() }),
-      detail: {
-        summary: "获取广告详情",
-        description: "获取指定广告的详细信息（需要权限）",
         tags: ["Ads"],
       },
     }

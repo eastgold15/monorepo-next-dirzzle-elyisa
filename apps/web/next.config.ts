@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       { hostname: "img.poripori.top" },
     ],
   },
+  transpilePackages: ["@repo/contract"],
 };
 
 export default nextConfig;

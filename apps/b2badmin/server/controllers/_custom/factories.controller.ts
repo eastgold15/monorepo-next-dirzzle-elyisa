@@ -184,7 +184,7 @@ export const factoriesController = new Elysia({
 
   // 更新工厂（包含业务逻辑）
   .patch(
-    "/factoryId/:factoryId",
+    "/:id",
     async ({ db, body, role, exporterId, factoryId, params }) => {
       const { factoryId: paramFactoryId } = params;
 
@@ -243,30 +243,27 @@ export const factoriesController = new Elysia({
   )
 
   // 标准的 CRUD 操作
-  .get(
-    "/",
-    ({ query, permissions, auth }) => {
-      if (!permissions.includes("FACTORIES_VIEW")) throw new Error("Forbidden");
-      return factoriesService.findAll(query, auth);
-    },
-    {
-      query: FactoriesContract.ListQuery,
-      detail: {
-        summary: "获取工厂分页列表",
-        description: "分页获取工厂列表，支持复杂的查询条件",
-        tags: ["Factories"],
-      },
-    }
-  )
+  // .get(
+  //   "/",
+  //   ({ query, permissions, auth, db }) =>
+  //     factoriesService.findAll(query, { auth, db }),
+  //   {
+  //     allPermissions: "FACTORIES_VIEW",
+  //     query: FactoriesContract.ListQuery,
+  //     detail: {
+  //       summary: "获取工厂分页列表",
+  //       description: "分页获取工厂列表，支持复杂的查询条件",
+  //       tags: ["Factories"],
+  //     },
+  //   }
+  // )
 
   .delete(
     "/:id",
-    ({ params, permissions, auth }) => {
-      if (!permissions.includes("FACTORIES_DELETE"))
-        throw new Error("Forbidden");
-      return factoriesService.delete(params.id, auth);
-    },
+    ({ params, permissions, auth, db }) =>
+      factoriesService.delete(params.id, { db, auth }),
     {
+      allPermissions: "FACTORIES_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除工厂",
@@ -278,7 +275,7 @@ export const factoriesController = new Elysia({
 
   // 获取工厂详情（包含站点信息）
   .get(
-    "/:id/detail",
+    "/detail/:id/",
     async ({ params, db, role, exporterId, factoryId }) => {
       const { id } = params;
 
@@ -331,6 +328,7 @@ export const factoriesController = new Elysia({
       return { data: factory };
     },
     {
+      allPermissions: "FACTORIES_VIEW",
       params: t.Object({
         id: t.String(),
       }),

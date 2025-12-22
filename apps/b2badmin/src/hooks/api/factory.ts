@@ -6,7 +6,7 @@ import { handleEden } from "@/lib/utils/base";
 export function useFactoriesList() {
   return useQuery({
     queryKey: ["factories", "list"],
-    queryFn: async () => await handleEden(rpc.api.v1.factories.get()),
+    queryFn: async () => await handleEden(rpc.api.v1.factories.list.get()),
     staleTime: 5 * 60 * 1000, // 5分钟
   });
 }
@@ -14,7 +14,8 @@ export function useFactoriesList() {
 export function useFactoryDetail(id: string) {
   return useQuery({
     queryKey: ["factory", id],
-    queryFn: async () => await handleEden(rpc.api.v1.factories({ id }).get()),
+    queryFn: async () =>
+      await handleEden(rpc.api.v1.factories.detail({ id }).get()),
     enabled: !!id,
   });
 }
@@ -48,8 +49,8 @@ export function useFactoryDelete() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (ids: string[]) =>
-      await handleEden(rpc.api.v1.factories.delete({ body: { ids } })),
+    mutationFn: async (id: string) =>
+      await handleEden(rpc.api.v1.factories({ id }).delete()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["factories"] });
     },

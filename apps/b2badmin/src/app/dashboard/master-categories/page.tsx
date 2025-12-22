@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
+import { CreateMasterCategoryModal } from "@/components/form/CreateMasterCategoryModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,37 +26,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Textarea } from "@/components/ui/textarea";
 import {
   useBatchDeleteMasterCategories,
-  useCreateMasterCategory,
   useDeleteMasterCategory,
   useMasterCategoriesTree,
-  useUpdateMasterCategory,
-} from "@/hooks/api/master-category";
-import { useIsSuperAdmin } from "@/stores/user-store";
+} from "@/hooks/api/mastercategory";
+import { useAuthStore } from "@/stores/auth-store";
 
 // 将契约层的实体类型转换为前端使用的带children的类型
 type MasterCategory = MasterCategoryTModel["Entity"] & {
@@ -194,225 +177,6 @@ function MasterCategoryTreeNode({
   );
 }
 
-// 创建/编辑主分类对话框
-function MasterCategoryDialog({
-  category,
-  isOpen,
-  onClose,
-  allCategories,
-}: {
-  category?: MasterCategory;
-  isOpen: boolean;
-  onClose: () => void;
-  allCategories: MasterCategory[];
-}) {
-  const [formData, setFormData] = useState({
-    name: category?.name || "",
-    slug: category?.slug || "",
-    description: category?.description || "",
-    parentId: category?.parentId || null,
-    sortOrder: category?.sortOrder || 0,
-    isVisible: category?.isVisible ?? true,
-    icon: category?.icon || "",
-  });
-
-  const createMutation = useCreateMasterCategory();
-  const updateMutation = useUpdateMasterCategory();
-
-  const isEdit = !!category;
-
-  const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      toast.error("分类名称不能为空");
-      return;
-    }
-    if (!formData.slug.trim()) {
-      toast.error("分类标识不能为空");
-      return;
-    }
-    if (!formData.description.trim()) {
-      toast.error("分类描述不能为空");
-      return;
-    }
-
-    try {
-      if (isEdit && category) {
-        await updateMutation.mutateAsync({
-          id: category.id,
-          data: formData,
-        });
-        toast.success("主分类更新成功");
-      } else {
-        await createMutation.mutateAsync(formData);
-        toast.success("主分类创建成功");
-      }
-      onClose();
-    } catch (error) {
-      toast.error(isEdit ? "主分类更新失败" : "主分类创建失败");
-    }
-  };
-
-  // 生成slug
-  const generateSlug = (name: string) =>
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9\u4e00-\u9fa5]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-
-  return (
-    <Dialog onOpenChange={onClose} open={isOpen}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "编辑主分类" : "创建主分类"}</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              分类名称 <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              className="focus:ring-2 focus:ring-indigo-500"
-              id="name"
-              onChange={(e) => {
-                const name = e.target.value;
-                setFormData({
-                  ...formData,
-                  name,
-                  slug: formData.slug || generateSlug(name),
-                });
-              }}
-              placeholder="请输入分类名称"
-              value={formData.name}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="slug">
-              分类标识 <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              className="focus:ring-2 focus:ring-indigo-500"
-              id="slug"
-              onChange={(e) =>
-                setFormData({ ...formData, slug: e.target.value })
-              }
-              placeholder="分类的唯一标识，用于URL和API"
-              value={formData.slug}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">
-              分类描述 <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              className="focus:ring-2 focus:ring-indigo-500"
-              id="description"
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="请输入分类描述"
-              rows={3}
-              value={formData.description}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="parent">父分类</Label>
-              <Select
-                onValueChange={(value) =>
-                  setFormData({ ...formData, parentId: value || null })
-                }
-                value={formData.parentId || ""}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="选择父分类（可选）" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">无（顶级分类）</SelectItem>
-                  {allCategories
-                    ?.filter((cat) => !isEdit || cat.id !== category?.id)
-                    .map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="sortOrder">排序</Label>
-              <Input
-                className="focus:ring-2 focus:ring-indigo-500"
-                id="sortOrder"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sortOrder: Number.parseInt(e.target.value, 10) || 0,
-                  })
-                }
-                placeholder="0"
-                type="number"
-                value={formData.sortOrder}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="icon">图标</Label>
-            <Input
-              className="focus:ring-2 focus:ring-indigo-500"
-              id="icon"
-              onChange={(e) =>
-                setFormData({ ...formData, icon: e.target.value })
-              }
-              placeholder="图标名称或URL"
-              value={formData.icon}
-            />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={formData.isVisible}
-              id="isVisible"
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, isVisible: checked })
-              }
-            />
-            <Label htmlFor="isVisible">显示在分类中</Label>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button onClick={onClose} variant="outline">
-            取消
-          </Button>
-          <Button
-            className="bg-indigo-600 text-white hover:bg-indigo-700"
-            disabled={createMutation.isPending || updateMutation.isPending}
-            onClick={handleSubmit}
-          >
-            {createMutation.isPending || updateMutation.isPending ? (
-              <span className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                处理中...
-              </span>
-            ) : isEdit ? (
-              "更新"
-            ) : (
-              "创建"
-            )}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // 获取分类路径（用于显示）
 function getMasterCategoryPath(
   category: MasterCategory,
@@ -456,13 +220,14 @@ function findMasterCategoryById(
 }
 
 export default function MasterCategoryManager() {
-  const isSuperAdmin = useIsSuperAdmin();
+  const user = useAuthStore((state) => state.user);
+  const isSuperAdmin = user?.isSuperAdmin;
   const { data: categoriesTree, isLoading } = useMasterCategoriesTree();
   const deleteMutation = useDeleteMasterCategory();
   const batchDeleteMutation = useBatchDeleteMasterCategories();
 
   // 所有 hooks 必须在权限检查之前调用
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<
     MasterCategory | undefined
   >();
@@ -502,7 +267,7 @@ export default function MasterCategoryManager() {
 
   const handleEdit = (category: MasterCategory) => {
     setEditingCategory(category);
-    setIsDialogOpen(true);
+    setIsCreateModalOpen(true);
   };
 
   const handleDelete = async (category: MasterCategory) => {
@@ -598,6 +363,14 @@ export default function MasterCategoryManager() {
               <p className="mt-2 text-slate-600">
                 管理全局主分类体系，这是所有站点分类的标准参考。出口商的站点分类通过映射关系关联到主分类。
               </p>
+              <p className="mt-1 text-slate-500 text-sm">
+                <a
+                  className="text-indigo-600 hover:underline"
+                  href="/dashboard/master-categories/demo"
+                >
+                  查看主分类选择器演示
+                </a>
+              </p>
             </div>
 
             {/* 搜索和操作栏 */}
@@ -651,14 +424,16 @@ export default function MasterCategoryManager() {
                   </AlertDialog>
                 )}
 
-                <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      添加主分类
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
+                <Button
+                  className="bg-indigo-600 text-white hover:bg-indigo-700"
+                  onClick={() => {
+                    setEditingCategory(undefined);
+                    setIsCreateModalOpen(true);
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  添加主分类
+                </Button>
               </div>
             </div>
           </div>
@@ -716,7 +491,10 @@ export default function MasterCategoryManager() {
                 </p>
                 <Button
                   className="bg-indigo-600 text-white hover:bg-indigo-700"
-                  onClick={() => setIsDialogOpen(true)}
+                  onClick={() => {
+                    setEditingCategory(undefined);
+                    setIsCreateModalOpen(true);
+                  }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   创建主分类
@@ -728,14 +506,18 @@ export default function MasterCategoryManager() {
       </SidebarInset>
 
       {/* 创建/编辑主分类对话框 */}
-      <MasterCategoryDialog
-        allCategories={filteredCategories || []}
-        category={editingCategory}
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setEditingCategory(undefined);
+      <CreateMasterCategoryModal
+        onOpenChange={(open) => {
+          setIsCreateModalOpen(open);
+          if (!open) {
+            setEditingCategory(undefined);
+          }
         }}
+        onSuccess={() => {
+          // 刷新数据
+          window.location.reload();
+        }}
+        open={isCreateModalOpen}
       />
     </SidebarProvider>
   );

@@ -1,6 +1,8 @@
 // 🛡️ 自动生成的路由导出
 
 export * from "./_custom/ads.controller";
+export * from "./_custom/attribute.controller";
+export * from "./_custom/attributetemplate.controller";
 export * from "./_custom/factories.controller";
 export * from "./_custom/herocards.controller";
 export * from "./_custom/master.controller";
@@ -14,8 +16,6 @@ export * from "./_custom/skus.controller";
 export * from "./_custom/users.controller";
 export * from "./_custom/usersiteroles.controller";
 export * from "./_generated/account.controller";
-export * from "./_generated/attribute.controller";
-export * from "./_generated/attributetemplate.controller";
 export * from "./_generated/attributevalue.controller";
 export * from "./_generated/customer.controller";
 export * from "./_generated/dailyinquirycounter.controller";

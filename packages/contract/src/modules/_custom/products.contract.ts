@@ -36,12 +36,13 @@ const CustomResponse = t.Composite([
 const CustomCreate = t.Composite([
   Generated.Create,
   t.Object({
-    // 例如：增加"产品标签"和"规格参数"这些额外的业务字段
-    tags: t.Optional(t.Array(t.String())),
-    specifications: t.Optional(t.Object({}, { additionalProperties: true })),
-    // seoKeywords: t.Optional(t.Array(t.String())),
-    // seoDescription: t.Optional(t.String()),
-    // relatedProductIds: t.Optional(t.Array(t.String())),
+    // 站点分类（必选）
+    siteCategoryId: t.String({ format: "uuid" }),
+    // 模板（可选）
+    templateId: t.String({ format: "uuid" }),
+    // 图片关联
+    mediaIds: t.Optional(t.Array(t.String({ format: "uuid" }))),
+    mainImageId: t.Optional(t.String({ format: "uuid" })),
   }),
 ]);
 
@@ -177,7 +178,7 @@ export const ProductsContract = {
 } as const;
 
 // --- E. 导出 DTO 类型给前端使用 ---
-export type ProductsDTO = {
+export type ProductsContractDto = {
   Response: typeof ProductsContract.Response.static;
   Create: typeof ProductsContract.Create.static;
   Update: typeof Generated.Update.static; // 未修改的直接透传

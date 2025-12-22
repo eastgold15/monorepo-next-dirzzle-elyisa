@@ -124,11 +124,10 @@ export const sitesController = new Elysia({ prefix: "/sites" })
   // 获取站点列表（管理员）
   .get(
     "/",
-    ({ query, permissions, auth }) => {
-      if (!permissions.includes("SITES_VIEW")) throw new Error("Forbidden");
-      return sitesService.findAll(query, auth);
-    },
+    ({ query, permissions, auth, db }) =>
+      sitesService.findAll(query, { db, auth }),
     {
+      allPermissions: ["SITES_VIEW"],
       query: SitesContract.ListQuery,
       detail: {
         summary: "获取站点列表",
@@ -141,11 +140,10 @@ export const sitesController = new Elysia({ prefix: "/sites" })
   // 创建站点（管理员）
   .post(
     "/",
-    ({ body, permissions, auth, db }) => {
-      if (!permissions.includes("SITES_CREATE")) throw new Error("Forbidden");
-      return sitesService.create(body, auth);
-    },
+    ({ body, permissions, auth, db }) =>
+      sitesService.create(body, { db, auth }),
     {
+      allPermissions: ["SITES_CREATE"],
       body: SitesContract.Create,
       detail: {
         summary: "创建新站点",
@@ -158,11 +156,10 @@ export const sitesController = new Elysia({ prefix: "/sites" })
   // 更新站点信息（管理员）
   .patch(
     "/:id",
-    ({ params, body, permissions, auth }) => {
-      if (!permissions.includes("SITES_EDIT")) throw new Error("Forbidden");
-      return sitesService.update(params.id, body, auth);
-    },
+    ({ params, body, permissions, auth, db }) =>
+      sitesService.update(params.id, body, { db, auth }),
     {
+      allPermissions: ["SITES_EDIT"],
       params: t.Object({ id: t.String() }),
       body: SitesContract.Patch,
       detail: {
@@ -176,11 +173,10 @@ export const sitesController = new Elysia({ prefix: "/sites" })
   // 删除站点（管理员）
   .delete(
     "/:id",
-    ({ params, permissions, auth }) => {
-      if (!permissions.includes("SITES_DELETE")) throw new Error("Forbidden");
-      return sitesService.delete(params.id, auth);
-    },
+    ({ params, permissions, auth, db }) =>
+      sitesService.delete(params.id, { db, auth }),
     {
+      allPermissions: ["SITES_DELETE"],
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除站点",

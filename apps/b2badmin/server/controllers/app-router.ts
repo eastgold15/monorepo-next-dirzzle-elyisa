@@ -7,6 +7,8 @@
  */
 import type { Elysia } from "elysia";
 import { adsController } from "./_custom/ads.controller";
+import { attributeController } from "./_custom/attribute.controller";
+import { attributetemplateController } from "./_custom/attributetemplate.controller";
 import { factoriesController } from "./_custom/factories.controller";
 import { herocardsController } from "./_custom/herocards.controller";
 import { masterController } from "./_custom/master.controller";
@@ -20,8 +22,6 @@ import { skusController } from "./_custom/skus.controller";
 import { usersController } from "./_custom/users.controller";
 import { usersiterolesController } from "./_custom/usersiteroles.controller";
 import { accountController } from "./_generated/account.controller";
-import { attributeController } from "./_generated/attribute.controller";
-import { attributetemplateController } from "./_generated/attributetemplate.controller";
 import { attributevalueController } from "./_generated/attributevalue.controller";
 import { customerController } from "./_generated/customer.controller";
 import { dailyinquirycounterController } from "./_generated/dailyinquirycounter.controller";

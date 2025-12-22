@@ -5,7 +5,7 @@ import type { MyInferQuery } from "./utils";
 
 // 媒体文件相关 hooks
 // 使用
-type MediaListQueryParams = MyInferQuery<typeof rpc.api.v1.media.get>;
+type MediaListQueryParams = MyInferQuery<typeof rpc.api.v1.media.list.get>;
 
 export function useMediaList(query: MediaListQueryParams) {
   return useQuery({

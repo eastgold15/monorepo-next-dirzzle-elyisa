@@ -29,7 +29,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/stores/auth-store";
-import type { PermissionType } from "@/types/permission";
+import { PERMISSIONS, type PermissionType } from "@/types/permission";
 
 // --- 1. 菜单配置文件 (数据驱动) ---
 // 以后加菜单只需要改这里，一眼就能看懂
@@ -62,40 +62,36 @@ const SIDEBAR_CONFIG: NavSection[] = [
     title: "业务管理",
     items: [
       {
-        title: "Products",
-        url: "/dashboard/products",
-        icon: ShoppingBag,
-        permission: "PRODUCTS_TABLE_VIEW",
-      },
-      {
-        title: "Site Categories",
+        title: "站点分类",
         url: "/dashboard/site-categories",
         icon: Tags,
-        permission: "SITE_CATEGORIES_VIEW",
+        permission: PERMISSIONS.SITE_CATEGORIES_VIEW,
       },
+
       {
-        title: "Media Library",
-        url: "/dashboard/media",
-        icon: ImageIcon,
-        permission: "MEDIA_VIEW",
-      },
-      {
-        title: "Templates",
+        title: "商品模版管理",
         url: "/dashboard/templates",
         icon: FileBox,
-        permission: "PRODUCT_TEMPLATE_TABLE_VIEW",
+        permission: PERMISSIONS.PRODUCT_TEMPLATE_TABLE_VIEW,
+      },
+
+      {
+        title: "媒体管理",
+        url: "/dashboard/media",
+        icon: ImageIcon,
+        permission: PERMISSIONS.MEDIA_VIEW,
       },
       {
-        title: "Advertisements",
-        url: "/dashboard/ads",
-        icon: PieChart,
-        permission: "ADVERTISEMENTS_VIEW",
+        title: "产品管理",
+        url: "/dashboard/products",
+        icon: ShoppingBag,
+        permission: PERMISSIONS.PRODUCTS_TABLE_VIEW,
       },
       {
-        title: "Hero Cards",
-        url: "/dashboard/hero-cards",
-        icon: Frame,
-        permission: "HERO_CARDS_VIEW",
+        title: "sku管理",
+        url: "/dashboard/skus",
+        icon: ShoppingBag,
+        permission: PERMISSIONS.SKUS_TABLE_VIEW,
       },
     ],
   },
@@ -103,16 +99,28 @@ const SIDEBAR_CONFIG: NavSection[] = [
     title: "站点管理",
     items: [
       {
+        title: "Advertisements",
+        url: "/dashboard/ads",
+        icon: PieChart,
+        permission: PERMISSIONS.ADVERTISEMENTS_VIEW,
+      },
+      {
+        title: "Hero Cards",
+        url: "/dashboard/hero-cards",
+        icon: Frame,
+        permission: PERMISSIONS.HERO_CARDS_VIEW,
+      },
+      {
         title: "Site Config",
         url: "/dashboard/site-config",
         icon: Settings,
-        permission: "SITE_CONFIG_VIEW",
+        permission: PERMISSIONS.SITE_CONFIG_VIEW,
       },
       {
         title: "Master Categories",
         url: "/dashboard/master-categories",
         icon: Layers,
-        permission: "MASTER_CATEGORIES_VIEW",
+        permission: PERMISSIONS.MASTER_CATEGORIES_VIEW,
       },
     ],
   },
@@ -123,13 +131,13 @@ const SIDEBAR_CONFIG: NavSection[] = [
         title: "Factories",
         url: "/dashboard/factories",
         icon: Building2,
-        permission: "FACTORIES_VIEW",
+        permission: PERMISSIONS.FACTORIES_VIEW,
       },
       {
         title: "Users",
         url: "/dashboard/users",
         icon: Users,
-        permission: "USERS_VIEW",
+        permission: PERMISSIONS.USERS_VIEW,
       },
     ],
   },
@@ -140,7 +148,7 @@ const SIDEBAR_CONFIG: NavSection[] = [
         title: "Analytics",
         url: "/dashboard/analytics",
         icon: BarChart3,
-        permission: "DAILY_INQUIRY_COUNTER_VIEW",
+        permission: PERMISSIONS.DAILY_INQUIRY_COUNTER_VIEW,
       },
       {
         title: "Product Statistics",

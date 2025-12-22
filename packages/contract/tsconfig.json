@@ -9,6 +9,7 @@
         "./src/*"
       ]
     },
+    "baseUrl": "./",
     "strictNullChecks": true,
     "incremental": true,
     "tsBuildInfoFile": "./.cache/tsbuildinfo",
@@ -18,6 +19,8 @@
     "composite": true,
     // 2. 必须显式配置 outDir（composite 隐含约束）
     "outDir": "./dist",
+    // 确保生成文件
+    "noEmitOnError": false
   },
   "include": [
     "src/**/*"

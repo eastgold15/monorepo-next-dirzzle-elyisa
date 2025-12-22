@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
-import { MediaUpload } from "@/components/MediaUpload";
+import { CreateProductModal } from "@/components/form/CreateProductModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,16 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -38,12 +29,9 @@ import {
 } from "@/components/ui/sidebar";
 import {
   useProductsBatchDelete,
-  useProductsCreate,
   useProductsDelete,
   useProductsList,
-  useProductsUpdate,
 } from "@/hooks/api/products";
-import { useSiteCategories } from "@/hooks/api/site-category";
 
 interface Product {
   id: string;
@@ -67,255 +55,19 @@ interface Product {
   updatedAt: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  children?: Category[];
-}
-
-// 创建/编辑商品对话框
-function ProductDialog({
-  product,
-  isOpen,
-  onClose,
-}: {
-  product?: Product;
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const { data: categories } = useSiteCategories();
-
-  const [formData, setFormData] = useState({
-    name: product?.name || "",
-    spuCode: product?.spuCode || "",
-    description: product?.description || "",
-    siteCategoryId: product?.siteCategoryId || "",
-    price: product?.sitePrice || "",
-    siteName: product?.siteName || "",
-    siteDescription: product?.siteDescription || "",
-    imageIds: product?.imageIds || [],
-    mainImageId: product?.mainImageId || "",
-  });
-
-  const createMutation = useProductsCreate();
-  const updateMutation = useProductsUpdate();
-  const isEdit = !!product;
-
-  const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      toast.error("商品名称不能为空");
-      return;
-    }
-    if (!formData.spuCode.trim()) {
-      toast.error("商品编码不能为空");
-      return;
-    }
-    if (!formData.siteCategoryId) {
-      toast.error("请选择商品分类");
-      return;
-    }
-
-    try {
-      const submitData = {
-        name: formData.name,
-        spuCode: formData.spuCode,
-        description: formData.description || undefined,
-        siteCategoryId: formData.siteCategoryId,
-        price: formData.price ? Number(formData.price) : undefined,
-        siteName: formData.siteName || undefined,
-        siteDescription: formData.siteDescription || undefined,
-        imageIds: formData.imageIds,
-        mainImageId: formData.mainImageId || undefined,
-      };
-
-      if (isEdit && product) {
-        await updateMutation.mutateAsync({
-          id: product.id,
-          data: submitData,
-        });
-        toast.success("商品更新成功");
-      } else {
-        await createMutation.mutateAsync(submitData);
-        toast.success("商品创建成功");
-      }
-      onClose();
-    } catch (error) {
-      toast.error(isEdit ? "商品更新失败" : "商品创建失败");
-    }
-  };
-
-  return (
-    <Dialog onOpenChange={onClose} open={isOpen}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "编辑商品" : "创建商品"}</DialogTitle>
-          <DialogDescription>
-            填写商品信息。带 * 的字段为必填项。
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="max-h-[calc(100vh-200px)] space-y-6 overflow-y-auto py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">
-                商品名称 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="请输入商品名称"
-                value={formData.name}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="spuCode">
-                商品编码 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="spuCode"
-                onChange={(e) =>
-                  setFormData({ ...formData, spuCode: e.target.value })
-                }
-                placeholder="请输入商品编码"
-                value={formData.spuCode}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">商品描述</Label>
-            <textarea
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              id="description"
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="请输入商品描述"
-              rows={3}
-              value={formData.description}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="siteCategoryId">
-                商品分类 <span className="text-red-500">*</span>
-              </Label>
-              <select
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                id="siteCategoryId"
-                onChange={(e) =>
-                  setFormData({ ...formData, siteCategoryId: e.target.value })
-                }
-                value={formData.siteCategoryId}
-              >
-                <option value="">请选择分类</option>
-                {categories?.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">商品价格</Label>
-              <Input
-                id="price"
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                placeholder="0.00"
-                step="0.01"
-                type="number"
-                value={formData.price}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="siteName">展示名称</Label>
-            <Input
-              id="siteName"
-              onChange={(e) =>
-                setFormData({ ...formData, siteName: e.target.value })
-              }
-              placeholder="商品在前端的展示名称（可选）"
-              value={formData.siteName}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="siteDescription">展示描述</Label>
-            <textarea
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              id="siteDescription"
-              onChange={(e) =>
-                setFormData({ ...formData, siteDescription: e.target.value })
-              }
-              placeholder="商品在前端的展示描述（可选）"
-              rows={3}
-              value={formData.siteDescription}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>商品图片</Label>
-            <MediaUpload
-              maxCount={5}
-              onChange={(mediaIds) =>
-                setFormData({ ...formData, imageIds: mediaIds })
-              }
-              value={formData.imageIds}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>主图设置</Label>
-            <MediaUpload
-              maxCount={1}
-              onChange={(mediaIds) =>
-                setFormData({ ...formData, mainImageId: mediaIds[0] || "" })
-              }
-              value={formData.mainImageId ? [formData.mainImageId] : []}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button onClick={onClose} variant="outline">
-            取消
-          </Button>
-          <Button
-            disabled={createMutation.isPending || updateMutation.isPending}
-            onClick={handleSubmit}
-          >
-            {createMutation.isPending || updateMutation.isPending
-              ? "处理中..."
-              : isEdit
-                ? "更新"
-                : "创建"}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export default function ProductsPage() {
   const { data: productsData, isLoading, refetch } = useProductsList();
   const deleteMutation = useProductsDelete();
   const batchDeleteMutation = useProductsBatchDelete();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setIsDialogOpen(true);
+    setIsCreateModalOpen(true);
   };
 
   const handleDelete = async (product: Product) => {
@@ -346,7 +98,7 @@ export default function ProductsPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked && productsData) {
-      setSelectedIds(new Set(productsData.map((p) => p.id)));
+      setSelectedIds(new Set(productsData.data.map((p: Product) => p.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -364,8 +116,8 @@ export default function ProductsPage() {
 
   // 过滤商品
   const filteredProducts =
-    productsData?.filter(
-      (product) =>
+    productsData?.data.filter(
+      (product: Product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.spuCode.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
@@ -434,14 +186,16 @@ export default function ProductsPage() {
                 </AlertDialog>
               )}
 
-              <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
-                    <Plus className="mr-2 h-4 w-4" />
-                    添加商品
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
+              <Button
+                className="bg-indigo-600 text-white hover:bg-indigo-700"
+                onClick={() => {
+                  setEditingProduct(undefined);
+                  setIsCreateModalOpen(true);
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                添加商品
+              </Button>
             </div>
           </div>
 
@@ -502,7 +256,10 @@ export default function ProductsPage() {
                   {!searchTerm && (
                     <Button
                       className="bg-indigo-600 text-white hover:bg-indigo-700"
-                      onClick={() => setIsDialogOpen(true)}
+                      onClick={() => {
+                        setEditingProduct(undefined);
+                        setIsCreateModalOpen(true);
+                      }}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       创建商品
@@ -605,13 +362,18 @@ export default function ProductsPage() {
       </SidebarInset>
 
       {/* 创建/编辑商品对话框 */}
-      <ProductDialog
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setEditingProduct(undefined);
+      <CreateProductModal
+        onOpenChange={(open) => {
+          setIsCreateModalOpen(open);
+          if (!open) {
+            setEditingProduct(undefined);
+          }
         }}
-        product={editingProduct}
+        onSuccess={() => {
+          // 刷新数据
+          refetch();
+        }}
+        open={isCreateModalOpen}
       />
     </SidebarProvider>
   );

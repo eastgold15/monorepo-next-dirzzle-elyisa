@@ -4,17 +4,18 @@ import type { SiteCategoriesContractDTO as SiteCategoriesContractDto } from "@re
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
+import type { MyInferQuery } from "./utils";
 
-interface SiteCategory {
+export interface SiteCategoryTree {
   id: string;
-  name: string;
-  description?: string;
-  parentId?: string;
-  sortOrder: number;
-  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  children?: SiteCategory[];
+  name: string;
+  parentId?: string;
+  sortOrder: number;
+  siteId: string;
+  masterCategoryId?: string;
+  children: SiteCategoryTree[];
 }
 
 // 获取当前站点的分类树
@@ -24,18 +25,24 @@ export function useSiteCategoriesTree() {
     queryFn: async () => {
       const data = await handleEden(rpc.api.v1.sitecategories.tree.get());
       // 确保返回数组，即使是空数组
-      return (data || []) as SiteCategory[];
+      return (data || []) as SiteCategoryTree[];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
 }
 
 // 获取当前站点的扁平化分类列表（用于下拉选择）
-export function useSiteCategories() {
+export function useSiteCategories(
+  query: MyInferQuery<typeof rpc.api.v1.sitecategories.tree.get>
+) {
   return useQuery({
     queryKey: ["site-categories", "flat"],
     queryFn: async () => {
-      const categories = await handleEden(rpc.api.v1.sitecategories.get());
+      const categories = await handleEden(
+        rpc.api.v1.sitecategories.get({
+          query,
+        })
+      );
       return categories?.data || [];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
@@ -45,7 +52,6 @@ export function useSiteCategories() {
 // 创建站点分类
 export function useCreateSiteCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       name: string;

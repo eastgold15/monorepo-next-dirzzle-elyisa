@@ -28,7 +28,7 @@ export function useAdsCreate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: Omit<typeof AdsContract.Create, "siteId">) =>
+    mutationFn: async (data: typeof AdsContract.Create.static) =>
       await handleEden(rpc.api.v1.ads.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });

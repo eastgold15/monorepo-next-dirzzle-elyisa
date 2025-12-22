@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
+  transpilePackages: ["@repo/contract"],
 };
 
 export default nextConfig;

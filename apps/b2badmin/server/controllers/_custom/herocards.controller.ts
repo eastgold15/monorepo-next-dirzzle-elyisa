@@ -42,17 +42,7 @@ export const herocardsController = new Elysia({
       });
     },
     {
-      body: t.Object({
-        title: t.String(),
-        subtitle: t.Optional(t.String()),
-        description: t.Optional(t.String()),
-        buttonUrl: t.Optional(t.String()),
-        buttonLabel: t.Optional(t.String()),
-        sortOrder: t.Optional(t.Number()),
-        isActive: t.Optional(t.Boolean()),
-        backgroundClass: t.Optional(t.String()),
-        mediaId: t.Optional(t.String()),
-      }),
+      body: HeroCardsContract.Create,
       detail: {
         summary: "创建首页展示卡片",
         description: "创建新的首页展示卡片，可关联媒体文件",
@@ -118,22 +108,6 @@ export const herocardsController = new Elysia({
       detail: {
         summary: "获取首页展示卡片列表",
         description: "分页获取首页展示卡片列表（需要权限）",
-        tags: ["HeroCards"],
-      },
-    }
-  )
-
-  .get(
-    "/:id",
-    ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("HEROCARDS_VIEW")) throw new Error("Forbidden");
-      return heroCardsService.findOne(params.id, { db, auth });
-    },
-    {
-      params: t.Object({ id: t.String() }),
-      detail: {
-        summary: "获取首页展示卡片详情",
-        description: "获取指定首页展示卡片的详细信息（需要权限）",
         tags: ["HeroCards"],
       },
     }

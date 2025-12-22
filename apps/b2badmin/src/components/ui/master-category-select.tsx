@@ -1,6 +1,6 @@
 "use client";
 
-import type { MasterCategoryTModel } from "@repo/contract";
+import type { MasterContractDto } from "@repo/contract";
 import { useMemo } from "react";
 import {
   Select,
@@ -9,13 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMasterCategories } from "@/hooks/api/master-category";
+import { useMasterCategoryStore } from "@/stores/mastercategory-store";
 
 interface MasterCategorySelectProps {
   value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  allowClear?: boolean;
+  excludeId?: string; // 排除某个ID（用于编辑时防止选择自己）
 }
 
 export function MasterCategorySelect({
@@ -23,32 +25,50 @@ export function MasterCategorySelect({
   onChange,
   placeholder = "选择主分类",
   className = "",
+  allowClear = false,
+  excludeId,
 }: MasterCategorySelectProps) {
-  const { data: categories = [], isLoading } = useMasterCategories();
+  const { treeData, isLoading, getCategoryById } = useMasterCategoryStore();
 
   // 扁平化的选项用于显示
   const flattenedOptions = useMemo(() => {
     const flatten = (
-      cats: MasterCategoryTModel["Entity"][]
+      cats: MasterContractDto["TreeEntity"][]
     ): Array<{ value: string; label: string }> => {
       const result: Array<{ value: string; label: string }> = [];
       cats.forEach((cat) => {
-        result.push({
-          value: cat.id,
-          label: cat.name,
-        });
+        // 排除指定的ID
+        if (cat.id !== excludeId) {
+          result.push({
+            value: cat.id,
+            label: cat.name,
+          });
+        }
+        // 递归处理子分类
+        if (cat.children && cat.children.length > 0) {
+          result.push(...flatten(cat.children));
+        }
       });
       return result;
     };
-    return flatten(categories);
-  }, [categories]);
+    return flatten(treeData);
+  }, [treeData, excludeId]);
 
   // 获取选中的分类名称
   const selectedCategoryName = useMemo(() => {
     if (!value) return "";
-    const option = flattenedOptions.find((opt) => opt.value === value);
-    return option?.label || "";
-  }, [value, flattenedOptions]);
+    const category = getCategoryById(value);
+    return category?.name || "";
+  }, [value, getCategoryById]);
+
+  // 处理值变化
+  const handleValueChange = (newValue: string) => {
+    if (allowClear && newValue === "none") {
+      onChange("");
+    } else {
+      onChange(newValue);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -61,19 +81,27 @@ export function MasterCategorySelect({
   }
 
   return (
-    <Select onValueChange={onChange} value={value || ""}>
+    <Select
+      onValueChange={handleValueChange}
+      value={value || (allowClear ? "none" : "")}
+    >
       <SelectTrigger className={`w-full ${className}`}>
         <SelectValue placeholder={placeholder}>
           {selectedCategoryName || placeholder}
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {categories.length === 0 ? (
+        {allowClear && (
+          <SelectItem value="none">
+            <span className="text-slate-400">无（清除选择）</span>
+          </SelectItem>
+        )}
+        {flattenedOptions.length === 0 ? (
           <div className="px-3 py-2 text-slate-500 text-sm">暂无主分类数据</div>
         ) : (
-          categories.map((category) => (
-            <SelectItem key={category.id} value={category.id}>
-              {category.name}
+          flattenedOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
             </SelectItem>
           ))
         )}

@@ -1,16 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { createContext, type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/hooks/api/use-user-api";
 
 import { useAuthStore } from "@/stores/auth-store";
-
-// 创建用户上下文（为了向后兼容，主要逻辑已移到 Zustand store）
-const UserContext = createContext<{
-  refetch: () => void;
-} | null>(null);
 
 // 用户Provider组件
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -40,7 +35,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // 3. 渲染控制
   if (isPublicPage) return <>{children}</>;
-  if (isLoading) return <Skeleton className="h-screen w-full" />;
+  if (isLoading) return <div className="h-screen w-full"><Skeleton className="h-full w-full" /></div>;
   if (!data) return null;
 
   return <>{children}</>;

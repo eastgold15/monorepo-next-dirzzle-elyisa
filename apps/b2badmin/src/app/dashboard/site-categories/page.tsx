@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
+import { CreateSiteCategoryModal } from "@/components/form/CreateSiteCategoryModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,35 +17,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  useCreateSiteCategory,
   useDeleteSiteCategory,
   useSiteCategoriesTree,
-  useToggleCategoryStatus,
   useUpdateSiteCategory,
 } from "@/hooks/api/site-category";
 
@@ -54,7 +35,6 @@ interface SiteCategory {
   description?: string;
   parentId?: string;
   sortOrder: number;
-  isActive: boolean;
   createdAt: string;
   updatedAt: string;
   children?: SiteCategory[];
@@ -187,177 +167,6 @@ function CategoryTreeNode({
   );
 }
 
-// 创建/编辑分类对话框
-function CategoryDialog({
-  category,
-  isOpen,
-  onClose,
-  allCategories,
-}: {
-  category?: SiteCategory;
-  isOpen: boolean;
-  onClose: () => void;
-  allCategories: SiteCategory[];
-}) {
-  const [formData, setFormData] = useState({
-    name: category?.name || "",
-    description: category?.description || "",
-    parentId: category?.parentId || "",
-    sortOrder: category?.sortOrder || 0,
-    isActive: category?.isActive ?? true,
-  });
-
-  const createMutation = useCreateSiteCategory();
-  const updateMutation = useUpdateSiteCategory();
-
-  const isEdit = !!category;
-
-  const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      toast.error("分类名称不能为空");
-      return;
-    }
-
-    try {
-      const submitData = {
-        name: formData.name,
-        description: formData.description || undefined,
-        parentId: formData.parentId || undefined,
-        sortOrder: formData.sortOrder,
-        isActive: formData.isActive,
-      };
-
-      if (isEdit && category) {
-        await updateMutation.mutateAsync({
-          id: category.id,
-          data: submitData,
-        });
-        toast.success("分类更新成功");
-      } else {
-        await createMutation.mutateAsync(submitData);
-        toast.success("分类创建成功");
-      }
-      onClose();
-    } catch (error) {
-      toast.error(isEdit ? "分类更新失败" : "分类创建失败");
-    }
-  };
-
-  return (
-    <Dialog onOpenChange={onClose} open={isOpen}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "编辑分类" : "创建分类"}</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              分类名称 <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              className="focus:ring-2 focus:ring-indigo-500"
-              id="name"
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="请输入分类名称"
-              value={formData.name}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">分类描述</Label>
-            <Textarea
-              id="description"
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="请输入分类描述（可选）"
-              rows={3}
-              value={formData.description}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="parent">父分类</Label>
-            <Select
-              onValueChange={(value) =>
-                setFormData({ ...formData, parentId: value || "" })
-              }
-              value={formData.parentId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="选择父分类（可选）" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">无（顶级分类）</SelectItem>
-                {allCategories
-                  ?.filter((cat) => !isEdit || cat.id !== category?.id)
-                  .map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="sortOrder">排序</Label>
-            <Input
-              className="focus:ring-2 focus:ring-indigo-500"
-              id="sortOrder"
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  sortOrder: Number.parseInt(e.target.value, 10) || 0,
-                })
-              }
-              placeholder="0"
-              type="number"
-              value={formData.sortOrder}
-            />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={formData.isActive}
-              id="isActive"
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, isActive: checked })
-              }
-            />
-            <Label htmlFor="isActive">启用分类</Label>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button onClick={onClose} variant="outline">
-            取消
-          </Button>
-          <Button
-            className="bg-indigo-600 text-white hover:bg-indigo-700"
-            disabled={createMutation.isPending || updateMutation.isPending}
-            onClick={handleSubmit}
-          >
-            {createMutation.isPending || updateMutation.isPending ? (
-              <span className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                处理中...
-              </span>
-            ) : isEdit ? (
-              "更新"
-            ) : (
-              "创建"
-            )}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // 获取分类路径（用于显示）
 function getCategoryPath(
   category: SiteCategory,
@@ -403,9 +212,9 @@ function findCategoryById(
 export default function SiteCategoryManager() {
   const { data: flatCategories, isLoading } = useSiteCategoriesTree();
   const deleteMutation = useDeleteSiteCategory();
-  const toggleStatusMutation = useToggleCategoryStatus();
+  const updateMutation = useUpdateSiteCategory();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<
     SiteCategory | undefined
   >();
@@ -413,7 +222,7 @@ export default function SiteCategoryManager() {
 
   const handleEdit = (category: SiteCategory) => {
     setEditingCategory(category);
-    setIsDialogOpen(true);
+    setIsCreateModalOpen(true);
   };
 
   const handleDelete = async (category: SiteCategory) => {
@@ -422,15 +231,6 @@ export default function SiteCategoryManager() {
       toast.success("分类删除成功");
     } catch (error) {
       toast.error("分类删除失败");
-    }
-  };
-
-  // 切换分类状态
-  const handleToggleStatus = async (id: string) => {
-    try {
-      await toggleStatusMutation.mutateAsync(id);
-    } catch (error) {
-      toast.error("操作失败");
     }
   };
 
@@ -548,14 +348,16 @@ export default function SiteCategoryManager() {
                 </AlertDialog>
               )}
 
-              <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
-                    <Plus className="mr-2 h-4 w-4" />
-                    添加分类
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
+              <Button
+                className="bg-indigo-600 text-white hover:bg-indigo-700"
+                onClick={() => {
+                  setEditingCategory(undefined);
+                  setIsCreateModalOpen(true);
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                添加分类
+              </Button>
             </div>
           </div>
 
@@ -612,7 +414,10 @@ export default function SiteCategoryManager() {
                 </p>
                 <Button
                   className="bg-indigo-600 text-white hover:bg-indigo-700"
-                  onClick={() => setIsDialogOpen(true)}
+                  onClick={() => {
+                    setEditingCategory(undefined);
+                    setIsCreateModalOpen(true);
+                  }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   创建分类
@@ -624,14 +429,18 @@ export default function SiteCategoryManager() {
       </SidebarInset>
 
       {/* 创建/编辑分类对话框 */}
-      <CategoryDialog
-        allCategories={flatCategories || []}
-        category={editingCategory}
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setEditingCategory(undefined);
+      <CreateSiteCategoryModal
+        onOpenChange={(open) => {
+          setIsCreateModalOpen(open);
+          if (!open) {
+            setEditingCategory(undefined);
+          }
         }}
+        onSuccess={() => {
+          // 刷新数据
+          window.location.reload();
+        }}
+        open={isCreateModalOpen}
       />
     </SidebarProvider>
   );

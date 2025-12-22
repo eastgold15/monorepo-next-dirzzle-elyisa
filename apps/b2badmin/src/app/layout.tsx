@@ -1,6 +1,8 @@
 import QueryProvider from "@/providers/query-provider";
 import { UserProvider } from "@/providers/UserProvider";
 import "./globals.css";
+import { MasterCategoryProvider } from "@/providers/mastercategory-provider";
+import { SiteCategoryProvider } from "@/providers/site-category-provider";
 
 export default function RootLayout({
   children,
@@ -11,7 +13,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-white font-sans text-black antialiased">
         <QueryProvider>
-          <UserProvider>{children}</UserProvider>
+          <SiteCategoryProvider>
+            <MasterCategoryProvider>
+              <UserProvider>{children}</UserProvider>
+            </MasterCategoryProvider>
+          </SiteCategoryProvider>
         </QueryProvider>
       </body>
     </html>

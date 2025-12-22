@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,12 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./server/*"
-      ]
+      "@/*": ["./src/*"],
+      "~/*": ["./server/*"],
+      "@repo/contract": ["../../packages/contract/src/index.ts"]
     }
   },
   "include": [
@@ -38,9 +31,7 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../../packages/contract"

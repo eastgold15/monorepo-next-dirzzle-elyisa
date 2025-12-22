@@ -5,14 +5,9 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./table": {
-      "types": "./src/table.schema.ts",
-      "import": "./src/table.schema.ts"
-    },
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts",
-      "default": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
@@ -24,7 +19,7 @@
     "db:studio": "bun x drizzle-kit studio",
     "seed": "bun run seed-complete.ts",
     "seed:reset": "bun run reset-database.ts",
-    "build": "bunx tsc -b"
+    "build": "tsc -b --force"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

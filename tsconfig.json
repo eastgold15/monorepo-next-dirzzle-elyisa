@@ -1,14 +1,14 @@
 {
-    "files": [],
-    "references": [
-        {
-            "path": "./packages/contract"
-        },
-        {
-            "path": "./apps/web"
-        },
-        {
-            "path": "./apps/b2badmin"
-        }
-    ]
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/contract"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./apps/b2badmin"
+    }
+  ]
 }

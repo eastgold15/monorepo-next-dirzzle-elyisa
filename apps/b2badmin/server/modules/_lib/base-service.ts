@@ -3,12 +3,12 @@ import { and, eq, ilike, type SQL, sql } from "drizzle-orm";
 import type {
   PgDelete,
   PgSelect,
-  PgTableWithColumns,
+  PgTable,
   PgUpdate,
 } from "drizzle-orm/pg-core";
-
+import type { db } from "~/db/connection";
 export interface ServiceContext {
-  db: any;
+  db: typeof db;
   auth: {
     userId: string;
     siteId: string;
@@ -20,7 +20,7 @@ export interface ServiceContext {
 }
 
 export abstract class B2BBaseService<
-  T extends PgTableWithColumns<any>,
+  T extends PgTable,
   C extends { Create: any; Update: any; Response: any; ListQuery: any },
 > {
   constructor(
@@ -93,10 +93,7 @@ export abstract class B2BBaseService<
       ...(table.exporterId && exporterId && { exporterId }), // 👈 强制注入自己的出口商 ID
     };
 
-    const [result] = await ctx.db
-      .insert(this.table)
-      .values(payload)
-      .returning();
+    const result = await ctx.db.insert(this.table).values(payload).returning();
     return result;
   }
 

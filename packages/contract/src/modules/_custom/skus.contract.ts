@@ -25,26 +25,29 @@ const CustomResponse = t.Composite([
     // 添加关联数据
     product: t.Optional(ProductsContract.Response),
     values: t.Optional(t.Array(SkusValuesResponse)),
-    _extra: t.Optional(t.Any()), // 预留临时扩展位
+
   }),
 ]);
 
 // --- B. 扩展创建请求 (增加前端特有的字段) ---
 const CustomCreate = t.Composite([
   Generated.Create,
+]);
+
+const BatchCreate = t.Composite([
+
   t.Object({
-    // 允许创建时同时提供属性值
-    attributeValues: t.Optional(
-      t.Array(
-        t.Object({
-          attributeId: t.String(),
-          value: t.String(),
-        })
-      )
-    ),
-    // 允许指定产品
     productId: t.String(),
-    mediaId: t.Optional(t.String()),
+    // 批量创建时，允许同时创建多个SKU
+    skus: t.Array(
+      t.Object({
+        skuCode: t.String(),
+        price: t.Number(),
+        stock: t.Optional(t.Number()),
+        specJson: t.Any(),
+        mediaIds: t.Optional(t.Array(t.String())),
+      })
+    ),
   }),
 ]);
 
@@ -89,6 +92,7 @@ export const SkusContract = {
   ...Generated, // 默认继承所有：Update, Patch
   Response: CustomResponse, // 覆盖为自定义详情响应
   Create: CustomCreate, // 覆盖为自定义创建请求
+  BatchCreate,
   Update: CustomUpdate, // 保持默认更新契约
   ListQuery: CustomListQuery, // 覆盖为自定义列表查询
 } as const;
@@ -97,6 +101,7 @@ export const SkusContract = {
 export type SkusDTO = {
   Response: typeof SkusContract.Response.static;
   Create: typeof SkusContract.Create.static;
+  BatchCreate: typeof SkusContract.BatchCreate.static;
   Update: typeof Generated.Update.static; // 未修改的直接透传
   Patch: typeof Generated.Patch.static;
   ListQuery: typeof SkusContract.ListQuery.static;

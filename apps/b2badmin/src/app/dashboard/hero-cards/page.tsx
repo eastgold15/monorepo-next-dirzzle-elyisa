@@ -46,7 +46,7 @@ import {
   useHeroCardsList,
   useHeroCardsToggleStatus,
   useHeroCardsUpdate,
-} from "@/hooks/api/hero-cards";
+} from "@/hooks/api/herocards";
 
 interface HeroCard {
   id: string;

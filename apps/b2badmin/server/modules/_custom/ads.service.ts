@@ -144,58 +144,6 @@ export class AdsService extends AdsGeneratedService {
   }
 
   /**
-   * 🛡️ 核心：拖拽排序
-   */
-  async updateSortOrder(
-    items: Array<{ id: string; sortOrder: number }>,
-    ctx: ServiceContext
-  ) {
-    const table = this.table as any;
-
-    // 使用事务处理批量排序更新
-    await ctx.db.transaction(async (tx) => {
-      for (const item of items) {
-        // 使用 withScope 确保只能更新属于自己 Scope 的广告
-        await this.withScope(
-          tx.update(table).set({ sortOrder: item.sortOrder }),
-          ctx,
-          [eq(table.id, item.id)]
-        );
-      }
-    });
-
-    return { success: true, message: "排序更新成功" };
-  }
-
-  /**
-   * 🛡️ 核心：切换激活状态
-   */
-  async toggleStatus(id: string, ctx: ServiceContext) {
-    const table = this.table as any;
-    const select = ctx.db.select().from(this.table).$dynamic();
-    const [ad] = await this.withScope(select, ctx, [eq(table.id, id)]);
-
-    if (!ad) {
-      throw new HttpError.NotFound("广告不存在或无权访问");
-    }
-
-    const [updatedAd] = await this.withScope(
-      ctx.db
-        .update(table)
-        .set({ isActive: !ad.isActive })
-        .where(eq(table.id, id))
-        .returning(),
-      ctx
-    );
-
-    return {
-      id: updatedAd.id,
-      isActive: updatedAd.isActive,
-      message: updatedAd.isActive ? "广告已激活" : "广告已停用",
-    };
-  }
-
-  /**
    * 🛡️ 核心：批量删除
    */
   async batchDelete(ids: string[], ctx: ServiceContext) {
