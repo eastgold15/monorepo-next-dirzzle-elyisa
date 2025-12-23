@@ -339,6 +339,7 @@ export const adsTable = p.pgTable("advertisements", {
 export const heroCardsTable = p.pgTable("hero_cards", {
   ...Audit,
   title: p.varchar("title", { length: 255 }).notNull(),
+
   description: p.text("description").notNull(),
   buttonText: p.varchar("button_text", { length: 100 }).notNull(),
   buttonUrl: p.varchar("button_url", { length: 500 }),

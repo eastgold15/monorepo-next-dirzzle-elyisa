@@ -14,11 +14,10 @@ export const herocardsController = new Elysia({
   // 获取首页展示卡片列表（包含媒体信息）
   .get(
     "/",
-    async ({ query, db, auth, permissions }) => {
-      if (!permissions.includes("HEROCARDS_VIEW")) throw new Error("Forbidden");
-      return await heroCardsService.findAllWithMedia(query, { db, auth });
-    },
+    async ({ query, db, auth }) =>
+      await heroCardsService.findAllWithMedia(query, { db, auth }),
     {
+      allPermissions: ["HEROCARDS_TABLE_VIEW"],
       query: HeroCardsContract.ListQuery,
       detail: {
         summary: "获取首页展示卡片列表",
@@ -31,10 +30,7 @@ export const herocardsController = new Elysia({
   // 创建首页展示卡片（支持关联媒体）
   .post(
     "/",
-    async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("HEROCARDS_CREATE"))
-        throw new Error("Forbidden");
-
+    async ({ body, db, auth }) => {
       const { mediaId, ...cardData } = body;
       return await heroCardsService.createHeroCard(cardData, mediaId ?? null, {
         db,
@@ -42,6 +38,7 @@ export const herocardsController = new Elysia({
       });
     },
     {
+      allPermissions: ["HEROCARDS_TABLE_CREATE"],
       body: HeroCardsContract.Create,
       detail: {
         summary: "创建首页展示卡片",
@@ -54,12 +51,10 @@ export const herocardsController = new Elysia({
   // 批量更新排序
   .patch(
     "/sort",
-    async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("HEROCARDS_EDIT")) throw new Error("Forbidden");
-
-      return await heroCardsService.updateSortOrder(body.items, { db, auth });
-    },
+    async ({ body, db, auth }) =>
+      await heroCardsService.updateSortOrder(body.items, { db, auth }),
     {
+      allPermissions: ["HEROCARDS_TABLE_EDIT"],
       body: t.Object({
         items: t.Array(
           t.Object({
@@ -78,13 +73,11 @@ export const herocardsController = new Elysia({
 
   // 切换卡片激活状态
   .patch(
-    "/:id/toggle",
-    async ({ params, db, auth, permissions }) => {
-      if (!permissions.includes("HEROCARDS_EDIT")) throw new Error("Forbidden");
-
-      return await heroCardsService.toggleStatus(params.id, { db, auth });
-    },
+    "/toggle/:id/",
+    async ({ params, db, auth }) =>
+      await heroCardsService.toggleStatus(params.id, { db, auth }),
     {
+      allPermissions: ["HEROCARDS_TABLE_EDIT"],
       params: t.Object({
         id: t.String(),
       }),
@@ -96,32 +89,14 @@ export const herocardsController = new Elysia({
     }
   )
 
-  // 标准的 CRUD 操作
-  .get(
-    "/",
-    ({ query, permissions, auth, db }) => {
-      if (!permissions.includes("HEROCARDS_VIEW")) throw new Error("Forbidden");
-      return heroCardsService.findAll(query, { db, auth });
-    },
-    {
-      query: HeroCardsContract.ListQuery,
-      detail: {
-        summary: "获取首页展示卡片列表",
-        description: "分页获取首页展示卡片列表（需要权限）",
-        tags: ["HeroCards"],
-      },
-    }
-  )
-
-  .patch(
+  .put(
     "/:id",
-    ({ params, body, permissions, auth, db }) => {
-      if (!permissions.includes("HEROCARDS_EDIT")) throw new Error("Forbidden");
-      return heroCardsService.update(params.id, body, { db, auth });
-    },
+    ({ params, body, auth, db }) =>
+      heroCardsService.update(params.id, body, { db, auth }),
     {
+      allPermissions: ["HEROCARDS_TABLE_EDIT"],
       params: t.Object({ id: t.String() }),
-      body: HeroCardsContract.Patch,
+      body: HeroCardsContract.Update,
       detail: {
         summary: "更新首页展示卡片",
         description: "更新指定首页展示卡片的信息（需要权限）",
@@ -132,12 +107,10 @@ export const herocardsController = new Elysia({
 
   .delete(
     "/:id",
-    ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("HEROCARDS_DELETE"))
-        throw new Error("Forbidden");
-      return heroCardsService.delete(params.id, { db, auth });
-    },
+    ({ params, auth, db }) =>
+      heroCardsService.delete(params.id, { db, auth }),
     {
+      allPermissions: ["HEROCARDS_TABLE_DELETE"],
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除首页展示卡片",

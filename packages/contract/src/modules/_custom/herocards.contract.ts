@@ -6,7 +6,6 @@
  * --------------------------------------------------------
  */
 import { t } from "elysia";
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
 import { HeroCardsBase } from "../_generated/herocards.contract";
 
@@ -26,6 +25,7 @@ export const HeroCardsContract = {
       "id",
       "createdAt",
       "updatedAt",
+      "siteId",
     ]).properties
   ),
 
@@ -41,9 +41,8 @@ export const HeroCardsContract = {
 
   // 列表查询
   ListQuery: t.Object({
-    ...t.Partial(t.Object(HeroCardsBase.insertFields)).properties,
-    ...PaginationParams.properties,
-    ...SortParams.properties,
+    // ...PaginationParams.properties,
+    // ...SortParams.properties,
     search: t.Optional(t.String()),
   }),
 

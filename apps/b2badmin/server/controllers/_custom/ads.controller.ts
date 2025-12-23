@@ -14,11 +14,10 @@ export const adsController = new Elysia({
   // 获取广告列表（包含媒体信息）
   .get(
     "/",
-    async ({ query, db, auth, permissions }) => {
-      if (!permissions.includes("ADS_VIEW")) throw new Error("Forbidden");
-      return await adsService.findAllWithMedia(query, { db, auth });
-    },
+    async ({ query, db, auth, permissions }) =>
+      await adsService.findAllWithMedia(query, { db, auth }),
     {
+      allPermission: "ADS_TABLE_VIEW",
       query: AdsContract.ListQuery,
       detail: {
         summary: "获取广告列表",
@@ -36,7 +35,7 @@ export const adsController = new Elysia({
       return await adsService.createAd(adData, mediaId, { db, auth });
     },
     {
-      allPermission: "ADS_CREATE",
+      allPermission: "ADS_TABLE_CREATE",
       body: AdsContract.Create,
       detail: {
         summary: "创建广告",

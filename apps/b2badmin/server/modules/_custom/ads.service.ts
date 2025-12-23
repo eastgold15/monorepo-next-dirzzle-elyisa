@@ -7,9 +7,8 @@
  */
 
 import { mediaTable } from "@repo/contract";
-import { and, eq, inArray, like, sql } from "drizzle-orm";
+import { and, eq, getColumns, inArray, like, sql } from "drizzle-orm";
 import { HttpError } from "elysia-http-problem-json";
-import { StorageFactory } from "~/lib/media/storage/StorageFactory";
 import { AdsGeneratedService } from "../_generated/ads.service";
 import type { ServiceContext } from "../_lib/base-service";
 
@@ -23,7 +22,7 @@ export class AdsService extends AdsGeneratedService {
    */
   async findAllWithMedia(query: any, ctx: ServiceContext) {
     const { page = 1, limit = 10, search, type, position, isActive } = query;
-    const table = this.table as any;
+    const table = this.table;
     const filters: any[] = [];
 
     // 搜索条件
@@ -49,28 +48,11 @@ export class AdsService extends AdsGeneratedService {
     // 关联媒体数据查询
     const select = ctx.db
       .select({
-        id: table.id,
-        title: table.title,
-        description: table.description,
-        type: table.type,
-        link: table.link,
-        position: table.position,
-        startDate: table.startDate,
-        endDate: table.endDate,
-        sortOrder: table.sortOrder,
-        isActive: table.isActive,
-        createdAt: table.createdAt,
-        updatedAt: table.updatedAt,
-        media: {
-          id: (table as any).mediaTable.id,
-          storageKey: (table as any).mediaTable.storageKey,
-        },
+        ...getColumns(table),
+        mediaUrl: mediaTable.url,
       })
       .from(table)
-      .leftJoin(
-        (table as any).mediaTable,
-        eq(table.mediaId, (table as any).mediaTable.id)
-      )
+      .leftJoin(mediaTable, eq(table.mediaId, mediaTable.id))
       .$dynamic();
 
     // 获取数据
@@ -85,11 +67,9 @@ export class AdsService extends AdsGeneratedService {
       and(...this.getScopeFilters(ctx), ...filters)
     );
 
-    // 格式化返回数据，包含媒体 URL
-    const storage = StorageFactory.createStorageFromEnv();
-    const data = ads.map((item: any) => ({
+    const data = ads.map((item) => ({
       ...item,
-      imageUrl: item.media ? storage.getPublicUrl(item.media.storageKey) : null,
+      mediaUrl: item.mediaUrl,
     }));
 
     return {
@@ -118,27 +98,10 @@ export class AdsService extends AdsGeneratedService {
         sortOrder: data.sortOrder ?? 0,
         isActive: data.isActive ?? true,
         mediaId,
+        siteId: ctx.auth.siteId,
       },
       ctx
     );
-
-    // 2. 如果有关联的媒体文件，返回带媒体 URL 的数据
-    if (mediaId) {
-      const storage = StorageFactory.createStorageFromEnv();
-
-      const [media] = await ctx.db
-        .select()
-        .from(mediaTable)
-        .where(eq(mediaTable.id, mediaId))
-        .limit(1);
-
-      if (media) {
-        return {
-          ...ad,
-          imageUrl: storage.getPublicUrl(media.storageKey),
-        };
-      }
-    }
 
     return ad;
   }
