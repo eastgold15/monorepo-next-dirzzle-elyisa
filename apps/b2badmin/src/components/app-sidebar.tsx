@@ -91,7 +91,7 @@ const SIDEBAR_CONFIG: NavSection[] = [
         title: "SKU管理",
         url: "/dashboard/sku",
         icon: Package,
-        permission: PERMISSIONS.SKUS_TABLE_VIEW,
+        permission: PERMISSIONS.SITES_MANAGE,
       },
     ],
   },
