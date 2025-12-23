@@ -1,9 +1,9 @@
-import type { ProductsContractDto } from "@repo/contract";
+import type { ProductsDTO } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 // 获取商品列表
-export function useProductsList(query: ProductsContractDto["ListQuery"]) {
+export function useProductsList(query: ProductsDTO["ListQuery"]) {
   return useQuery({
     queryKey: ["products", "list", query],
     queryFn: () => handleEden(rpc.api.v1.products.get({ query })),
@@ -15,7 +15,7 @@ export function useProductsCreate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ProductsContractDto["Create"]) =>
+    mutationFn: (data: ProductsDTO["Create"]) =>
       handleEden(rpc.api.v1.products.post(data)),
     onSuccess: () => {
       // 刷新商品列表
@@ -63,7 +63,7 @@ export function useProductsUpdate() {
       data,
     }: {
       id: string;
-      data: ProductsContractDto["Update"];
+      data: ProductsDTO["Update"];
     }) => await handleEden(rpc.api.v1.products({ id }).patch(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });

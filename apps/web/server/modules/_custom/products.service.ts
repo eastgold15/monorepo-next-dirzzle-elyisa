@@ -50,29 +50,39 @@ export class ProductsService extends ProductsGeneratedService {
       );
     }
 
+
+
     // 2. 构建复杂 Join 查询
     const baseQuery = ctx.db
       .select({
         id: this.table.id,
         name: this.table.name,
-        // 子查询获取 SKU 最小价格
         price: sql<number>`(select min(${skusTable.price}) from ${skusTable} where ${skusTable.productId} = ${this.table.id})`,
         status: this.table.status,
         createdAt: this.table.createdAt,
-        updatedAt: this.table.updatedAt,
-        categoryId: productMasterCategoriesTable.categoryId,
-        imageUrl: mediaTable.url,
+        // 【改进】只取主图或第一张图，避免 Join 导致的数据重复
+        mainImageUrl: sql<string>`(
+      select ${mediaTable.url} 
+      from ${mediaTable} 
+      inner join ${productMediaTable} on ${mediaTable.id} = ${productMediaTable.mediaId}
+      where ${productMediaTable.productId} = ${this.table.id}
+      order by ${productMediaTable.isMain} desc, ${productMediaTable.sortOrder} asc 
+      limit 1
+    )`,
+        // 【可选】如果需要标记这个商品是否有视频
+        hasVideo: sql<boolean>`exists(
+      select 1 from ${mediaTable} 
+      inner join ${productMediaTable} on ${mediaTable.id} = ${productMediaTable.mediaId}
+      where ${productMediaTable.productId} = ${this.table.id} 
+      and ${mediaTable.mediaType} = 'video'
+    )`
       })
       .from(this.table)
+      // 移除原来的 productMediaTable 和 mediaTable 的 leftJoin，改用上面的子查询
       .leftJoin(
         productMasterCategoriesTable,
         eq(this.table.id, productMasterCategoriesTable.productId)
       )
-      .leftJoin(
-        productMediaTable,
-        eq(this.table.id, productMediaTable.productId)
-      )
-      .leftJoin(mediaTable, eq(productMediaTable.mediaId, mediaTable.id))
       .$dynamic();
 
     // 3. 注入站点隔离条件并执行分页

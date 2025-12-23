@@ -19,6 +19,7 @@ export const MediaContract = {
   Response: t.Object({
     ...MediaBase.fields,
   }),
+  Entity: t.Object(MediaBase.fields),
 
   // 创建请求 (默认排除系统字段)
   Create: t.Object(

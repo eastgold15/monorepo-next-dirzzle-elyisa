@@ -7,30 +7,30 @@
 import type { Elysia } from "elysia";
 import { adsController } from "./_custom/ads.controller";
 import { herocardsController } from "./_custom/herocards.controller";
-import { inquiryController } from "./_custom/inquiry.controller";
+// import { inquiryController } from "./_custom/inquiry.controller";
 import { mediaController } from "./_custom/media.controller";
 import { productsController } from "./_custom/products.controller";
 import { sitecategoriesController } from "./_custom/sitecategories.controller";
-import { accountController } from "./_generated/account.controller";
+// import { accountController } from "./_generated/account.controller";
 import { attributeController } from "./_generated/attribute.controller";
 import { attributetemplateController } from "./_generated/attributetemplate.controller";
 import { attributevalueController } from "./_generated/attributevalue.controller";
-import { customerController } from "./_generated/customer.controller";
-import { dailyinquirycounterController } from "./_generated/dailyinquirycounter.controller";
+// import { customerController } from "./_generated/customer.controller";
+// import { dailyinquirycounterController } from "./_generated/dailyinquirycounter.controller";
 import { exportersController } from "./_generated/exporters.controller";
 import { factoriesController } from "./_generated/factories.controller";
 import { inquiryitemsController } from "./_generated/inquiryitems.controller";
 import { masterController } from "./_generated/master.controller";
 import { mediametadataController } from "./_generated/mediametadata.controller";
-import { permissionController } from "./_generated/permission.controller";
+// import { permissionController } from "./_generated/permission.controller";
 import { productmastercategoriesController } from "./_generated/productmastercategories.controller";
 import { productmediaController } from "./_generated/productmedia.controller";
 import { productsitecategoriesController } from "./_generated/productsitecategories.controller";
 import { producttemplateController } from "./_generated/producttemplate.controller";
 import { quotationitemsController } from "./_generated/quotationitems.controller";
 import { quotationsController } from "./_generated/quotations.controller";
-import { roleController } from "./_generated/role.controller";
-import { rolepermissionsController } from "./_generated/rolepermissions.controller";
+// import { roleController } from "./_generated/role.controller";
+// import { rolepermissionsController } from "./_generated/rolepermissions.controller";
 import { salespersonaffiliationsController } from "./_generated/salespersonaffiliations.controller";
 import { salespersoncategoriesController } from "./_generated/salespersoncategories.controller";
 import { salespersonsController } from "./_generated/salespersons.controller";
@@ -47,22 +47,22 @@ import { verificationController } from "./_generated/verification.controller";
 
 export const appRouter = (app: Elysia) =>
   app
-    .use(customerController)
-    .use(accountController)
+    // .use(customerController)
+    // .use(accountController)
     .use(adsController)
     .use(attributeController)
     .use(attributetemplateController)
     .use(attributevalueController)
-    .use(dailyinquirycounterController)
+    // .use(dailyinquirycounterController)
     .use(exportersController)
     .use(factoriesController)
     .use(herocardsController)
     .use(inquiryitemsController)
-    .use(inquiryController)
+    // .use(inquiryController)
     .use(masterController)
     .use(mediametadataController)
     .use(mediaController)
-    .use(permissionController)
+    // .use(permissionController)
     .use(productmastercategoriesController)
     .use(productmediaController)
     .use(productsitecategoriesController)
@@ -70,8 +70,8 @@ export const appRouter = (app: Elysia) =>
     .use(productsController)
     .use(quotationitemsController)
     .use(quotationsController)
-    .use(rolepermissionsController)
-    .use(roleController)
+    // .use(rolepermissionsController)
+    // .use(roleController)
     .use(salespersonaffiliationsController)
     .use(salespersoncategoriesController)
     .use(salespersonsController)

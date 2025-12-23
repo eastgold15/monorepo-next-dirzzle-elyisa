@@ -1,3 +1,4 @@
+import type { MediaDTO } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
@@ -11,7 +12,9 @@ export function useMediaList(query: MediaListQueryParams) {
   return useQuery({
     queryKey: ["media", "list", query],
     queryFn: async () => {
-      const res = await handleEden(rpc.api.v1.media.list.get({ query }));
+      const res = (await handleEden(
+        rpc.api.v1.media.list.get({ query })
+      )) as MediaDTO["Entity"][];
       return res;
     },
     staleTime: 5 * 60 * 1000, // 5分钟

@@ -13,7 +13,7 @@ export const productsController = new Elysia({
   // 创建商品（支持站点隔离和模板绑定）
   .post(
     "/",
-    async ({ body, db, auth, permissions }) => {
+    async ({ body, db, auth }) => {
       const result = await productsService.createProduct(body, { db, auth });
 
       return {
@@ -26,7 +26,7 @@ export const productsController = new Elysia({
       };
     },
     {
-      allPermission: "PRODUCTS_CREATE",
+      allPermission: "PRODUCTS_TABLE_CREATE",
       body: ProductsContract.Create,
       detail: {
         summary: "创建商品",
@@ -42,7 +42,7 @@ export const productsController = new Elysia({
     async ({ query, db, auth, permissions }) =>
       await productsService.getSiteProducts(query, { db, auth }),
     {
-      allPermission: "PRODUCTS_VIEW",
+      allPermission: "PRODUCTS_TABLE_VIEW",
       query: ProductsContract.ListQuery,
       detail: {
         summary: "获取站点商品列表",
@@ -58,7 +58,7 @@ export const productsController = new Elysia({
     async ({ body, db, auth, permissions }) =>
       await productsService.batchDelete(body.ids, { db, auth }),
     {
-      allPermission: "PRODUCTS_DELETE",
+      allPermission: "PRODUCTS_TABLE_DELETE",
       body: t.Object({
         ids: t.Array(t.String()),
       }),
@@ -73,14 +73,14 @@ export const productsController = new Elysia({
   .patch(
     "/:id",
     ({ params, body, permissions, auth, db }) =>
-      productsService.update(params.id, body, { db, auth }),
+      productsService.updateProduct(params.id, body, { db, auth }),
     {
-      allPermission: "PRODUCTS_EDIT",
+      allPermission: "PRODUCTS_TABLE_EDIT",
       params: t.Object({ id: t.String() }),
-      body: ProductsContract.Patch,
+      body: ProductsContract.Update,
       detail: {
         summary: "更新商品信息",
-        description: "更新商品的基本信息（需要权限）",
+        description: "更新商品的基本信息和媒体关联（需要权限）",
         tags: ["Products"],
       },
     }
@@ -91,7 +91,7 @@ export const productsController = new Elysia({
     ({ params, permissions, auth, db }) =>
       productsService.delete(params.id, { db, auth }),
     {
-      allPermission: "PRODUCTS_DELETE",
+      allPermission: "PRODUCTS_TABLE_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除商品",

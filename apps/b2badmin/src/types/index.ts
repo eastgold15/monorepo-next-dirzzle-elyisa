@@ -15,11 +15,10 @@ export interface ProductTemplate {
   createdAt: string;
 }
 
-
 export type TemplateField = AttributeDTO["Entity"] & {
-  value?: string;  // text/number 类型的占位符或默认值
-  options?: string[];  // select/multiselect 类型的选项数组
-}
+  value?: string; // text/number 类型的占位符或默认值
+  options?: string[]; // select/multiselect 类型的选项数组
+};
 
 export interface MediaAsset {
   id: string;

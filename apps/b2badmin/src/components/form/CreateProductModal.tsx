@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Package } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -25,9 +26,8 @@ import { Input } from "@/components/ui/input";
 import { MediaSelect } from "@/components/ui/media-select";
 import { SiteCategoryTreeSelect } from "@/components/ui/site-category-tree-select";
 import { Textarea } from "@/components/ui/textarea";
-import { useTemplates } from "@/hooks/api/attributetemplate";
-import { useProductsCreate } from "@/hooks/api/products";
-import { useSiteCategoryStore } from "@/stores/site-category-store";
+import { useListTemplates } from "@/hooks/api/attributetemplate";
+import { useProductsCreate, useProductsUpdate } from "@/hooks/api/products";
 
 const formSchema = z.object({
   spuCode: z.string().min(1, "SPU编码不能为空"),
@@ -38,6 +38,7 @@ const formSchema = z.object({
   templateId: z.string().optional(),
   mediaIds: z.array(z.string()).optional(),
   mainImageId: z.string().optional(),
+  videoIds: z.array(z.string()).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,16 +47,24 @@ interface CreateProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  product?: any; // 编辑时传入的商品数据
 }
 
 export function CreateProductModal({
   open,
   onOpenChange,
   onSuccess,
+  product,
 }: CreateProductModalProps) {
   const createProduct = useProductsCreate();
-  const { siteCategories } = useSiteCategoryStore();
-  const { data: templatesData = [] } = useTemplates({ page: 1, limit: 100 });
+  const updateProduct = useProductsUpdate();
+
+  const { data: templatesData = [] } = useListTemplates({
+    page: 1,
+    limit: 100,
+  });
+
+  const isEdit = !!product;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -68,12 +77,41 @@ export function CreateProductModal({
       templateId: undefined,
       mediaIds: [],
       mainImageId: undefined,
+      videoIds: [],
     },
   });
 
+  // 当 product 变化时，重置表单
+  React.useEffect(() => {
+    if (product) {
+      // 编辑模式：填充表单数据
+      form.reset({
+        spuCode: product.spuCode || "",
+        name: product.name || "",
+        description: product.description || "",
+        units: product.units || "",
+        siteCategoryId: product.siteCategoryId || "",
+        templateId: product.templateId || undefined,
+        mediaIds: product.mediaIds || [],
+        mainImageId: product.mainImageId || undefined,
+        videoIds: product.videoIds || [],
+      });
+    } else {
+      // 创建模式：重置表单
+      form.reset();
+    }
+  }, [product, form]);
+
   const onSubmit = async (data: FormData) => {
     try {
-      await createProduct.mutateAsync(data);
+      if (isEdit) {
+        await updateProduct.mutateAsync({
+          id: product.id,
+          data,
+        });
+      } else {
+        await createProduct.mutateAsync(data);
+      }
       onSuccess?.();
       form.reset();
       onOpenChange(false);
@@ -100,15 +138,15 @@ export function CreateProductModal({
   };
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={open}>
-      <DialogContent className="sm:max-w-[700px]">
+    <Dialog key={product?.id || "create"} onOpenChange={handleOpenChange} open={open}>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            创建新商品
+            {isEdit ? "编辑商品" : "创建新商品"}
           </DialogTitle>
           <DialogDescription>
-            填写商品基本信息，创建新的SPU商品
+            {isEdit ? "修改商品信息" : "填写商品基本信息，创建新的SPU商品"}
           </DialogDescription>
         </DialogHeader>
 
@@ -263,9 +301,30 @@ export function CreateProductModal({
                   <FormLabel>主图</FormLabel>
                   <FormControl>
                     <MediaSelect
+                      availableMediaIds={form.watch("mediaIds")}
                       onChange={(ids) => field.onChange(ids[0] || undefined)}
-                      placeholder="选择商品主图"
+                      placeholder="选择商品主图（从已选图片中选择）"
                       value={field.value ? [field.value] : []}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="videoIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>商品视频</FormLabel>
+                  <FormControl>
+                    <MediaSelect
+                      maxCount={5}
+                      multiple
+                      onChange={(ids) => field.onChange(ids)}
+                      placeholder="选择商品视频"
+                      value={field.value || []}
                     />
                   </FormControl>
                   <FormMessage />
@@ -275,19 +334,24 @@ export function CreateProductModal({
 
             <DialogFooter>
               <Button
-                disabled={createProduct.isPending}
+                disabled={createProduct.isPending || updateProduct.isPending}
                 onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
               >
                 取消
               </Button>
-              <Button disabled={createProduct.isPending} type="submit">
-                {createProduct.isPending ? (
+              <Button
+                disabled={createProduct.isPending || updateProduct.isPending}
+                type="submit"
+              >
+                {(createProduct.isPending || updateProduct.isPending) ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    创建中...
+                    {isEdit ? "保存中..." : "创建中..."}
                   </>
+                ) : isEdit ? (
+                  "保存商品"
                 ) : (
                   "创建商品"
                 )}

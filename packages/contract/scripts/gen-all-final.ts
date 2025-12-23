@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-// ⚠️ 请确保这里指向你的 Drizzle Schema 定义文件
 import * as dbSchema from "../src/table.schema";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -29,8 +28,24 @@ function toCamelCase(str: string) {
 }
 
 function ensureDir(dir: string) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`📂 [DIR] 已创建目录: ${dir}`);
+  }
 }
+
+/**
+ * 打印带格式的日志
+ */
+const log = {
+  info: (msg: string) => console.log(`💡 ${msg}`),
+  success: (msg: string) => console.log(`✅ ${msg}`),
+  warn: (msg: string) => console.warn(`⚠️ ${msg}`),
+  skip: (file: string) => console.log(`  index.ts [SKIP] 保持现状: ${file}`),
+  create: (file: string) => console.log(`✨ [CREATE] 已生成新文件: ${file}`),
+  update: (file: string) =>
+    console.log(`🔄 [UPDATE] 已覆盖自动生成文件: ${file}`),
+};
 
 // --- 📝 模板 Header ---
 const GEN_HEADER = (type: string) =>
@@ -54,11 +69,25 @@ const CUSTOM_HEADER = (type: string) =>
 // --- ⚙️ 核心引擎 ---
 
 function generate() {
-  console.log("\n🚀 正在启动全栈自动化引擎 [Custom 优先模式]...");
+  console.log("\n🚀 ==================================================");
+  console.log("🚀 正在启动全栈自动化引擎 [Custom 优先模式]");
+  console.log("🚀 ==================================================\n");
+
+  // 1. 打印路径概览
+  log.info(`Schema 定义源:  ${path.resolve(__dirname, "../src/table.schema")}`);
+  log.info(`契约输出根目录: ${CONTRACT_ROOT}`);
+  log.info(`B2B Server 根: ${B2B_SERVER_ROOT}`);
+  log.info(`WEB Server 根: ${WEB_SERVER_ROOT}\n`);
 
   const tableEntries = Object.entries(dbSchema).filter(([key]) =>
     key.endsWith("Table")
   );
+  if (tableEntries.length === 0) {
+    log.warn(
+      "未检测到任何以 'Table' 结尾的 schema 表定义，请检查 table.schema.ts"
+    );
+    return;
+  }
 
   const processedModules: {
     lowName: string;
@@ -75,101 +104,55 @@ function generate() {
     });
   });
 
+  // --- 契约层 (Shared Contract) ---
   const contractDirs = {
     gen: path.join(CONTRACT_ROOT, "_generated"),
     custom: path.join(CONTRACT_ROOT, "_custom"),
   };
+
   ensureDir(contractDirs.gen);
   ensureDir(contractDirs.custom);
 
   processedModules.forEach(({ key, capitalized, lowName }) => {
-    // 1. 生成 _generated 里的 Base (零件库)
-    const genContent = `
-${GEN_HEADER("Contract Base")}
-import { t } from "elysia";
-import { ${key} } from "../../table.schema";
-import { spread } from "../../helper/utils"; 
+    // A. 生成 _generated (零件库 - 始终覆盖)
+    const genPath = path.join(contractDirs.gen, `${lowName}.contract.ts`);
+    const genContent = `${GEN_HEADER("Contract Base")}\nimport { t } from "elysia";\nimport { ${key} } from "../../table.schema";\nimport { spread } from "../../helper/utils"; \n\nexport const ${capitalized}Base = {\n  fields: spread(${key}, 'select'),\n  insertFields: spread(${key}, 'insert'),\n} as const;`;
 
-export const ${capitalized}Base = {
-  fields: spread(${key}, 'select'),
-  insertFields: spread(${key}, 'insert'),
-} as const;
-`.trim();
-    fs.writeFileSync(
-      path.join(contractDirs.gen, `${lowName}.contract.ts`),
-      `${genContent}\n`
-    );
+    fs.writeFileSync(genPath, `${genContent}\n`);
+    log.update(`Contract-Base: ${lowName}`);
 
-    // 2. 生成 _custom 里的业务契约 (仅在不存在时生成)
+    // B. 生成 _custom (业务层 - 仅创建)
     const customPath = path.join(contractDirs.custom, `${lowName}.contract.ts`);
     if (!fs.existsSync(customPath)) {
-      const customContent = `
-${CUSTOM_HEADER("Contract")}
-import { t } from "elysia";
-import { ${capitalized}Base } from "../_generated/${lowName}.contract";
-import { InferDTO } from "../../helper/utils"; 
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
+      const customContent = `${CUSTOM_HEADER("Contract")}\nimport { t } from "elysia";\nimport { ${capitalized}Base } from "../_generated/${lowName}.contract";\nimport { InferDTO } from "../../helper/utils"; \nimport { PaginationParams, SortParams } from "../../helper/query-types.model";\n\nexport const ${capitalized}Contract = {\n  Response: t.Object({ ...${capitalized}Base.fields }),\n  Create: t.Object(t.Omit(t.Object(${capitalized}Base.insertFields), [${SYSTEM_FIELDS.map((f) => `"${f}"`).join(", ")}]).properties),\n  Update: t.Partial(t.Omit(t.Object(${capitalized}Base.insertFields), [${SYSTEM_FIELDS.map((f) => `"${f}"`).join(", ")}, "siteId"])),\n  ListQuery: t.Object({ ...t.Partial(t.Object(${capitalized}Base.insertFields)).properties, ...PaginationParams.properties, ...SortParams.properties, search: t.Optional(t.String()) }),\n  ListResponse: t.Object({ data: t.Array(t.Object(${capitalized}Base.fields)), total: t.Number() }),\n} as const;\n\nexport type ${capitalized}DTO = InferDTO<typeof ${capitalized}Contract>;`;
 
-/**
- * ${capitalized} 契约定义
- * 你可以直接在此处添加或 Omit 字段
- */
-export const ${capitalized}Contract = {
-  // 响应字段 (默认展开所有数据库字段)
-  Response: t.Object({
-    ...${capitalized}Base.fields,
-  }),
-  
-  // 创建请求 (默认排除系统字段)
-  Create: t.Object(
-    t.Omit(t.Object(${capitalized}Base.insertFields), [${SYSTEM_FIELDS.map((f) => `"${f}"`).join(", ")}]).properties
-  ),
-  
-  // 更新请求 (精细化可选更新)
-  Update: t.Partial(
-    t.Omit(t.Object(${capitalized}Base.insertFields), [${SYSTEM_FIELDS.map((f) => `"${f}"`).join(", ")}, "siteId"])
-  ),
-  
-  // 列表查询
-  ListQuery: t.Object({
-    ...t.Partial(t.Object(${capitalized}Base.insertFields)).properties,
-    ...PaginationParams.properties,
-    ...SortParams.properties,
-    search: t.Optional(t.String()),
-  }),
-  
-  ListResponse: t.Object({ 
-    data: t.Array(t.Object(${capitalized}Base.fields)), 
-    total: t.Number() 
-  }),
-} as const;
-
-// ✨ DTO 类型直接在此导出，方便外部引用
-export type ${capitalized}DTO = InferDTO<typeof ${capitalized}Contract>;
-`.trim();
       fs.writeFileSync(customPath, `${customContent}\n`);
-      console.log(`🆕 已创建新契约: ${lowName}.contract.ts`);
+      log.create(`Contract-Custom: ${lowName}`);
     }
   });
 
-  // 3. 生成统一入口 index.ts
-  const indexHeader = "/** 🛡️ 契约统一出口 - 脚本自动路由 */\n";
-  const indexContent = processedModules
-    .map((m) => `export * from "./_custom/${m.lowName}.contract";`)
-    .join("\n");
-  fs.writeFileSync(
-    path.join(CONTRACT_ROOT, "index.ts"),
-    `${indexHeader + indexContent}\n`
-  );
+  // C. 生成契约统一索引 (index.ts)
+  const indexContent =
+    "/** 🛡️ 契约统一出口 - 脚本自动路由 */\n" +
+    processedModules
+      .map((m) => `export * from "./_custom/${m.lowName}.contract";`)
+      .join("\n");
+  fs.writeFileSync(path.join(CONTRACT_ROOT, "index.ts"), `${indexContent}\n`);
 
-  // --- 处理端 (B2B & WEB) 保持之前的 Controller/Service 生成逻辑 ---
+  // --- 处理 Server 端 (B2B & WEB) ---
   [
     { name: "B2B", root: B2B_SERVER_ROOT },
     { name: "WEB", root: WEB_SERVER_ROOT },
   ].forEach((env) => {
-    if (!fs.existsSync(env.root)) return;
+    if (!fs.existsSync(env.root)) {
+      log.warn(`跳过环境 ${env.name}: 路径不存在 ${env.root}`);
+      return;
+    }
+
+    log.info(`正在处理 ${env.name} Server 逻辑...`);
     const moduleRoot = path.join(env.root, "modules");
     const controllerRoot = path.join(env.root, "controllers");
+
     const dirs = {
       lib: path.join(moduleRoot, "_lib"),
       servGen: path.join(moduleRoot, "_generated"),
@@ -177,24 +160,18 @@ export type ${capitalized}DTO = InferDTO<typeof ${capitalized}Contract>;
       ctrlGen: path.join(controllerRoot, "_generated"),
       ctrlCustom: path.join(controllerRoot, "_custom"),
     };
+
     Object.values(dirs).forEach(ensureDir);
 
+    // 1. 生成 BaseService (不覆盖)
     generateBaseService(env.name, dirs.lib);
 
     processedModules.forEach(({ key, capitalized, lowName }) => {
-      // 生成 Service
+      // 2. Service 生成
       const servGenPath = path.join(dirs.servGen, `${lowName}.service.ts`);
       fs.writeFileSync(
         servGenPath,
-        `
-${GEN_HEADER(`${env.name} Service`)}
-import { ${key}, ${capitalized}Contract } from "@repo/contract";
-import { ${env.name}BaseService } from "../_lib/base-service";
-
-export class ${capitalized}GeneratedService extends ${env.name}BaseService<typeof ${key}, typeof ${capitalized}Contract> {
-  constructor() { super(${key}, ${capitalized}Contract); }
-}
-`.trim()
+        `${GEN_HEADER(`${env.name} Service`)}\nimport { ${key}, ${capitalized}Contract } from "@repo/contract";\nimport { ${env.name}BaseService } from "../_lib/base-service";\n\nexport class ${capitalized}GeneratedService extends ${env.name}BaseService<typeof ${key}, typeof ${capitalized}Contract> {\n  constructor() { super(${key}, ${capitalized}Contract); }\n}`
       );
 
       const servCustomPath = path.join(
@@ -204,15 +181,12 @@ export class ${capitalized}GeneratedService extends ${env.name}BaseService<typeo
       if (!fs.existsSync(servCustomPath)) {
         fs.writeFileSync(
           servCustomPath,
-          `
-${CUSTOM_HEADER(`${env.name} Service`)}
-import { ${capitalized}GeneratedService } from "../_generated/${lowName}.service";
-export class ${capitalized}Service extends ${capitalized}GeneratedService {}
-`.trim()
+          `${CUSTOM_HEADER(`${env.name} Service`)}\nimport { ${capitalized}GeneratedService } from "../_generated/${lowName}.service";\nexport class ${capitalized}Service extends ${capitalized}GeneratedService {}`
         );
+        log.create(`${env.name} Service: ${lowName}`);
       }
 
-      // 生成 Controller
+      // 3. Controller 生成 (总是更新 _generated)
       const ctrlGenPath = path.join(dirs.ctrlGen, `${lowName}.controller.ts`);
       fs.writeFileSync(
         ctrlGenPath,
@@ -220,7 +194,7 @@ export class ${capitalized}Service extends ${capitalized}GeneratedService {}
       );
     });
 
-    // 索引生成
+    // 4. 生成模块索引 (modules/index.ts)
     fs.writeFileSync(
       path.join(moduleRoot, "index.ts"),
       processedModules
@@ -230,6 +204,8 @@ export class ${capitalized}Service extends ${capitalized}GeneratedService {}
         )
         .join("\n\n")
     );
+
+    // 5. 生成控制器索引 (controllers/index.ts)
     fs.writeFileSync(
       path.join(controllerRoot, "index.ts"),
       processedModules
@@ -241,11 +217,17 @@ export class ${capitalized}Service extends ${capitalized}GeneratedService {}
         })
         .join("\n")
     );
+
+    // 6. 生成 AppRouter (入口文件)
     generateAppRouter(processedModules, controllerRoot);
   });
 
-  console.log("✅ 同步完成。");
+  console.log("\n✨ ==================================================");
+  log.success("同步完成。请检查各模块的 _custom 文件夹进行业务扩展。");
+  console.log("✨ ==================================================\n");
 }
+
+// --- 🧩 辅助生成函数 (逻辑保持不变，仅增加日志) ---
 
 // --- 🧩 辅助生成函数 ---
 
@@ -329,7 +311,12 @@ export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
 function generateAppRouter(processedModules: any[], controllerRoot: string) {
   const routerPath = path.join(controllerRoot, "app-router.ts");
 
-  // 智能路由检测：决定 Import 源
+  // 1. 检查文件是否存在，如果存在则直接退出
+  if (fs.existsSync(routerPath)) {
+    log.skip("app-router.ts (存在即保护)");
+    return;
+  }
+
   const imports = processedModules
     .map((m) => {
       const customPath = path.join(
@@ -362,6 +349,7 @@ ${uses};
 `.trim();
 
   fs.writeFileSync(routerPath, `${content}\n`);
+  log.create(`AppRouter 入口: ${routerPath}`);
 }
 
 // 🔥 启动

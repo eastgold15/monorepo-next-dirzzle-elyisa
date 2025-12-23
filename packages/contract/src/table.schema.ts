@@ -293,6 +293,10 @@ export const mediaTable = p.pgTable("media", {
   originalName: p.varchar("original_name", { length: 255 }).notNull(),
   mimeType: p.varchar("mime_type", { length: 100 }).notNull(),
   status: p.boolean("status").notNull().default(true),
+  thumbnailUrl: p.text("thumbnail_url"), // 如果是视频，存储封面图
+  // 关键字段：使用枚举或字符串
+  // 'image' | 'video'
+  mediaType: p.varchar("media_type", { length: 20 }).notNull().default("image"),
   ...tenantCols,
 });
 
@@ -359,6 +363,7 @@ export const productsTable = p.pgTable("products_table", {
   description: p.text("description"),
   status: p.integer("status").notNull().default(1),
   units: p.varchar("units", { length: 20 }),
+
   ...tenantCols,
 });
 
@@ -369,12 +374,12 @@ export const productMasterCategoriesTable = p.pgTable(
       .uuid("product_id")
       .notNull()
       .references(() => productsTable.id),
-    categoryId: p
+    masterCategoryId: p
       .uuid("category_id")
       .notNull()
       .references(() => masterTable.id),
   },
-  (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
+  (t) => [p.primaryKey({ columns: [t.productId, t.masterCategoryId] })]
 );
 
 export const productSiteCategoriesTable = p.pgTable(
@@ -404,6 +409,7 @@ export const productMediaTable = p.pgTable(
       .notNull()
       .references(() => mediaTable.id),
     isMain: p.boolean("is_main").default(false),
+    sortOrder: p.integer("sort_order").default(0),
   },
   (t) => [p.primaryKey({ columns: [t.productId, t.mediaId] })]
 );

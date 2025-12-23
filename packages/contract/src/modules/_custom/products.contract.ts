@@ -21,22 +21,34 @@ export const ProductsContract = {
   }),
 
   // 创建请求 (默认排除系统字段)
-  Create: t.Object(
-    t.Omit(t.Object(ProductsBase.insertFields), [
+  Create: t.Object({
+    ...t.Omit(t.Object(ProductsBase.insertFields), [
       "id",
       "createdAt",
       "updatedAt",
-    ]).properties
-  ),
+    ]).properties,
+    // 站点ID
+    siteCategoryId: t.Optional(t.String()),
+    // 商品媒体关联
+    mediaIds: t.Optional(t.Array(t.String())), // 商品图片ID列表
+    mainImageId: t.Optional(t.String()), // 主图ID
+    videoIds: t.Optional(t.Array(t.String())), // 视频ID列表
+  }),
 
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
-    t.Omit(t.Object(ProductsBase.insertFields), [
-      "id",
-      "createdAt",
-      "updatedAt",
-      "siteId",
-    ])
+    t.Object({
+      ...t.Omit(t.Object(ProductsBase.insertFields), [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "siteId",
+      ]).properties,
+      // 商品媒体关联（更新时可全量替换）
+      mediaIds: t.Optional(t.Array(t.String())),
+      mainImageId: t.Optional(t.String()),
+      videoIds: t.Optional(t.Array(t.String())),
+    })
   ),
 
   // 列表查询

@@ -12,9 +12,7 @@ import { authGuardMid } from "~/middleware/auth";
 
 export const attributeController = new Elysia({ prefix: "/attribute" })
   .use(dbPlugin)
-  .use(authGuardMid)
-
-
+  .use(authGuardMid);
 
 // 更新属性
 // .put(

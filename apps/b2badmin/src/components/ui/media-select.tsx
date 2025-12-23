@@ -1,6 +1,8 @@
-import type { MediaContractDto } from "@repo/contract";
-import { Plus } from "lucide-react";
-import { MediaUpload } from "@/components/MediaUpload";
+import type { MediaDTO } from "@repo/contract";
+import { Plus, Video } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { MediaSelectorDialog } from "@/components/MediaSelectorDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useMediaList } from "@/hooks/api";
@@ -9,29 +11,39 @@ interface MediaSelectProps {
   value?: string[]; // 媒体ID列表
   onChange?: (mediaIds: string[]) => void; // 回调函数
   maxCount?: number; // 最大选择数量
+  max?: number; // maxCount 的别名（向后兼容）
   className?: string;
   placeholder?: string;
   multiple?: boolean;
+  category?: string; // 媒体分类筛选
+  availableMediaIds?: string[]; // 可选择的媒体ID列表（用于主图从已选图片中选择）
 }
 
 export function MediaSelect({
   value = [],
   onChange,
   maxCount = 5,
+  max,
   className,
   placeholder = "选择图片",
   multiple = true,
+  category = "",
+  availableMediaIds,
 }: MediaSelectProps) {
-  const { data: mediaList = [] } = useMediaList({
-    category: "",
+  // 优先使用 maxCount，如果没有则使用 max（向后兼容）
+  const effectiveMaxCount = maxCount ?? max ?? 5;
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // 获取媒体列表（用于显示已选择的媒体）
+  const { data: mediaListData } = useMediaList({
+    category,
     search: "",
   });
+  const mediaList = mediaListData || [];
 
-  // 添加媒体
-  const handleAddMedia = () => {
-    // 这里应该打开媒体选择器或上传对话框
-    // 暂时使用 console.log 作为占位
-    console.log("添加媒体");
+  // 确认选择媒体
+  const handleSelectMedia = (mediaIds: string[]) => {
+    onChange?.(mediaIds);
   };
 
   // 移除媒体
@@ -40,21 +52,12 @@ export function MediaSelect({
     onChange?.(newMediaIds);
   };
 
-  // 获取媒体URL
-  const getMediaUrl = (mediaId: string) => {
-    const media = mediaList.find(
-      (m: MediaContractDto["Entity"]) => m.id === mediaId
-    );
-    return media?.url || "";
-  };
+  // 获取媒体信息
+  const getMedia = (mediaId: string) =>
+    mediaList.find((m: MediaDTO["Entity"]) => m.id === mediaId);
 
-  // 获取媒体名称
-  const getMediaName = (mediaId: string) => {
-    const media = mediaList.find(
-      (m: MediaContractDto["Entity"]) => m.id === mediaId
-    );
-    return media?.filename || media?.originalName || "";
-  };
+  // 判断是否是视频
+  const isVideo = (mimeType?: string) => mimeType?.startsWith("video/");
 
   return (
     <div className={className}>
@@ -62,46 +65,76 @@ export function MediaSelect({
         {/* 显示已选择的媒体 */}
         {value.length > 0 && (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {value.map((mediaId) => (
-              <Card className="relative" key={mediaId}>
-                <CardContent className="p-2">
-                  <div className="group relative aspect-square overflow-hidden rounded-md">
-                    <img
-                      alt={getMediaName(mediaId)}
-                      className="h-full w-full object-cover"
-                      src={getMediaUrl(mediaId)}
-                    />
-                    <Button
-                      className="absolute top-1 right-1 h-6 w-6 rounded-full bg-red-500 p-0 opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
-                      onClick={() => handleRemoveMedia(mediaId)}
-                      size="sm"
-                      variant="destructive"
-                    >
-                      ×
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {value.map((mediaId) => {
+              const media = getMedia(mediaId);
+              const video = isVideo(media?.mimeType);
+
+              return (
+                <Card className="relative" key={mediaId}>
+                  <CardContent className="p-2">
+                    <div className="group relative aspect-square overflow-hidden rounded-md bg-muted">
+                      {video ? (
+                        <div className="flex h-full items-center justify-center">
+                          <Video className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      ) : (
+                        <Image
+                          alt={media?.originalName || "媒体"}
+                          className="h-full w-full object-cover"
+                          fill
+                          sizes="(max-width: 768px) 50vw, 20vw"
+                          src={media?.url || "/placeholder.png"}
+                        />
+                      )}
+                      {/* 删除按钮 */}
+                      <Button
+                        className="absolute top-1 right-1 h-6 w-6 rounded-full bg-red-500 p-0 opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
+                        onClick={() => handleRemoveMedia(mediaId)}
+                        size="sm"
+                        type="button"
+                        variant="destructive"
+                      >
+                        ×
+                      </Button>
+                      {/* 视频标记 */}
+                      {video && (
+                        <div className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50">
+                          <Video className="h-3 w-3 text-white" />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
         {/* 添加媒体按钮 */}
         {(!multiple && value.length === 0) ||
-        (multiple && value.length < maxCount) ? (
-          <MediaUpload
-            onUploadComplete={() => {
-              // 上传完成后刷新媒体列表
-              // 这里可以触发重新获取媒体列表
-              console.log("媒体上传完成");
-            }}
+        (multiple && value.length < effectiveMaxCount) ? (
+          <Button
+            className="w-full"
+            onClick={() => setDialogOpen(true)}
+            type="button"
+            variant="outline"
           >
-            <Button className="w-full" type="button" variant="outline">
-              <Plus className="mr-2 h-4 w-4" />
-              {placeholder}
-            </Button>
-          </MediaUpload>
+            <Plus className="mr-2 h-4 w-4" />
+            {placeholder}
+          </Button>
         ) : null}
+
+        {/* 媒体选择对话框 */}
+        <MediaSelectorDialog
+          availableMediaIds={availableMediaIds}
+          category={category}
+          initialSelected={value}
+          maxCount={effectiveMaxCount}
+          multiple={multiple}
+          onOpenChange={setDialogOpen}
+          onSelect={handleSelectMedia}
+          open={dialogOpen}
+        />
       </div>
     </div>
   );

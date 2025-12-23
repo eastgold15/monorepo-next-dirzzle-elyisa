@@ -11,7 +11,6 @@ import type { InferDTO } from "../../helper/utils";
 import { AttributeBase } from "../_generated/attribute.contract";
 import { AttributeTemplateBase } from "../_generated/attributetemplate.contract";
 import { MasterBase } from "../_generated/master.contract";
-import { SiteCategoriesBase } from "../_generated/sitecategories.contract";
 
 /**
  * AttributeTemplate 契约定义

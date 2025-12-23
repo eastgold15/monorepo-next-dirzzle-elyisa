@@ -50,7 +50,7 @@ export class ProductTemplateService extends ProductTemplateGeneratedService {
       if (a) {
         templateMap.get(t.id).fields.push({
           id: a.id,
-          key: a.key,           // 前端使用 key
+          key: a.key, // 前端使用 key
           code: a.code,
           inputType: a.inputType, // 前端使用 inputType
           isRequired: a.isRequired, // 前端使用 isRequired
@@ -86,7 +86,10 @@ export class ProductTemplateService extends ProductTemplateGeneratedService {
           const rawValues = valuesByAttributeId.get(field.id) || [];
 
           // --- 核心逻辑：根据类型决定 value 的格式 ---
-          if (field.inputType === "select" || field.inputType === "multiselect") {
+          if (
+            field.inputType === "select" ||
+            field.inputType === "multiselect"
+          ) {
             // 对于选择框，value 应该是逗号分隔的字符串，方便前端编辑器的 textarea 显示
             field.value = rawValues.join(", ");
             // 同时保留 options 数组，方便前端渲染下拉列表预览

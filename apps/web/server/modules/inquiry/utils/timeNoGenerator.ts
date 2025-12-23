@@ -1,4 +1,4 @@
-import { dailyInquiryCounterTable } from "@repo/contract/table";
+import { dailyInquiryCounterTable } from "@repo/contract";
 import { eq } from "drizzle-orm";
 import { db } from "~/db/connection";
 
