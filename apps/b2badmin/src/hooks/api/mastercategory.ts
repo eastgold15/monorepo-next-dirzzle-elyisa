@@ -105,4 +105,3 @@ export function useMasterCategory(id: string) {
     enabled: !!id,
   });
 }
-

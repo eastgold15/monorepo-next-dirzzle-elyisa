@@ -25,6 +25,7 @@ export * from "./_generated/inquiryitems.controller";
 export * from "./_generated/mediametadata.controller";
 export * from "./_generated/permission.controller";
 export * from "./_generated/productmedia.controller";
+export * from "./_generated/productsitecategories.controller";
 export * from "./_generated/producttemplate.controller";
 export * from "./_generated/quotationitems.controller";
 export * from "./_generated/quotations.controller";

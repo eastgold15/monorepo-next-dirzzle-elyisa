@@ -35,7 +35,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // 3. 渲染控制
   if (isPublicPage) return <>{children}</>;
-  if (isLoading) return <div className="h-screen w-full"><Skeleton className="h-full w-full" /></div>;
+  if (isLoading)
+    return (
+      <div className="h-screen w-full">
+        <Skeleton className="h-full w-full" />
+      </div>
+    );
   if (!data) return null;
 
   return <>{children}</>;

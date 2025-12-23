@@ -379,6 +379,21 @@ export const productMasterCategoriesTable = p.pgTable(
   (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
 );
 
+export const productSiteCategoriesTable = p.pgTable(
+  "product_site_categories",
+  {
+    productId: p
+      .uuid("product_id")
+      .notNull()
+      .references(() => productsTable.id),
+    categoryId: p
+      .uuid("category_id")
+      .notNull()
+      .references(() => masterTable.id),
+  },
+  (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
+);
+
 export const productMediaTable = p.pgTable(
   "product_media",
   {
@@ -463,6 +478,10 @@ export const skusTable = p.pgTable("skus_table", {
     })
     .notNull(),
 
+  siteId: p
+    .uuid("site_id")
+    .notNull()
+    .references(() => sitesTable.id, { onDelete: "cascade" }),
   ...tenantCols,
 });
 

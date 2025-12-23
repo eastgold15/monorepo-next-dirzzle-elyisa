@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateAttributeTemplate } from "@/hooks/api/attributetemplate";
+import { useCreateTemplate } from "@/hooks/api/attributetemplate";
 import { useMasterCategoryStore } from "@/stores/mastercategory-store";
 
 // 属性值的 schema
@@ -65,7 +65,7 @@ export function CreateAttributeTemplateModal({
   onOpenChange,
   onSuccess,
 }: CreateAttributeTemplateModalProps) {
-  const createAttributeTemplate = useCreateAttributeTemplate();
+  const createAttributeTemplate = useCreateTemplate();
   const { masterCategories } = useMasterCategoryStore();
 
   const form = useForm<FormData>({

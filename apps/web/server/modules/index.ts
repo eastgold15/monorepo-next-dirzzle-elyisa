@@ -54,6 +54,9 @@ export const productMasterCategoriesService =
 import { ProductMediaService } from "./_custom/productmedia.service";
 export const productMediaService = new ProductMediaService();
 
+import { ProductSiteCategoriesService } from "./_custom/productsitecategories.service";
+export const productSiteCategoriesService = new ProductSiteCategoriesService();
+
 import { ProductTemplateService } from "./_custom/producttemplate.service";
 export const productTemplateService = new ProductTemplateService();
 

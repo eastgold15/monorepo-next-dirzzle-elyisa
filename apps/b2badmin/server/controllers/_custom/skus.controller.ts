@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "~/db/connection";
 import { authGuardMid } from "~/middleware/auth";
-import { skusService } from "~/modules";
+import { skusService } from "~/modules/index";
 
 export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
   .use(authGuardMid)
@@ -37,7 +37,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
 
   // 更新SKU
   .put(
-    "/:id",
+    "/update/:id",
     async ({ params: { id }, body, db, user, role, auth }) => {
       // 验证媒体是否存在（如果要更新的话）
       if (body.mediaId !== undefined && body.mediaId) {
@@ -91,9 +91,17 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
 
   // 获取SKU列表
   .get(
-    "/",
-    async ({ query, db, user, role, auth }) =>
-      await skusService.getSkusList({ db, auth }, query),
+    "/list",
+    async ({ db, auth }) => {
+      try {
+        console.log('query:')
+
+        return await skusService.getSkusList({ db, auth }, {});
+
+      } catch (error) {
+        console.log("error:", error);
+      }
+    },
     {
       allPermission: "SKUS_TABLE_VIEW",
       query: SkusContract.ListQuery,
@@ -107,7 +115,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
 
   // 获取SKU详情
   .get(
-    "/:id",
+    "/detail/:id",
     async ({ params: { id }, db, user, role, auth }) => {
       // 获取SKU详情
       return await skusService.getSkuDetail({ db, auth }, id);
@@ -147,7 +155,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
 
   // 更新SKU的媒体关联
   .put(
-    "/:id/media",
+    "/media/:id",
     async ({ params: { id }, body, db, user, role, auth }) => {
       // 更新媒体关联
       return await skusService.updateSkuMedia(

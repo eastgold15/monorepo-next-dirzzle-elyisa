@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
 import type { MediaContractDto } from "@repo/contract";
+import { Plus } from "lucide-react";
 import { MediaUpload } from "@/components/MediaUpload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,13 +42,17 @@ export function MediaSelect({
 
   // 获取媒体URL
   const getMediaUrl = (mediaId: string) => {
-    const media = mediaList.find((m: MediaContractDto["Entity"]) => m.id === mediaId);
+    const media = mediaList.find(
+      (m: MediaContractDto["Entity"]) => m.id === mediaId
+    );
     return media?.url || "";
   };
 
   // 获取媒体名称
   const getMediaName = (mediaId: string) => {
-    const media = mediaList.find((m: MediaContractDto["Entity"]) => m.id === mediaId);
+    const media = mediaList.find(
+      (m: MediaContractDto["Entity"]) => m.id === mediaId
+    );
     return media?.filename || media?.originalName || "";
   };
 
@@ -83,7 +87,8 @@ export function MediaSelect({
         )}
 
         {/* 添加媒体按钮 */}
-        {(!multiple && value.length === 0) || (multiple && value.length < maxCount) ? (
+        {(!multiple && value.length === 0) ||
+        (multiple && value.length < maxCount) ? (
           <MediaUpload
             onUploadComplete={() => {
               // 上传完成后刷新媒体列表

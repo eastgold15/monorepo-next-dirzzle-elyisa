@@ -7,6 +7,7 @@
  */
 import {
   mediaTable,
+  productSiteCategoriesTable,
   productsTable,
   salespersonAffiliationsTable,
   salespersonsTable,
@@ -296,35 +297,31 @@ export class SkusService extends SkusGeneratedService {
       sortOrder = "desc",
     } = query;
 
+    const { siteId } = ctx.auth;
+
     const baseConditions = [];
 
-    // 根据用户角色过滤数据
-    if (ctx.auth.role === "salesperson") {
-      const productIds = await this.getSalesmanProductIds(ctx);
-
-      if (productIds.length === 0) {
-        return [];
-      }
-
-      baseConditions.push(inArray(skusTable.productId, productIds));
+    // 1. 站点筛选 (必须)
+    if (siteId) {
+      baseConditions.push(eq(skusTable.siteId, siteId));
     }
 
-    // 商品筛选
+    // 2. 商品筛选
     if (productId) {
       baseConditions.push(eq(skusTable.productId, productId));
     }
 
-    // 搜索条件
+    // 3. 搜索条件 (SKU Code 或 商品名称)
     if (search) {
       baseConditions.push(like(skusTable.skuCode, `%${search}%`));
     }
 
-    // 状态筛选
+    // 4. 状态筛选
     if (status !== undefined) {
-      baseConditions.push(eq(skusTable.status, status));
+      baseConditions.push(eq(skusTable.status, Number(status)));
     }
 
-    // 排序字段白名单
+    // 排序处理
     const allowedSortFields = {
       id: skusTable.id,
       skuCode: skusTable.skuCode,
@@ -332,102 +329,91 @@ export class SkusService extends SkusGeneratedService {
       stock: skusTable.stock,
       status: skusTable.status,
       createdAt: skusTable.createdAt,
-      updatedAt: skusTable.updatedAt,
     };
-
-    const orderBy =
+    const orderByField =
       allowedSortFields[sort as keyof typeof allowedSortFields] ||
       skusTable.createdAt;
-    const orderDirection = sortOrder === "desc" ? desc(orderBy) : undefined;
 
-    // 构建查询
+    // --- 构建主查询 ---
     let queryBuilder = db
       .select({
+        // SKU 信息
         id: skusTable.id,
         skuCode: skusTable.skuCode,
-        productId: skusTable.productId,
         price: skusTable.price,
-        marketPrice: skusTable.marketPrice,
-        costPrice: skusTable.costPrice,
-        weight: skusTable.weight,
-        volume: skusTable.volume,
         stock: skusTable.stock,
-        specJson: skusTable.specJson,
-        extraAttributes: skusTable.extraAttributes,
         status: skusTable.status,
+        specJson: skusTable.specJson,
         createdAt: skusTable.createdAt,
-        updatedAt: skusTable.updatedAt,
-        // 完整的商品信息
+        // 补充商品信息
         product: {
           id: productsTable.id,
           name: productsTable.name,
           spuCode: productsTable.spuCode,
-          siteCategoryId: productsTable.siteCategoryId,
         },
+        // 补充站点分类信息 (由于是多对多，这里通常取关联表的 categoryId)
+        siteCategoryId: productSiteCategoriesTable.categoryId,
       })
       .from(skusTable)
+      // 连商品表
       .innerJoin(productsTable, eq(skusTable.productId, productsTable.id))
+      // 连商品站点分类关联表 (Left Join 以防万一没设分类也能查出来)
+      .leftJoin(
+        productSiteCategoriesTable,
+        eq(productsTable.id, productSiteCategoriesTable.productId)
+      )
       .$dynamic();
 
     if (baseConditions.length > 0) {
       queryBuilder = queryBuilder.where(and(...baseConditions));
     }
 
-    // 添加排序
-    if (orderDirection) {
-      queryBuilder = queryBuilder.orderBy(orderBy);
-    }
+    // 排序与分页
+    const items = await queryBuilder
+      .orderBy(sortOrder === "desc" ? desc(orderByField) : orderByField)
+      .limit(limit)
+      .offset((page - 1) * limit);
 
-    // 执行查询
-    const items = await queryBuilder.limit(limit).offset((page - 1) * limit);
-
-    // 获取SKU的图片信息
-    const skuIds = items.map((item: { id: any }) => item.id);
+    // --- 批量获取图片信息 (优化 N+1) ---
+    const skuIds = items.map((item) => item.id);
     const images =
       skuIds.length > 0
         ? await db
             .select({
               skuId: skuMediaTable.skuId,
               mediaId: mediaTable.id,
-              imageUrl: mediaTable.url,
-              imageKey: mediaTable.storageKey,
+              url: mediaTable.url,
+              isMain: skuMediaTable.isMain,
             })
             .from(skuMediaTable)
-            .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+            .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
             .where(inArray(skuMediaTable.skuId, skuIds))
+            .orderBy(skuMediaTable.sortOrder)
         : [];
 
+    // 图片按 SKU 分组 Map
     const imageMap = images.reduce(
       (map: any, img: any) => {
-        if (img.mediaId) {
-          map[img.skuId] = {
-            id: img.mediaId,
-            url: img.imageUrl,
-            key: img.imageKey,
-          };
-        }
+        if (!map[img.skuId]) map[img.skuId] = [];
+        map[img.skuId].push(img);
         return map;
       },
-      {} as Record<string, any>
+      {} as Record<string, any[]>
     );
 
-    // 格式化返回数据
-    return items.map((item: any) => ({
-      ...item,
-      image: imageMap[item.id] || null,
-      specJson: item.specJson ?? null,
-      extraAttributes: item.extraAttributes ?? null,
-      price: Number.parseFloat(item.price || "0"),
-      marketPrice: item.marketPrice
-        ? Number.parseFloat(item.marketPrice)
-        : null,
-      costPrice: item.costPrice ? Number.parseFloat(item.costPrice) : null,
-      weight: item.weight ? Number.parseFloat(item.weight) : null,
-      volume: item.volume ? Number.parseFloat(item.volume) : null,
-      stock: item.stock ? Number.parseFloat(item.stock) : null,
-    }));
+    // --- 最终数据格式化 ---
+    return items.map((item: any) => {
+      const skuImages = imageMap[item.id] || [];
+      return {
+        ...item,
+        price: Number(item.price),
+        stock: Number(item.stock),
+        // 提取该 SKU 的主图
+        mainImage: skuImages.find((i) => i.isMain) || skuImages[0] || null,
+        allImages: skuImages,
+      };
+    });
   }
-
   // 获取SKU详情
   async getSkuDetail(ctx: ServiceContext, id: string) {
     const db = ctx.db;

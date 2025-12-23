@@ -24,6 +24,7 @@ export * from "./_generated/mediametadata.contract";
 export * from "./_generated/permission.contract";
 export * from "./_generated/productmastercategories.contract";
 export * from "./_generated/productmedia.contract";
+export * from "./_generated/productsitecategories.contract";
 export * from "./_generated/quotationitems.contract";
 export * from "./_generated/quotations.contract";
 export * from "./_generated/role.contract";

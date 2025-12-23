@@ -26,6 +26,7 @@ import { mediametadataController } from "./_generated/mediametadata.controller";
 import { permissionController } from "./_generated/permission.controller";
 import { productmastercategoriesController } from "./_generated/productmastercategories.controller";
 import { productmediaController } from "./_generated/productmedia.controller";
+import { productsitecategoriesController } from "./_generated/productsitecategories.controller";
 import { producttemplateController } from "./_generated/producttemplate.controller";
 import { quotationitemsController } from "./_generated/quotationitems.controller";
 import { quotationsController } from "./_generated/quotations.controller";
@@ -65,6 +66,7 @@ export const appRouter = (app: Elysia) =>
     .use(permissionController)
     .use(productmastercategoriesController)
     .use(productmediaController)
+    .use(productsitecategoriesController)
     .use(producttemplateController)
     .use(productsController)
     .use(quotationitemsController)

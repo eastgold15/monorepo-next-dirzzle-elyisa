@@ -1,8 +1,8 @@
 //这是模板
 // 1. 导入自动生成的原始契约
 import { t } from "elysia";
-import { MasterContract as Generated } from "../_generated/master.contract";
 import type { TreeNode } from "../../helper/utils.types";
+import { MasterContract as Generated } from "../_generated/master.contract";
 
 // 2. 导入你可能需要关联的其他契约
 // import { OtherContract } from "../generated/other.contract";

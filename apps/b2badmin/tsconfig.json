@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -22,19 +18,13 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./server/*"
-      ],
-      "@repo/contract": [
-        "../../packages/contract/src/index.ts"
-      ]
+      "@/*": ["./src/*"],
+      "~/*": ["./server/*"],
+      "@repo/contract": ["../../packages/contract/src/index.ts"]
     },
     // ✅ 增量编译（关键！）
     "incremental": true,
-    "tsBuildInfoFile": "./.cache/tsbuildinfo",
+    "tsBuildInfoFile": "./.cache/tsbuildinfo"
   },
   "exclude": [
     "node_modules",

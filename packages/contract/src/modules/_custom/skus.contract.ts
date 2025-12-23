@@ -25,17 +25,13 @@ const CustomResponse = t.Composite([
     // 添加关联数据
     product: t.Optional(ProductsContract.Response),
     values: t.Optional(t.Array(SkusValuesResponse)),
-
   }),
 ]);
 
 // --- B. 扩展创建请求 (增加前端特有的字段) ---
-const CustomCreate = t.Composite([
-  Generated.Create,
-]);
+const CustomCreate = t.Composite([Generated.Create]);
 
 const BatchCreate = t.Composite([
-
   t.Object({
     productId: t.String(),
     // 批量创建时，允许同时创建多个SKU

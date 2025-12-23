@@ -12,17 +12,25 @@ import { PaginationParams, SortParams } from "../../helper/query-types.model";
 
 const _Select = createSelectSchema(skusTable);
 const _Insert = createInsertSchema(skusTable);
+const _baseUpdate = createUpdateSchema(skusTable)
+const Create = t.Omit(_Insert, ["id", "createdAt", "updatedAt"]);
 
+const FilterParams = t.Object({
+  productId: t.Optional(t.String({ format: 'uuid' })),
+  siteId: t.Optional(t.String({ format: 'uuid' })),
+  status: t.Optional(t.Numeric()), // 使用 Numeric 自动处理字符串转数字
+  skuCode: t.Optional(t.String()),
+  search: t.Optional(t.String()),
+});
 export const SkusContract = {
   Response: _Select,
-  Create: t.Omit(_Insert, ["id", "createdAt", "updatedAt"]),
-  Update: createUpdateSchema(skusTable),
+  Create,
+  Update: _baseUpdate,
   Patch: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])),
-  ListQuery: t.Object({
-    ...t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])).properties,
-    ...PaginationParams.properties,
-    ...SortParams.properties,
-    search: t.Optional(t.String()),
-  }),
+  ListQuery: t.Intersect([
+    FilterParams,
+    PaginationParams,
+    SortParams,
+  ]),
   ListResponse: t.Object({ data: t.Array(_Select), total: t.Number() }),
 } as const;
