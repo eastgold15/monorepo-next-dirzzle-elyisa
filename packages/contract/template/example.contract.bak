@@ -1,52 +1,22 @@
-//这是模板
-
 import { t } from "elysia";
-// 1. 导入自动生成的原始契约
-import { UsersContract as Generated } from "../_generated/users.contract";
+// ✅ 关键：从 Generated 导入 Base (零件) 和 Generated (默认实现)
+import { SkusBase, SkusContract as Generated } from "../_generated/skus.contract";
+import { ProductsContract } from "../_generated/products.contract";
 
-// 2. 导入你可能需要关联的其他契约
-// import { OtherContract } from "../generated/other.contract";
+export const SkusContract = {
+  ...Generated, // 1. 继承所有默认 CRUD 定义
+  
+  // 2. 覆盖 Response：使用 Base.fields 快速重组，并加入 Product 关联
+  Response: t.Object({
+    ...SkusBase.fields, 
+    product: t.Optional(ProductsContract.Response) 
+  }),
 
-/**
- * 自定义扩展契约：${ModuleName}
- * 模式：继承基础字段 + 叠加复杂逻辑
- */
-
-// --- A. 扩展响应结构 (最常用：增加关联数据) ---
-const CustomResponse = t.Composite([
-    Generated.Response, // 保持数据库字段同步
-    t.Object({
-        // 在这里添加关联字段，例如：
-        // creator: t.Optional(GeneratedUser.Response),
-        // tags: t.Array(t.String()),
-        _extra: t.Optional(t.Any()), // 预留临时扩展位
-    }),
-]);
-
-// --- B. 扩展创建请求 (例如：增加前端特有的校验) ---
-const CustomCreate = t.Composite([
-    Generated.Create,
-    t.Object({
-        // 例如：增加“确认密码”或“验证码”这种数据库没有的字段
-        // captcha: t.String(),
-    }),
-]);
-
-// --- C. 组装并导出 ---
-export const XxxContract = {
-    ...Generated, // 默认继承所有：Update, Patch, ListQuery
-    Response: CustomResponse, // 覆盖为自定义详情响应
-    Create: CustomCreate, // 覆盖为自定义创建请求
+  // 3. 添加新业务
+  BatchCreate: t.Object({
+    productId: t.String(),
+    skus: t.Array(t.Object({
+        ...t.Omit(t.Object(SkusBase.insertFields), ['productId']).properties
+    }))
+  })
 } as const;
-
-// --- D. 导出 DTO 类型给前端使用 ---
-export type XxxDTO = {
-    Response: typeof XxxContract.Response.static;
-    Create: typeof XxxContract.Create.static;
-    Update: typeof Generated.Update.static; // 未修改的直接透传
-    Patch: typeof Generated.Patch.static;
-    ListQuery: typeof Generated.ListQuery.static;
-    ListResponse: typeof Generated.ListResponse.static & {
-        // 如果列表也需要扩展，可以在这里交叉类型
-    };
-};

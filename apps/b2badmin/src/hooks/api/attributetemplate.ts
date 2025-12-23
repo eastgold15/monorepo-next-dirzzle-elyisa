@@ -11,7 +11,7 @@ export function useTemplates(
     queryKey: ["templates", query],
     queryFn: async () =>
       await handleEden(
-        rpc.api.v1.attributetemplate.list.get({
+        rpc.api.v1.attributetemplate.get({
           query,
         })
       ),
@@ -24,7 +24,7 @@ export function useCreateTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: typeof AttributeTemplateContract.Create.static) =>
+    mutationFn: async (data: typeof AttributeContractreate.static) =>
       await handleEden(rpc.api.v1.attributetemplate.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });

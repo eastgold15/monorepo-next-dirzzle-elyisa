@@ -7,4 +7,6 @@
  */
 import { AttributeGeneratedService } from "../_generated/attribute.service";
 
-export class AttributeService extends AttributeGeneratedService {}
+export class AttributeService extends AttributeGeneratedService {
+    
+}

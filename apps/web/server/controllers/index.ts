@@ -1,5 +1,3 @@
-// 🛡️ 自动生成的路由导出
-
 export * from "./_custom/ads.controller";
 export * from "./_custom/herocards.controller";
 export * from "./_custom/inquiry.controller";

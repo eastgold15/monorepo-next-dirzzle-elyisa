@@ -10,7 +10,7 @@ import {
   attributeTemplateTable,
   attributeValueTable,
 } from "@repo/contract";
-import { eq, inArray, like } from "drizzle-orm";
+import { asc, eq, inArray, like } from "drizzle-orm";
 import { ProductTemplateGeneratedService } from "../_generated/producttemplate.service";
 import type { ServiceContext } from "../_lib/base-service";
 
@@ -20,75 +20,83 @@ export class ProductTemplateService extends ProductTemplateGeneratedService {
    * 模板是全局公用的，不需要站点隔离
    */
   async getTemplates(ctx: ServiceContext, search?: string) {
-    const templates = await ctx.db
+    const rows = await ctx.db
       .select()
       .from(attributeTemplateTable)
-      .where(
-        search ? like(attributeTemplateTable.name, `%${search}%`) : undefined
-      )
       .leftJoin(
         attributeTable,
         eq(attributeTemplateTable.id, attributeTable.templateId)
+      )
+      .where(
+        search ? like(attributeTemplateTable.name, `%${search}%`) : undefined
       );
 
-    // 按模板分组
     const templateMap = new Map();
 
-    for (const row of templates) {
-      if (!templateMap.has(row.attribute_templates.id)) {
-        templateMap.set(row.attribute_templates.id, {
-          id: row.attribute_templates.id,
-          name: row.attribute_templates.name,
-          categoryId: row.attribute_templates.categoryId,
-          categoryName: null,
+    for (const row of rows) {
+      const t = row.attribute_templates;
+      const a = row.attributes_table;
+
+      if (!templateMap.has(t.id)) {
+        templateMap.set(t.id, {
+          id: t.id,
+          name: t.name,
+          masterCategoryId: t.masterCategoryId,
+          siteCategoryId: t.siteCategoryId,
           fields: [],
         });
       }
 
-      if (row.attributes_table) {
-        const template = templateMap.get(row.attribute_templates.id);
-        template.fields.push({
-          id: row.attributes_table.id,
-          name: row.attributes_table.name,
-          code: row.attributes_table.code,
-          type: row.attributes_table.inputType,
-          isRequired: row.attributes_table.isRequired,
-          isSkuSpec: row.attributes_table.isSaleAttr,
-          sortOrder: row.attributes_table.sortOrder,
+      if (a) {
+        templateMap.get(t.id).fields.push({
+          id: a.id,
+          name: a.key,
+          code: a.code,
+          type: a.inputType,
+          required: a.isRequired,
+          isSkuSpec: a.isSkuSpec,
+          // 这里我们统一定义一个 value 字段
+          value: "",
+          options: [],
         });
       }
     }
 
-    // 为每个模板获取属性值
-    const templateIds = Array.from(templateMap.keys());
-    const attributeValues =
-      templateIds.length > 0
-        ? await ctx.db
-            .select()
-            .from(attributeValueTable)
-            .where(
-              inArray(
-                attributeValueTable.attributeId,
-                Array.from(templateMap.values()).flatMap((t: any) =>
-                  t.fields.map((f: any) => f.id)
-                )
-              )
-            )
-        : [];
+    const allFieldIds = Array.from(templateMap.values()).flatMap((t) =>
+      t.fields.map((f: any) => f.id)
+    );
 
-    // 构建属性值映射
-    const valueMap = new Map();
-    for (const value of attributeValues) {
-      if (!valueMap.has(value.attributeId)) {
-        valueMap.set(value.attributeId, []);
+    if (allFieldIds.length > 0) {
+      const allValues = await ctx.db
+        .select()
+        .from(attributeValueTable)
+        .where(inArray(attributeValueTable.attributeId, allFieldIds))
+        .orderBy(asc(attributeValueTable.sortOrder));
+
+      const valuesByAttributeId = new Map<string, string[]>();
+      for (const val of allValues) {
+        if (!valuesByAttributeId.has(val.attributeId)) {
+          valuesByAttributeId.set(val.attributeId, []);
+        }
+        valuesByAttributeId.get(val.attributeId)!.push(val.value);
       }
-      valueMap.get(value.attributeId).push(value.value);
-    }
 
-    // 补充 options
-    for (const template of templateMap.values()) {
-      for (const field of template.fields) {
-        field.options = valueMap.get(field.id) || [];
+      for (const template of templateMap.values()) {
+        for (const field of template.fields) {
+          const rawValues = valuesByAttributeId.get(field.id) || [];
+
+          // --- 核心逻辑：根据类型决定 value 的格式 ---
+          if (field.type === "select" || field.type === "multiselect") {
+            // 对于选择框，value 应该是逗号分隔的字符串，方便前端编辑器的 textarea 显示
+            field.value = rawValues.join(", ");
+            // 同时保留 options 数组，方便前端渲染下拉列表预览
+            field.options = rawValues;
+          } else {
+            // 对于 text 或 number，value 就是那唯一的一个提示/默认值字符串
+            field.value = rawValues[0] || "";
+            field.options = [];
+          }
+        }
       }
     }
 

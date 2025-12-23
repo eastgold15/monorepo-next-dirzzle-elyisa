@@ -147,7 +147,7 @@ export const relations = defineRelations(schema, (r) => ({
     // }),
     attributeTemplates: r.many.attributeTemplateTable({
       from: r.masterTable.id,
-      to: r.attributeTemplateTable.categoryId,
+      to: r.attributeTemplateTable.masterCategoryId,
     }),
 
     // 🔥 关联到站点分类 (可选关系，用于数据聚合)
@@ -390,9 +390,13 @@ export const relations = defineRelations(schema, (r) => ({
 
   // --- Attributes ---
   attributeTemplateTable: {
-    category: r.one.masterTable({
-      from: r.attributeTemplateTable.categoryId,
+    masterCategory: r.one.masterTable({
+      from: r.attributeTemplateTable.masterCategoryId,
       to: r.masterTable.id,
+    }),
+    siteCategory: r.one.siteCategoriesTable({
+      from: r.attributeTemplateTable.siteCategoryId,
+      to: r.siteCategoriesTable.id,
     }),
     attributes: r.many.attributeTable({
       from: r.attributeTemplateTable.id,

@@ -13,14 +13,14 @@ import { useEffect, useState } from "react";
 import { MediaPicker } from "@/components/admin/MediaPicker";
 import { AppSidebar } from "@/components/app-sidebar";
 import { FactorySelector } from "@/components/auth/FactorySelector";
-import { CanCreateProducts } from "@/components/auth/PermissionGuard";
+
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { usePermissions } from "@/hooks/use-permissions";
+
 import {
   INITIAL_CATEGORIES,
   INITIAL_FACTORIES,

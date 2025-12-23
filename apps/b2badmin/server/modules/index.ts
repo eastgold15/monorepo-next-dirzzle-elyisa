@@ -1,4 +1,3 @@
-// 🛡️ 自动生成的模块实例导出
 import { CustomerService } from "./_custom/customer.service";
 export const customerService = new CustomerService();
 

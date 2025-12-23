@@ -1,15 +1,13 @@
 /**
- * 🤖 【WEB Service - 自动生成】
+ * 🤖 【WEB Service - 自动生成基类】
  * --------------------------------------------------------
- * 🛠️ 该文件由自动化脚本生成。手动修改将被下次运行覆盖。
- * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
+ * ⚠️ 请勿手动修改此文件，下次运行会被覆盖。
+ * 💡 请前往 ../_custom 目录修改具体的业务契约。
  * --------------------------------------------------------
  */
 import { siteProductsTable, SiteProductsContract } from "@repo/contract";
 import { WEBBaseService } from "../_lib/base-service";
 
 export class SiteProductsGeneratedService extends WEBBaseService<typeof siteProductsTable, typeof SiteProductsContract> {
-  constructor() {
-    super(siteProductsTable, SiteProductsContract);
-  }
+  constructor() { super(siteProductsTable, SiteProductsContract); }
 }

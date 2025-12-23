@@ -1,28 +1,15 @@
 /**
- * 🤖 【Contract - 自动生成】
+ * 🤖 【Contract Base - 自动生成基类】
  * --------------------------------------------------------
- * 🛠️ 该文件由自动化脚本生成。手动修改将被下次运行覆盖。
- * 👈 如果需要自定义逻辑，请前往 ../_custom 目录。
+ * ⚠️ 请勿手动修改此文件，下次运行会被覆盖。
+ * 💡 请前往 ../_custom 目录修改具体的业务契约。
  * --------------------------------------------------------
  */
 import { t } from "elysia";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-typebox";
 import { usersTable } from "../../table.schema";
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
+import { spread } from "../../helper/utils"; 
 
-const _Select = createSelectSchema(usersTable);
-const _Insert = createInsertSchema(usersTable);
-
-export const UsersContract = {
-  Response: _Select,
-  Create: t.Omit(_Insert, ["id", "createdAt", "updatedAt"]),
-  Update: createUpdateSchema(usersTable),
-  Patch: t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])),
-  ListQuery: t.Object({
-    ...t.Partial(t.Omit(_Insert, ["id", "createdAt", "updatedAt"])).properties,
-    ...PaginationParams.properties,
-    ...SortParams.properties,
-    search: t.Optional(t.String()),
-  }),
-  ListResponse: t.Object({ data: t.Array(_Select), total: t.Number() }),
+export const UsersBase = {
+  fields: spread(usersTable, 'select'),
+  insertFields: spread(usersTable, 'insert'),
 } as const;

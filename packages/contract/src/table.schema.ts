@@ -30,6 +30,7 @@ export const tenantCols = {
   ownerId: p.uuid("owner_id").references(() => usersTable.id),
   // 4. 公开属性：是否是“公海”数据
   isPublic: p.boolean("is_public").default(false).notNull(),
+  siteId: p.uuid("site_id").references(() => sitesTable.id),
 };
 // --- Enums ---
 export const adsTypeEnum = p.pgEnum("ads_type", ["banner", "carousel", "list"]);
@@ -58,7 +59,6 @@ export const InputTypeEnum = p.pgEnum("input_type", [
   "text",
   "number",
   "multiselect",
-  "richtext",
 ]);
 
 export const entityTypeEnum = p.pgEnum("entity_type", ["exporter", "factory"]);
@@ -294,8 +294,6 @@ export const mediaTable = p.pgTable("media", {
   mimeType: p.varchar("mime_type", { length: 100 }).notNull(),
   status: p.boolean("status").notNull().default(true),
   ...tenantCols,
-  // 如果是 Banner 或 Logo，这里填 siteId；如果是产品图，这里留空
-  siteId: p.uuid("site_id").references(() => sitesTable.id),
 });
 
 export const mediaMetadataTable = p.pgTable("media_metadata", {
@@ -413,10 +411,14 @@ export const productMediaTable = p.pgTable(
 export const attributeTemplateTable = p.pgTable("attribute_templates", {
   id: idUuid,
   name: p.varchar("name", { length: 100 }).notNull(),
-  categoryId: p
-    .uuid("category_id")
+  masterCategoryId: p
+    .uuid("master_category_id")
     .notNull()
     .references(() => masterTable.id),
+  siteCategoryId: p
+    .uuid("site_category_id")
+    .notNull()
+    .references(() => siteCategoriesTable.id),
 });
 
 export const attributeTable = p.pgTable("attributes_table", {
@@ -425,11 +427,11 @@ export const attributeTable = p.pgTable("attributes_table", {
     .uuid("template_id")
     .notNull()
     .references(() => attributeTemplateTable.id),
-  name: p.varchar("name", { length: 100 }).notNull(),
+  key: p.varchar("key", { length: 100 }).notNull(),
   code: p.varchar("code", { length: 50 }).notNull(),
   inputType: InputTypeEnum("input_type").default("select"),
   isRequired: p.boolean("is_required").default(true),
-  isSaleAttr: p.boolean("is_sale_attr").default(true),
+  isSkuSpec: p.boolean("is_sku_spec").default(true),
   sortOrder: p.integer("sort_order").default(0),
 });
 
@@ -478,10 +480,6 @@ export const skusTable = p.pgTable("skus_table", {
     })
     .notNull(),
 
-  siteId: p
-    .uuid("site_id")
-    .notNull()
-    .references(() => sitesTable.id, { onDelete: "cascade" }),
   ...tenantCols,
 });
 
@@ -523,9 +521,6 @@ export const inquiryTable = p.pgTable("inquiries", {
   customerPhone: p.varchar("phone", { length: 50 }),
   customerWhatsapp: p.varchar("whatsapp", { length: 50 }),
   status: inquiryStatusEnum("status").default("pending").notNull(),
-  // 🔥 新增：来源标记
-  // 这个询盘虽然属于 factoryId (通过 items 关联)，但我们需要知道它是从哪个 Site 提交的
-  siteId: p.uuid("site_id").references(() => sitesTable.id),
   ...tenantCols,
 });
 

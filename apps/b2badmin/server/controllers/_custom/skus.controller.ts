@@ -92,12 +92,10 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
   // 获取SKU列表
   .get(
     "/list",
-    async ({ db, auth }) => {
+    async ({ db, auth, query }) => {
+      console.log("query:", query);
       try {
-        console.log('query:')
-
-        return await skusService.getSkusList({ db, auth }, {});
-
+        return await skusService.getSkusList({ db, auth }, query);
       } catch (error) {
         console.log("error:", error);
       }

@@ -1,40 +1,57 @@
-//这是模板
-
+/**
+ * ✍️ 【Contract - 业务自定义层】
+ * --------------------------------------------------------
+ * 💡 你可以直接在此修改 Response, Create, Update 等字段。
+ * 🛡️ 脚本检测到文件存在时永远不会覆盖此处。
+ * --------------------------------------------------------
+ */
 import { t } from "elysia";
-// 1. 导入自动生成的原始契约
-import { ProductTemplateContract as Generated } from "../_generated/producttemplate.contract";
-
-// 2. 导入你可能需要关联的其他契约
-// import { OtherContract } from "../generated/other.contract";
+import { PaginationParams, SortParams } from "../../helper/query-types.model";
+import type { InferDTO } from "../../helper/utils";
+import { ProductTemplateBase } from "../_generated/producttemplate.contract";
 
 /**
- * 自定义扩展契约：${ModuleName}
- * 模式：继承基础字段 + 叠加复杂逻辑
+ * ProductTemplate 契约定义
+ * 你可以直接在此处添加或 Omit 字段
  */
-
-// --- A. 扩展响应结构 (最常用：增加关联数据) ---
-const CustomResponse = t.Composite([
-  Generated.Response, // 保持数据库字段同步
-]);
-
-// --- B. 扩展创建请求 (例如：增加前端特有的校验) ---
-const CustomCreate = t.Composite([Generated.Create]);
-
-// --- C. 组装并导出 ---
 export const ProductTemplateContract = {
-  ...Generated, // 默认继承所有：Update, Patch, ListQuery
-  Response: CustomResponse, // 覆盖为自定义详情响应
-  Create: CustomCreate, // 覆盖为自定义创建请求
+  // 响应字段 (默认展开所有数据库字段)
+  Response: t.Object({
+    ...ProductTemplateBase.fields,
+  }),
+
+  // 创建请求 (默认排除系统字段)
+  Create: t.Object(
+    t.Omit(t.Object(ProductTemplateBase.insertFields), [
+      "id",
+      "createdAt",
+      "updatedAt",
+    ]).properties
+  ),
+
+  // 更新请求 (精细化可选更新)
+  Update: t.Partial(
+    t.Omit(t.Object(ProductTemplateBase.insertFields), [
+      "id",
+      "createdAt",
+      "updatedAt",
+      "siteId",
+    ])
+  ),
+
+  // 列表查询
+  ListQuery: t.Object({
+    ...t.Partial(t.Object(ProductTemplateBase.insertFields)).properties,
+    ...PaginationParams.properties,
+    ...SortParams.properties,
+    search: t.Optional(t.String()),
+  }),
+
+  ListResponse: t.Object({
+    data: t.Array(t.Object(ProductTemplateBase.fields)),
+    total: t.Number(),
+  }),
 } as const;
 
-// --- D. 导出 DTO 类型给前端使用 ---
-export type ProductTemplateDTO = {
-  Response: typeof ProductTemplateContract.Response.static;
-  Create: typeof ProductTemplateContract.Create.static;
-  Update: typeof Generated.Update.static; // 未修改的直接透传
-  Patch: typeof Generated.Patch.static;
-  ListQuery: typeof Generated.ListQuery.static;
-  ListResponse: typeof Generated.ListResponse.static & {
-    // 如果列表也需要扩展，可以在这里交叉类型
-  };
-};
+// ✨ DTO 类型直接在此导出，方便外部引用
+export type ProductTemplateDTO = InferDTO<typeof ProductTemplateContract>;

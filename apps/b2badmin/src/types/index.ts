@@ -1,3 +1,5 @@
+import type { AttributeDTO } from "@repo/contract";
+
 export type FieldType =
   | "text"
   | "number"
@@ -5,23 +7,17 @@ export type FieldType =
   | "multiselect"
   | "richtext";
 
-export interface TemplateField {
-  id: string;
-  name: string;
-  code: string;
-  type: FieldType;
-  isSkuSpec: boolean; // Determines if this field drives SKU generation
-  options?: string[]; // For select/multiselect
-  required?: boolean;
-  defaultValue?: string; // Default value for text/number fields
-}
-
 export interface ProductTemplate {
   id: string;
   name: string;
   description?: string;
   fields: TemplateField[];
   createdAt: string;
+}
+
+
+export type TemplateField = AttributeDTO["Entity"] & {
+  value: string;
 }
 
 export interface MediaAsset {
