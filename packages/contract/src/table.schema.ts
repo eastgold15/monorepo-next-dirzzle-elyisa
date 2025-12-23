@@ -417,8 +417,7 @@ export const attributeTemplateTable = p.pgTable("attribute_templates", {
     .references(() => masterTable.id),
   siteCategoryId: p
     .uuid("site_category_id")
-    .notNull()
-    .references(() => siteCategoriesTable.id),
+    .references(() => siteCategoriesTable.id), // 允许为 null：模板可以不关联站点分类
 });
 
 export const attributeTable = p.pgTable("attributes_table", {

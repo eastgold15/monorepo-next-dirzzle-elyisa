@@ -4,7 +4,7 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
 // 获取模板列表
-export function useTemplates(
+export function useListTemplates(
   query: typeof AttributeTemplateContract.ListQuery.static
 ) {
   return useQuery({
@@ -24,22 +24,11 @@ export function useCreateTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: typeof AttributeContractreate.static) =>
+    mutationFn: async (data: typeof AttributeTemplateContract.Create.static) =>
       await handleEden(rpc.api.v1.attributetemplate.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
-  });
-}
-
-// 获取单个模板
-export function useTemplate(id: string) {
-  return useQuery({
-    queryKey: ["template", id],
-    queryFn: async () =>
-      await handleEden(rpc.api.v1.attributetemplate({ id }).get()),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!id,
   });
 }
 
@@ -54,7 +43,7 @@ export function useUpdateTemplate() {
     }: {
       id: string;
       data: typeof AttributeTemplateContract.Update.static;
-    }) => await handleEden(rpc.api.v1.attributetemplate({ id }).patch(data)),
+    }) => await handleEden(rpc.api.v1.attributetemplate({ id }).put(data)),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       queryClient.invalidateQueries({ queryKey: ["template", id] });

@@ -9,7 +9,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { Separator } from "@/components/ui/separator";
@@ -22,8 +22,7 @@ import { SiteCategoryTreeSelect } from "@/components/ui/site-category-tree-selec
 import {
   useCreateTemplate,
   useDeleteTemplates,
-  useTemplate,
-  useTemplates,
+  useListTemplates,
   useUpdateTemplate, // 确保你有这个 hook
 } from "@/hooks/api/attributetemplate";
 import { useMasterCategories } from "@/hooks/api/mastercategory";
@@ -41,6 +40,8 @@ const slugify = (text: string) =>
 
 export default function TemplateManager() {
   const [view, setView] = useState<"list" | "create" | "edit">("list");
+
+  // 1. 定义状态
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // API 层
@@ -48,7 +49,7 @@ export default function TemplateManager() {
     data: templatesData,
     isLoading,
     refetch,
-  } = useTemplates({ page: 1, limit: 100 });
+  } = useListTemplates({ page: 1, limit: 100 });
   const { data: categories = [] } = useMasterCategories({
     page: 1,
     limit: 100,
@@ -57,7 +58,6 @@ export default function TemplateManager() {
     page: 1,
     limit: 100,
   });
-  const { data: editingTemplate } = useTemplate(editingId || "");
 
   const createMutation = useCreateTemplate();
   const updateMutation = useUpdateTemplate();
@@ -76,12 +76,12 @@ export default function TemplateManager() {
     isValid,
   } = useTemplateForm();
 
-  // 编辑回显
-  useEffect(() => {
-    if (view === "edit" && editingTemplate) {
-      resetForm(editingTemplate);
-    }
-  }, [view, editingTemplate, resetForm]);
+  // 2. 从全量列表中查找（不再使用 useTemplate 钩子）
+  const editingTemplate = useMemo(() => {
+    if (!(editingId && templates)) return null;
+    // 从当前的 templates 数组中找到匹配的那一项
+    return templates.find((t: any) => t.id === editingId);
+  }, [editingId, templates]);
 
   const handleSave = async () => {
     if (!isValid)
@@ -132,8 +132,11 @@ export default function TemplateManager() {
                 deleteMutation.mutateAsync([id]).then(() => refetch())
               }
               onEdit={(t) => {
+                // 这里的 t 就是列表中的一行完整数据
                 setEditingId(t.id);
                 setView("edit");
+                // 如果你想更直接一点，也可以在这里直接 resetForm(t)
+                resetForm(t);
               }}
               templates={templates}
             />
@@ -230,7 +233,7 @@ function FieldBuilderCard({
 }: {
   fields: TemplateField[];
   onAdd: () => void;
-  onUpdate: (id: string, updates: TemplateField) => void;
+  onUpdate: (id: string, updates: Partial<TemplateField>) => void;
   onMove: (index: number, direction: "up" | "down") => void;
   onRemove: (id: string) => void;
 }) {

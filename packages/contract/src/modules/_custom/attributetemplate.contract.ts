@@ -8,7 +8,10 @@
 import { t } from "elysia";
 import { PaginationParams, SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
+import { AttributeBase } from "../_generated/attribute.contract";
 import { AttributeTemplateBase } from "../_generated/attributetemplate.contract";
+import { MasterBase } from "../_generated/master.contract";
+import { SiteCategoriesBase } from "../_generated/sitecategories.contract";
 
 /**
  * AttributeTemplate 契约定义
@@ -21,22 +24,45 @@ export const AttributeTemplateContract = {
   }),
 
   // 创建请求 (默认排除系统字段)
-  Create: t.Object(
-    t.Omit(t.Object(AttributeTemplateBase.insertFields), [
-      "id",
-      "createdAt",
-      "updatedAt",
-    ]).properties
-  ),
+  Create: t.Object({
+    fields: t.Optional(
+      t.Array(
+        t.Object({
+          key: AttributeBase.insertFields.key,
+          code: AttributeBase.insertFields.code,
+          inputType: AttributeBase.insertFields.inputType,
+          isRequired: AttributeBase.insertFields.isRequired,
+          isSkuSpec: AttributeBase.fields.isSkuSpec,
+          value: t.Optional(t.String()), // 可选：text/number 类型使用
+          options: t.Optional(t.Array(t.String())), // 可选：select/multiselect 类型使用
+        })
+      )
+    ),
+    name: AttributeTemplateBase.insertFields.name,
+    siteCategoryId: t.Optional(t.String()), // 可选：不强制要求站点分类
+    masterCategoryId: MasterBase.fields.id,
+  }),
 
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
-    t.Omit(t.Object(AttributeTemplateBase.insertFields), [
-      "id",
-      "createdAt",
-      "updatedAt",
-      "siteId",
-    ])
+    t.Object({
+      fields: t.Optional(
+        t.Array(
+          t.Object({
+            key: AttributeBase.insertFields.key,
+            code: AttributeBase.insertFields.code,
+            inputType: AttributeBase.insertFields.inputType,
+            isRequired: AttributeBase.insertFields.isRequired,
+            isSkuSpec: AttributeBase.fields.isSkuSpec,
+            value: t.Optional(t.String()), // 可选：text/number 类型使用
+            options: t.Optional(t.Array(t.String())), // 可选：select/multiselect 类型使用
+          })
+        )
+      ),
+      name: AttributeTemplateBase.insertFields.name,
+      siteCategoryId: t.Optional(t.String()), // 可选：不强制要求站点分类
+      masterCategoryId: MasterBase.fields.id,
+    })
   ),
 
   // 列表查询
