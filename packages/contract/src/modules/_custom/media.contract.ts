@@ -43,6 +43,7 @@ export const MediaContract = {
     ...PaginationParams.properties,
     ...SortParams.properties,
     search: t.Optional(t.String()),
+    ids: t.Optional(t.Array(t.String())), // 批量查询 ID 列表
   }),
 
   ListResponse: t.Object({

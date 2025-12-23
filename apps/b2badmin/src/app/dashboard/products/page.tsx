@@ -1,11 +1,23 @@
 "use client";
 
-import { Edit, Plus, Search, Video } from "lucide-react";
+import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  ChevronDown,
+  ChevronRight,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+  Video,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateProductModal } from "@/components/form/CreateProductModal";
+import { CreateSKUModal } from "@/components/form/CreateSKUModal";
+import { EditSKUModal } from "@/components/form/EditSKUModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,10 +39,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import {
-  useProductsBatchDelete,
-  useProductsList,
-} from "@/hooks/api/products";
+import { useProductsBatchDelete, useProductsList } from "@/hooks/api/products";
+import { useSkuDelete } from "@/hooks/api/skus";
 
 // 使用后端返回的类型
 interface Product {
@@ -76,6 +86,8 @@ interface Product {
     stock: string;
     specJson: any;
     status: number;
+    mainImage: { url: string; isMain: boolean } | null;
+    allImages: Array<{ id: string; url: string; isMain: boolean }>;
   }>;
   skuCount: number;
 }
@@ -90,11 +102,57 @@ export default function ProductsPage() {
     limit: 100,
   });
   const batchDeleteMutation = useProductsBatchDelete();
+  const deleteSKUMutation = useSkuDelete();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
+  // SKU 展开状态：Map<productId, boolean>
+  const [expandedSKUs, setExpandedSKUs] = useState<Set<string>>(new Set());
+  // 创建 SKU 的商品 ID
+  const [createSKUProductId, setCreateSKUProductId] = useState<
+    string | undefined
+  >();
+  // 编辑 SKU 的数据
+  const [editingSKU, setEditingSKU] = useState<
+    | {
+        id: string;
+        skuCode: string;
+        price: string | number;
+        marketPrice?: string | number | null;
+        costPrice?: string | number | null;
+        weight?: string | number | null;
+        volume?: string | number | null;
+        stock: string | number;
+        specJson?: Record<string, string> | null;
+        status?: number;
+        allImages?: Array<{ id: string; url: string; isMain: boolean }>;
+      }
+    | undefined
+  >(undefined);
+  // 图片预览
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const toggleSKUExpand = (productId: string) => {
+    const newExpanded = new Set(expandedSKUs);
+    if (newExpanded.has(productId)) {
+      newExpanded.delete(productId);
+    } else {
+      newExpanded.add(productId);
+    }
+    setExpandedSKUs(newExpanded);
+  };
+
+  const handleDeleteSKU = async (skuId: string, skuCode: string) => {
+    try {
+      await deleteSKUMutation.mutateAsync([skuId]);
+      toast.success(`SKU ${skuCode} 删除成功`);
+      refetch();
+    } catch (error) {
+      toast.error("SKU 删除失败");
+    }
+  };
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -484,41 +542,177 @@ export default function ProductsPage() {
                         </div>
                       )}
 
-                      {/* SKU 信息 */}
-                      {product.skus.length > 0 && (
-                        <div className="mt-3 border-t pt-3">
-                          <p className="mb-2 font-medium text-slate-600 text-xs">
-                            SKU 规格 ({product.skuCount})
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {product.skus.map((sku) => (
-                              <div
-                                className="flex items-center gap-2 rounded border bg-slate-50 px-3 py-1.5 text-xs"
-                                key={sku.id}
-                              >
-                                <span className="font-medium text-slate-900">
-                                  {sku.skuCode}
-                                </span>
-                                <span className="text-slate-500">
-                                  {Object.entries(sku.specJson || {}).map(
-                                    ([key, value]) => (
-                                      <span className="mr-1" key={key}>
-                                        {key}: {value}
-                                      </span>
-                                    )
-                                  )}
-                                </span>
-                                <span className="font-medium text-indigo-600">
-                                  ¥{sku.price}
-                                </span>
-                                <span className="text-slate-500">
-                                  库存: {sku.stock}
-                                </span>
-                              </div>
-                            ))}
+                      {/* SKU 列表区域 */}
+                      <div className="mt-3 border-t pt-3">
+                        {/* SKU 标题栏 - 可点击展开/收起 */}
+                        <div
+                          className="-mx-1 flex cursor-pointer items-center justify-between rounded px-1 py-1 transition-colors hover:bg-slate-50"
+                          onClick={() => toggleSKUExpand(product.id)}
+                        >
+                          <div className="flex items-center gap-2">
+                            {expandedSKUs.has(product.id) ? (
+                              <ChevronDown className="h-4 w-4 text-slate-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-slate-500" />
+                            )}
+                            <span className="font-medium text-slate-700 text-sm">
+                              SKU 列表
+                            </span>
+                            <Badge className="text-xs" variant="secondary">
+                              {product.skuCount}
+                            </Badge>
                           </div>
+                          <Button
+                            className="h-7 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCreateSKUProductId(product.id);
+                            }}
+                            size="sm"
+                            variant="outline"
+                          >
+                            <Plus className="mr-1 h-3 w-3" />
+                            创建SKU
+                          </Button>
                         </div>
-                      )}
+
+                        {/* 展开的 SKU 列表 */}
+                        {expandedSKUs.has(product.id) && (
+                          <div className="mt-3 space-y-2">
+                            {product.skus.length === 0 ? (
+                              <div className="py-4 text-center text-slate-500 text-sm">
+                                暂无 SKU，点击右侧按钮创建
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {product.skus.map((sku) => (
+                                  <div
+                                    className="group rounded border bg-slate-50 p-4 text-sm"
+                                    key={sku.id}
+                                  >
+                                    {/* 第一行：SKU 信息 */}
+                                    <div className="mb-3 flex items-start justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <span className="font-medium text-slate-900">
+                                          {sku.skuCode}
+                                        </span>
+                                        <div className="flex items-center gap-2 text-slate-600">
+                                          {Object.entries(
+                                            sku.specJson || {}
+                                          ).map(([key, value]) => (
+                                            <Badge
+                                              className="text-xs"
+                                              key={key}
+                                              variant="outline"
+                                            >
+                                              {key}: {value}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-indigo-600">
+                                          ¥{sku.price}
+                                        </span>
+                                        <span className="text-slate-500 text-xs">
+                                          库存: {sku.stock}
+                                        </span>
+                                        {/* 编辑按钮 */}
+                                        <Button
+                                          className="h-7 w-7 p-0 text-slate-400 hover:text-indigo-600"
+                                          onClick={() => setEditingSKU(sku)}
+                                          size="sm"
+                                          variant="ghost"
+                                        >
+                                          <Edit className="h-4 w-4" />
+                                        </Button>
+                                        {/* 删除按钮 */}
+                                        <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                            <Button
+                                              className="h-7 w-7 p-0 text-slate-400 hover:text-red-600"
+                                              size="sm"
+                                              variant="ghost"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                              <AlertDialogTitle>
+                                                确认删除 SKU
+                                              </AlertDialogTitle>
+                                              <AlertDialogDescription>
+                                                确定要删除 SKU "{sku.skuCode}"
+                                                吗？此操作不可撤销。
+                                              </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                              <AlertDialogCancel>
+                                                取消
+                                              </AlertDialogCancel>
+                                              <AlertDialogAction
+                                                onClick={() =>
+                                                  handleDeleteSKU(
+                                                    sku.id,
+                                                    sku.skuCode
+                                                  )
+                                                }
+                                              >
+                                                删除
+                                              </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                          </AlertDialogContent>
+                                        </AlertDialog>
+                                      </div>
+                                    </div>
+                                    {/* 第二行：图片 */}
+                                    {sku.allImages &&
+                                      sku.allImages.length > 0 && (
+                                        <div className="flex items-center gap-2 pl-1">
+                                          {sku.allImages
+                                            .slice(0, 6)
+                                            .map((image: any) => (
+                                              <div
+                                                className="relative h-16 w-16 flex-shrink-0 cursor-pointer overflow-hidden rounded border-2 bg-white transition-opacity hover:opacity-80"
+                                                key={image.id}
+                                                onClick={() =>
+                                                  setPreviewImage(image.url)
+                                                }
+                                                style={{
+                                                  borderColor: image.isMain
+                                                    ? "rgb(79 70 229)"
+                                                    : "rgb(226 232 240)",
+                                                }}
+                                              >
+                                                <Image
+                                                  alt={image.url || "SKU图片"}
+                                                  className="h-full w-full object-cover"
+                                                  fill
+                                                  sizes="64px"
+                                                  src={image.url}
+                                                />
+                                                {image.isMain && (
+                                                  <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-white text-xs">
+                                                    ★
+                                                  </div>
+                                                )}
+                                              </div>
+                                            ))}
+                                          {sku.allImages.length > 6 && (
+                                            <span className="text-slate-500 text-xs">
+                                              +{sku.allImages.length - 6}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -543,6 +737,68 @@ export default function ProductsPage() {
         open={isCreateModalOpen}
         product={editingProduct}
       />
+
+      {/* 创建 SKU 对话框 */}
+      <CreateSKUModal
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreateSKUProductId(undefined);
+          }
+        }}
+        onSuccess={() => {
+          refetch();
+        }}
+        open={!!createSKUProductId}
+        productId={createSKUProductId}
+      />
+
+      {/* 编辑 SKU 对话框 */}
+      <EditSKUModal
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingSKU(undefined);
+          }
+        }}
+        onSuccess={() => {
+          refetch();
+        }}
+        open={!!editingSKU}
+        sku={editingSKU}
+      />
+
+      {/* 图片预览对话框 */}
+      {previewImage && (
+        <Dialog
+          onOpenChange={(open) => {
+            if (!open) {
+              setPreviewImage(null);
+            }
+          }}
+          open={!!previewImage}
+        >
+          <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none">
+            <div className="relative">
+              <Button
+                className="absolute -top-12 right-0 z-10 bg-white/90 hover:bg-white"
+                onClick={() => setPreviewImage(null)}
+                size="icon"
+                variant="outline"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="overflow-hidden rounded-lg bg-black/50 backdrop-blur-sm">
+                <Image
+                  alt="预览图片"
+                  className="h-auto w-full object-contain"
+                  height={800}
+                  src={previewImage}
+                  width={800}
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </SidebarProvider>
   );
 }

@@ -6,10 +6,17 @@
  * --------------------------------------------------------
  */
 import { t } from "elysia";
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
+import { SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
 import { SkusBase } from "../_generated/skus.contract";
 
+
+const Create = t.Omit(t.Object(SkusBase.insertFields), [
+  "id",
+  "createdAt",
+  "updatedAt",
+  "siteId",
+])
 /**
  * Skus 契约定义
  * 你可以直接在此处添加或 Omit 字段
@@ -29,20 +36,11 @@ export const SkusContract = {
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
     t.Composite([
-      t.Omit(t.Object(SkusBase.insertFields), [
-        "id",
-        "createdAt",
-        "updatedAt",
-        "siteId",
-      ]),
+      t.Omit(t.Object(SkusBase.insertFields), ["id", "createdAt", "updatedAt", "siteId"]),
       t.Object({
-        attributeValues: t.Object({
-          attributeId: t.String(),
-          value: t.String(),
-        }),
-        productId: t.String(),
-        mediaId: t.Optional(t.String()),
-      }),
+        mediaIds: t.Optional(t.Array(t.String())), // 该 SKU 的图片 ID 列表
+        mainImageId: t.Optional(t.String()),     // 指定哪张 ID 为主图
+      })
     ])
   ),
 
@@ -51,7 +49,7 @@ export const SkusContract = {
     skus: t.Array(
       t.Object({
         skuCode: t.String(),
-        price: SkusBase.fields.price,
+        price: t.Number(),
         stock: t.Optional(t.Number()),
         specJson: t.Any(),
         mediaIds: t.Optional(t.Array(t.String())),
@@ -61,7 +59,7 @@ export const SkusContract = {
 
   // 列表查询
   ListQuery: t.Object({
-    ...PaginationParams.properties,
+    // ...PaginationParams.properties,
     ...SortParams.properties,
     search: t.Optional(t.String()),
   }),

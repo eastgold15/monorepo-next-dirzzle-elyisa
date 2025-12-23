@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Package } from "lucide-react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -138,8 +138,12 @@ export function CreateProductModal({
   };
 
   return (
-    <Dialog key={product?.id || "create"} onOpenChange={handleOpenChange} open={open}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+    <Dialog
+      key={product?.id || "create"}
+      onOpenChange={handleOpenChange}
+      open={open}
+    >
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -345,7 +349,7 @@ export function CreateProductModal({
                 disabled={createProduct.isPending || updateProduct.isPending}
                 type="submit"
               >
-                {(createProduct.isPending || updateProduct.isPending) ? (
+                {createProduct.isPending || updateProduct.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {isEdit ? "保存中..." : "创建中..."}

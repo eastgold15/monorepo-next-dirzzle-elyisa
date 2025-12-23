@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, PackagePlus, Plus, X } from "lucide-react";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MediaSelect } from "@/components/ui/media-select";
 import {
   Select,
   SelectContent,
@@ -35,15 +37,17 @@ import { useCreateSKUBatch, useProductsForSKU } from "@/hooks/api/skus";
 
 // SKU 基础信息 schema
 const skuSchema = z.object({
-  skuCode: z.string().min(1, "SKU编码不能为空"),
+  skuCode: z.string().optional(), // SKU编码会在提交时自动生成
   price: z.number().min(0, "价格不能小于0"),
   marketPrice: z.number().optional(),
   costPrice: z.number().optional(),
   weight: z.number().optional(),
   volume: z.number().optional(),
-  stock: z.number().min(0, "库存不能小于0").default(0),
-  specJson: z.record(z.string()),
-  extraAttributes: z.record(z.any()).optional(),
+
+  stock: z.number().min(0, "库存不能小于0"),
+  specJson: z.record(z.string(), z.string()),
+  mediaIds: z.array(z.string()).optional(),
+  extraAttributes: z.record(z.string(), z.any()).optional(),
 });
 
 // 主表单 schema
@@ -69,7 +73,10 @@ export function CreateSKUModal({
   productId,
 }: CreateSKUModalProps) {
   const createSKUBatch = useCreateSKUBatch();
-  const { data: productsData = [] } = useProductsForSKU();
+  const { data: productsData } = useProductsForSKU();
+
+  // 获取当前商品名称 - 处理可能为空的情况
+  const currentProduct = productsData?.data?.find((p: any) => p.id === productId);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -86,6 +93,7 @@ export function CreateSKUModal({
           volume: undefined,
           stock: 0,
           specJson: {},
+          mediaIds: [],
         },
       ],
     },
@@ -96,23 +104,34 @@ export function CreateSKUModal({
     name: "skus",
   });
 
+  // 当 productId 变化时，更新表单的 productId
+  useEffect(() => {
+    if (productId) {
+      form.setValue("productId", productId);
+    }
+  }, [productId, form]);
+
   const onSubmit = async (data: FormData) => {
+    console.log("CreateSKUModal onSubmit:", data);
     try {
       // 生成完整的SKU编码
       const processedSkus = data.skus.map((sku, index) => ({
         ...sku,
         skuCode: `${data.baseSkuCode}-${String(index + 1).padStart(3, "0")}`,
       }));
+      console.log("Processed SKUs:", processedSkus);
 
-      await createSKUBatch.mutateAsync({
+      const result = await createSKUBatch.mutateAsync({
         productId: data.productId,
         skus: processedSkus,
       });
+      console.log("Create result:", result);
+
       onSuccess?.();
       form.reset();
       onOpenChange(false);
     } catch (error) {
-      // 错误已在 mutation 中处理
+      console.error("Create SKU error:", error);
     }
   };
 
@@ -133,6 +152,7 @@ export function CreateSKUModal({
       volume: undefined,
       stock: 0,
       specJson: {},
+      mediaIds: [],
     });
   };
 
@@ -153,15 +173,23 @@ export function CreateSKUModal({
   };
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={open}>
+    <Dialog
+      key={productId || "create"}
+      onOpenChange={handleOpenChange}
+      open={open}
+    >
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[1200px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <PackagePlus className="h-5 w-5" />
-            批量创建SKU
+            {currentProduct
+              ? `为 "${currentProduct.name}" 创建 SKU`
+              : "批量创建 SKU"}
           </DialogTitle>
           <DialogDescription>
-            为商品批量创建SKU，支持规格组合定价
+            {currentProduct
+              ? `为商品 "${currentProduct.name}" 批量创建SKU，支持规格组合定价`
+              : "为商品批量创建SKU，支持规格组合定价"}
           </DialogDescription>
         </DialogHeader>
 
@@ -169,34 +197,36 @@ export function CreateSKUModal({
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
             {/* 基础信息 */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="productId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>商品 *</FormLabel>
-                    <FormControl>
-                      <Select
-                        disabled={!!productId}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="选择商品" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {productsData.data?.map((product) => (
-                            <SelectItem key={product.id} value={product.id}>
-                              {product.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* 商品选择 - 只有在没有预设 productId 时显示 */}
+              {!productId && (
+                <FormField
+                  control={form.control}
+                  name="productId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>商品 *</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择商品" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {productsData?.data?.map((product: any) => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
@@ -290,7 +320,7 @@ export function CreateSKUModal({
                                   {...field}
                                   onChange={(e) =>
                                     field.onChange(
-                                      Number.parseInt(e.target.value) || 0
+                                      Number.parseInt(e.target.value, 10) || 0
                                     )
                                   }
                                 />
@@ -465,6 +495,27 @@ export function CreateSKUModal({
                           ))}
                         </div>
                       </div>
+
+                      {/* SKU 图片选择 */}
+                      <FormField
+                        control={form.control}
+                        name={`skus.${index}.mediaIds`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">SKU 图片</FormLabel>
+                            <FormControl>
+                              <MediaSelect
+                                maxCount={6}
+                                multiple
+                                onChange={(ids) => field.onChange(ids)}
+                                placeholder="选择 SKU 图片（最多 6 张）"
+                                value={field.value || []}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       {/* 显示生成的SKU编码 */}
                       <div>

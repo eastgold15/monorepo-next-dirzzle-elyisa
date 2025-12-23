@@ -46,10 +46,10 @@ export class MediaService extends MediaGeneratedService {
 
   /**
    * 🛡️ 核心：获取列表
-   * withScope 会自动根据当前登录人是“出口商”还是“工厂”添加不同的 WHERE 条件
+   * withScope 会自动根据当前登录人是"出口商"还是"工厂"添加不同的 WHERE 条件
    */
   async getMediaList(
-    query: { category?: string; search?: string },
+    query: { category?: string; search?: string; ids?: string[] },
     ctx: ServiceContext
   ) {
     console.debug("query:", query);
@@ -60,6 +60,8 @@ export class MediaService extends MediaGeneratedService {
       if (query.category) filters.push(eq(table.category, query.category));
       if (query.search)
         filters.push(like(table.originalName, `%${query.search}%`));
+      if (query.ids && query.ids.length > 0)
+        filters.push(inArray(table.id, query.ids));
 
       const select = ctx.db.select().from(this.table).$dynamic();
 

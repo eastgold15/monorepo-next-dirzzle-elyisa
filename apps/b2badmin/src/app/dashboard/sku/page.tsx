@@ -16,7 +16,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,8 +32,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useSiteCategoriesTree } from "@/hooks/api/site-category";
-import { useProductsForSKU, useSkuDelete, useSkusList } from "@/hooks/api/skus";
+import {
+  type SkusRes,
+  useProductsForSKU,
+  useSkuDelete,
+  useSkusList,
+} from "@/hooks/api/skus";
 import { useSiteCategoryStore } from "@/stores/site-category-store";
 
 interface SKU {
@@ -64,9 +67,10 @@ interface SKU {
 
 export default function SKUManagementPage() {
   const { data: skusData, isLoading, refetch } = useSkusList();
+
   const deleteMutation = useSkuDelete();
-  const { data: productsData = [] } = useProductsForSKU();
-  const { treeData } = useSiteCategoriesTree();
+  const { data: productsData } = useProductsForSKU();
+
   const { getCategoryById } = useSiteCategoryStore();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -78,6 +82,13 @@ export default function SKUManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterProductId, setFilterProductId] = useState<string>("all");
 
+  if (!skusData) {
+    return null;
+  }
+
+  if (!productsData) {
+    return null;
+  }
   const handleDelete = async (ids: string | string[]) => {
     try {
       const idsToDelete = Array.isArray(ids) ? ids : [ids];
@@ -92,7 +103,7 @@ export default function SKUManagementPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked && skusData) {
-      setSelectedIds(new Set(skusData.data.map((sku: SKU) => sku.id)));
+      setSelectedIds(new Set(skusData.map((sku: SkusRes) => sku.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -110,13 +121,13 @@ export default function SKUManagementPage() {
 
   // 过滤 SKU
   const filteredSKUs =
-    skusData?.data.filter((sku: SKU) => {
+    skusData.filter((sku: SkusRes) => {
       const matchesSearch =
         sku.skuCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sku.product?.name.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesProduct =
-        filterProductId === "all" || sku.productId === filterProductId;
+        filterProductId === "all" || sku.product.id === filterProductId;
 
       return matchesSearch && matchesProduct;
     }) || [];
@@ -236,7 +247,7 @@ export default function SKUManagementPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部商品</SelectItem>
-                  {productsData.data?.map((product) => (
+                  {productsData.data.map((product) => (
                     <SelectItem key={product.id} value={product.id}>
                       {product.name}
                     </SelectItem>
@@ -255,7 +266,7 @@ export default function SKUManagementPage() {
                   <input
                     checked={
                       selectedIds.size > 0 && skusData
-                        ? selectedIds.size === skusData.data.length
+                        ? selectedIds.size === skusData.length
                         : false
                     }
                     className="rounded border-slate-300 text-slate-600 focus:ring-2 focus:ring-indigo-500"
@@ -264,7 +275,7 @@ export default function SKUManagementPage() {
                   />
                   全选
                   <span className="text-slate-500">
-                    ({selectedIds.size}/{skusData?.data.length || 0})
+                    ({selectedIds.size}/{skusData?.length || 0})
                   </span>
                 </label>
               </div>
@@ -297,7 +308,7 @@ export default function SKUManagementPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {filteredSKUs.map((sku: SKU) => (
+                  {filteredSKUs.map((sku: SkusRes) => (
                     <div
                       className="flex items-center gap-4 rounded-lg border p-4"
                       key={sku.id}
@@ -319,9 +330,9 @@ export default function SKUManagementPage() {
                               {sku.product?.name}
                             </p>
                           </div>
-                          <Badge variant="secondary">
-                            {sku.product?.siteCategory?.name || "未分类"}
-                          </Badge>
+                          {/* <Badge variant="secondary">
+                            {sku.siteCategoryId?.name || "未分类"}
+                          </Badge> */}
                         </div>
 
                         <div className="flex items-center gap-6 text-sm">
@@ -329,14 +340,14 @@ export default function SKUManagementPage() {
                             <span className="text-slate-500">售价：</span>
                             <span className="font-medium">¥{sku.price}</span>
                           </div>
-                          {sku.marketPrice && (
+                          {/* {sku.marketPrice && (
                             <div>
                               <span className="text-slate-500">市场价：</span>
                               <span className="text-slate-700">
                                 ¥{sku.marketPrice}
                               </span>
                             </div>
-                          )}
+                          )} */}
                           <div>
                             <span className="text-slate-500">库存：</span>
                             <span
@@ -359,7 +370,7 @@ export default function SKUManagementPage() {
                           className="h-8 w-8 p-0"
                           onClick={() => {
                             setSelectedProduct({
-                              id: sku.productId,
+                              id: sku.product?.id || "",
                               name: sku.product?.name || "",
                             });
                             setIsCreateModalOpen(true);

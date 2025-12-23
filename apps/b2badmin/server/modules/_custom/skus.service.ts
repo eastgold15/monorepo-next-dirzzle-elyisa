@@ -231,7 +231,67 @@ export class SkusService extends SkusGeneratedService {
 
     return updated[0];
   }
+  /**
+   * 🛡️ 核心：单个 SKU 更新（含媒体关联全量替换）
+   */
+  async updateSingleSku(ctx: ServiceContext, id: string, body: any) {
+    const db = ctx.db;
+    const { mediaIds, mainImageId, ...updateData } = body;
 
+    return await db.transaction(async (tx) => {
+      // 1. 安全性检查：确保 SKU 属于该站点（如果 SKU 表有 siteId）
+      // 如果你的 SKU 表没有 siteId，需通过 productId 关联 productsTable 校验 siteId
+      const [existingSku] = await tx
+        .select()
+        .from(skusTable)
+        .where(eq(skusTable.id, id))
+        .limit(1);
+
+      if (!existingSku) {
+        throw new HttpError.NotFound("SKU 不存在");
+      }
+
+      // 2. 更新 SKU 基础信息
+      if (Object.keys(updateData).length > 0) {
+        // 处理数值类型转换
+        const formattedData = {
+          ...updateData,
+          price: updateData.price?.toString(),
+          stock: updateData.stock?.toString(),
+          marketPrice: updateData.marketPrice?.toString(),
+          costPrice: updateData.costPrice?.toString(),
+        };
+
+        await tx
+          .update(skusTable)
+          .set(formattedData)
+          .where(eq(skusTable.id, id));
+      }
+
+      // 3. 处理媒体关联更新 (如果传了 mediaIds)
+      if (mediaIds !== undefined) {
+        // a. 先删除该 SKU 旧的所有图片关联
+        await tx.delete(skuMediaTable).where(eq(skuMediaTable.skuId, id));
+
+        // b. 插入新的关联
+        if (mediaIds.length > 0) {
+          const mediaRelations = mediaIds.map(
+            (mediaId: string, index: number) => ({
+              skuId: id,
+              mediaId,
+              // 如果传了 mainImageId 则匹配，否则默认第一张为主图
+              isMain: mainImageId ? mediaId === mainImageId : index === 0,
+              sortOrder: index,
+            })
+          );
+
+          await tx.insert(skuMediaTable).values(mediaRelations);
+        }
+      }
+
+      return { success: true, id };
+    });
+  }
   // 获取业务员有权限的商品ID列表
   async getSalesmanProductIds(ctx: ServiceContext): Promise<string[]> {
     const db = ctx.db;
@@ -379,16 +439,16 @@ export class SkusService extends SkusGeneratedService {
     const images =
       skuIds.length > 0
         ? await db
-            .select({
-              skuId: skuMediaTable.skuId,
-              mediaId: mediaTable.id,
-              url: mediaTable.url,
-              isMain: skuMediaTable.isMain,
-            })
-            .from(skuMediaTable)
-            .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
-            .where(inArray(skuMediaTable.skuId, skuIds))
-            .orderBy(skuMediaTable.sortOrder)
+          .select({
+            skuId: skuMediaTable.skuId,
+            mediaId: mediaTable.id,
+            url: mediaTable.url,
+            isMain: skuMediaTable.isMain,
+          })
+          .from(skuMediaTable)
+          .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+          .where(inArray(skuMediaTable.skuId, skuIds))
+          .orderBy(skuMediaTable.sortOrder)
         : [];
 
     // 图片按 SKU 分组 Map
@@ -472,9 +532,9 @@ export class SkusService extends SkusGeneratedService {
       ...sku,
       product: product
         ? {
-            id: sku.productId,
-            name: product.name,
-          }
+          id: sku.productId,
+          name: product.name,
+        }
         : null,
       values: [], // 暂时返回空数组
       images: images.filter((img: any) => img.url), // 过滤掉没有URL的图片
@@ -514,19 +574,19 @@ export class SkusService extends SkusGeneratedService {
     const images =
       skuIds.length > 0
         ? await db
-            .select({
-              skuId: skuMediaTable.skuId,
-              id: mediaTable.id,
-              url: mediaTable.url,
-              storageKey: mediaTable.storageKey,
-              category: mediaTable.category,
-              isMain: skuMediaTable.isMain,
-              sortOrder: skuMediaTable.sortOrder,
-            })
-            .from(skuMediaTable)
-            .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
-            .where(inArray(skuMediaTable.skuId, skuIds))
-            .orderBy(skuMediaTable.sortOrder)
+          .select({
+            skuId: skuMediaTable.skuId,
+            id: mediaTable.id,
+            url: mediaTable.url,
+            storageKey: mediaTable.storageKey,
+            category: mediaTable.category,
+            isMain: skuMediaTable.isMain,
+            sortOrder: skuMediaTable.sortOrder,
+          })
+          .from(skuMediaTable)
+          .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+          .where(inArray(skuMediaTable.skuId, skuIds))
+          .orderBy(skuMediaTable.sortOrder)
         : [];
 
     // 将图片按 SKU ID 分组

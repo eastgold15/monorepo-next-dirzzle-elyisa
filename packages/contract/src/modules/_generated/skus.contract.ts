@@ -7,7 +7,7 @@
  */
 import { t } from "elysia";
 import { skusTable } from "../../table.schema";
-import { spread } from "../../helper/utils"; 
+import { spread } from "../../helper/utils";
 
 export const SkusBase = {
   fields: spread(skusTable, 'select'),

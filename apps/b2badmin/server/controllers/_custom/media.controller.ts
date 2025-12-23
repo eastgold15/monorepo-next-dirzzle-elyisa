@@ -29,6 +29,7 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
       query: t.Object({
         category: t.Optional(t.String()),
         search: t.Optional(t.String()),
+        ids: t.Optional(t.Array(t.String())),
       }),
     }
   )

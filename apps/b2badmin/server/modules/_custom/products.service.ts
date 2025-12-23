@@ -15,6 +15,7 @@ import {
   productTemplateTable,
   siteCategoriesTable,
   siteProductsTable,
+  skuMediaTable,
   skusTable,
 } from "@repo/contract";
 import { and, asc, eq, inArray, like, or, sql } from "drizzle-orm";
@@ -59,7 +60,9 @@ export class ProductsService extends ProductsGeneratedService {
         .limit(1);
 
       if (!siteCategory) {
-        throw new HttpError.NotFound(`站点分类不存在${siteCategoryId}，站点ID:${ctx.auth.siteId}`,);
+        throw new HttpError.NotFound(
+          `站点分类不存在${siteCategoryId}，站点ID:${ctx.auth.siteId}`
+        );
       }
 
       // 2. 验证模板（如果提供）
@@ -338,11 +341,49 @@ export class ProductsService extends ProductsGeneratedService {
         .from(skusTable)
         .where(inArray(skusTable.productId, productIds));
 
+      // 查询 SKU 图片
+      const skuIds = skus.map((s) => s.id);
+      const skuImages =
+        skuIds.length > 0
+          ? await ctx.db
+            .select({
+              skuId: skuMediaTable.skuId,
+              id: mediaTable.id,
+              url: mediaTable.url,
+              isMain: skuMediaTable.isMain,
+              sortOrder: skuMediaTable.sortOrder,
+            })
+            .from(skuMediaTable)
+            .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+            .where(inArray(skuMediaTable.skuId, skuIds))
+            .orderBy(asc(skuMediaTable.sortOrder))
+          : [];
+
+      // 将图片按 SKU ID 分组
+      const skuImageMap = new Map<string, any[]>();
+      for (const img of skuImages) {
+        if (!skuImageMap.has(img.skuId)) {
+          skuImageMap.set(img.skuId, []);
+        }
+        skuImageMap.get(img.skuId)!.push({
+          id: img.id,
+          url: img.url,
+          isMain: img.isMain,
+        });
+      }
+
       for (const sku of skus) {
+        const skuImages = skuImageMap.get(sku.id) || [];
+        const enrichedSku = {
+          ...sku,
+          allImages: skuImages,
+          mainImage:
+            skuImages.find((img: any) => img.isMain) || skuImages[0] || null,
+        };
         if (!skuMap.has(sku.productId)) {
           skuMap.set(sku.productId, []);
         }
-        skuMap.get(sku.productId)!.push(sku);
+        skuMap.get(sku.productId)!.push(enrichedSku);
       }
     }
 
@@ -376,13 +417,14 @@ export class ProductsService extends ProductsGeneratedService {
       };
     });
 
-
-
     // 替换 getSiteProducts 最后的总数计算部分
     const [{ count }] = await ctx.db
       .select({ count: sql<number>`count(*)` })
       .from(siteProductsTable)
-      .innerJoin(productsTable, eq(siteProductsTable.productId, productsTable.id))
+      .innerJoin(
+        productsTable,
+        eq(siteProductsTable.productId, productsTable.id)
+      )
       .where(and(...conditions));
     return {
       data: enrichedResult,
@@ -392,22 +434,31 @@ export class ProductsService extends ProductsGeneratedService {
     };
   }
 
-
   /**
-     * 🛡️ 核心：更新商品（全量关联更新）
-     */
+   * 🛡️ 核心：更新商品（全量关联更新）
+   */
   async updateProduct(productId: string, body: any, ctx: ServiceContext) {
     const {
       // 1. 基础信息
-      name, spuCode, description, status, units,
+      name,
+      spuCode,
+      description,
+      status,
+      units,
       // 2. 站点特定信息
-      price, siteName, siteDescription, seoTitle, siteCategoryId,
+      price,
+      siteName,
+      siteDescription,
+      seoTitle,
+      siteCategoryId,
       // 3. 关联 ID
       templateId,
       // 4. 媒体数据
-      mediaIds, mainImageId, videoIds,
+      mediaIds,
+      mainImageId,
+      videoIds,
       // 5. SKU 列表 (全量覆盖更新方案)
-      skus
+      skus,
     } = body;
 
     return await ctx.db.transaction(async (tx) => {
@@ -436,7 +487,10 @@ export class ProductsService extends ProductsGeneratedService {
       if (units !== undefined) productUpdate.units = units;
 
       if (Object.keys(productUpdate).length > 0) {
-        await tx.update(productsTable).set(productUpdate).where(eq(productsTable.id, productId));
+        await tx
+          .update(productsTable)
+          .set(productUpdate)
+          .where(eq(productsTable.id, productId));
       }
 
       // --- 阶段 C: 更新站点商品表与分类联动 ---
@@ -445,28 +499,42 @@ export class ProductsService extends ProductsGeneratedService {
         siteDescription: siteDescription || description,
         sitePrice: price ? price.toString() : null,
         seoTitle,
-        siteCategoryId
+        siteCategoryId,
       };
 
-      await tx.update(siteProductsTable)
+      await tx
+        .update(siteProductsTable)
         .set(siteUpdate)
-        .where(and(eq(siteProductsTable.productId, productId), eq(siteProductsTable.siteId, ctx.auth.siteId)));
+        .where(
+          and(
+            eq(siteProductsTable.productId, productId),
+            eq(siteProductsTable.siteId, ctx.auth.siteId)
+          )
+        );
 
       // 如果更新了站点分类，同步更新主分类关联
       if (siteCategoryId) {
-        const [category] = await tx.select().from(siteCategoriesTable).where(eq(siteCategoriesTable.id, siteCategoryId)).limit(1);
+        const [category] = await tx
+          .select()
+          .from(siteCategoriesTable)
+          .where(eq(siteCategoriesTable.id, siteCategoryId))
+          .limit(1);
         if (category?.masterCategoryId) {
-          await tx.delete(productMasterCategoriesTable).where(eq(productMasterCategoriesTable.productId, productId));
+          await tx
+            .delete(productMasterCategoriesTable)
+            .where(eq(productMasterCategoriesTable.productId, productId));
           await tx.insert(productMasterCategoriesTable).values({
             productId,
-            masterCategoryId: category.masterCategoryId
+            masterCategoryId: category.masterCategoryId,
           });
         }
       }
 
       // --- 阶段 D: 媒体全量替换 (Images & Videos) ---
       if (mediaIds !== undefined || videoIds !== undefined) {
-        await tx.delete(productMediaTable).where(eq(productMediaTable.productId, productId));
+        await tx
+          .delete(productMediaTable)
+          .where(eq(productMediaTable.productId, productId));
 
         const allMediaIds = [...(mediaIds || []), ...(videoIds || [])];
         if (allMediaIds.length > 0) {
@@ -477,7 +545,7 @@ export class ProductsService extends ProductsGeneratedService {
               productId,
               mediaId: id,
               isMain: id === mainImageId,
-              sortOrder: idx
+              sortOrder: idx,
             });
           });
           // 视频处理 (sortOrder < 0)
@@ -486,7 +554,7 @@ export class ProductsService extends ProductsGeneratedService {
               productId,
               mediaId: id,
               isMain: false,
-              sortOrder: -1 - idx
+              sortOrder: -1 - idx,
             });
           });
           await tx.insert(productMediaTable).values(mediaRelations);
@@ -498,13 +566,13 @@ export class ProductsService extends ProductsGeneratedService {
       if (skus && Array.isArray(skus)) {
         await tx.delete(skusTable).where(eq(skusTable.productId, productId));
         if (skus.length > 0) {
-          const skuValues = skus.map(s => ({
+          const skuValues = skus.map((s) => ({
             productId,
             skuCode: s.skuCode,
             price: s.price?.toString(),
             stock: s.stock || 0,
             specJson: s.specJson || {},
-            status: s.status ?? 1
+            status: s.status ?? 1,
           }));
           await tx.insert(skusTable).values(skuValues);
         }
@@ -512,9 +580,13 @@ export class ProductsService extends ProductsGeneratedService {
 
       // --- 阶段 F: 模板关联更新 ---
       if (templateId !== undefined) {
-        await tx.delete(productTemplateTable).where(eq(productTemplateTable.productId, productId));
+        await tx
+          .delete(productTemplateTable)
+          .where(eq(productTemplateTable.productId, productId));
         if (templateId) {
-          await tx.insert(productTemplateTable).values({ productId, templateId });
+          await tx
+            .insert(productTemplateTable)
+            .values({ productId, templateId });
         }
       }
 
@@ -551,9 +623,7 @@ export class ProductsService extends ProductsGeneratedService {
             inArray(siteProductsTable.productId, ids)
           )
         );
-      await tx
-        .delete(skusTable)
-        .where(inArray(skusTable.productId, ids));
+      await tx.delete(skusTable).where(inArray(skusTable.productId, ids));
 
       // 3. 删除其他关联数据
       await tx

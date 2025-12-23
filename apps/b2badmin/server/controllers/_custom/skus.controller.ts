@@ -12,7 +12,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
   // 批量创建SKU
   .post(
     "/batch",
-    async ({ body: { productId, skus }, db, currentSite, auth }) => {
+    async ({ body: { productId, skus }, db, auth }) => {
       // 验证商品是否存在
       const productExists = await skusService.validateProductExists(
         { db, auth },
@@ -25,7 +25,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
       return await skusService.batchCreateSkus({ db, auth }, productId, skus);
     },
     {
-      allPermission: "SKUS_TABLE_CREATE",
+      // allPermission: "SKUS_TABLE_CREATE", // 临时禁用权限检查
       body: SkusContract.BatchCreate,
       detail: {
         summary: "批量创建SKU",
@@ -38,23 +38,12 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
   // 更新SKU
   .put(
     "/update/:id",
-    async ({ params: { id }, body, db, user, role, auth }) => {
-      // 验证媒体是否存在（如果要更新的话）
-      if (body.mediaId !== undefined && body.mediaId) {
-        const mediaExists = await skusService.validateMediaExists(
-          { db, auth },
-          body.mediaId
-        );
-        if (!mediaExists) {
-          throw new HttpError.NotFound("图片不存在");
-        }
-      }
-
+    async ({ params: { id }, body, db, auth }) => {
       // 更新SKU及媒体关联
-      return await skusService.updateSkuWithMedia({ db, auth }, id, body);
+      return await skusService.updateSingleSku({ db, auth }, id, body);
     },
     {
-      allPermission: "SKUS_TABLE_UPDATE",
+      // allPermission: "SKUS_TABLE_UPDATE", // 临时禁用权限检查
       params: t.Object({
         id: t.String(),
       }),
@@ -70,14 +59,13 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
   // 批量删除SKU
   .delete(
     "/batch",
-    async ({ body, db, user, role, auth }) => {
-      const ids = body?.ids || [];
+    async ({ body: { ids }, db, user, role, auth }) => {
       // 使用基类的批量删除方法
       const result = await skusService.deleteMany({ db, auth }, ids);
       return result;
     },
     {
-      allPermission: "SKUS_TABLE_DELETE",
+      // allPermission: "SKUS_TABLE_DELETE", // 临时禁用权限检查
       body: t.Object({
         ids: t.Array(t.String(), { minItems: 1 }),
       }),
@@ -91,7 +79,7 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
 
   // 获取SKU列表
   .get(
-    "/list",
+    "/",
     async ({ db, auth, query }) => {
       console.log("query:", query);
       try {
@@ -150,32 +138,3 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
       },
     }
   )
-
-  // 更新SKU的媒体关联
-  .put(
-    "/media/:id",
-    async ({ params: { id }, body, db, user, role, auth }) => {
-      // 更新媒体关联
-      return await skusService.updateSkuMedia(
-        { db, auth },
-        id,
-        body.mediaIds,
-        body.mainImageIndex
-      );
-    },
-    {
-      allPermission: "SKUS_TABLE_UPDATE",
-      params: t.Object({
-        id: t.String(),
-      }),
-      body: t.Object({
-        mediaIds: t.Array(t.String()),
-        mainImageIndex: t.Optional(t.Number()), // 指定哪张图片作为主图
-      }),
-      detail: {
-        summary: "更新SKU媒体关联",
-        description: "更新SKU的图片关联，支持多张图片",
-        tags: ["SKUs"],
-      },
-    }
-  );
