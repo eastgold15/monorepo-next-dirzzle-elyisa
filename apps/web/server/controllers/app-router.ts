@@ -26,7 +26,6 @@ import { mediametadataController } from "./_generated/mediametadata.controller";
 import { productmastercategoriesController } from "./_generated/productmastercategories.controller";
 import { productmediaController } from "./_generated/productmedia.controller";
 import { productsitecategoriesController } from "./_generated/productsitecategories.controller";
-import { producttemplateController } from "./_generated/producttemplate.controller";
 import { quotationitemsController } from "./_generated/quotationitems.controller";
 import { quotationsController } from "./_generated/quotations.controller";
 // import { roleController } from "./_generated/role.controller";
@@ -34,55 +33,57 @@ import { quotationsController } from "./_generated/quotations.controller";
 import { salespersonaffiliationsController } from "./_generated/salespersonaffiliations.controller";
 import { salespersoncategoriesController } from "./_generated/salespersoncategories.controller";
 import { salespersonsController } from "./_generated/salespersons.controller";
-import { sessionController } from "./_generated/session.controller";
 import { siteconfigController } from "./_generated/siteconfig.controller";
 import { siteproductsController } from "./_generated/siteproducts.controller";
 import { sitesController } from "./_generated/sites.controller";
 import { skumediaController } from "./_generated/skumedia.controller";
 import { skusController } from "./_generated/skus.controller";
-import { translationdictController } from "./_generated/translationdict.controller";
-import { usersController } from "./_generated/users.controller";
-import { usersiterolesController } from "./_generated/usersiteroles.controller";
-import { verificationController } from "./_generated/verification.controller";
 
 export const appRouter = (app: Elysia) =>
   app
     // .use(customerController)
     // .use(accountController)
+
+    // .use(dailyinquirycounterController)
+
+    // .use(inquiryController)
+
+    // .use(permissionController)
+
+    // .use(producttemplateController)
+
+    // .use(rolepermissionsController)
+    // .use(roleController)
+
+    // .use(sessionController)
+
+    // .use(translationdictController)
+    // .use(usersiterolesController)
+    // .use(usersController)
+    // .use(verificationController);
     .use(adsController)
     .use(attributeController)
     .use(attributetemplateController)
     .use(attributevalueController)
-    // .use(dailyinquirycounterController)
+    .use(salespersonaffiliationsController)
+    .use(salespersoncategoriesController)
+    .use(salespersonsController)
+    .use(productsController)
     .use(exportersController)
     .use(factoriesController)
     .use(herocardsController)
     .use(inquiryitemsController)
-    // .use(inquiryController)
+    .use(productmastercategoriesController)
     .use(masterController)
     .use(mediametadataController)
     .use(mediaController)
-    // .use(permissionController)
-    .use(productmastercategoriesController)
     .use(productmediaController)
     .use(productsitecategoriesController)
-    .use(producttemplateController)
-    .use(productsController)
     .use(quotationitemsController)
     .use(quotationsController)
-    // .use(rolepermissionsController)
-    // .use(roleController)
-    .use(salespersonaffiliationsController)
-    .use(salespersoncategoriesController)
-    .use(salespersonsController)
-    .use(sessionController)
     .use(sitecategoriesController)
     .use(siteconfigController)
     .use(siteproductsController)
     .use(sitesController)
     .use(skumediaController)
-    .use(skusController)
-    .use(translationdictController)
-    .use(usersiterolesController)
-    .use(usersController)
-    .use(verificationController);
+    .use(skusController);

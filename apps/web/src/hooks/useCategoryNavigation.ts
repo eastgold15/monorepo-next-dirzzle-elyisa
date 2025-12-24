@@ -1,13 +1,14 @@
 import { useCallback } from "react";
-import { useCategoryQuery } from "@/hooks/category-hook";
+import { useCategoryQuery } from "@/hooks/api/category-hook";
 
 /**
  * 统一的分类导航数据和处理逻辑 Hook
  * 提供分类数据、加载状态、错误处理以及通用的导航处理函数
  */
 export const useCategoryNavigation = () => {
-  const { data: categories, isLoading, error } = useCategoryQuery();
+  const { data, isLoading, error } = useCategoryQuery();
 
+  const categories = data || []
   /**
    * 滚动到页面顶部
    */
@@ -57,7 +58,7 @@ export const useCategoryNavigation = () => {
 
   return {
     // 数据
-    categories: categories?.data || [],
+    categories: categories || [],
     isLoading,
     error,
 
@@ -65,9 +66,5 @@ export const useCategoryNavigation = () => {
     handleScrollToTop,
     handleNavigate,
     handleNavigateWithCallback,
-
-    // 状态
-    hasData: categories?.data && categories.data.length > 0,
-    isEmpty: !categories?.data || categories.data.length === 0,
   };
 };

@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 import ProductDetail from "@/components/product/ProductDetail";
-import { useProductQuery } from "@/hooks/product-hook";
+import { useProductQuery } from "@/hooks/api/product-hook";
 
 export default function ProductPage() {
   const { id } = useParams();

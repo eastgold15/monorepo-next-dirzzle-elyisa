@@ -15,8 +15,8 @@ import {
 import Image from "next/image";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { useInquiryMutation } from "@/hooks/inquiry-hook";
-import type { BackendProduct } from "@/hooks/product-hook";
+import { useInquiryMutation } from "@/hooks/api/inquiry-hook";
+import type { BackendProduct } from "@/hooks/api/product-hook";
 
 interface ProductDetailProps {
   product: BackendProduct;

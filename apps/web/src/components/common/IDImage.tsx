@@ -1,57 +1,58 @@
+"use client";
 import Image from "next/image";
-import { useCurrentMediaQuery } from "@/hooks/meida-hook";
+import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrentMediaQuery } from "@/hooks/api/meida-hook";
+import { cn } from "@/lib/utils";
 
-/**
- * 广告图片组件 - 独立处理图片加载
- */
-const IDImage: React.FC<{
+interface IDImageProps {
   imageId: string | null | undefined;
   alt: string;
   className?: string;
-}> = ({ imageId, alt, className }) => {
-  const defaultImage =
-    "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012&auto=format&fit=crop";
+  priority?: boolean; // 新增：允许控制是否优先加载（用于首屏）
+}
 
-  const { data: mediaResponse, isLoading } = useCurrentMediaQuery(
-    imageId ?? "0"
+const IDImage: React.FC<IDImageProps> = ({
+  imageId,
+  alt,
+  className,
+  priority = false,
+}) => {
+  const [isImgLoading, setIsImgLoading] = useState(true);
+
+  // 确保传入字符串，避免 hook 报错
+  const { data: imageUrl, isLoading: isQueryLoading } = useCurrentMediaQuery(
+    String(imageId || "")
   );
 
-  if (!imageId) {
-    return (
-      <Image
-        alt={alt}
-        className={
-          className ??
-          "absolute inset-0 h-full w-full object-cover object-center md:object-[center_30%]"
-        }
-        fill
-        priority
-        sizes="(max-width: 768px) 100vw, 50vw"
-        src={defaultImage}
-      />
-    );
-  }
+  const defaultImage =
+    "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012&auto=format&fit=crop";
+  const finalSrc = imageUrl || defaultImage;
 
-  if (isLoading) {
-    return (
-      <div className="absolute inset-0 h-full w-full animate-pulse bg-gray-300" />
-    );
-  }
-
-  const imageUrl = mediaResponse?.data || defaultImage;
+  // 判断是否需要显示骨架屏
+  // 逻辑：正在查API 或 API查完了但图片文件还没下载完
+  const showSkeleton = isQueryLoading || isImgLoading;
 
   return (
-    <Image
-      alt={alt}
-      className={
-        className ??
-        "absolute inset-0 h-full w-full object-cover object-center md:object-[center_30%]"
-      }
-      fill
-      priority
-      sizes="(max-width: 768px) 100vw, 50vw"
-      src={imageUrl}
-    />
+    <div className={cn("relative overflow-hidden", className)}>
+      {showSkeleton && (
+        <Skeleton className="absolute inset-0 z-10 h-full w-full bg-gray-200" />
+      )}
+
+      <Image
+        alt={alt}
+        className={cn(
+          "object-cover transition-opacity duration-700",
+          // 图片加载好之前透明，避免看到"逐行扫描"的加载过程
+          isImgLoading ? "opacity-0" : "opacity-100"
+        )}
+        fill
+        onLoad={() => setIsImgLoading(false)}
+        priority={priority}
+        sizes="(max-width: 768px) 100vw, 80vw"
+        src={finalSrc}
+      />
+    </div>
   );
 };
 

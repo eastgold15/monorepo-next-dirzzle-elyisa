@@ -1,9 +1,9 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
-import { useCurrentAdsQuery } from "@/hooks/ads-hook";
-import { useCurrentMediaQuery } from "@/hooks/meida-hook";
+import { useCurrentAdsQuery } from "@/hooks/api/ads-hook";
+import { MyImage } from "../MyImage";
+import { Skeleton } from "../ui/skeleton";
 
 interface AdShowProps {
   /**
@@ -15,57 +15,6 @@ interface AdShowProps {
    */
   showSkeleton?: boolean;
 }
-
-/**
- * 广告图片组件 - 独立处理图片加载
- */
-const AdImage: React.FC<{
-  imageId: string | null | undefined;
-  alt: string;
-  className?: string;
-}> = ({ imageId, alt, className }) => {
-  // 如果没有图片 ID，使用默认图片
-  const defaultImage =
-    "https://images.unsplash.com/photo-1596482343834-039c394c8617?q=80&w=2070&auto=format&fit=crop";
-
-  // 始终调用 hook 以遵循 React Hooks 规则
-  // 只有当 imageId 是有效数字时才真正查询，否则使用一个不会导致网络请求的默认值
-  const shouldFetch = imageId !== null && imageId !== undefined;
-  const { data: mediaResponse, isLoading } = useCurrentMediaQuery(
-    shouldFetch ? String(imageId) : "0" // 确保传递的是字符串类型
-  );
-
-  // 如果没有有效的 imageId，则直接返回默认图像
-  if (!shouldFetch) {
-    return (
-      <Image
-        alt={alt}
-        className={className}
-        fill
-        sizes="(max-width: 768px) 100vw, 50vw"
-        src={defaultImage}
-      />
-    );
-  }
-
-  // 加载中显示占位符
-  if (isLoading) {
-    return <div className="h-full w-full animate-pulse bg-gray-300" />;
-  }
-
-  // 获取实际的图片 URL
-  const imageUrl = mediaResponse?.data || defaultImage;
-
-  return (
-    <Image
-      alt={alt}
-      className={className}
-      fill
-      sizes="(max-width: 768px) 100vw, 50vw"
-      src={imageUrl}
-    />
-  );
-};
 
 /**
  * 动态广告展示组件
@@ -82,26 +31,25 @@ const AdShowComponent: React.FC<AdShowProps> = ({
   if (isLoading && showSkeleton) {
     return (
       <section className={`w-full bg-white ${className}`}>
+        {/* 这里的网格结构要和 displayAds.length === 2 的情况完全一致 */}
         <div className="grid h-auto grid-cols-1 md:h-[800px] md:grid-cols-2">
-          {Array.from({ length: 2 }, (key) => (
-            <div
-              className="relative h-[400px] animate-pulse bg-gray-200 md:h-full"
-              key={`skeleton-${key}`}
-            />
-          ))}
+          <Skeleton
+            className="h-[400px] border-white/10 border-r md:h-full"
+            variant="rectangle"
+          />
+          <Skeleton className="h-[400px] md:h-full" variant="rectangle" />
         </div>
       </section>
     );
   }
-
-  // 错误或无数据
-  if (error || !response) {
-    return null;
-  }
-
   // 提取实际的广告数据
-  const ads = response.data;
+  const ads = response;
   console.log("ads:", ads);
+  // 错误或无数据
+  // 2. 错误处理：不再返回 null，可以考虑返回空容器保持占位
+  if (error || !ads || ads.length === 0) {
+    return <div className="hidden" />; // 或者返回一个精简的默认展板
+  }
 
   // 根据位置决定背景色和文字颜色
   const getAdStyles = (index: number) => {
@@ -123,7 +71,7 @@ const AdShowComponent: React.FC<AdShowProps> = ({
 
     return (
       <div
-        className={`group relative overflow-hidden ${styles.bgColor}`}
+        className={`group relative z-20 overflow-hidden ${styles.bgColor}`}
         key={ad.id}
       >
         {/* Header Block */}
@@ -157,10 +105,10 @@ const AdShowComponent: React.FC<AdShowProps> = ({
 
         {/* Image */}
         <div className="relative h-[400px] md:h-full">
-          <AdImage
+          <MyImage
             alt={ad.title || "Advertisement"}
             className="mt-20 h-full w-full transform object-cover transition-transform duration-1000 group-hover:scale-105 md:mt-0"
-            imageId={ad.image_id}
+            imageId={ad.mediaId}
           />
         </div>
 

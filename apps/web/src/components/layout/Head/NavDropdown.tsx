@@ -1,13 +1,19 @@
 import { ChevronDown } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
+import type { SiteCategoryTreeRes } from "@/hooks/api/category-hook";
 import { useCategoryNavigation } from "@/hooks/useCategoryNavigation";
-import type { NavDropdownProps } from "@/types/category";
 
 /**
  * 导航下拉菜单组件
  * 支持鼠标悬停显示二级分类，支持无限层级嵌套
  */
-const NavDropdownComponent: React.FC<NavDropdownProps> = ({
+const NavDropdownComponent: React.FC<{
+  category: SiteCategoryTreeRes;
+  onNavigate?: (slug: string, id: string) => void;
+  className?: string;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
+}> = ({
   category,
   onNavigate,
   className = "",

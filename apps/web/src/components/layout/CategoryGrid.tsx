@@ -1,5 +1,5 @@
 import type React from "react";
-import type { BackendProductList } from "@/hooks/product-hook";
+import type { BackendProductList } from "@/hooks/api/product-hook";
 import ProductCard from "../product/productCard";
 
 interface CategoryGridProps {

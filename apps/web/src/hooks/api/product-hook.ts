@@ -2,42 +2,62 @@
 import { useQuery } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
+
+
+export interface ProductListRes {
+  items: Item[];
+  meta: Meta;
+}
+interface Meta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+interface Item {
+  id: string;
+  name: string;
+  price: string;
+  status: number;
+  createdAt: string;
+  mainImageUrl: string;
+  hasVideo: boolean;
+}
+/**
+ * 获取商品列表
+ */
 /**
  * 获取商品列表
  */
 export function useProductListQuery(
-  params?: {
+  params: {
     page?: number;
     limit?: number;
     categoryId?: string;
     name?: string;
-  },
+  } = {}, // 给个默认空对象
   options?: { enabled?: boolean }
 ) {
   return useQuery({
     queryKey: ["products", params],
     queryFn: async () => {
-      // 确保必需的参数有默认值
-      const queryParams = {
-        page: params?.page || 1,
-        limit: params?.limit || 10,
-        categoryId: params?.categoryId,
-        name: params?.name,
-      };
-      Object.keys(queryParams).forEach((key) => {
-        if (queryParams[key as keyof typeof queryParams] === undefined) {
-          delete queryParams[key as keyof typeof queryParams];
-        }
+      // 过滤掉 undefined 的参数
+      const cleanParams = Object.fromEntries(
+        Object.entries({
+          page: 1, // 默认值
+          limit: 10,
+          ...params,
+        }).filter(([_, v]) => v !== undefined)
+      );
+
+      const response = await rpc.api.v1.products.get({
+        $query: cleanParams as any,
       });
-      const result = await rpc.api.v1.products.get({
-        $query: queryParams,
-      });
-      return handleEden(result);
+
+      return handleEden(response) as ProductListRes;
     },
     enabled: options?.enabled ?? true,
-    staleTime: 5 * 60 * 1000, // 5分钟缓存
-    retry: 2,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

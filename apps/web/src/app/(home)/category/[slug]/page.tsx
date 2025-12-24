@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import CategoryGrid from "@/components/layout/CategoryGrid";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
-import { useCategoryDescQuery } from "@/hooks/category-hook";
-import { useProductListQuery } from "@/hooks/product-hook";
+import { useCategoryQuery } from "@/hooks/api/category-hook";
+import { useProductListQuery } from "@/hooks/api/product-hook";
 
 export default function CategoryPage() {
   const { slug } = useParams(); // 从 params.slug 获取 slug
@@ -25,7 +25,7 @@ export default function CategoryPage() {
     data: descRes,
     error: err,
     isLoading: descLoading,
-  } = useCategoryDescQuery(id!, { enabled: isMounted && !!id });
+  } = useCategoryQuery(id!, { enabled: isMounted && !!id });
 
   const {
     data: products,
@@ -99,8 +99,8 @@ export default function CategoryPage() {
     <div className="relative min-h-screen bg-white font-sans text-black selection:bg-black selection:text-white">
       <Navbar />
       <CategoryGrid
-        description={descRes.data.des}
-        products={products.data}
+        description={descRes.des}
+        products={products}
         title={title}
       />
       <Footer />
