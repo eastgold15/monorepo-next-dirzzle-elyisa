@@ -1,19 +1,5 @@
 "use client";
 
-import { Dialog } from "@radix-ui/react-dialog";
-import {
-  ChevronDown,
-  ChevronRight,
-  Edit,
-  Plus,
-  Search,
-  Trash2,
-  Video,
-  X,
-} from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
-import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateProductModal } from "@/components/form/CreateProductModal";
 import { CreateSKUModal } from "@/components/form/CreateSKUModal";
@@ -32,7 +18,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DialogContent } from "@/components/ui/dialog";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -43,6 +28,18 @@ import {
 } from "@/components/ui/sidebar";
 import { useProductsBatchDelete, useProductsList } from "@/hooks/api/products";
 import { useSkuDelete } from "@/hooks/api/skus";
+import {
+  ChevronDown,
+  ChevronRight,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+  Video
+} from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
 
 // 使用后端返回的类型
 interface Product {

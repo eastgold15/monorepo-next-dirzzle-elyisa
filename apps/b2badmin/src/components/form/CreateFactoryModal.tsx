@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCreateFactory } from "@/hooks/api/factory";
+import { useFactoryCreate } from "@/hooks/api/factory";
 
 const formSchema = z.object({
   name: z.string().min(2, "工厂名称至少需要2个字符"),
@@ -49,7 +49,7 @@ export function CreateFactoryModal({
   onOpenChange,
   onSuccess,
 }: CreateFactoryModalProps) {
-  const createFactory = useCreateFactory();
+  const createFactory = useFactoryCreate();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
