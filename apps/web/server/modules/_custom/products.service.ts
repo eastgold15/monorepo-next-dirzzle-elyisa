@@ -12,6 +12,7 @@ import {
   skusTable,
 } from "@repo/contract";
 import { and, asc, desc, eq, exists, like, type SQL, sql } from "drizzle-orm";
+import { db } from "~/db/connection";
 import { ProductsGeneratedService } from "../_generated/products.service";
 import type { ServiceContext } from "../_lib/base-service";
 
@@ -43,14 +44,12 @@ export class ProductsService extends ProductsGeneratedService {
             .where(
               and(
                 eq(productMasterCategoriesTable.productId, this.table.id),
-                eq(productMasterCategoriesTable.categoryId, categoryId)
+                eq(productMasterCategoriesTable.masterCategoryId, categoryId)
               )
             )
         )
       );
     }
-
-
 
     // 2. 构建复杂 Join 查询
     const baseQuery = ctx.db
@@ -75,7 +74,7 @@ export class ProductsService extends ProductsGeneratedService {
       inner join ${productMediaTable} on ${mediaTable.id} = ${productMediaTable.mediaId}
       where ${productMediaTable.productId} = ${this.table.id} 
       and ${mediaTable.mediaType} = 'video'
-    )`
+    )`,
       })
       .from(this.table)
       // 移除原来的 productMediaTable 和 mediaTable 的 leftJoin，改用上面的子查询
@@ -104,23 +103,25 @@ export class ProductsService extends ProductsGeneratedService {
     return { data, total };
   }
 
+
+
+
   /**
    * 🔍 获取商品详情 (使用 Relational Query)
    */
   async getDetail(id: string, ctx: ServiceContext) {
     // Relational Query 目前不支持 withScope 注入，需手动合并 siteId
-    const product = await ctx.db.query.productsTable.findFirst({
-      where: and(
-        eq(this.table.id, id),
-        eq(this.table.siteId, ctx.siteId) // 🛡️ 强制站点隔离
-      ),
+    const product = await db.query.productsTable.findFirst({
+      where: {
+        id,
+        siteId: ctx.siteId,
+      },
       with: {
         productMedia: { with: { media: true } },
-        productCategories: { with: { category: true } },
+        siteCategory: true,
         skus: { with: { media: true } },
-      },
+      }
     });
-
     if (!product) throw new Error("商品不存在");
     return product;
   }

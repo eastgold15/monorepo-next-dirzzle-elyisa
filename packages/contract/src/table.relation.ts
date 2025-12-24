@@ -222,6 +222,10 @@ export const relations = defineRelations(schema, (r) => ({
     //   from: r.productsTable.id.through(r.productCategoriesTable.productId),
     //   to: r.MasterTable.id.through(r.productCategoriesTable.categoryId),
     // }),
+    siteCategory: r.many.siteCategoriesTable({
+      from: r.productsTable.id.through(r.productSiteCategoriesTable.productId),
+      to: r.siteCategoriesTable.id.through(r.productSiteCategoriesTable.categoryId),
+    }),
     productMedia: r.many.productMediaTable(),
     // productCategories: r.many.productCategoriesTable({
     //   alias: 'product_categories',
