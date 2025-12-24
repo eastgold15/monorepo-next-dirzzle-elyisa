@@ -11,15 +11,16 @@ export const adsController = new Elysia({
   .use(authGuardMid)
   .use(dbPlugin)
 
-  // 获取广告列表（包含媒体信息）
+  // 获取广告列表（包含媒体信息
   .get(
     "/",
-    async ({ query, db, auth, permissions }) =>
+    async ({ query, db, auth }) =>
       await adsService.findAllWithMedia(query, { db, auth }),
     {
-      allPermission: "ADS_TABLE_VIEW",
+      allPermission: "ADVERTISEMENTS_VIEW",
       query: AdsContract.ListQuery,
       detail: {
+        operationId: "getAdsList",
         summary: "获取广告列表",
         description: "获取当前站点的所有广告，包含媒体信息",
         tags: ["Ads"],
@@ -30,12 +31,12 @@ export const adsController = new Elysia({
   // 创建广告（支持关联媒体）
   .post(
     "/",
-    async ({ body, db, auth, permissions }) => {
+    async ({ body, db, auth }) => {
       const { mediaId, ...adData } = body;
       return await adsService.createAd(adData, mediaId, { db, auth });
     },
     {
-      allPermission: "ADS_TABLE_CREATE",
+      allPermission: "ADVERTISEMENTS_CREATE",
       body: AdsContract.Create,
       detail: {
         summary: "创建广告",
@@ -45,80 +46,14 @@ export const adsController = new Elysia({
     }
   )
 
-  // 批量更新排序
-  .patch(
-    "/sort",
-    async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("ADS_EDIT")) throw new Error("Forbidden");
-
-      return await adsService.updateSortOrder(body.items, { db, auth });
-    },
-    {
-      body: t.Object({
-        items: t.Array(
-          t.Object({
-            id: t.String(),
-            sortOrder: t.Number(),
-          })
-        ),
-      }),
-      detail: {
-        summary: "批量更新广告排序",
-        description: "批量更新广告的排序",
-        tags: ["Ads"],
-      },
-    }
-  )
-
-  // 切换广告激活状态
-  .patch(
-    "/:id/toggle",
-    async ({ params, db, auth, permissions }) => {
-      if (!permissions.includes("ADS_EDIT")) throw new Error("Forbidden");
-
-      return await adsService.toggleStatus(params.id, { db, auth });
-    },
-    {
-      params: t.Object({
-        id: t.String(),
-      }),
-      detail: {
-        summary: "切换广告状态",
-        description: "启用或禁用指定的广告",
-        tags: ["Ads"],
-      },
-    }
-  )
-
-  // 批量删除
-  .delete(
-    "/batch",
-    async ({ body, db, auth, permissions }) => {
-      if (!permissions.includes("ADS_DELETE")) throw new Error("Forbidden");
-
-      return await adsService.batchDelete(body.ids, { db, auth });
-    },
-    {
-      body: t.Object({
-        ids: t.Array(t.String()),
-      }),
-      detail: {
-        summary: "批量删除广告",
-        description: "批量删除广告",
-        tags: ["Ads"],
-      },
-    }
-  )
-
-  .patch(
+  .put(
     "/:id",
-    ({ params, body, permissions, auth, db }) => {
-      if (!permissions.includes("ADS_EDIT")) throw new Error("Forbidden");
-      return adsService.update(params.id, body, { db, auth });
-    },
+    ({ params, body, auth, db }) =>
+      adsService.update(params.id, body, { db, auth }),
     {
+      allPermission: "ADVERTISEMENTS_EDIT",
       params: t.Object({ id: t.String() }),
-      body: AdsContract.Patch,
+      body: AdsContract.Update,
       detail: {
         summary: "更新广告",
         description: "更新指定广告的信息（需要权限）",
@@ -129,15 +64,32 @@ export const adsController = new Elysia({
 
   .delete(
     "/:id",
-    ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("ADS_DELETE")) throw new Error("Forbidden");
-      return adsService.delete(params.id, { db, auth });
-    },
+    ({ params, auth, db }) =>
+      adsService.delete(params.id, { db, auth }),
     {
+      allPermission: "ADVERTISEMENTS_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除广告",
         description: "删除指定的广告（需要权限）",
+        tags: ["Ads"],
+      },
+    }
+  )
+
+  // 批量删除
+  .delete(
+    "/batch",
+    async ({ body, db, auth }) =>
+      await adsService.batchDelete(body.ids, { db, auth }),
+    {
+      allPermission: "ADVERTISEMENTS_DELETE",
+      body: t.Object({
+        ids: t.Array(t.String()),
+      }),
+      detail: {
+        summary: "批量删除广告",
+        description: "批量删除广告",
         tags: ["Ads"],
       },
     }

@@ -22,18 +22,24 @@ export const AdsContract = {
 
   // 创建请求 (默认排除系统字段)
   Create: t.Object(
-    t.Omit(t.Object(AdsBase.insertFields), ["id", "createdAt", "updatedAt"])
-      .properties
+    {
+      ...t.Omit(t.Object(AdsBase.insertFields), ["id", "createdAt", "updatedAt", "siteId", "startDate", "endDate"])
+        .properties,
+      startDate: t.String(),
+      endDate: t.String(),
+    }
   ),
 
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
-    t.Omit(t.Object(AdsBase.insertFields), [
-      "id",
-      "createdAt",
-      "updatedAt",
-      "siteId",
-    ])
+    t.Object(
+      {
+        ...t.Omit(t.Object(AdsBase.insertFields), ["id", "createdAt", "updatedAt", "siteId", "startDate", "endDate"])
+          .properties,
+        startDate: t.String(),
+        endDate: t.String(),
+      }
+    ),
   ),
 
   // 列表查询

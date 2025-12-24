@@ -46,7 +46,7 @@ export function useAdsUpdate() {
     }: {
       id: string;
       data: typeof AdsContract.Update.static;
-    }) => await handleEden(rpc.api.v1.ads({ id }).patch(data)),
+    }) => await handleEden(rpc.api.v1.ads({ id }).put(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ads"] });
     },

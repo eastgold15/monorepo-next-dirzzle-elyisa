@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
-import { MediaUpload } from "@/components/MediaUpload";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MediaSelect } from "@/components/ui/media-select";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -51,14 +51,12 @@ import {
 interface HeroCard {
   id: string;
   title: string;
-  subtitle?: string;
-  description?: string;
-  buttonLabel?: string;
-  buttonUrl?: string;
-  backgroundClass?: string;
-  mediaId?: string;
-  imageUrl?: string | null;
-  sortOrder: number;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+  backgroundClass: string;
+  mediaId: string;
+  sortOrder: number | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -70,9 +68,8 @@ export default function HeroCardsPage() {
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
-    subtitle: "",
     description: "",
-    buttonLabel: "",
+    buttonText: "",
     buttonUrl: "",
     backgroundClass: "bg-blue-50",
     sortOrder: 0,
@@ -102,9 +99,8 @@ export default function HeroCardsPage() {
   const resetForm = () => {
     setFormData({
       title: "",
-      subtitle: "",
       description: "",
-      buttonLabel: "",
+      buttonText: "",
       buttonUrl: "",
       backgroundClass: "bg-blue-50",
       sortOrder: 0,
@@ -119,9 +115,8 @@ export default function HeroCardsPage() {
     setEditingCard(card);
     setFormData({
       title: card.title,
-      subtitle: card.subtitle || "",
       description: card.description || "",
-      buttonLabel: card.buttonLabel || "",
+      buttonText: card.buttonText || "",
       buttonUrl: card.buttonUrl || "",
       backgroundClass: card.backgroundClass || "bg-blue-50",
       sortOrder: card.sortOrder,
@@ -135,14 +130,13 @@ export default function HeroCardsPage() {
     try {
       const data = {
         title: formData.title,
-        subtitle: formData.subtitle || undefined,
-        description: formData.description || undefined,
-        buttonLabel: formData.buttonLabel || undefined,
-        buttonUrl: formData.buttonUrl || undefined,
+        description: formData.description,
+        buttonText: formData.buttonText,
+        buttonUrl: formData.buttonUrl,
         backgroundClass: formData.backgroundClass || undefined,
         sortOrder: formData.sortOrder,
         isActive: formData.isActive,
-        mediaId: formData.mediaId || undefined,
+        mediaId: formData.mediaId,
       };
 
       if (editingCard) {
@@ -308,20 +302,6 @@ export default function HeroCardsPage() {
                             value={formData.title}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="subtitle">副标题</Label>
-                          <Input
-                            id="subtitle"
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                subtitle: e.target.value,
-                              })
-                            }
-                            placeholder="请输入副标题（可选）"
-                            value={formData.subtitle}
-                          />
-                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -331,11 +311,11 @@ export default function HeroCardsPage() {
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              buttonLabel: e.target.value,
+                              buttonText: e.target.value,
                             })
                           }
                           placeholder="请输入按钮文本（可选）"
-                          value={formData.buttonLabel}
+                          value={formData.buttonText}
                         />
                       </div>
 
@@ -404,7 +384,7 @@ export default function HeroCardsPage() {
 
                       <div className="space-y-2">
                         <Label>图片</Label>
-                        <MediaUpload
+                        <MediaSelect
                           maxCount={1}
                           onChange={(mediaIds) =>
                             setFormData({
@@ -412,6 +392,7 @@ export default function HeroCardsPage() {
                               mediaId: mediaIds[0] || "",
                             })
                           }
+                          placeholder="选择图片"
                           value={formData.mediaId ? [formData.mediaId] : []}
                         />
                       </div>
@@ -501,30 +482,28 @@ export default function HeroCardsPage() {
                               type="checkbox"
                             />
                             <GripVertical className="mt-1 h-5 w-5 text-muted-foreground" />
-                            {card.imageUrl && (
+                            {card.mediaUrl && (
                               <Image
                                 alt={card.title}
                                 className="h-16 w-16 rounded object-cover"
-                                src={card.imageUrl}
+                                height={40}
+                                src={card.mediaUrl}
+                                width={40}
                               />
                             )}
                             <div className="flex-1">
                               <h3 className="font-semibold text-lg">
                                 {card.title}
                               </h3>
-                              {card.subtitle && (
-                                <p className="text-muted-foreground text-sm">
-                                  {card.subtitle}
-                                </p>
-                              )}
+
                               {card.description && (
                                 <p className="mt-1 text-muted-foreground text-sm">
                                   {card.description}
                                 </p>
                               )}
                               <div className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
-                                {card.buttonLabel && (
-                                  <span>按钮: {card.buttonLabel}</span>
+                                {card.buttonText && (
+                                  <span>按钮: {card.buttonText}</span>
                                 )}
                                 {card.buttonUrl && (
                                   <span>链接: {card.buttonUrl}</span>

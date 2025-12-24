@@ -22,9 +22,8 @@ export function useHeroCardsList(params?: {
           },
         })
       );
-
       // 返回数据列表
-      return res?.data || [];
+      return res.data || [];
     },
     staleTime: 5 * 60 * 1000, // 5分钟
   });
@@ -51,8 +50,8 @@ export function useHeroCardsUpdate() {
       data,
     }: {
       id: string;
-      data: typeof HeroCardsContract.Patch.static;
-    }) => await handleEden(rpc.api.v1.herocards({ id }).patch(data)),
+      data: typeof HeroCardsContract.Update.static;
+    }) => await handleEden(rpc.api.v1.herocards({ id }).put(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
     },

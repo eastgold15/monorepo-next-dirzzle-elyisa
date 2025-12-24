@@ -39,6 +39,7 @@ import {
   useMasterCategoriesTree,
 } from "@/hooks/api/mastercategory";
 import { useAuthStore } from "@/stores/auth-store";
+import { Label } from "@radix-ui/react-label";
 
 // 将契约层的实体类型转换为前端使用的带children的类型
 type MasterCategory = MasterCategoryTModel["Entity"] & {

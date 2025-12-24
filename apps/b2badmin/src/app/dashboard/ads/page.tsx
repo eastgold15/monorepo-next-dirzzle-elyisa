@@ -14,7 +14,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
-import { MediaUpload } from "@/components/MediaUpload";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MediaSelect } from "@/components/ui/media-select";
 import {
   Select,
   SelectContent,
@@ -315,11 +315,12 @@ function AdsDialog({
 
           <div className="space-y-2">
             <Label>广告图片</Label>
-            <MediaUpload
+            <MediaSelect
               maxCount={1}
               onChange={(mediaIds) =>
                 setFormData({ ...formData, mediaId: mediaIds[0] || "" })
               }
+              placeholder="选择广告图片"
               value={formData.mediaId ? [formData.mediaId] : []}
             />
           </div>
@@ -542,12 +543,12 @@ export default function AdsPage() {
                     />
 
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                      {ad.imageUrl ? (
+                      {ad.mediaUrl ? (
                         <Image
                           alt={ad.title}
                           className="h-full w-full object-cover"
                           height={64}
-                          src={ad.imageUrl}
+                          src={ad.mediaUrl}
                           width={64}
                         />
                       ) : (

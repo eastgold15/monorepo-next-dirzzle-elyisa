@@ -26,7 +26,7 @@ export abstract class B2BBaseService<
   constructor(
     protected table: T,
     protected contract: C
-  ) {}
+  ) { }
 
   protected getScopeFilters(ctx: ServiceContext): SQL[] {
     const filters: SQL[] = [];
@@ -102,7 +102,7 @@ export abstract class B2BBaseService<
       .update(this.table)
       .set({ ...data, updatedAt: new Date() })
       .$dynamic();
-    const [result] = await this.withScope(update, ctx, [
+    const result = await this.withScope(update, ctx, [
       eq((this.table as any).id, id),
     ]).returning();
     return result;

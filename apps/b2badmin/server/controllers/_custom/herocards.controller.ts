@@ -17,7 +17,7 @@ export const herocardsController = new Elysia({
     async ({ query, db, auth }) =>
       await heroCardsService.findAllWithMedia(query, { db, auth }),
     {
-      allPermissions: ["HEROCARDS_TABLE_VIEW"],
+      allPermissions: ["HERO_CARDS_VIEW"],
       query: HeroCardsContract.ListQuery,
       detail: {
         summary: "获取首页展示卡片列表",
@@ -38,7 +38,7 @@ export const herocardsController = new Elysia({
       });
     },
     {
-      allPermissions: ["HEROCARDS_TABLE_CREATE"],
+      allPermissions: ["HERO_CARDS_CREATE"],
       body: HeroCardsContract.Create,
       detail: {
         summary: "创建首页展示卡片",
@@ -48,13 +48,45 @@ export const herocardsController = new Elysia({
     }
   )
 
+  .put(
+    "/:id",
+    ({ params, body, auth, db }) =>
+      heroCardsService.update(params.id, body, { db, auth }),
+    {
+      allPermissions: ["HERO_CARDS_EDIT"],
+      params: t.Object({ id: t.String() }),
+      body: HeroCardsContract.Update,
+      detail: {
+        summary: "更新首页展示卡片",
+        description: "更新指定首页展示卡片的信息（需要权限）",
+        tags: ["HeroCards"],
+      },
+    }
+  )
+
+  .delete(
+    "/:id",
+    ({ params, auth, db }) =>
+      heroCardsService.delete(params.id, { db, auth }),
+    {
+      allPermissions: ["HERO_CARDS_DELETE"],
+      params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "删除首页展示卡片",
+        description: "删除指定的首页展示卡片（需要权限）",
+        tags: ["HeroCards"],
+      },
+    }
+  )
+
+
   // 批量更新排序
   .patch(
     "/sort",
     async ({ body, db, auth }) =>
       await heroCardsService.updateSortOrder(body.items, { db, auth }),
     {
-      allPermissions: ["HEROCARDS_TABLE_EDIT"],
+      allPermissions: ["HERO_CARDS_EDIT"],
       body: t.Object({
         items: t.Array(
           t.Object({
@@ -77,7 +109,7 @@ export const herocardsController = new Elysia({
     async ({ params, db, auth }) =>
       await heroCardsService.toggleStatus(params.id, { db, auth }),
     {
-      allPermissions: ["HEROCARDS_TABLE_EDIT"],
+      allPermissions: ["HERO_CARDS_EDIT"],
       params: t.Object({
         id: t.String(),
       }),
@@ -89,33 +121,3 @@ export const herocardsController = new Elysia({
     }
   )
 
-  .put(
-    "/:id",
-    ({ params, body, auth, db }) =>
-      heroCardsService.update(params.id, body, { db, auth }),
-    {
-      allPermissions: ["HEROCARDS_TABLE_EDIT"],
-      params: t.Object({ id: t.String() }),
-      body: HeroCardsContract.Update,
-      detail: {
-        summary: "更新首页展示卡片",
-        description: "更新指定首页展示卡片的信息（需要权限）",
-        tags: ["HeroCards"],
-      },
-    }
-  )
-
-  .delete(
-    "/:id",
-    ({ params, auth, db }) =>
-      heroCardsService.delete(params.id, { db, auth }),
-    {
-      allPermissions: ["HEROCARDS_TABLE_DELETE"],
-      params: t.Object({ id: t.String() }),
-      detail: {
-        summary: "删除首页展示卡片",
-        description: "删除指定的首页展示卡片（需要权限）",
-        tags: ["HeroCards"],
-      },
-    }
-  );

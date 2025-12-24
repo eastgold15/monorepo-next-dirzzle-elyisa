@@ -339,17 +339,15 @@ export const adsTable = p.pgTable("advertisements", {
 export const heroCardsTable = p.pgTable("hero_cards", {
   ...Audit,
   title: p.varchar("title", { length: 255 }).notNull(),
-
   description: p.text("description").notNull(),
   buttonText: p.varchar("button_text", { length: 100 }).notNull(),
-  buttonUrl: p.varchar("button_url", { length: 500 }),
+  buttonUrl: p.varchar("button_url", { length: 500 }).notNull(),
   backgroundClass: p
     .varchar("background_class", { length: 100 })
     .default("bg-blue-50"),
   sortOrder: p.integer("sort_order").default(0),
   isActive: p.boolean("is_active").default(true),
-
-  mediaId: p.uuid("media_id").references(() => mediaTable.id),
+  mediaId: p.uuid("media_id").references(() => mediaTable.id).notNull(),
   // 🔥 必须新增：属于哪个站点
   siteId: p
     .uuid("site_id")
