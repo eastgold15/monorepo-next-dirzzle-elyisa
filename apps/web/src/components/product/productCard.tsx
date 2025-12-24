@@ -1,23 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
-
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  status: number;
-  createdAt: Date;
-  updatedAt: Date;
-  categoryId: string | null;
-  imageUrl: string | null;
-  additionalImages?: string[];
-  isNew?: boolean;
-  subtitle?: string;
-};
+import type { ProductListRes } from "@/hooks/api/product-hook";
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductListRes["items"][0];
   aspectRatio?: string;
 }
 
@@ -26,10 +13,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   aspectRatio = "aspect-[4/3]",
 }) => {
   // 确保有主图，否则显示占位图（可选）
-  const mainImage = product.imageUrl || "/placeholder.jpg";
+  const mainImage = product.mainImageUrl || "/placeholder.jpg";
 
   // 悬停图：优先用 additionalImages[0]，否则回退到主图
-  const hoverImage = product.additionalImages?.[0] || mainImage;
+  const hoverImage = product.mainImageUrl || mainImage;
 
   return (
     <Link
@@ -43,6 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Image
           alt={product.name}
           className="absolute inset-0 h-full w-full transform object-contain opacity-100 mix-blend-multiply transition-opacity duration-700 group-hover:opacity-0"
+          fill
           loading="lazy"
           src={mainImage}
         />
@@ -51,15 +39,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Image
           alt={`${product.name} alternate`}
           className="absolute inset-0 h-full w-full scale-105 transform object-contain opacity-0 mix-blend-multiply transition-all duration-700 group-hover:opacity-100"
+          fill
           loading="lazy"
           src={hoverImage}
         />
 
-        {product.isNew && (
+        {/* {product.isNew && (
           <span className="absolute top-2 left-2 bg-black px-2 py-1 font-bold text-[8px] text-white uppercase tracking-widest">
             New In
           </span>
-        )}
+        )} */}
       </div>
 
       <div className="text-center">
@@ -67,9 +56,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {product.name}
         </h3>
 
-        {product.subtitle && (
+        {product.name && (
           <p className="mb-2 font-serif text-gray-500 text-sm italic">
-            {product.subtitle}
+            {product.name}
           </p>
         )}
 

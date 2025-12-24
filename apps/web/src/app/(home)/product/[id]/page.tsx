@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/components/Navbar/Navbar";
 import ProductDetail from "@/components/product/ProductDetail";
 import { Skeleton } from "@/components/ui/skeleton"; // 假设你已经有这个组件
 import { useProductQuery } from "@/hooks/api/product-hook";

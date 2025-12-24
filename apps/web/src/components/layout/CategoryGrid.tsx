@@ -1,16 +1,16 @@
 import type React from "react";
-import type { BackendProductList } from "@/hooks/api/product-hook";
+import type { ProductListRes } from "@/hooks/api/product-hook";
 import ProductCard from "../product/productCard";
 
 interface CategoryGridProps {
   title: string;
-  products: BackendProductList;
+  productListRes: ProductListRes;
   description?: string;
 }
 
 const CategoryGrid: React.FC<CategoryGridProps> = ({
   title,
-  products,
+  productListRes,
   description,
 }) => {
   return (
@@ -29,9 +29,9 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
 
       {/* Product Grid */}
       <div className="mx-auto max-w-[1600px] px-6">
-        {products.items.length > 0 ? (
+        {productListRes.items.length > 0 ? (
           <div className="grid grid-cols-2 gap-x-6 gap-y-16 md:grid-cols-3 lg:grid-cols-4">
-            {products.items.map((product) => (
+            {productListRes.items.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -47,7 +47,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
         )}
 
         {/* Load More (Visual) */}
-        {products.items.length > 0 && (
+        {productListRes.items.length > 0 && (
           <div className="mt-20 flex justify-center">
             <button className="border-black border-b pb-1 font-bold text-xs uppercase tracking-[0.2em] transition-colors hover:border-gray-500 hover:text-gray-500">
               Load More

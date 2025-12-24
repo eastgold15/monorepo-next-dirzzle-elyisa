@@ -35,6 +35,7 @@ export function useCategoryQuery(id: string, options?: { enabled?: boolean }) {
     staleTime: 5 * 60 * 1000, // 5分钟
     retry: 2,
     refetchOnWindowFocus: false,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -46,6 +47,19 @@ export function useCategoryQuery(id: string, options?: { enabled?: boolean }) {
 //   });
 // }
 
+
+export interface SiteCategoryDetailRes {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  parentId?: any;
+  sortOrder: number;
+  siteId: string;
+  description?: string;
+  masterCategoryId?: string;
+}
+
 export function useCategoryDetailQuery(
   id: string,
   options?: { enabled?: boolean }
@@ -53,7 +67,7 @@ export function useCategoryDetailQuery(
   return useQuery({
     queryKey: queryKeys.categories.desc(id),
     queryFn: async () => {
-      const result = handleEden(await rpc.api.v1.sitecategories[id].get());
+      const result = handleEden(await rpc.api.v1.sitecategories[id].get()) as unknown as SiteCategoryDetailRes
       return result;
     },
     enabled: options?.enabled ?? true,

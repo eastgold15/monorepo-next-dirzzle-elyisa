@@ -4,7 +4,7 @@ import Ad from "@/components/gina/Ad";
 import SubscribeModal from "@/components/gina/SubscribeModal";
 import { HeroShow } from "@/components/heroShow";
 import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/components/Navbar/Navbar";
 
 const page: React.FC = () => {
   const [isSubscribeOpen, setIsSubscribeOpen] = useState(false);
