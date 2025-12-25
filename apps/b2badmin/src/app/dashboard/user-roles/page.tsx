@@ -57,7 +57,6 @@ export default function UserRolesPage() {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-
   const filteredRoles =
     userSiteRolesData?.filter(
       (role: any) =>
@@ -268,8 +267,8 @@ export default function UserRolesPage() {
                                   <AlertDialogAction
                                     onClick={() =>
                                       handleDelete(
-                                        userRole.id,
-                                        userRole.user?.name
+                                        userRole.userId,
+                                        userRole.user?.name || "未知用户"
                                       )
                                     }
                                   >

@@ -1,4 +1,4 @@
-import { UserSiteRolesContract, userSiteRolesTable } from "@repo/contract";
+import { UserSiteRolesContract } from "@repo/contract";
 import { Elysia, t } from "elysia";
 import { HttpError } from "elysia-http-problem-json";
 import { dbPlugin } from "~/db/connection";
@@ -9,60 +9,58 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .use(authGuardMid)
   .use(dbPlugin)
 
-  // 需要完成的功能，
-  // 1. 超管为所有人分配 用户在某站点的角色。
-  // 2. 出口商为工厂用户和业务员分配在某站点的角色。
-  // 3. 工厂用户为业务员分配在该站点的角色。
-
-
-
-
-
-  // 超管和出口商为工厂用户分配站点，工厂用户的角色管理列表
+  /**
+   * 获取该用户身份下的用户角色管理列表
+   *
+   * 权限规则：
+   * 1. 超管：可以看到所有用户角色分配
+   * 2. 出口商：可以看到旗下工厂用户和业务员的角色分配
+   * 3. 工厂：可以看到自己工厂业务员的角色分配
+   */
   .get(
     "/admin",
-    ({ query, auth, db }) => userSiteRolesService.list({ db, auth }, query),
+    ({ auth, db, user }) => userSiteRolesService.list({ db, auth }, user),
     {
-      allPermissions: ["USER_SITE_ROLES_VIEW"],
-      query: UserSiteRolesContract.ListQuery,
       detail: {
-        summary: "获取该用户身份下的用户角色管理",
-        description:
-          "获取该用户身份下的用户角色管理列表",
+        summary: "获取用户角色管理列表",
+        description: "根据当前用户身份，返回可管理的用户站点角色分配列表",
         tags: ["UserSiteRoles"],
       },
     }
   )
 
-  // 分配用户到站点角色
+  /**
+   * 分配用户到站点角色
+   *
+   * 权限规则：
+   * 1. 超管可以为所有人分配
+   * 2. 出口商可以为工厂用户和业务员分配到旗下站点
+   * 3. 工厂用户可以为业务员分配到该站点
+   */
   .post(
     "/",
-    ({ body, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_CREATE"))
-        throw new Error("Forbidden");
-      return userSiteRolesService.create(body, auth);
-    },
+    ({ body, auth, db }) => userSiteRolesService.createUser(body, { db, auth }),
     {
       body: UserSiteRolesContract.Create,
       detail: {
         summary: "分配用户站点角色",
-        description: "将用户分配到指定站点，并授予相应的角色权限",
+        description:
+          "将用户分配到指定站点，并授予相应的角色权限。根据当前用户身份，有不同的分配权限限制。",
         tags: ["UserSiteRoles"],
       },
     }
   )
 
-  // 更新用户站点角色
+  /**
+   * 更新用户站点角色
+   */
   .patch(
     "/:id",
-    ({ params, body, permissions, auth }) => {
-      if (!permissions.includes("USERSITEROLES_EDIT"))
-        throw new Error("Forbidden");
-      return userSiteRolesService.update(params.id, body, auth);
-    },
+    ({ params, body, auth, db }) =>
+      userSiteRolesService.update(params.id, body, { db, auth }),
     {
       params: t.Object({ id: t.String() }),
-      body: UserSiteRolesContract.Patch,
+      body: UserSiteRolesContract.Update,
       detail: {
         summary: "更新用户站点角色",
         description: "更新用户在站点中的角色信息，如更改角色或权限级别",
@@ -71,14 +69,13 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
     }
   )
 
-  // 取消用户站点角色分配
+  /**
+   * 取消用户站点角色分配
+   */
   .delete(
     "/:id",
-    ({ params, permissions, auth }) => {
-      if (!permissions.includes("USERSITEROLES_DELETE"))
-        throw new Error("Forbidden");
-      return userSiteRolesService.delete(params.id, auth);
-    },
+    ({ params, auth, db }) =>
+      userSiteRolesService.delete(params.id, { db, auth }),
     {
       params: t.Object({ id: t.String() }),
       detail: {
@@ -90,13 +87,12 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
     }
   )
 
-  // 批量分配多个用户到站点
+  /**
+   * 批量分配多个用户到站点
+   */
   .post(
-    "/batch-assign",
-    async ({ body, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_CREATE"))
-        throw new Error("Forbidden");
-
+    "/batch/assign",
+    async ({ body, auth, db }) => {
       const { userIds, siteId, roleId } = body;
 
       // 检查站点是否存在
@@ -121,20 +117,25 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
         throw new HttpError.NotFound("角色不存在");
       }
 
-      // 批量创建用户站点角色
-      const assignments = userIds.map((userId) => ({
-        userId,
-        siteId,
-        roleId,
-        assignedAt: new Date(),
-      }));
+      // 逐个验证权限并创建分配
+      const results = [];
+      for (const userId of userIds) {
+        try {
+          const result = await userSiteRolesService.create(
+            { userId, siteId, roleId },
+            { db, auth }
+          );
+          results.push({ success: true, data: result });
+        } catch (error: any) {
+          results.push({
+            success: false,
+            userId,
+            error: error.message || "分配失败",
+          });
+        }
+      }
 
-      const result = await db
-        .insert(userSiteRolesTable)
-        .values(assignments)
-        .returning();
-
-      return { data: result };
+      return { data: results };
     },
     {
       body: t.Object({
@@ -144,19 +145,19 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       }),
       detail: {
         summary: "批量分配用户站点角色",
-        description: "一次性将多个用户分配到同一个站点，并授予相同的角色",
+        description:
+          "一次性将多个用户分配到同一个站点，并授予相同的角色。会逐个验证权限。",
         tags: ["UserSiteRoles"],
       },
     }
   )
 
-  // 获取站点下的所有用户及其角色
+  /**
+   * 获取站点下的所有用户及其角色
+   */
   .get(
     "/site/:siteId/users",
-    async ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_VIEW"))
-        throw new Error("Forbidden");
-
+    async ({ params, db }) => {
       const { siteId } = params;
 
       const siteUsers = await db.query.userSiteRolesTable.findMany({
@@ -201,13 +202,12 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
     }
   )
 
-  // 获取用户的所有站点角色
+  /**
+   * 获取用户的所有站点角色
+   */
   .get(
     "/user/:userId/sites",
-    async ({ params, permissions, auth, db }) => {
-      if (!permissions.includes("USERSITEROLES_VIEW"))
-        throw new Error("Forbidden");
-
+    async ({ params, db }) => {
       const { userId } = params;
 
       const userSites = await db.query.userSiteRolesTable.findMany({

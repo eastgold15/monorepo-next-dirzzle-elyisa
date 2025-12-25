@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useManageableUsers } from "@/hooks/api";
 import { useRolesList } from "@/hooks/api/role";
-import { useSiteCategories } from "@/hooks/api/site-category"; // 假设有这个hook
+import { useAccessibleSites } from "@/hooks/api/sites";
 import { useUserSiteRoleCreate } from "@/hooks/api/usersiteroles";
 
 const formSchema = z.object({
@@ -57,7 +57,7 @@ export function AssignUserRoleModal({
   // 获取用户列表
   const { data: usersData, isLoading: usersLoading } = useManageableUsers();
   // 获取站点列表
-  const { data: sitesData, isLoading: sitesLoading } = useSiteCategories();
+  const { data: sitesData, isLoading: sitesLoading } = useAccessibleSites();
   // 获取角色列表
   const { data: rolesData, isLoading: rolesLoading } = useRolesList();
 
@@ -182,11 +182,12 @@ export function AssignUserRoleModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {rolesData?.data?.map((role: any) => (
+                        {(rolesData || []).map((role: any) => (
                           <SelectItem key={role.id} value={role.id}>
-                            {role.name}{" "}
+                            {role.name}
                             {role.type === "system" && (
                               <span className="text-slate-500 text-xs">
+                                {" "}
                                 (系统)
                               </span>
                             )}

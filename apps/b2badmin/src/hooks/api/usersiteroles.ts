@@ -3,11 +3,11 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
 // 用户站点角色相关 hooks
-export function useUserSiteRolesList(params?: { limit?: number; page?: number }) {
+export function useUserSiteRolesList() {
   return useQuery({
-    queryKey: ["usersiteroles", "list", params],
+    queryKey: ["usersiteroles", "list"],
     queryFn: async () =>
-      await handleEden(rpc.api.v1.usersiteroles.get(params)),
+      await handleEden(rpc.api.v1.usersiteroles.admin.get()),
   });
 }
 
@@ -73,7 +73,7 @@ export function useBatchAssignUsers() {
 
   return useMutation({
     mutationFn: async (data: { userIds: string[]; siteId: string; roleId: string }) =>
-      await handleEden(rpc.api.v1.usersiteroles.batchAssign.post(data)),
+      await handleEden(rpc.api.v1.usersiteroles.batch.assign.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usersiteroles"] });
     },

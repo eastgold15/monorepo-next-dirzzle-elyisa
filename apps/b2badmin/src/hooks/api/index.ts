@@ -14,6 +14,8 @@ export * from "./herocards";
 export * from "./media";
 // 站点配置相关 hooks
 export * from "./site-config";
+// 站点相关 hooks
+export * from "./sites";
 // 商品相关 hooks
 export * from "./skus";
 // 翻译相关 hooks
