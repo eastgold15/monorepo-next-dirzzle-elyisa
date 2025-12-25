@@ -57,7 +57,6 @@ import {
   useAdsCreate,
   useAdsDelete,
   useAdsList,
-  useAdsToggleStatus,
   useAdsUpdate,
 } from "@/hooks/api/ads";
 
@@ -65,15 +64,15 @@ import {
 interface Ad {
   id: string;
   title: string;
-  description?: string;
-  type: string;
+  description: string;
+  type: "banner" | "carousel" | "list" | undefined;
   link: string;
-  position: string;
+  position: "home-top" | "home-middle" | "sidebar" | null | undefined;
   startDate: string;
   endDate: string;
   sortOrder: number;
   isActive: boolean;
-  mediaId?: string;
+  mediaId: string;
   imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -138,19 +137,19 @@ function AdsDialog({
     try {
       const submitData = {
         title: formData.title,
-        description: formData.description || undefined,
+        description: formData.description,
         type: formData.type,
         link: formData.link,
         position: formData.position,
         startDate: formData.startDate
           ? new Date(formData.startDate).toISOString()
-          : undefined,
+          : new Date().toISOString(),
         endDate: formData.endDate
           ? new Date(formData.endDate).toISOString()
-          : undefined,
+          : new Date().toISOString(),
         sortOrder: formData.sortOrder,
         isActive: formData.isActive,
-        mediaId: formData.mediaId || undefined,
+        mediaId: formData.mediaId,
       };
 
       if (isEdit && ad) {
@@ -366,18 +365,17 @@ export default function AdsPage() {
   const { data: adsData, isLoading, refetch } = useAdsList();
   const deleteMutation = useAdsDelete();
   const batchDeleteMutation = useAdsBatchDelete();
-  const toggleStatusMutation = useAdsToggleStatus();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Ad | undefined>();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const handleEdit = (ad: Ad) => {
+  const handleEdit = (ad: any) => {
     setEditingAd(ad);
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (ad: Ad) => {
+  const handleDelete = async (ad: any) => {
     try {
       await deleteMutation.mutateAsync(ad.id);
       toast.success("广告删除成功");
@@ -421,9 +419,8 @@ export default function AdsPage() {
     setSelectedIds(newSelectedIds);
   };
 
-  const handleToggleActive = async (ad: Ad) => {
+  const handleToggleActive = (ad: any) => {
     try {
-      await toggleStatusMutation.mutateAsync(ad.id);
       refetch();
     } catch (error) {
       toast.error("操作失败");
@@ -576,7 +573,9 @@ export default function AdsPage() {
                         </p>
                       )}
                       <div className="mt-1 flex items-center gap-4 text-slate-400 text-xs">
-                        <span>位置: {AD_POSITION_LABELS[ad.position]}</span>
+                        <span>
+                          位置: {AD_POSITION_LABELS[ad.position || "home-top"]}
+                        </span>
                         <span>排序: {ad.sortOrder}</span>
                         <span>
                           有效期:{" "}

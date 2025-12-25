@@ -1,15 +1,13 @@
 "use client";
 
-import type { SiteCategoryTModel } from "@repo/contract";
+import type { SiteCategoriesDTO } from "@repo/contract";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useSiteCategoriesTree } from "@/hooks/api/site-category";
 
 // 将契约层的实体类型转换为前端使用的带children的类型
-type SiteCategory = SiteCategoryTModel["Entity"] & {
-  children?: SiteCategory[];
-};
+type SiteCategory = SiteCategoriesDTO["TreeResponse"];
 
 interface CategoryTreeSelectProps {
   value?: string;

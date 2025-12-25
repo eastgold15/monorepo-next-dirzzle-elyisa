@@ -22,10 +22,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateMasterCategory } from "@/hooks/api/mastercategory";
-import { useMasterCategoryStore } from "@/stores/mastercategory-store";
+import { useCreateMasterCategory } from "@/hooks/api/master-categories";
 
 const formSchema = z.object({
   name: z.string().min(1, "分类名称不能为空"),
@@ -54,9 +54,8 @@ export function CreateMasterCategoryModal({
   onSuccess,
 }: CreateMasterCategoryModalProps) {
   const createMasterCategory = useCreateMasterCategory();
-  const { masterCategories } = useMasterCategoryStore();
 
-  const form = useForm<FormData>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -178,7 +177,6 @@ export function CreateMasterCategoryModal({
                   <FormLabel>父级分类</FormLabel>
                   <FormControl>
                     <MasterCategorySelect
-                      allowClear
                       excludeId={field.value}
                       onChange={field.onChange}
                       placeholder="选择父级分类（可选）"

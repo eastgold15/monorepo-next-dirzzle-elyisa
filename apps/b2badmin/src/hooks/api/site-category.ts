@@ -6,17 +6,7 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 import type { MyInferQuery } from "./utils";
 
-export interface SiteCategoryTree {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  parentId?: string;
-  sortOrder: number;
-  siteId: string;
-  masterCategoryId?: string;
-  children: SiteCategoryTree[];
-}
+
 
 // 获取当前站点的分类树
 export function useSiteCategoriesTree() {
@@ -25,7 +15,7 @@ export function useSiteCategoriesTree() {
     queryFn: async () => {
       const data = await handleEden(rpc.api.v1.sitecategories.tree.get());
       // 确保返回数组，即使是空数组
-      return (data || []) as SiteCategoryTree[];
+      return (data || []) as SiteCategoriesDTO["TreeResponse"][];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });

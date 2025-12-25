@@ -81,28 +81,28 @@ export function useAdsBatchDelete() {
   });
 }
 
-// 批量更新排序
-export function useAdsUpdateSort() {
-  const queryClient = useQueryClient();
+// // 批量更新排序
+// export function useAdsUpdateSort() {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (items: Array<{ id: string; sortOrder: number }>) =>
-      await handleEden(rpc.api.v1.ads.sort.patch({ items })),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ads"] });
-    },
-  });
-}
+//   return useMutation({
+//     mutationFn: async (items: Array<{ id: string; sortOrder: number }>) =>
+//       await handleEden(rpc.api.v1.ads.sort.patch({ items })),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ["ads"] });
+//     },
+//   });
+// }
 
-// 切换激活状态
-export function useAdsToggleStatus() {
-  const queryClient = useQueryClient();
+// // 切换激活状态
+// export function useAdsToggleStatus() {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (id: string) =>
-      await handleEden(rpc.api.v1.ads({ id }).toggle.patch()),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ads"] });
-    },
-  });
-}
+//   return useMutation({
+//     mutationFn: async (id: string) =>
+//       await handleEden(rpc.api.v1.ads({ id }).toggle.patch()),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ["ads"] });
+//     },
+//   });
+// }

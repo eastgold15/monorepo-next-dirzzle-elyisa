@@ -71,17 +71,17 @@ export function useHeroCardsDelete() {
 }
 
 // 批量删除首页展示卡片
-export function useHeroCardsBatchDelete() {
-  const queryClient = useQueryClient();
+// export function useHeroCardsBatchDelete() {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (ids: string[]) =>
-      await handleEden(rpc.api.v1.herocards.batch.delete({ ids })),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
-    },
-  });
-}
+//   return useMutation({
+//     mutationFn: async (ids: string[]) =>
+//       await handleEden(rpc.api.v1.herocards.batch.delete({ ids })),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
+//     },
+//   });
+// }
 
 // 批量更新排序
 export function useHeroCardsUpdateSort() {
@@ -102,7 +102,7 @@ export function useHeroCardsToggleStatus() {
 
   return useMutation({
     mutationFn: async (id: string) =>
-      await handleEden(rpc.api.v1.herocards({ id }).toggle.patch()),
+      await handleEden(rpc.api.v1.herocards.toggle({ id }).patch()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-cards"] });
     },

@@ -181,12 +181,12 @@ export function CreateRoleModal({
                     <FormLabel>优先级 (0-100)</FormLabel>
                     <FormControl>
                       <Input
-                        defaultValue={0}
                         max={100}
                         min={0}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                         placeholder="0"
                         type="number"
-                        {...field}
+                        value={(field.value as any) ?? 0}
                       />
                     </FormControl>
                     <FormMessage />

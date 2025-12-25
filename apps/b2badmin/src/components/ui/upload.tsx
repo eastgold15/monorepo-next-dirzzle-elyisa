@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  File,
   Film,
-  Image,
+  File as IconFile,
+  Image as IconImage,
   Music,
   Upload as UploadIcon,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -40,6 +41,11 @@ interface UploadProps {
   autoUpload?: boolean; // 是否自动上传
 }
 
+type FilePropertyBag = {
+  type?: string;
+  lastModified?: number;
+};
+
 export function Upload({
   accept = "image/*,video/*,.pdf,.doc,.docx",
   multiple = true,
@@ -65,10 +71,10 @@ export function Upload({
   };
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith("image/")) return <Image className="size-4" />;
+    if (type.startsWith("image/")) return <IconImage className="size-4" />;
     if (type.startsWith("video/")) return <Film className="size-4" />;
     if (type.startsWith("audio/")) return <Music className="size-4" />;
-    return <File className="size-4" />;
+    return <IconFile className="size-4" />;
   };
 
   const createPreview = (file: File): Promise<string> =>
@@ -152,12 +158,13 @@ export function Upload({
       // 逐个上传文件，确保每个文件都被正确处理
       const uploadFiles = pendingFiles.map((uploadFile) => {
         // 创建新的 File 对象，使用编辑后的名称（如果名称被修改了）
+
         const fileToUpload =
           uploadFile.name !== uploadFile.originalName
             ? new File([uploadFile.file], uploadFile.name, {
                 type: uploadFile.file.type,
                 lastModified: uploadFile.file.lastModified,
-              })
+              } as FilePropertyBag)
             : uploadFile.file;
 
         return { fileToUpload, uploadFile };
@@ -315,7 +322,7 @@ export function Upload({
               <Card className="p-3" key={uploadFile.id}>
                 <div className="flex items-start gap-3">
                   {uploadFile.preview ? (
-                    <img
+                    <Image
                       alt={uploadFile.name}
                       className="mt-0.5 size-10 rounded object-cover"
                       src={uploadFile.preview}
@@ -333,7 +340,7 @@ export function Upload({
                         {uploadFile.status !== "uploading" ? (
                           <input
                             className="w-full truncate rounded border border-transparent bg-transparent px-2 py-1 font-medium text-sm transition-colors hover:border-gray-200 focus:border-primary focus:outline-none"
-                            disabled={uploadFile.status === "uploading"}
+                            disabled={uploadFile.status === "pending"}
                             onChange={(e) => {
                               setFiles((prev) =>
                                 prev.map((f) =>

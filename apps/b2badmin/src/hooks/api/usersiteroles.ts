@@ -28,7 +28,7 @@ export function useUserSiteRoleUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) =>
-      await handleEden(rpc.api.v1.usersiteroles({ id }).patch(data)),
+      await handleEden(rpc.api.v1.usersiteroles({ id }).put(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usersiteroles"] });
     },

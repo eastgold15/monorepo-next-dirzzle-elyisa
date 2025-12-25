@@ -1,6 +1,6 @@
 // providers/dictionary.provider.ts
 
-import { translationDictTable } from "@repo/contract/table";
+import { translationDictTable } from "@repo/contract";
 import { eq } from "drizzle-orm";
 import { db } from "~/db/connection";
 
@@ -9,7 +9,7 @@ import type { TranslateProvider } from "../interfaces/translation-provider.inter
 export class DictionaryTranslationProvider implements TranslateProvider {
   readonly name = "DatabaseDictionary";
 
-  private constructor() {}
+  private constructor() { }
 
   static create() {
     return new DictionaryTranslationProvider();

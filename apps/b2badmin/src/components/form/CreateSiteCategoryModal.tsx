@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { SiteCategoryTreeSelect } from "@/components/ui/site-category-tree-select";
 import { useCreateSiteCategory } from "@/hooks/api/site-category";
-import { useMasterCategoryStore } from "@/stores/mastercategory-store";
+import { useMasterCategoryStore } from "@/stores/master-categories-store";
 
 const formSchema = z.object({
   name: z.string().min(1, "分类名称不能为空"),

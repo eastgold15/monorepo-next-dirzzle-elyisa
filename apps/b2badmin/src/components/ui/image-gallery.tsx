@@ -54,11 +54,13 @@ export function ImageGallery({
       <div className={`flex items-center gap-2 overflow-x-auto ${className}`}>
         {displayImages.map((image) => (
           <div
-            key={image.id}
             className={`${config.size} relative flex-shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 bg-white shadow-sm transition-all hover:scale-105 hover:shadow-md`}
+            key={image.id}
             onClick={() => handlePreview(image.url)}
             style={{
-              borderColor: image.isMain ? "rgb(99 102 241)" : "rgb(226 232 240)",
+              borderColor: image.isMain
+                ? "rgb(99 102 241)"
+                : "rgb(226 232 240)",
             }}
           >
             <Image
@@ -76,7 +78,7 @@ export function ImageGallery({
           </div>
         ))}
         {remainingCount > 0 && (
-          <span className="flex h-16 w-8 items-center justify-center rounded border border-dashed border-slate-300 bg-slate-50 text-slate-500 text-xs">
+          <span className="flex h-16 w-8 items-center justify-center rounded border border-slate-300 border-dashed bg-slate-50 text-slate-500 text-xs">
             +{remainingCount}
           </span>
         )}
@@ -90,7 +92,7 @@ export function ImageGallery({
         >
           <div className="relative max-h-[90vh] max-w-[90vw]">
             <button
-              className="absolute -top-12 right-0 h-10 w-10 rounded-full bg-white/90 p-0 shadow-lg hover:bg-white hover:shadow-xl transition-all"
+              className="absolute -top-12 right-0 h-10 w-10 rounded-full bg-white/90 p-0 shadow-lg transition-all hover:bg-white hover:shadow-xl"
               onClick={() => setPreviewUrl(null)}
             >
               ✕

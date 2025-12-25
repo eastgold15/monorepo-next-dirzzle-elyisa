@@ -1,5 +1,6 @@
+import { translationDictTable } from "@repo/contract";
 import { eq } from "drizzle-orm";
-import { translationDictTable } from "@/server/db/schema";
+
 import { db } from "~/db/connection";
 
 /**

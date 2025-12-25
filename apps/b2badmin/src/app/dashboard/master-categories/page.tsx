@@ -2,7 +2,7 @@
 
 import { Label } from "@radix-ui/react-label";
 import { Switch } from "@radix-ui/react-switch";
-import type { MasterCategoryTModel } from "@repo/contract";
+import type { MasterDTO } from "@repo/contract";
 import {
   ChevronDown,
   ChevronRight,
@@ -38,11 +38,11 @@ import {
   useBatchDeleteMasterCategories,
   useDeleteMasterCategory,
   useMasterCategoriesTree,
-} from "@/hooks/api/mastercategory";
+} from "@/hooks/api/master-categories";
 import { useAuthStore } from "@/stores/auth-store";
 
 // 将契约层的实体类型转换为前端使用的带children的类型
-type MasterCategory = MasterCategoryTModel["Entity"] & {
+type MasterCategory = MasterDTO["Response"] & {
   children?: MasterCategory[];
 };
 
@@ -101,7 +101,7 @@ function MasterCategoryTreeNode({
             <span className="whitespace-nowrap text-slate-500 text-xs">
               排序: {category.sortOrder}
             </span>
-            {!category.isVisible && (
+            {!category.isActive && (
               <span className="rounded bg-amber-50 px-2 py-1 text-amber-600 text-xs">
                 隐藏
               </span>
@@ -262,7 +262,7 @@ export default function MasterCategoryManager() {
         !searchTerm ||
         category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         category.slug.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesVisibility = showHidden || category.isVisible;
+      const matchesVisibility = showHidden || category.isActive;
       return matchesSearch && matchesVisibility;
     }) || [];
 

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useCategoriesTree } from "../api";
+import { useMasterCategoriesTree } from "../api/master-categories";
 
 
 /**
@@ -7,7 +7,7 @@ import { useCategoriesTree } from "../api";
  * 提供分类数据、加载状态、错误处理以及通用的导航处理函数
  */
 export const useCategoryNavigation = () => {
-  const { data: categories, isLoading, error } = useCategoriesTree();
+  const { data: categories, isLoading, error } = useMasterCategoriesTree();
 
   /**
    * 滚动到页面顶部

@@ -1,9 +1,29 @@
 "use client";
 
-import type { MasterContract, MasterDTO, } from "@repo/contract";
+import type { MasterContract, MasterDTO } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
+
+// 工具函数：将树形分类数据扁平化为选项列表
+export function flattenCategories(
+  categories: MasterDTO["TreeEntity"][]
+): Array<{ value: string; label: string }> {
+  const result: Array<{ value: string; label: string }> = [];
+
+  const traverse = (nodes: MasterDTO["TreeEntity"][], prefix = "") => {
+    for (const node of nodes) {
+      const label = prefix ? `${prefix} > ${node.name}` : node.name;
+      result.push({ value: node.id, label });
+      if (node.children && node.children.length > 0) {
+        traverse(node.children, label);
+      }
+    }
+  };
+
+  traverse(categories);
+  return result;
+}
 
 // 获取主分类树
 export function useMasterCategoriesTree() {

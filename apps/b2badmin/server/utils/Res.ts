@@ -1,9 +1,5 @@
 // Elysia + Drizzle 统一响应格式工具文件
 
-import type { SQL } from "drizzle-orm";
-import type { PgColumn } from "drizzle-orm/pg-core";
-import type { QueryScopeEnum, SoftDeletableTable } from "./soft-delete";
-
 /**
  * 前端用的响应类型定义
  * 错误也使用这个
@@ -91,17 +87,4 @@ export type PageMeta = {
   page: number;
   limit: number;
   totalPages: number;
-};
-
-/**
- * 分页选项
- */
-export type PaginationOptionsType<T = any> = {
-  page?: number;
-  limit?: number;
-  orderBy?: PgColumn | SQL | SQL.Aliased;
-  orderDirection?: "asc" | "desc";
-  scope?: QueryScopeEnum;
-  table?: SoftDeletableTable;
-  transformItem?: (item: any) => T; // 👈 新增：单条数据转换函数
 };

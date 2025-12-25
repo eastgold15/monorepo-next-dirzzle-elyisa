@@ -64,7 +64,7 @@ export function useProductsUpdate() {
     }: {
       id: string;
       data: ProductsDTO["Update"];
-    }) => await handleEden(rpc.api.v1.products({ id }).patch(data)),
+    }) => await handleEden(rpc.api.v1.products({ id }).put(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },

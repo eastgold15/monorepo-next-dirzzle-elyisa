@@ -1,5 +1,6 @@
 "use client";
 
+import type { SiteCategoriesDTO } from "@repo/contract";
 import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -26,19 +27,10 @@ import {
 import {
   useDeleteSiteCategory,
   useSiteCategoriesTree,
-  useUpdateSiteCategory,
 } from "@/hooks/api/site-category";
 
-interface SiteCategory {
-  id: string;
-  name: string;
-  description?: string;
-  parentId?: string;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
-  children?: SiteCategory[];
-}
+// 使用契约层类型
+type SiteCategory = SiteCategoriesDTO["TreeResponse"];
 
 // 树形节点组件
 function CategoryTreeNode({
@@ -212,7 +204,6 @@ function findCategoryById(
 export default function SiteCategoryManager() {
   const { data: flatCategories, isLoading } = useSiteCategoriesTree();
   const deleteMutation = useDeleteSiteCategory();
-  const updateMutation = useUpdateSiteCategory();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<

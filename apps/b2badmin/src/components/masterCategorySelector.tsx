@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { flattenCategories, useCategories } from "@/hooks/api";
+import { useMasterCategories } from "@/hooks/api/master-categories";
 
 interface CategorySelectorProps {
   value?: string;
@@ -20,10 +20,13 @@ export function CategorySelector({
   error,
 }: CategorySelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: categories, isLoading } = useCategories();
+  const { data: categories, isLoading } = useMasterCategories({
+    page: 1,
+    limit: 100,
+  });
 
-  const options = categories ? flattenCategories(categories) : [];
-  const selectedOption = options.find((option) => option.value === value);
+  const options = categories || [];
+  const selectedOption = options.find((option) => option.id === value);
 
   return (
     <div className="relative">
@@ -42,7 +45,7 @@ export function CategorySelector({
       >
         <div className="flex items-center justify-between">
           <span className={selectedOption ? "" : "text-slate-400"}>
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption ? selectedOption.name : placeholder}
           </span>
           <ChevronDown
             className={`h-4 w-4 text-slate-400 transition-transform ${
@@ -77,19 +80,19 @@ export function CategorySelector({
                 {options.map((option) => (
                   <button
                     className={`w-full px-3 py-2 text-left transition-colors ${
-                      option.value === value
+                      option.id === value
                         ? "bg-indigo-50 text-indigo-700"
                         : "text-slate-700 hover:bg-slate-50"
                     }
                     `}
-                    key={option.value}
+                    key={option.id}
                     onClick={() => {
-                      onChange(option.value);
+                      onChange(option.id);
                       setIsOpen(false);
                     }}
                     type="button"
                   >
-                    {option.label}
+                    {option.name}
                   </button>
                 ))}
               </div>

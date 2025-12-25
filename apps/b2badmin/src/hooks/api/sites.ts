@@ -1,5 +1,6 @@
 "use client";
 
+import type { SitesContract } from "@repo/contract";
 import { useQuery } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
@@ -35,11 +36,13 @@ export function useAccessibleSites() {
 /**
  * 获取站点列表（管理员）
  */
-export function useSitesList() {
+export function useSitesList(
+  query: typeof SitesContract.ListQuery.static = { page: 1, limit: 100 }
+) {
   return useQuery({
-    queryKey: ["sites", "list"],
+    queryKey: ["sites", "list", query],
     queryFn: async () => {
-      const result = await handleEden(rpc.api.v1.sites.get());
+      const result = await handleEden(rpc.api.v1.sites.get({ query }));
       return result?.data || [];
     },
     staleTime: 1000 * 60 * 5,

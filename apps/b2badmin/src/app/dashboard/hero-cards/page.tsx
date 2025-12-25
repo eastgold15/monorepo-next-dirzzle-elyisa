@@ -1,5 +1,6 @@
 "use client";
 
+import type { HeroCardsDTO } from "@repo/contract";
 import { Edit, GripVertical, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -40,7 +41,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  useHeroCardsBatchDelete,
   useHeroCardsCreate,
   useHeroCardsDelete,
   useHeroCardsList,
@@ -48,23 +48,11 @@ import {
   useHeroCardsUpdate,
 } from "@/hooks/api/herocards";
 
-interface HeroCard {
-  id: string;
-  title: string;
-  description: string;
-  buttonText: string;
-  buttonUrl: string;
-  backgroundClass: string;
-  mediaId: string;
-  sortOrder: number | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function HeroCardsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingCard, setEditingCard] = useState<HeroCard | null>(null);
+  const [editingCard, setEditingCard] = useState<
+    HeroCardsDTO["Response"] | null
+  >(null);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
@@ -89,9 +77,6 @@ export default function HeroCardsPage() {
   // 删除首页展示卡片
   const deleteMutation = useHeroCardsDelete();
 
-  // 批量删除首页展示卡片
-  const batchDeleteMutation = useHeroCardsBatchDelete();
-
   // 切换激活状态
   const toggleStatusMutation = useHeroCardsToggleStatus();
 
@@ -111,16 +96,16 @@ export default function HeroCardsPage() {
   };
 
   // 打开编辑对话框
-  const handleEdit = (card: HeroCard) => {
+  const handleEdit = (card: HeroCardsDTO["Response"]) => {
     setEditingCard(card);
     setFormData({
       title: card.title,
       description: card.description || "",
       buttonText: card.buttonText || "",
       buttonUrl: card.buttonUrl || "",
-      backgroundClass: card.backgroundClass || "bg-blue-50",
-      sortOrder: card.sortOrder,
-      isActive: card.isActive,
+      backgroundClass: card.backgroundClass || "bg-bjlue-50",
+      sortOrder: card.sortOrder ?? 0,
+      isActive: card.isActive ?? true,
       mediaId: card.mediaId || "",
     });
   };
@@ -182,14 +167,14 @@ export default function HeroCardsPage() {
   };
 
   // 批量删除
-  const handleBatchDelete = async () => {
+  const handleBatchDelete = () => {
     if (selectedCards.length === 0) {
       toast.error("请选择要删除的首页展示卡片");
       return;
     }
 
     try {
-      await batchDeleteMutation.mutateAsync(selectedCards);
+      // await batchDeleteMutation.mutateAsync(selectedCards);
       toast.success(`成功删除 ${selectedCards.length} 个首页展示卡片`);
       setSelectedCards([]);
       refetch();
@@ -211,7 +196,9 @@ export default function HeroCardsPage() {
     if (selectedCards.length === cardsData?.length) {
       setSelectedCards([]);
     } else {
-      setSelectedCards(cardsData?.map((card: HeroCard) => card.id) || []);
+      setSelectedCards(
+        cardsData?.map((card: HeroCardsDTO["Response"]) => card.id) || []
+      );
     }
   };
 

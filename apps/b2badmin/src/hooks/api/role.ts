@@ -4,10 +4,10 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
 // 角色相关 hooks
-export function useRolesList(query?: typeof RoleContract.ListQuery.static) {
+export function useRolesList(query: typeof RoleContract.ListQuery.static) {
   return useQuery({
     queryKey: ["roles", "list", query],
-    queryFn: async () => await handleEden(rpc.api.v1.role.get(query)),
+    queryFn: async () => await handleEden(rpc.api.v1.role.get({ query })),
   });
 }
 

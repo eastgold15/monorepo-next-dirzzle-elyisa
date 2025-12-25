@@ -25,7 +25,7 @@ import {
   useListTemplates,
   useUpdateTemplate, // 确保你有这个 hook
 } from "@/hooks/api/attributetemplate";
-import { useMasterCategories } from "@/hooks/api/mastercategory";
+import { useMasterCategories } from "@/hooks/api/master-categories";
 import { useSiteCategories } from "@/hooks/api/site-category";
 import type { TemplateField } from "@/types";
 import { useTemplateForm } from "./useTemplateForm";
@@ -128,10 +128,10 @@ export default function TemplateManager() {
                 resetForm();
                 setView("create");
               }}
-              onDelete={(id) =>
-                deleteMutation.mutateAsync([id]).then(() => refetch())
+              onDelete={(id: string) =>
+                deleteMutation.mutateAsync(id).then(() => refetch())
               }
-              onEdit={(t) => {
+              onEdit={(t: TemplateField) => {
                 // 这里的 t 就是列表中的一行完整数据
                 setEditingId(t.id);
                 setView("edit");
@@ -394,7 +394,7 @@ function FieldItem({
           </button>
           <button
             className="ml-2 p-1 text-slate-400 hover:text-red-500"
-            onClick={onRemove}
+            onClick={() => onRemove(field.id)}
           >
             <Trash2 size={15} />
           </button>

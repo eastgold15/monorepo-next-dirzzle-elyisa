@@ -129,7 +129,7 @@ export class LocalImageStorage extends AbstractImageStorage {
    * @param options 选项
    * @returns 公开 URL
    */
-  async getPresignedUrl(
+  getPresignedUrl(
     key: string,
     options: {
       method: "GET" | "PUT";
@@ -137,7 +137,7 @@ export class LocalImageStorage extends AbstractImageStorage {
     }
   ): Promise<string> {
     // 本地存储不支持预签名，直接返回公开 URL
-    return this.getPublicUrl(key);
+    return Promise.resolve(this.getPublicUrl(key));
   }
 
   /**

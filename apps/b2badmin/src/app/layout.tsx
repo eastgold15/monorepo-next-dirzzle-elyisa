@@ -1,7 +1,7 @@
 import QueryProvider from "@/providers/query-provider";
 import { UserProvider } from "@/providers/UserProvider";
 import "./globals.css";
-import { MasterCategoryProvider } from "@/providers/mastercategory-provider";
+import { MasterCategoryProvider } from "@/providers/master-categories-provider";
 import { SiteCategoryProvider } from "@/providers/site-category-provider";
 
 export default function RootLayout({

@@ -1,5 +1,17 @@
 "use client";
 
+import {
+  ChevronDown,
+  ChevronRight,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+  Video,
+} from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateProductModal } from "@/components/form/CreateProductModal";
 import { CreateSKUModal } from "@/components/form/CreateSKUModal";
@@ -28,18 +40,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useProductsBatchDelete, useProductsList } from "@/hooks/api/products";
 import { useSkuDelete } from "@/hooks/api/skus";
-import {
-  ChevronDown,
-  ChevronRight,
-  Edit,
-  Plus,
-  Search,
-  Trash2,
-  Video
-} from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
-import { toast } from "sonner";
 
 // 使用后端返回的类型
 interface Product {
@@ -600,7 +600,7 @@ export default function ProductsPage() {
                                                   key={key}
                                                   variant="outline"
                                                 >
-                                                  {key}: {value}
+                                                  {key}: {(value as any)}
                                                 </Badge>
                                               ))}
                                             </div>
@@ -668,11 +668,13 @@ export default function ProductsPage() {
                                           sku.allImages.length > 0 && (
                                             <div className="mt-3">
                                               <ImageGallery
-                                                images={sku.allImages.map((img: any) => ({
-                                                  id: img.id,
-                                                  url: img.url,
-                                                  isMain: img.isMain,
-                                                }))}
+                                                images={sku.allImages.map(
+                                                  (img: any) => ({
+                                                    id: img.id,
+                                                    url: img.url,
+                                                    isMain: img.isMain,
+                                                  })
+                                                )}
                                                 size="md"
                                                 title="● SKU 图片"
                                               />

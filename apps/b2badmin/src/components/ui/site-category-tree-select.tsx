@@ -1,6 +1,6 @@
 "use client";
 
-import type { SiteCategoryContractDto } from "@repo/contract";
+import type { SiteCategoriesDTO } from "@repo/contract";
 import { useMemo } from "react";
 import {
   Select,
@@ -35,7 +35,7 @@ export function SiteCategoryTreeSelect({
   // 扁平化选项用于显示
   const flattenedOptions = useMemo(() => {
     const flatten = (
-      cats: SiteCategoryContractDto["TreeEntity"][],
+      cats: SiteCategoriesDTO["TreeResponse"][],
       level = 0,
       prefix = ""
     ): Array<{ value: string; label: string }> => {
@@ -62,7 +62,7 @@ export function SiteCategoryTreeSelect({
       return result;
     };
 
-    return flatten(treeData);
+    return flatten(treeData || []);
   }, [treeData, excludeId]);
 
   // 获取选中的分类名称

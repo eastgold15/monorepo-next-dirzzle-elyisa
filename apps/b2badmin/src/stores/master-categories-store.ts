@@ -112,7 +112,7 @@ export const useMasterCategoryStore = create<MasterCategoryState>()(
       },
     }),
     {
-      name: "mastercategory-store",
+      name: "master-categories-store",
     }
   )
 );

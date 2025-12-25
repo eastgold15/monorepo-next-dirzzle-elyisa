@@ -37,7 +37,7 @@ export function useFactoryUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) =>
-      await handleEden(rpc.api.v1.factories({ id }).patch(data)),
+      await handleEden(rpc.api.v1.factories({ id }).put(data)),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["factories"] });
       queryClient.invalidateQueries({ queryKey: ["factory", id] });

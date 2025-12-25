@@ -123,7 +123,7 @@ export const siteconfigController = new Elysia({
 
   // 批量更新配置
   .post(
-    "/batch-update",
+    "/batch/update",
     async ({ body, db, currentSite }) => {
       const results: (typeof siteConfigTable.$inferSelect)[] = [];
 
@@ -220,37 +220,7 @@ export const siteconfigController = new Elysia({
     }
   )
 
-  // 标准的 CRUD 操作
-  .get(
-    "/",
-    ({ query, permissions, auth, db }) =>
-      siteConfigService.findAll(query, { db, auth }),
-    {
-      allPermission: "SITECONFIG_VIEW",
-      query: SiteConfigContract.ListQuery,
-      detail: {
-        summary: "获取配置分页列表",
-        description: "分页获取网站配置列表（权限检查版）",
-        tags: ["Site Config"],
-      },
-    }
-  )
-
-  .post(
-    "/",
-    ({ body, permissions, auth, db }) =>
-      siteConfigService.create(body, { db, auth }),
-    {
-      allPermission: "SITECONFIG_CREATE",
-      body: SiteConfigContract.Create,
-      detail: {
-        summary: "创建配置",
-        description: "创建新的网站配置",
-        tags: ["Site Config"],
-      },
-    }
-  )
-
+ 
   .put(
     "/:id",
     ({ params, body, auth, db }) =>
@@ -262,22 +232,6 @@ export const siteconfigController = new Elysia({
       detail: {
         summary: "更新配置",
         description: "更新网站配置信息",
-        tags: ["Site Config"],
-      },
-    }
-  )
-
-  .patch(
-    "/:id",
-    ({ params, body, permissions, auth, db }) =>
-      siteConfigService.update(params.id, body, { db, auth }),
-    {
-      allPermission: "SITECONFIG_EDIT",
-      params: t.Object({ id: t.String() }),
-      body: SiteConfigContract.Update,
-      detail: {
-        summary: "部分更新配置",
-        description: "部分更新网站配置信息",
         tags: ["Site Config"],
       },
     }

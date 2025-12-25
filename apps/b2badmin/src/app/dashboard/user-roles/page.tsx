@@ -51,7 +51,7 @@ export default function UserRolesPage() {
     isLoading,
     refetch,
   } = useUserSiteRolesList();
-  const { data: rolesData } = useRolesList();
+  const { data: rolesData } = useRolesList({});
   const deleteMutation = useUserSiteRoleDelete();
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);

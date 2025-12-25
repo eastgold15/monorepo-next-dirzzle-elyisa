@@ -86,10 +86,7 @@ export const factoriesController = new Elysia({
         });
       }
 
-      return {
-        factories,
-        total: factories.length,
-      };
+      return factories
     },
     {
       detail: {

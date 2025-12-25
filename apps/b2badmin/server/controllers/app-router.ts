@@ -42,7 +42,7 @@ import { salespersonsController } from "./_generated/salespersons.controller";
 import { sessionController } from "./_generated/session.controller";
 import { siteproductsController } from "./_generated/siteproducts.controller";
 import { skumediaController } from "./_generated/skumedia.controller";
-import { translationdictController } from "./_generated/translationdict.controller";
+// import { translationdictController } from "./_generated/translationdict.controller";
 import { verificationController } from "./_generated/verification.controller";
 
 export const appRouter = (app: Elysia) =>
@@ -82,7 +82,7 @@ export const appRouter = (app: Elysia) =>
     .use(sitesController)
     .use(skumediaController)
     .use(skusController)
-    .use(translationdictController)
+    // .use(translationdictController)
     .use(usersiterolesController)
     .use(usersController)
     .use(verificationController);

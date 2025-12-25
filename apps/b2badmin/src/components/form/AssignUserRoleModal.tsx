@@ -59,7 +59,7 @@ export function AssignUserRoleModal({
   // 获取站点列表
   const { data: sitesData, isLoading: sitesLoading } = useAccessibleSites();
   // 获取角色列表
-  const { data: rolesData, isLoading: rolesLoading } = useRolesList();
+  const { data: rolesData, isLoading: rolesLoading } = useRolesList({});
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

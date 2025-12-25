@@ -31,6 +31,12 @@ export function AvatarUploadNew({
   };
 
   return (
+    <>
+      {" "}
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
+        1
+      </div>
+    </>
     // <SimpleMultiFileUpload
     //   config={avatarUploadConfig}
     //   onError={onError}

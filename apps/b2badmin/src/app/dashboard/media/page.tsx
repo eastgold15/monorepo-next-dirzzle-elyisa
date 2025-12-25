@@ -33,6 +33,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useMediaDelete, useMediaList } from "@/hooks/api";
+import { cn } from "@/lib/utils";
 
 interface UseMediaList {
   id: string;
@@ -59,13 +60,11 @@ export default function MediaLibrary() {
 
   // 1. 获取数据 (使用防抖后的搜索词)
   const { data, isLoading, error, refetch } = useMediaList({
-    page,
-    limit: 20,
     category: category || undefined,
     search: debouncedSearch || undefined,
   });
 
-  const mediaItems = (data as UseMediaList[]) || [];
+  const mediaItems = (data as unknown as UseMediaList[]) || [];
 
   const deleteMediaMutation = useMediaDelete();
 
@@ -348,9 +347,4 @@ function MediaCard({
       </div>
     </div>
   );
-}
-
-// 简单的辅助工具
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(" ");
 }
