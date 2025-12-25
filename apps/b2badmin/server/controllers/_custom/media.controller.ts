@@ -16,6 +16,7 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
       return await mediaService.upload(body.file, { db, auth }, body.category);
     },
     {
+      allPermission: "MEDIA_CREATE",
       body: t.Object({ file: t.File(), category: t.Optional(t.String()) }),
     }
   )
@@ -26,6 +27,7 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
     async ({ query, db, auth }) =>
       await mediaService.getMediaList(query, { db, auth }),
     {
+      allPermission: "MEDIA_VIEW",
       query: t.Object({
         category: t.Optional(t.String()),
         search: t.Optional(t.String()),
@@ -34,13 +36,15 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
     }
   )
   // 4. 更新
-  .patch(
+  .put(
     "/:id",
-    ({ params, body, permissions, auth, db }) => {
-      if (!permissions.includes("MEDIA_EDIT")) throw new Error("Forbidden");
-      return mediaService.update(params.id, body, { db, auth });
-    },
-    { params: t.Object({ id: t.String() }), body: MediaContract.Patch }
+    ({ params, body, permissions, auth, db }) =>
+      mediaService.update(params.id, body, { db, auth }),
+    {
+      allPermission: "MEDIA_EDIT",
+      params: t.Object({ id: t.String() }),
+      body: MediaContract.Update,
+    }
   )
 
   // 5. 单个物理删除
@@ -50,7 +54,10 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
       if (!permissions.includes("MEDIA_DELETE")) throw new Error("Forbidden");
       return await mediaService.deletePhysical(params.id, { db, auth });
     },
-    { params: t.Object({ id: t.String() }) }
+    {
+      allPermission: "MEDIA_DELETE",
+      params: t.Object({ id: t.String() }),
+    }
   )
 
   // 6. 批量删除
@@ -61,6 +68,7 @@ export const mediaController = new Elysia({ prefix: "/media", tags: ["Media"] })
       return await mediaService.batchDeletePhysical(body.ids, { db, auth });
     },
     {
+      allPermission: "MEDIA_DELETE",
       body: t.Object({ ids: t.Array(t.String()) }),
     }
   );

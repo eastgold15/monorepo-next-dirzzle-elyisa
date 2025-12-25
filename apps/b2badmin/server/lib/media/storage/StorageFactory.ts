@@ -101,15 +101,15 @@ class StorageFactory {
    */
   private static detectStorageType(): StorageType {
     // 优先级：环境变量 > 默认值
-    const envStorageType = env.STORAGE_TYPE?.toLowerCase();
+    // const envStorageType = env.STORAGE_TYPE?.toLowerCase();
 
-    if (envStorageType === "local") {
-      return "local";
-    }
+    // if (envStorageType === "local") {
+    //   return "local";
+    // }
 
-    if (envStorageType === "oss") {
-      return "oss";
-    }
+    // if (envStorageType === "oss") {
+    //   return "oss";
+    // }
 
     // 自动检测：优先使用 OSS，然后是本地存储
     if (StorageFactory.hasOSSConfig()) {
@@ -129,7 +129,7 @@ class StorageFactory {
       "SECRET_ACCESS_KEY",
       "BUCKET",
       "ENDPOINT",
-    ];
+    ] as const
 
     return requiredEnvVars.every((varName) => !!env[varName]);
   }
@@ -181,16 +181,16 @@ class StorageFactory {
         };
         break;
 
-      case "local":
-        baseConfig.config = {
-          baseDir:
-            customConfig.baseDir || env.LOCAL_STORAGE_DIR || "public/uploads",
-          baseUrl: customConfig.baseUrl || env.LOCAL_STORAGE_URL || "/uploads",
-          maxFileSize:
-            customConfig.maxFileSize ||
-            Number.parseInt(env.MAX_FILE_SIZE || "10485760", 10), // 10MB
-        };
-        break;
+      // case "local":
+      //   baseConfig.config = {
+      //     baseDir:
+      //       customConfig.baseDir || env.LOCAL_STORAGE_DIR || "public/uploads",
+      //     baseUrl: customConfig.baseUrl || env.LOCAL_STORAGE_URL || "/uploads",
+      //     maxFileSize:
+      //       customConfig.maxFileSize ||
+      //       Number.parseInt(env.MAX_FILE_SIZE || "10485760", 10), // 10MB
+      //   };
+      //   break;
 
       default:
         throw new Error(`不支持的存储类型: ${type}`);

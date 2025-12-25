@@ -11,12 +11,12 @@ import { RoleGeneratedService } from "../_generated/role.service";
 import type { ServiceContext } from "../_lib/base-service";
 
 export class RoleService extends RoleGeneratedService {
-    async list(ctx: ServiceContext, query?: RoleContract.ListQuery) {
+    async list(ctx: ServiceContext, query?: typeof RoleContract.ListQuery.static) {
         const res = await db.query.roleTable.findMany({
             where: {
-                ...(query?.name ? { name: { like: `%${query.name}%` } } : {}),
-                ...(query?.description ? { description: { like: `%${query.description}%` } } : {}),
-                ...(query?.type ? { type: { like: `%${query.type}%` } } : {}),
+                ...(query?.search ? { name: { like: `%${query.search}%` } } : {}),
+                ...(query?.search ? { description: { like: `%${query.search}%` } } : {}),
+                ...(query?.search ? { type: { like: `%${query.search}%` } } : {}),
             },
         });
 

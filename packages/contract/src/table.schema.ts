@@ -196,7 +196,7 @@ export const masterTable = p.pgTable("master_categories", {
   description: p.varchar("description", { length: 255 }).notNull(),
   parentId: p.uuid("parent_id"),
   sortOrder: p.integer("sort_order").default(0),
-  isVisible: p.boolean("is_visible").default(true),
+  isActive: p.boolean("is_active").default(true),
   icon: p.varchar("icon", { length: 255 }).default(""),
   createdAt,
   updatedAt,
@@ -408,7 +408,7 @@ export const productMediaTable = p.pgTable(
       .notNull()
       .references(() => mediaTable.id),
     isMain: p.boolean("is_main").default(false),
-    sortOrder: p.integer("sort_order").default(0),
+    sortOrder: p.integer("sort_order").notNull().default(0),
   },
   (t) => [p.primaryKey({ columns: [t.productId, t.mediaId] })]
 );
@@ -645,6 +645,7 @@ export const siteCategoriesTable = p.pgTable("site_categories", {
   description: p.text("description"),
   parentId: p.uuid("parent_id"),
   sortOrder: p.integer("sort_order").default(0),
+  isActive: p.boolean("is_active").default(true),
 
   siteId: p
     .uuid("site_id")

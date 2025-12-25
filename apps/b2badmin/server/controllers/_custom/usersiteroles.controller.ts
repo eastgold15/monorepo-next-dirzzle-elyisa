@@ -21,6 +21,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
     "/admin",
     ({ auth, db, user }) => userSiteRolesService.list({ db, auth }, user),
     {
+      allPermission: "USER_SITE_ROLES_VIEW",
       detail: {
         summary: "获取用户角色管理列表",
         description: "根据当前用户身份，返回可管理的用户站点角色分配列表",
@@ -41,6 +42,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
     "/",
     ({ body, auth, db }) => userSiteRolesService.createUser(body, { db, auth }),
     {
+      allPermission: "USER_SITE_ROLES_CREATE",
       body: UserSiteRolesContract.Create,
       detail: {
         summary: "分配用户站点角色",
@@ -54,11 +56,12 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   /**
    * 更新用户站点角色
    */
-  .patch(
+  .put(
     "/:id",
     ({ params, body, auth, db }) =>
       userSiteRolesService.update(params.id, body, { db, auth }),
     {
+      allPermission: "USER_SITE_ROLES_EDIT",
       params: t.Object({ id: t.String() }),
       body: UserSiteRolesContract.Update,
       detail: {
@@ -77,6 +80,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
     ({ params, auth, db }) =>
       userSiteRolesService.delete(params.id, { db, auth }),
     {
+      allPermission: "USER_SITE_ROLES_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "取消用户站点角色",
@@ -121,7 +125,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       const results = [];
       for (const userId of userIds) {
         try {
-          const result = await userSiteRolesService.create(
+          const result = await userSiteRolesService.createUser(
             { userId, siteId, roleId },
             { db, auth }
           );
@@ -143,6 +147,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
         siteId: t.String(),
         roleId: t.String(),
       }),
+      allPermission: "USER_SITE_ROLES_CREATE",
       detail: {
         summary: "批量分配用户站点角色",
         description:
@@ -194,6 +199,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       params: t.Object({
         siteId: t.String(),
       }),
+      allPermission: "USER_SITE_ROLES_VIEW",
       detail: {
         summary: "获取站点用户列表",
         description: "获取指定站点下的所有用户及其角色信息",
@@ -254,6 +260,7 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
       params: t.Object({
         userId: t.String(),
       }),
+      allPermission: "USER_SITE_ROLES_VIEW",
       detail: {
         summary: "获取用户站点列表",
         description: "获取指定用户的所有站点访问权限及角色信息",

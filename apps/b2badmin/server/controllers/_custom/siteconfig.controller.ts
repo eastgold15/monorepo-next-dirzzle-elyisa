@@ -16,11 +16,11 @@ export const siteconfigController = new Elysia({
   // 获取配置列表（包含业务逻辑）
   .get(
     "/list",
-    async ({ query, auth }) => {
-      const { data, total } = await siteConfigService.findWithBusinessLogic(
-        query,
-        auth
-      );
+    async ({ query, auth, db }) => {
+      const { data, total } = await siteConfigService.findAll(query, {
+        db,
+        auth,
+      });
       return { data, total };
     },
     {
@@ -223,12 +223,10 @@ export const siteconfigController = new Elysia({
   // 标准的 CRUD 操作
   .get(
     "/",
-    ({ query, permissions, auth }) => {
-      if (!permissions.includes("SITECONFIG_VIEW"))
-        throw new Error("Forbidden");
-      return siteConfigService.findAll(query, auth);
-    },
+    ({ query, permissions, auth, db }) =>
+      siteConfigService.findAll(query, { db, auth }),
     {
+      allPermission: "SITECONFIG_VIEW",
       query: SiteConfigContract.ListQuery,
       detail: {
         summary: "获取配置分页列表",
@@ -240,12 +238,10 @@ export const siteconfigController = new Elysia({
 
   .post(
     "/",
-    ({ body, permissions, auth }) => {
-      if (!permissions.includes("SITECONFIG_CREATE"))
-        throw new Error("Forbidden");
-      return siteConfigService.create(body, auth);
-    },
+    ({ body, permissions, auth, db }) =>
+      siteConfigService.create(body, { db, auth }),
     {
+      allPermission: "SITECONFIG_CREATE",
       body: SiteConfigContract.Create,
       detail: {
         summary: "创建配置",
@@ -257,12 +253,10 @@ export const siteconfigController = new Elysia({
 
   .put(
     "/:id",
-    ({ params, body, permissions, auth }) => {
-      if (!permissions.includes("SITECONFIG_EDIT"))
-        throw new Error("Forbidden");
-      return siteConfigService.update(params.id, body, auth);
-    },
+    ({ params, body, auth, db }) =>
+      siteConfigService.update(params.id, body, { db, auth }),
     {
+      allPermission: "SITECONFIG_EDIT",
       params: t.Object({ id: t.String() }),
       body: SiteConfigContract.Update,
       detail: {
@@ -275,14 +269,12 @@ export const siteconfigController = new Elysia({
 
   .patch(
     "/:id",
-    ({ params, body, permissions, auth }) => {
-      if (!permissions.includes("SITECONFIG_EDIT"))
-        throw new Error("Forbidden");
-      return siteConfigService.update(params.id, body, auth);
-    },
+    ({ params, body, permissions, auth, db }) =>
+      siteConfigService.update(params.id, body, { db, auth }),
     {
+      allPermission: "SITECONFIG_EDIT",
       params: t.Object({ id: t.String() }),
-      body: SiteConfigContract.Patch,
+      body: SiteConfigContract.Update,
       detail: {
         summary: "部分更新配置",
         description: "部分更新网站配置信息",
@@ -327,12 +319,10 @@ export const siteconfigController = new Elysia({
 
   .delete(
     "/:id",
-    ({ params, permissions, auth }) => {
-      if (!permissions.includes("SITECONFIG_DELETE"))
-        throw new Error("Forbidden");
-      return siteConfigService.delete(params.id, auth);
-    },
+    ({ params, permissions, auth, db }) =>
+      siteConfigService.delete(params.id, { db, auth }),
     {
+      allPermission: "SITECONFIG_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除配置",

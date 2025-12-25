@@ -70,7 +70,7 @@ export const productsController = new Elysia({
     }
   )
 
-  .patch(
+  .put(
     "/:id",
     ({ params, body, permissions, auth, db }) =>
       productsService.updateProduct(params.id, body, { db, auth }),

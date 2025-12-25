@@ -168,7 +168,7 @@ export const sitecategoriesController = new Elysia({
   .get(
     "/:id",
     ({ params, auth, db }) =>
-      siteCategoriesService.findOne(params.id, { db, auth }),
+      siteCategoriesService.findOne(),
     {
       allPermission: "SITE_CATEGORIES_VIEW",
       params: t.Object({ id: t.String() }),

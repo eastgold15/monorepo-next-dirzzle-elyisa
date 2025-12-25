@@ -53,7 +53,7 @@ export const attributetemplateController = new Elysia({
   .put(
     "/:id",
     async ({ params, body, db, auth }) =>
-      await attributeTemplateService.update(params.id, body, { db, auth }),
+      await attributeTemplateService.update2(params.id, body, { db, auth }),
     {
       params: t.Object({ id: t.String() }),
       body: AttributeTemplateContract.Update,

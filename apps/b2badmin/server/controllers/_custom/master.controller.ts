@@ -75,7 +75,7 @@ export const masterController = new Elysia({
   .post(
     "/",
     async ({ body, db }) => {
-      const { name, slug, description, parentId, sortOrder, isVisible, icon } =
+      const { name, slug, description, parentId, sortOrder, isActive, icon } =
         body;
 
       // 检查slug是否重复
@@ -109,7 +109,7 @@ export const masterController = new Elysia({
           description,
           parentId,
           sortOrder: sortOrder || 0,
-          isVisible: isVisible ?? true,
+          isActive: isActive ?? true,
           icon: icon || "",
         })
         .returning();
@@ -130,7 +130,7 @@ export const masterController = new Elysia({
   .put(
     "/:id",
     async ({ params: { id }, body, db }) => {
-      const { name, slug, description, parentId, sortOrder, isVisible, icon } =
+      const { name, slug, description, parentId, sortOrder, isActive, icon } =
         body;
 
       // 检查是否存在
@@ -178,7 +178,7 @@ export const masterController = new Elysia({
           description,
           parentId,
           sortOrder: sortOrder || 0,
-          isVisible: isVisible ?? true,
+          isActive: isActive ?? true,
           icon: icon || "",
           updatedAt: new Date(),
         })
@@ -320,11 +320,10 @@ export const masterController = new Elysia({
   // 标准的 CRUD 操作
   .delete(
     "/:id",
-    ({ params, permissions, auth }) => {
-      if (!permissions.includes("MASTER_DELETE")) throw new Error("Forbidden");
-      return masterService.delete(params.id, auth);
-    },
+    ({ params, permissions, auth, db }) =>
+      masterService.delete(params.id, { db, auth }),
     {
+      allPermission: "MASTER_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除主分类",

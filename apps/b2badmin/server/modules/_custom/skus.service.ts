@@ -412,7 +412,7 @@ export class SkusService extends SkusGeneratedService {
           spuCode: productsTable.spuCode,
         },
         // 补充站点分类信息 (由于是多对多，这里通常取关联表的 categoryId)
-        siteCategoryId: productSiteCategoriesTable.categoryId,
+        siteCategoryId: productSiteCategoriesTable.siteCategoryId,
       })
       .from(skusTable)
       // 连商品表
@@ -453,12 +453,12 @@ export class SkusService extends SkusGeneratedService {
 
     // 图片按 SKU 分组 Map
     const imageMap = images.reduce(
-      (map: any, img: any) => {
+      (map: Record<string, typeof images[0][]>, img) => {
         if (!map[img.skuId]) map[img.skuId] = [];
         map[img.skuId].push(img);
         return map;
       },
-      {} as Record<string, any[]>
+      {}
     );
 
     // --- 最终数据格式化 ---

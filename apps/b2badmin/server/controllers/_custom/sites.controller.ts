@@ -127,7 +127,7 @@ export const sitesController = new Elysia({ prefix: "/sites" })
     ({ query, auth, db }) =>
       sitesService.findAll(query, { db, auth }),
     {
-      allPermissions: ["SITES_VIEW"],
+      allPermission: "SITES_VIEW",
       query: SitesContract.ListQuery,
       detail: {
         summary: "获取站点列表",
@@ -143,7 +143,7 @@ export const sitesController = new Elysia({ prefix: "/sites" })
     ({ body, auth, db }) =>
       sitesService.create(body, { db, auth }),
     {
-      allPermissions: ["SITES_CREATE"],
+      allPermission: "SITES_CREATE",
       body: SitesContract.Create,
       detail: {
         summary: "创建新站点",
@@ -154,17 +154,17 @@ export const sitesController = new Elysia({ prefix: "/sites" })
   )
 
   // 更新站点信息（管理员）
-  .patch(
+  .put(
     "/:id",
     ({ params, body, auth, db }) =>
       sitesService.update(params.id, body, { db, auth }),
     {
-      allPermissions: ["SITES_EDIT"],
+      allPermission: "SITES_EDIT",
       params: t.Object({ id: t.String() }),
       body: SitesContract.Update,
       detail: {
         summary: "更新站点信息",
-        description: "部分更新指定站点的信息，如名称、域名、状态等",
+        description: "更新指定站点的信息",
         tags: ["Sites"],
       },
     }
@@ -176,7 +176,7 @@ export const sitesController = new Elysia({ prefix: "/sites" })
     ({ params, auth, db }) =>
       sitesService.delete(params.id, { db, auth }),
     {
-      allPermissions: ["SITES_DELETE"],
+      allPermission: "SITES_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除站点",

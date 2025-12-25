@@ -22,6 +22,12 @@ export const AttributeContract = {
   Entity: t.Object({
     ...AttributeBase.fields,
   }),
+  Create: t.Object({
+    ...t.Partial(t.Object(AttributeBase.insertFields)).properties,
+  }),
+  Update: t.Object({
+    ...t.Partial(t.Object(AttributeBase.insertFields)).properties,
+  }),
 
   // 列表查询
   ListQuery: t.Object({

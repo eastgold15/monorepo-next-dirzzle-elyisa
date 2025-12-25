@@ -183,7 +183,7 @@ export const factoriesController = new Elysia({
   )
 
   // 更新工厂（包含业务逻辑）
-  .patch(
+  .put(
     "/:id",
     async ({ db, body, role, exporterId, factoryId, params }) => {
       const { factoryId: paramFactoryId } = params;
@@ -233,7 +233,7 @@ export const factoriesController = new Elysia({
       params: t.Object({
         factoryId: t.String(),
       }),
-      body: FactoriesContract.Patch,
+      body: FactoriesContract.Update,
       detail: {
         summary: "更新工厂信息",
         description: "更新工厂信息，需要相应的权限",
@@ -248,7 +248,7 @@ export const factoriesController = new Elysia({
   //   ({ query, permissions, auth, db }) =>
   //     factoriesService.findAll(query, { auth, db }),
   //   {
-  //     allPermissions: "FACTORIES_VIEW",
+  //     allPermission: "FACTORIES_VIEW",
   //     query: FactoriesContract.ListQuery,
   //     detail: {
   //       summary: "获取工厂分页列表",
@@ -263,7 +263,7 @@ export const factoriesController = new Elysia({
     ({ params, permissions, auth, db }) =>
       factoriesService.delete(params.id, { db, auth }),
     {
-      allPermissions: "FACTORIES_DELETE",
+      allPermission: "FACTORIES_DELETE",
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "删除工厂",
@@ -328,7 +328,7 @@ export const factoriesController = new Elysia({
       return { data: factory };
     },
     {
-      allPermissions: "FACTORIES_VIEW",
+      allPermission: "FACTORIES_VIEW",
       params: t.Object({
         id: t.String(),
       }),

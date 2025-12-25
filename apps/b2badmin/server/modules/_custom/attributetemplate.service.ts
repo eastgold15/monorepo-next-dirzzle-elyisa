@@ -63,7 +63,7 @@ export class AttributeTemplateService extends AttributeTemplateGeneratedService 
   /**
    * 3. 更新接口：复用清理逻辑 + 插入逻辑
    */
-  async update(templateId: string, body: any, ctx: ServiceContext) {
+  async update2(templateId: string, body: any, ctx: ServiceContext) {
     const { name, masterCategoryId, siteCategoryId, fields } = body;
 
     return await ctx.db.transaction(async (tx) => {
