@@ -14,7 +14,7 @@ export const sitecategoriesController = new Elysia({
   // 获取树形结构的分类列表
   .get(
     "/tree",
-    async ({ db, auth, permissions }) =>
+    async ({ db, auth }) =>
       await siteCategoriesService.getTree({ db, auth }),
     {
       allPermission: "SITE_CATEGORIES_VIEW",
@@ -26,23 +26,96 @@ export const sitecategoriesController = new Elysia({
     }
   )
 
+
+  // 标准的 CRUD 操作
+  .get(
+    "/",
+    ({ query, permissions, auth, db }) =>
+      siteCategoriesService.findAll(query, { db, auth }),
+    {
+      allPermission: "SITE_CATEGORIES_VIEW",
+      query: SiteCategoriesContract.ListQuery,
+      detail: {
+        summary: "获取分类列表",
+        description: "分页获取分类列表（需要权限）",
+        tags: ["SiteCategories"],
+      },
+    }
+  )
+
+
   // 创建分类（支持层级关系）
   .post(
     "/",
-    async ({ body, db, auth, permissions }) =>
+    async ({ body, db, auth }) =>
       await siteCategoriesService.createCategory(body, { db, auth }),
     {
       allPermission: "SITE_CATEGORIES_CREATE",
-      body: t.Object({
-        name: t.String(),
-        description: t.Optional(t.String()),
-        parentId: t.Optional(t.String()),
-        sortOrder: t.Optional(t.Number()),
-        isActive: t.Optional(t.Boolean()),
-      }),
+      body: SiteCategoriesContract.Create,
       detail: {
         summary: "创建分类",
         description: "创建新的站点分类，支持设置父级分类",
+        tags: ["SiteCategories"],
+      },
+    }
+  )
+
+
+
+  .put(
+    "/:id",
+    ({ params, body, auth, db }) =>
+      siteCategoriesService.update(params.id, body, { db, auth }),
+    {
+      allPermission: "SITE_CATEGORIES_EDIT",
+      params: t.Object({ id: t.String() }),
+      body: SiteCategoriesContract.Update,
+      detail: {
+        summary: "更新分类信息",
+        description: "更新指定分类的信息（需要权限）",
+        tags: ["SiteCategories"],
+      },
+    }
+  )
+
+
+  .delete(
+    "/:id",
+    ({ params, permissions, auth, db }) =>
+      siteCategoriesService.delete(params.id, { db, auth }),
+    {
+      allPermission: "SITE_CATEGORIES_DELETE",
+      params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "删除分类",
+        description: "删除指定的分类（需要权限）",
+        tags: ["SiteCategories"],
+      },
+    }
+  )
+
+
+  // 批量更新排序
+  .patch(
+    "/sort",
+    async ({ body, db, auth, permissions }) =>
+      await siteCategoriesService.updateSortOrder(body.items, {
+        db,
+        auth,
+      }),
+    {
+      allPermission: "SITE_CATEGORIES_EDIT",
+      body: t.Object({
+        items: t.Array(
+          t.Object({
+            id: t.String(),
+            sortOrder: t.Number(),
+          })
+        ),
+      }),
+      detail: {
+        summary: "批量更新分类排序",
+        description: "批量更新分类的排序",
         tags: ["SiteCategories"],
       },
     }
@@ -74,33 +147,6 @@ export const sitecategoriesController = new Elysia({
       },
     }
   )
-
-  // 批量更新排序
-  .patch(
-    "/sort",
-    async ({ body, db, auth, permissions }) =>
-      await siteCategoriesService.updateSortOrder(body.items, {
-        db,
-        auth,
-      }),
-    {
-      allPermission: "SITE_CATEGORIES_EDIT",
-      body: t.Object({
-        items: t.Array(
-          t.Object({
-            id: t.String(),
-            sortOrder: t.Number(),
-          })
-        ),
-      }),
-      detail: {
-        summary: "批量更新分类排序",
-        description: "批量更新分类的排序",
-        tags: ["SiteCategories"],
-      },
-    }
-  )
-
   // 切换分类激活状态
   .patch(
     "/:id/toggle",
@@ -119,25 +165,9 @@ export const sitecategoriesController = new Elysia({
     }
   )
 
-  // 标准的 CRUD 操作
-  .get(
-    "/",
-    ({ query, permissions, auth, db }) =>
-      siteCategoriesService.findAll(query, { db, auth }),
-    {
-      allPermission: "SITE_CATEGORIES_VIEW",
-      query: SiteCategoriesContract.ListQuery,
-      detail: {
-        summary: "获取分类列表",
-        description: "分页获取分类列表（需要权限）",
-        tags: ["SiteCategories"],
-      },
-    }
-  )
-
   .get(
     "/:id",
-    ({ params, permissions, auth, db }) =>
+    ({ params, auth, db }) =>
       siteCategoriesService.findOne(params.id, { db, auth }),
     {
       allPermission: "SITE_CATEGORIES_VIEW",
@@ -150,33 +180,4 @@ export const sitecategoriesController = new Elysia({
     }
   )
 
-  .patch(
-    "/:id",
-    ({ params, body, permissions, auth, db }) =>
-      siteCategoriesService.update(params.id, body, { db, auth }),
-    {
-      allPermission: "SITE_CATEGORIES_EDIT",
-      params: t.Object({ id: t.String() }),
-      body: SiteCategoriesContract.Patch,
-      detail: {
-        summary: "更新分类信息",
-        description: "更新指定分类的信息（需要权限）",
-        tags: ["SiteCategories"],
-      },
-    }
-  )
 
-  .delete(
-    "/:id",
-    ({ params, permissions, auth, db }) =>
-      siteCategoriesService.delete(params.id, { db, auth }),
-    {
-      allPermission: "SITE_CATEGORIES_DELETE",
-      params: t.Object({ id: t.String() }),
-      detail: {
-        summary: "删除分类",
-        description: "删除指定的分类（需要权限）",
-        tags: ["SiteCategories"],
-      },
-    }
-  );

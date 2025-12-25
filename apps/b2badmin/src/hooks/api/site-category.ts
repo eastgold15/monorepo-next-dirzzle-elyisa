@@ -1,6 +1,6 @@
 "use client";
 
-import type { SiteCategoriesContractDTO as SiteCategoriesContractDto } from "@repo/contract";
+import type { SiteCategoriesContract, SiteCategoriesDTO } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
@@ -33,7 +33,7 @@ export function useSiteCategoriesTree() {
 
 // 获取当前站点的扁平化分类列表（用于下拉选择）
 export function useSiteCategories(
-  query: MyInferQuery<typeof rpc.api.v1.sitecategories.tree.get>
+  query?: MyInferQuery<typeof rpc.api.v1.sitecategories.tree.get>
 ) {
   return useQuery({
     queryKey: ["site-categories", "flat"],
@@ -53,13 +53,7 @@ export function useSiteCategories(
 export function useCreateSiteCategory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {
-      name: string;
-      description?: string;
-      parentId?: string;
-      sortOrder?: number;
-      isActive?: boolean;
-    }) => await handleEden(rpc.api.v1.sitecategories.post(data)),
+    mutationFn: async (data: typeof SiteCategoriesContract.Create.static) => await handleEden(rpc.api.v1.sitecategories.post(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -77,14 +71,8 @@ export function useUpdateSiteCategory() {
       data,
     }: {
       id: string;
-      data: {
-        name?: string;
-        description?: string;
-        parentId?: string;
-        sortOrder?: number;
-        isActive?: boolean;
-      };
-    }) => await handleEden(rpc.api.v1.sitecategories({ id }).patch(data)),
+      data: typeof SiteCategoriesContract.Update.static
+    }) => await handleEden(rpc.api.v1.sitecategories({ id }).put(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -155,11 +143,11 @@ export function useToggleCategoryStatus() {
 
 // 获取分类的完整路径（如：一级分类 > 二级分类 > 三级分类）
 export function getCategoryPath(
-  category: SiteCategoriesContractDto["TreeResponse"],
-  allCategories: SiteCategoriesContractDto["TreeResponse"][]
+  category: SiteCategoriesDTO["TreeResponse"],
+  allCategories: SiteCategoriesDTO["TreeResponse"][]
 ): string {
   const path: string[] = [];
-  let currentCategory: SiteCategoriesContractDto["TreeResponse"] | undefined =
+  let currentCategory: SiteCategoriesDTO["TreeResponse"] | undefined =
     category;
 
   while (currentCategory) {
@@ -180,8 +168,8 @@ export function getCategoryPath(
 // 根据ID查找分类
 function findCategoryById(
   id: string,
-  categories: SiteCategoriesContractDto["TreeResponse"][]
-): SiteCategoriesContractDto["TreeResponse"] | undefined {
+  categories: SiteCategoriesDTO["TreeResponse"][]
+): SiteCategoriesDTO["TreeResponse"] | undefined {
   for (const category of categories) {
     if (category.id === id) {
       return category;
@@ -198,15 +186,15 @@ function findCategoryById(
 
 // 检查分类是否有子分类
 export function hasChildren(
-  category: SiteCategoriesContractDto["TreeResponse"]
+  category: SiteCategoriesDTO["TreeResponse"]
 ): boolean {
   return !!(category.children && category.children.length > 0);
 }
 
 // 检查是否可以删除分类（没有子分类）
 export function canDeleteCategory(
-  category: SiteCategoriesContractDto["TreeResponse"],
-  allCategories: SiteCategoriesContractDto["TreeResponse"][]
+  category: SiteCategoriesDTO["TreeResponse"],
+  allCategories: SiteCategoriesDTO["TreeResponse"][]
 ): boolean {
   // 检查是否有子分类
   if (hasChildren(category)) {

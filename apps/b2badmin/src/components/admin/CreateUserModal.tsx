@@ -21,10 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  useCreateFactoryAdmin,
-  useCreateSalesperson,
-} from "@/hooks/api/use-user-api";
+import { useCreateFactoryAdmin, useCreateSalesperson } from "@/hooks/api/user";
 import { useIsExporterAdmin } from "@/stores/user-store";
 
 type CreateModalType = "salesperson" | "factory_admin";

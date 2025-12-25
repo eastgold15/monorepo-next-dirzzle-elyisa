@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMe } from "@/hooks/api/use-user-api";
+import { useMe } from "@/hooks/api/user";
 
 import { useAuthStore } from "@/stores/auth-store";
 

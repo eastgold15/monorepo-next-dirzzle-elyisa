@@ -35,8 +35,8 @@ import {
   useCreateFactoryAdmin,
   useCreateSalesperson,
   useUpdateUserStatus,
-} from "@/hooks/api/use-user-api";
-import { useUsersWithSearch } from "@/hooks/api/use-users-with-search";
+} from "@/hooks/api/user";
+import { useUsersWithSearch } from "@/hooks/use-users-with-search";
 
 type CreateModalType = "salesperson" | "factory_admin";
 

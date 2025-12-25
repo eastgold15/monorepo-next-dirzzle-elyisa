@@ -50,8 +50,7 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 获取用户列表
   .get(
     "/",
-    ({ query, permissions, auth, db }) =>
-      usersService.findAll(query, { db, auth }),
+    ({ query, auth, db }) => usersService.findAll(query, { db, auth }),
     {
       permissions: ["USERS_VIEW"],
       query: UsersContract.ListQuery,
@@ -66,8 +65,7 @@ export const usersController = new Elysia({ prefix: "/users" })
   // 创建用户
   .post(
     "/",
-    async ({ body, permissions, auth, db, currentSite }) => {
-      if (!permissions.includes("USERS_CREATE")) throw new Error("Forbidden");
+    async ({ body, db, currentSite, status }) => {
       const user = await authserver.api.signInEmail({
         body: {
           email: body.email,
@@ -75,13 +73,19 @@ export const usersController = new Elysia({ prefix: "/users" })
         },
       });
 
-      const userSiteRole = await db.insert(userSiteRolesTable).values({
-        userId: user.user.id,
-        siteId: currentSite.id,
-        roleId: body.role,
-      });
+      if (body.roleId) {
+        const userSiteRole = await db
+          .insert(userSiteRolesTable)
+          .values({
+            userId: user.user.id,
+            siteId: currentSite.id,
+            roleId: body.roleId,
+          })
+          .returning();
 
-      return userSiteRole;
+        return userSiteRole;
+      }
+      return user;
     },
     {
       allPermissions: ["USERS_CREATE"],
@@ -95,15 +99,14 @@ export const usersController = new Elysia({ prefix: "/users" })
   )
 
   // 更新用户信息
-  .patch(
+  .put(
     "/:id",
-    ({ params, body, permissions, auth, db }) => {
-      if (!permissions.includes("USERS_EDIT")) throw new Error("Forbidden");
-      return usersService.update(params.id, body, { db, auth });
-    },
+    ({ params, body, auth, db }) =>
+      usersService.update(params.id, body, { db, auth }),
     {
+      allPermissions: ["USERS_EDIT"],
       params: t.Object({ id: t.String() }),
-      body: UsersContract.Patch,
+      body: UsersContract.Update,
       detail: {
         summary: "更新用户信息",
         description: "部分更新指定用户的信息，需要相应的权限",

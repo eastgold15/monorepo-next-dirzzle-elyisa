@@ -14,6 +14,7 @@ import { masterController } from "./_custom/master.controller";
 import { mediaController } from "./_custom/media.controller";
 import { productmastercategoriesController } from "./_custom/productmastercategories.controller";
 import { productsController } from "./_custom/products.controller";
+import { roleController } from "./_custom/role.controller";
 import { sitecategoriesController } from "./_custom/sitecategories.controller";
 import { siteconfigController } from "./_custom/siteconfig.controller";
 import { sitesController } from "./_custom/sites.controller";
@@ -34,7 +35,6 @@ import { productsitecategoriesController } from "./_generated/productsitecategor
 import { producttemplateController } from "./_generated/producttemplate.controller";
 import { quotationitemsController } from "./_generated/quotationitems.controller";
 import { quotationsController } from "./_generated/quotations.controller";
-import { roleController } from "./_generated/role.controller";
 import { rolepermissionsController } from "./_generated/rolepermissions.controller";
 import { salespersonaffiliationsController } from "./_generated/salespersonaffiliations.controller";
 import { salespersoncategoriesController } from "./_generated/salespersoncategories.controller";

@@ -5,6 +5,22 @@
  * 🛡️ 自动化脚本永远不会覆盖此文件。
  * --------------------------------------------------------
  */
-import { UserSiteRolesGeneratedService } from "../_generated/usersiteroles.service";
 
-export class UserSiteRolesService extends UserSiteRolesGeneratedService {}
+import { db } from "~/db/connection";
+import { UserSiteRolesGeneratedService } from "../_generated/usersiteroles.service";
+import type { ServiceContext } from "../_lib/base-service";
+
+export class UserSiteRolesService extends UserSiteRolesGeneratedService {
+
+
+    // 获取该用户身份下的用户角色管理
+    async list(ctx: ServiceContext) {
+        return await db.query.userSiteRolesTable.findMany({
+            with: {
+                user: true,
+                site: true,
+                role: true,
+            }
+        });
+    }
+}

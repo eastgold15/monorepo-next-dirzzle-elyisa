@@ -1,5 +1,6 @@
 "use client";
 import type { Treaty } from "@elysiajs/eden";
+import type { UsersContract } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { rpc } from "@/lib/rpc";
@@ -18,18 +19,29 @@ export function useMe(options?: { siteId?: string }) {
 
 export type UserMeRes = Treaty.Data<typeof rpc.api.v1.users.me.get>;
 
+export function useCreateUser() {
+  return useMutation({
+    mutationFn: async (data: Parameters<typeof rpc.api.v1.users.post>[0]) =>
+      await handleEden(rpc.api.v1.users.post(data)),
+    onSuccess: () => {
+      toast.success("用户代表创建成功");
+    },
+    onError: (error) => {
+      toast.error(error.message || "创建用户代表失败");
+    },
+  });
+}
+
 // 获取可管理的用户列表
-export function useManageableUsers(params?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}) {
+export function useManageableUsers(
+  query?: typeof UsersContract.ListQuery.static
+) {
   return useQuery({
-    queryKey: ["user-management", "users", params],
+    queryKey: ["user-management", "users", query],
     queryFn: async () =>
       await handleEden(
         rpc.api.v1.users.get({
-          query: params || {},
+          query
         })
       ),
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -49,7 +61,7 @@ export function useUpdateUserStatus() {
       isActive: boolean;
     }) =>
       await handleEden(
-        rpc.api.v1.users({ id: userId }).patch({
+        rpc.api.v1.users({ id: userId }).put({
           isActive,
         })
       ),

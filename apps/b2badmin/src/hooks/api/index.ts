@@ -19,7 +19,7 @@ export * from "./skus";
 // 翻译相关 hooks
 export * from "./translations";
 // 用户相关 hooks
-export * from "./use-user-api";
+export * from "./user";
 
 // 工具函数
 export * from "./utils";

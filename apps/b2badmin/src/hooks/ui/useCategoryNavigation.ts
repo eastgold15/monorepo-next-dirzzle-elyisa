@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { useCategoriesTree } from "./api";
+import { useCategoriesTree } from "../api";
+
 
 /**
  * 统一的分类导航数据和处理逻辑 Hook

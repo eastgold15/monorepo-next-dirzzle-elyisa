@@ -6,14 +6,18 @@ import {
   FileBox,
   Frame,
   Image as ImageIcon,
+  Key,
   Layers,
+  type LucideIcon,
   Package,
   PieChart,
   Settings,
+  Shield,
   ShieldCheck,
   ShoppingBag,
   SquareTerminal,
   Tags,
+  UserCog,
   Users,
 } from "lucide-react";
 import * as React from "react";
@@ -155,6 +159,29 @@ const SIDEBAR_CONFIG: NavSection[] = [
         url: "/dashboard/product-statistics",
         icon: ShieldCheck,
         permission: "PRODUCTS_TABLE_VIEW",
+      },
+    ],
+  },
+  {
+    title: "权限管理",
+    items: [
+      {
+        title: "角色管理",
+        url: "/dashboard/roles",
+        icon: Shield,
+        permission: PERMISSIONS.ROLES_VIEW,
+      },
+      {
+        title: "权限管理",
+        url: "/dashboard/permissions",
+        icon: Key,
+        permission: PERMISSIONS.PERMISSIONS_VIEW,
+      },
+      {
+        title: "用户角色",
+        url: "/dashboard/user-roles",
+        icon: UserCog,
+        permission: PERMISSIONS.ROLES_VIEW,
       },
     ],
   },

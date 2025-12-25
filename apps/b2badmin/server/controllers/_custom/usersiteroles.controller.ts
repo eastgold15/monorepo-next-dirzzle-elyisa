@@ -9,20 +9,26 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .use(authGuardMid)
   .use(dbPlugin)
 
-  // 获取用户在站点中的角色列表
+  // 需要完成的功能，
+  // 1. 超管为所有人分配 用户在某站点的角色。
+  // 2. 出口商为工厂用户和业务员分配在某站点的角色。
+  // 3. 工厂用户为业务员分配在该站点的角色。
+
+
+
+
+
+  // 超管和出口商为工厂用户分配站点，工厂用户的角色管理列表
   .get(
-    "/",
-    ({ query, permissions, auth }) => {
-      if (!permissions.includes("USERSITEROLES_VIEW"))
-        throw new Error("Forbidden");
-      return userSiteRolesService.findAll(query, auth);
-    },
+    "/admin",
+    ({ query, auth, db }) => userSiteRolesService.list({ db, auth }, query),
     {
+      allPermissions: ["USER_SITE_ROLES_VIEW"],
       query: UserSiteRolesContract.ListQuery,
       detail: {
-        summary: "获取用户站点角色列表",
+        summary: "获取该用户身份下的用户角色管理",
         description:
-          "分页获取用户在各个站点中的角色分配列表，支持按用户ID、站点ID、角色ID筛选",
+          "获取该用户身份下的用户角色管理列表",
         tags: ["UserSiteRoles"],
       },
     }
