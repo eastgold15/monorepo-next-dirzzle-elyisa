@@ -6,7 +6,6 @@
  * --------------------------------------------------------
  */
 import { t } from "elysia";
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
 import { UserSiteRolesBase } from "../_generated/usersiteroles.contract";
 
@@ -41,9 +40,6 @@ export const UserSiteRolesContract = {
 
   // 列表查询
   ListQuery: t.Object({
-    ...t.Partial(t.Object(UserSiteRolesBase.insertFields)).properties,
-    ...PaginationParams.properties,
-    ...SortParams.properties,
     search: t.Optional(t.String()),
   }),
 

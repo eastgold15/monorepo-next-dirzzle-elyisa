@@ -101,7 +101,12 @@ export default function CategoryPage() {
       <Navbar />
       <CategoryGrid
         description={categoryData?.description || ""} // 兼容不同字段名
-        productListRes={productListRes}
+        productListRes={
+          productListRes || {
+            items: [],
+            meta: { total: 0, page: 1, limit: 12, totalPages: 0 },
+          }
+        }
         title={title}
       />
       <Footer />

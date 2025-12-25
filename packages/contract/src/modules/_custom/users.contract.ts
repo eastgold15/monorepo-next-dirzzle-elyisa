@@ -6,7 +6,6 @@
  * --------------------------------------------------------
  */
 import { t } from "elysia";
-import { PaginationParams, SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
 import { UsersBase } from "../_generated/users.contract";
 
@@ -21,10 +20,16 @@ export const UsersContract = {
   }),
 
   // 创建请求 (默认排除系统字段)
-  Create: t.Object(
-    t.Omit(t.Object(UsersBase.insertFields), ["id", "createdAt", "updatedAt"])
-      .properties
-  ),
+  Create: t.Composite([
+    t.Object(
+      t.Omit(t.Object(UsersBase.insertFields), ["id", "createdAt", "updatedAt"])
+        .properties
+    ),
+    t.Object({
+      password: t.String(),
+      roleId: t.Optional(t.String()),
+    }),
+  ]),
 
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
@@ -38,9 +43,6 @@ export const UsersContract = {
 
   // 列表查询
   ListQuery: t.Object({
-    ...t.Partial(t.Object(UsersBase.insertFields)).properties,
-    ...PaginationParams.properties,
-    ...SortParams.properties,
     search: t.Optional(t.String()),
   }),
 

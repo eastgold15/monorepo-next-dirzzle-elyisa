@@ -388,12 +388,12 @@ export const productSiteCategoriesTable = p.pgTable(
       .uuid("product_id")
       .notNull()
       .references(() => productsTable.id),
-    categoryId: p
+    siteCategoryId: p
       .uuid("category_id")
       .notNull()
-      .references(() => masterTable.id),
+      .references(() => siteCategoriesTable.id),
   },
-  (t) => [p.primaryKey({ columns: [t.productId, t.categoryId] })]
+  (t) => [p.primaryKey({ columns: [t.productId, t.siteCategoryId] })]
 );
 
 export const productMediaTable = p.pgTable(
@@ -642,6 +642,7 @@ export const siteCategoriesTable = p.pgTable("site_categories", {
   ...Audit,
 
   name: p.varchar("name", { length: 100 }).notNull(),
+  description: p.text("description"),
   parentId: p.uuid("parent_id"),
   sortOrder: p.integer("sort_order").default(0),
 

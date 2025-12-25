@@ -224,7 +224,7 @@ export const relations = defineRelations(schema, (r) => ({
     // }),
     siteCategory: r.many.siteCategoriesTable({
       from: r.productsTable.id.through(r.productSiteCategoriesTable.productId),
-      to: r.siteCategoriesTable.id.through(r.productSiteCategoriesTable.categoryId),
+      to: r.siteCategoriesTable.id.through(r.productSiteCategoriesTable.siteCategoryId),
     }),
     productMedia: r.many.productMediaTable(),
     // productCategories: r.many.productCategoriesTable({
