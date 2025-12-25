@@ -1,6 +1,6 @@
 "use client";
 
-import type { MasterContractDto } from "@repo/contract";
+import type { MasterDTO } from "@repo/contract";
 import { useMemo } from "react";
 import {
   Select,
@@ -33,7 +33,7 @@ export function MasterCategorySelect({
   // 扁平化的选项用于显示
   const flattenedOptions = useMemo(() => {
     const flatten = (
-      cats: MasterContractDto["TreeEntity"][]
+      cats: MasterDTO["TreeEntity"][]
     ): Array<{ value: string; label: string }> => {
       const result: Array<{ value: string; label: string }> = [];
       cats.forEach((cat) => {

@@ -20,6 +20,11 @@ export const MasterContract = {
     ...MasterBase.fields,
   }),
 
+  TreeEntity: t.Object({
+    ...MasterBase.fields,
+    children: t.Optional(t.Array(t.Object(MasterBase.fields))),
+  }),
+
   // 创建请求 (默认排除系统字段)
   Create: t.Object(
     t.Omit(t.Object(MasterBase.insertFields), ["id", "createdAt", "updatedAt"])

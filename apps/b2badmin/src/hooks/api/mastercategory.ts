@@ -1,6 +1,6 @@
 "use client";
 
-import type { MasterContract, MasterContractDto } from "@repo/contract";
+import type { MasterContract, MasterDTO, } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
@@ -12,7 +12,7 @@ export function useMasterCategoriesTree() {
     queryFn: async () => {
       const data = await handleEden(rpc.api.v1.master.tree.get());
       // 确保返回数组，即使是空数组
-      return (data || []) as MasterContractDto["TreeEntity"][];
+      return (data || []) as MasterDTO["TreeEntity"][];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
   });
@@ -60,7 +60,7 @@ export function useUpdateMasterCategory() {
       data,
     }: {
       id: string;
-      data: typeof MasterContract.Patch.static;
+      data: typeof MasterContract.Update.static;
     }) => await handleEden(rpc.api.v1.master({ id }).put(data)),
     onSuccess: () => {
       // 刷新主分类树和列表
