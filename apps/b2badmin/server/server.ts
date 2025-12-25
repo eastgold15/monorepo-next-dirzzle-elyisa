@@ -3,7 +3,6 @@ import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { OpenAPI } from "~/lib/auth-openapi";
 import { localeMiddleware } from "~/middleware/locale";
-import { loggerPlugin } from "~/middleware/logger";
 import { appRouter } from "./controllers/app-router";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
@@ -73,7 +72,7 @@ export const server = new Elysia({ name: "server" })
     })
   )
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
-  .use(loggerPlugin)
+  // .use(loggerPlugin)
   // 2. 核心错误处理插件 (拦截所有错误，进行转换和手动日志记录)
   .use(errorSuite)
   .use(dbPlugin)

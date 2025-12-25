@@ -58,9 +58,9 @@ export function handleAvatarUpload(
 
   // 如果没有上传文件或上传失败，使用默认头像
   if (name) {
-    return generateDefaultAvatar(name);
+    return Promise.resolve(generateDefaultAvatar(name));
   }
 
   // 如果连姓名都没有，使用默认头像
-  return generateDefaultAvatar("User");
+  return Promise.resolve(generateDefaultAvatar("User"));
 }

@@ -56,7 +56,7 @@ export function useMediaUpdate() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) =>
-      await handleEden(rpc.api.v1.media({ id }).patch(data)),
+      await handleEden(rpc.api.v1.media({ id }).put(data)),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
       queryClient.invalidateQueries({ queryKey: ["media", id] });

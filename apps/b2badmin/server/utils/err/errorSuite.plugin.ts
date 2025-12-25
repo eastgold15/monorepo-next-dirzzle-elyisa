@@ -4,11 +4,7 @@ import { Elysia } from "elysia";
 import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
 import { env } from "@/env";
 import { mapDatabaseError } from "./database-error-mapper";
-import {
-  filterStack,
-  getValidationSummary,
-  log,
-} from "./errorSuite.plugin.utils";
+import { filterStack, getValidationSummary } from "./errorSuite.plugin.utils";
 import { isDatabaseError } from "./guards";
 
 // 核心思路是，转化错误，然后打印日志，最后由elysia-http-problem-json抛出错误
@@ -146,13 +142,13 @@ export const errorLoggerPlugin = new Elysia({
   }
 
   // ========== 1. 静默写文件 (不输出到控制台) ==========
-  log.pino.error({
-    event: "request_error",
-    source: errorSource,
-    path,
-    err: error,
-    validation: code === "VALIDATION" ? (error as any).all : undefined,
-  });
+  // log.pino.error({
+  //   event: "request_error",
+  //   source: errorSource,
+  //   path,
+  //   err: error,
+  //   validation: code === "VALIDATION" ? (error as any).all : undefined,
+  // });
 
   // ========== 2. 开发环境精简美化打印 ==========
   if (env.NODE_ENV === "development") {

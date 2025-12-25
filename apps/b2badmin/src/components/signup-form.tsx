@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form"; // 🔥 新增导入 FormProvider
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useRegisterMutation } from "@/hooks/api/auth";
-import { AvatarUploadNew } from "./ui/avatar-upload-new";
 import {
   FormControl,
   FormDescription,
@@ -109,7 +107,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           {/* 移除嵌套的 form 标签，直接使用原生 form + form.handleSubmit */}
           <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
             {/* 头像上传区域 */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <FormLabel>头像（可选）</FormLabel>
               <div className="flex items-center gap-4">
                 {avatarPreview ? (
@@ -144,7 +142,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FormDescription>
                 点击按钮上传头像，支持 JPG、PNG 格式，不上传将使用默认头像
               </FormDescription>
-            </div>
+            </div> */}
 
             {/* 姓名输入框（🔥 移除重复的 rules，改用 zod schema 校验） */}
             <FormField
@@ -247,12 +245,12 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </FormProvider>
 
         {/* 头像上传对话框 */}
-        <AvatarUploadNew
+        {/* <AvatarUploadNew
           onError={handleAvatarUploadError}
           onOpenChange={setShowAvatarUpload}
           onUploadSuccess={handleAvatarUploadSuccess}
           open={showAvatarUpload}
-        />
+        /> */}
       </CardContent>
     </Card>
   );

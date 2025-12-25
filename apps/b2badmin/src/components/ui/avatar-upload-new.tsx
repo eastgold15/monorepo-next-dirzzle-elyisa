@@ -1,8 +1,5 @@
 "use client";
 
-import type { UploadTModel } from "@repo/contract";
-import { SimpleMultiFileUpload } from "./file-upload";
-
 interface AvatarUploadProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -11,7 +8,7 @@ interface AvatarUploadProps {
 }
 
 // 头像上传配置
-const avatarUploadConfig: UploadTModel["UploadConfig"] = {
+const avatarUploadConfig = {
   category: "avatar", // 头像分类
   mediaType: "image", // 媒体类型为图片
   multiple: false, // 不允许多文件
@@ -27,27 +24,19 @@ export function AvatarUploadNew({
   onError,
 }: AvatarUploadProps) {
   const handleUploadSuccess = (files: Array<{ url: string; data: any }>) => {
-    console.log(
-      "AvatarUploadNew - handleUploadSuccess called with files:",
-      files
-    );
     // 头像上传只会返回一个文件
     if (files.length > 0) {
-      console.log(
-        "AvatarUploadNew - calling onUploadSuccess with URL:",
-        files[0].url
-      );
       onUploadSuccess(files[0].url, files[0].data);
     }
   };
 
   return (
-    <SimpleMultiFileUpload
-      config={avatarUploadConfig}
-      onError={onError}
-      onOpenChange={onOpenChange}
-      onUploadSuccess={handleUploadSuccess}
-      open={open}
-    />
+    // <SimpleMultiFileUpload
+    //   config={avatarUploadConfig}
+    //   onError={onError}
+    //   onOpenChange={onOpenChange}
+    //   onUploadSuccess={handleUploadSuccess}
+    //   open={open}
+    // />
   );
 }

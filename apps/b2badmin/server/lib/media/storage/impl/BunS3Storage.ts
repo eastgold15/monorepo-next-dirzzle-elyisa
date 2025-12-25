@@ -4,6 +4,7 @@
  * 提供更好的性能和更简洁的 API
  */
 
+import { IMAGE_MIME_TYPE_MAP } from "@repo/contract";
 import { S3Client } from "bun";
 import { AbstractImageStorage } from "../ImageStorage";
 
@@ -37,7 +38,7 @@ export class BunS3Storage extends AbstractImageStorage {
     );
 
     if (missing.length > 0) {
-      throw new HttpError.BadRequest(`Bun S3 配置缺失：${missing.join(", ")}`);
+      console.log(`Bun S3 配置缺失：${missing.join(", ")}`);
     }
   }
 
@@ -48,7 +49,15 @@ export class BunS3Storage extends AbstractImageStorage {
       bucket: this.bucket,
       region: this.config.region,
       endpoint: this.config.endpoint,
-      acl: this.config.acl,
+      acl: this.config.acl as
+        | "private"
+        | "public-read"
+        | "public-read-write"
+        | "aws-exec-read"
+        | "authenticated-read"
+        | "bucket-owner-read"
+        | "bucket-owner-full-control"
+        | undefined,
     });
   }
 
@@ -92,7 +101,16 @@ export class BunS3Storage extends AbstractImageStorage {
       await s3File.write(body, {
         type: finalContentType,
         // 可以设置 ACL
-        ...(this.config.acl && { acl: this.config.acl }),
+        ...(this.config.acl && {
+          acl: this.config.acl as
+            | "private"
+            | "public-read"
+            | "public-read-write"
+            | "aws-exec-read"
+            | "authenticated-read"
+            | "bucket-owner-read"
+            | "bucket-owner-full-control",
+        }),
       });
 
       // 生成公开 URL
@@ -161,12 +179,28 @@ export class BunS3Storage extends AbstractImageStorage {
   }
 
   /**
-   * 生成预签名 URL
-   * @param key 文件 key
-   * @param expiresIn 过期时间（秒）
-   * @param options 额外选项
+   * 获取预签名 URL（实现基类抽象方法）
    */
-  async presignUrl(
+  getPresignedUrl(
+    key: string,
+    options: {
+      method: "GET" | "PUT";
+      expiresIn?: number;
+    }
+  ): Promise<string> {
+    const s3File = this.client.file(key);
+    return Promise.resolve(
+      s3File.presign({
+        expiresIn: options.expiresIn ?? 3600,
+        method: options.method,
+      })
+    )
+  }
+
+  /**
+   * 生成预签名 URL（扩展方法，支持更多选项）
+   */
+  presignUrl(
     key: string,
     expiresIn = 3600,
     options: {
@@ -176,15 +210,28 @@ export class BunS3Storage extends AbstractImageStorage {
     } = {}
   ): Promise<string> {
     const s3File = this.client.file(key);
-    return s3File.presign({
-      expiresIn,
-      method: options.method,
-      acl: options.acl,
-      type: options.type,
-    });
+    return Promise.resolve(
+      s3File.presign({
+        expiresIn,
+        method: options.method,
+        acl: options.acl as
+          | "private"
+          | "public-read"
+          | "public-read-write"
+          | "aws-exec-read"
+          | "authenticated-read"
+          | "bucket-owner-read"
+          | "bucket-owner-full-control"
+          | undefined,
+        type: options.type,
+      })
+    )
   }
 
-  private getPublicUrl(key: string): string {
+  /**
+   * 获取公开访问 URL（实现基类抽象方法）
+   */
+  getPublicUrl(key: string): string {
     // 优先使用自定义域名
     if (this.config.domain) {
       return `${this.config.domain}/${key}`;
@@ -317,7 +364,7 @@ export class BunS3Storage extends AbstractImageStorage {
           lastModified: new Date(item.lastModified),
           etag: item.etag,
         })),
-        isTruncated: result.isTruncated,
+        isTruncated: result.isTruncated ?? false,
       };
     } catch (error) {
       throw new Error(

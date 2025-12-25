@@ -15,7 +15,8 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
-  transpilePackages: ["@repo/contract"],
+  transpilePackages: [],
+  serverExternalPackages: ["@repo/contract", 'pino', 'thread-stream', 'logixlysia'],
 };
 
 export default nextConfig;
