@@ -1,8 +1,8 @@
-import QueryProvider from "@/providers/query-provider";
-import { UserProvider } from "@/providers/UserProvider";
+import { Providers } from "@/components/providers";
 import "./globals.css";
-import { MasterCategoryProvider } from "@/providers/master-categories-provider";
-import { SiteCategoryProvider } from "@/providers/site-category-provider";
+
+// 禁用静态预渲染，因为应用完全依赖客户端状态
+export const dynamic = 'force-dynamic';
 
 export default function RootLayout({
   children,
@@ -12,13 +12,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white font-sans text-black antialiased">
-        <QueryProvider>
-          <SiteCategoryProvider>
-            <MasterCategoryProvider>
-              <UserProvider>{children}</UserProvider>
-            </MasterCategoryProvider>
-          </SiteCategoryProvider>
-        </QueryProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

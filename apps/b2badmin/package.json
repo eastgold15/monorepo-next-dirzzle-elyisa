@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --bun next dev -p 4000",
-    "build": "bun --bun next build",
+    "build": " next build",
     "start": "bun --bun next start",
     "check": "npx ultracite check",
     "fix": "npx ultracite fix",

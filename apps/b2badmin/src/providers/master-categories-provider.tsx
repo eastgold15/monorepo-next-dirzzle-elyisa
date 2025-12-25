@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, type ReactNode, useContext, useEffect } from "react";
-import { useMasterCategoriesTree } from "@/hooks/api";
+import { useMasterCategoriesTree } from "@/hooks/api/master-categories";
 import { useMasterCategoryStore } from "@/stores/master-categories-store";
 
 // Context 类型定义
@@ -16,7 +16,11 @@ const MasterCategoryContext = createContext<
 >(undefined);
 
 // Provider 组件
-export function MasterCategoriesProvider({ children }: { children: ReactNode }) {
+export function MasterCategoriesProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { data: categories, isLoading, refetch } = useMasterCategoriesTree();
   const { setTreeData, setLoading } = useMasterCategoryStore();
 
@@ -50,7 +54,3 @@ export function useMasterCategoriesContext() {
   }
   return context;
 }
-
-// 向后兼容的导出
-export { MasterCategoriesProvider as MasterCategoryProvider };
-export { useMasterCategoriesContext as useMasterCategoryContext };
