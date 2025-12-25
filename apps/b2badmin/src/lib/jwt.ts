@@ -2,7 +2,7 @@ import * as jose from "jose";
 import { env } from "@/env";
 
 // Create an encryption key from the server's SECRET environment variable
-const key = new TextEncoder().encode(env.SECRET);
+const key = new TextEncoder().encode(env.BETTER_AUTH_SECRET);
 
 /**
  * Encrypts a value using JSON Web Encryption (JWE)
