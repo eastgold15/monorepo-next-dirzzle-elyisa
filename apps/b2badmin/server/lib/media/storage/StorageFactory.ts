@@ -4,7 +4,6 @@
  * 支持单例模式，避免重复创建相同类型的存储实例
  */
 
-import { env } from "@/env";
 import type { AbstractImageStorage } from "./ImageStorage";
 import { LocalImageStorage } from "./impl/LocalImageStorage";
 import { type OSSConfig, OSSImageStorage } from "./impl/OSSImageStorage";
@@ -131,19 +130,19 @@ class StorageFactory {
       "ENDPOINT",
     ] as const
 
-    return requiredEnvVars.every((varName) => !!env[varName]);
+    return requiredEnvVars.every((varName) => !!process.env[varName]);
   }
 
   /**
    * 从环境变量获取 OSS 配置
    */
   private static getOSSConfigFromEnv() {
-    const accessKeyId = env.ACCESS_KEY_ID;
-    const secretAccessKey = env.SECRET_ACCESS_KEY;
-    const bucket = env.BUCKET;
-    const region = env.REGION || "default";
-    const endpoint = env.ENDPOINT;
-    const domain = env.DOMAIN;
+    const accessKeyId = process.env.ACCESS_KEY_ID;
+    const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+    const bucket = process.env.BUCKET;
+    const region = process.env.REGION || "default";
+    const endpoint = process.env.ENDPOINT;
+    const domain = process.env.DOMAIN;
 
     if (!(accessKeyId && secretAccessKey && bucket && endpoint)) {
       throw new Error(

@@ -26,7 +26,7 @@ export function flattenCategories(
 }
 
 // 获取主分类树
-export function useMasterCategoriesTree() {
+export function useMasterCategoriesTree(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["master-categories", "tree"],
     queryFn: async () => {
@@ -35,6 +35,7 @@ export function useMasterCategoriesTree() {
       return (data || []) as MasterDTO["TreeEntity"][];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
+    enabled: options?.enabled ?? true, // 默认启用，可通过 options 控制
   });
 }
 

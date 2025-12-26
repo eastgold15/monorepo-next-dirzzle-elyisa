@@ -3,6 +3,7 @@
 import { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useSiteCategoriesTree } from "@/hooks/api/site-category";
 import { useSiteCategoryStore } from "@/stores/site-category-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 // Context 类型定义
 interface SiteCategoryContextType {
@@ -17,7 +18,12 @@ const SiteCategoryContext = createContext<SiteCategoryContextType | undefined>(
 
 // Provider 组件
 export function SiteCategoryProvider({ children }: { children: ReactNode }) {
-  const { data: categories, isLoading, refetch } = useSiteCategoriesTree();
+  const user = useAuthStore((s) => s.user);
+
+  // 只在用户已登录时才获取数据
+  const { data: categories, isLoading, refetch } = useSiteCategoriesTree({
+    enabled: !!user, // 只有当 user 存在时才启用查询
+  });
   const { setTreeData, setLoading } = useSiteCategoryStore();
 
   // 刷新数据的方法

@@ -9,7 +9,7 @@ import type { MyInferQuery } from "./utils";
 
 
 // 获取当前站点的分类树
-export function useSiteCategoriesTree() {
+export function useSiteCategoriesTree(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["site-categories", "tree"],
     queryFn: async () => {
@@ -18,6 +18,7 @@ export function useSiteCategoriesTree() {
       return (data || []) as SiteCategoriesDTO["TreeResponse"][];
     },
     staleTime: 1000 * 60 * 5, // 5分钟缓存
+    enabled: options?.enabled ?? true, // 默认启用，可通过 options 控制
   });
 }
 
