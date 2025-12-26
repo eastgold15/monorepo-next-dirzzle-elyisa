@@ -31,7 +31,7 @@ import { quotationsController } from "./_generated/quotations.controller";
 // import { roleController } from "./_generated/role.controller";
 // import { rolepermissionsController } from "./_generated/rolepermissions.controller";
 import { salespersonaffiliationsController } from "./_generated/salespersonaffiliations.controller";
-import { salespersoncategoriesController } from "./_generated/salespersoncategories.controller";
+// import { salespersoncategoriesController } from "./_generated/salespersoncategories.controller";
 import { salespersonsController } from "./_generated/salespersons.controller";
 import { siteconfigController } from "./_generated/siteconfig.controller";
 import { siteproductsController } from "./_generated/siteproducts.controller";
@@ -64,7 +64,7 @@ export const appRouter = (app: Elysia) =>
     .use(attributetemplateController)
     .use(attributevalueController)
     .use(salespersonaffiliationsController)
-    .use(salespersoncategoriesController)
+    // .use(salespersoncategoriesController)
     .use(salespersonsController)
     .use(productsController)
     .use(exportersController)

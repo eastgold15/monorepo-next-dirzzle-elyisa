@@ -158,11 +158,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
 
       await inquiryMutation.mutateAsync({
         productId: product.id,
-        sku: selectedSku!,
-        specs: JSON.stringify(selectedSpecs),
-        quantity,
+        skuId: selectedSku!.id!,
+        productName: product.name,
+        productDesc: product.description || "",
         paymentMethod,
-        ...values, // 直接展开 Zod 验证过的数据
+        customerRemarks: remarks || "",
+        quantity,
+        customerCompany: values.company,
+        customerEmail: values.email || "",
+        customerPhone: values.phone || "",
+        customerWhatsapp: values.whatsapp || "",
       });
 
       setSubmitSuccess(true);
@@ -420,13 +425,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
               </div>
               <div className="min-h-[100px] font-serif text-gray-600 text-sm leading-relaxed">
                 {activeTab === "description" ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        product.description ||
-                        `Discover ${product.name}, a premium product.`,
-                    }}
-                  />
+                  <div style={{ whiteSpace: "pre-line" }}>
+                    {product.description ||
+                      `Discover ${product.name}, a premium product.`}
+                  </div>
                 ) : (
                   <div className="space-y-4">
                     <div>

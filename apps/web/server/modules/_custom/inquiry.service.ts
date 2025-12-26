@@ -300,8 +300,8 @@ export class InquiryService extends InquiryGeneratedService {
     const template = createSalesInquiryTemplate(
       inquiryPreview,
       inquiry.id,
-      targetRep!.user,
-      factories
+      factories,
+      targetRep!.user
     );
 
     await sendEmail({

@@ -9,6 +9,7 @@ import { t } from "elysia";
 import { PaginationParams, SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
 import { SalespersonsBase } from "../_generated/salespersons.contract";
+import type { UsersDTO } from "./users.contract";
 
 /**
  * Salespersons 契约定义
@@ -55,3 +56,6 @@ export const SalespersonsContract = {
 
 // ✨ DTO 类型直接在此导出，方便外部引用
 export type SalespersonsDTO = InferDTO<typeof SalespersonsContract>;
+export type SalespersonsDTOWithUser = typeof SalespersonsContract.Response & {
+  user: UsersDTO["Response"];
+};

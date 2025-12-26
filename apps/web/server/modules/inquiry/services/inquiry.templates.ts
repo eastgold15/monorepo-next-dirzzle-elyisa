@@ -3,7 +3,7 @@
  * 处理询价确认、询价通知等业务相关的邮件模板
  */
 
-import type { InquiryTModel, SalesPersonTModel } from "@repo/contract";
+import type { InquiryWithItems } from "@repo/contract";
 import type {
   EmailAttachment,
   EmailTemplate,
@@ -110,16 +110,32 @@ export function createCustomerInquiryTemplate(
 /**
  * 创建业务员通知邮件模板
  */
+/**
+ * 修改后的业务员通知邮件模板
+ */
 export function createSalesInquiryTemplate(
-  inquiryData: InquiryTModel["InqueryWithItem"],
+  inquiryData: InquiryWithItems,
   inquiryNo: string,
-  factory: { name: string },
-  salser: SalesPersonTModel["EntityWithUser"]
+  factories: { name: string; address?: string }[], // 👈 修改为数组
+  salser: { name: string; email: string } // 简化参数
 ): EmailTemplate {
-  const subject = `【${factory.name}】新的询价请求 - ${inquiryNo}`;
+  const mainFactory = factories[0] || { name: "未知工厂" };
+  const subject = `【${mainFactory.name}】新的询价请求 - ${inquiryNo}`;
 
-  const items = inquiryData.items
-    .map(
+  // 渲染相似工厂列表（如果有的话）
+  const similarFactoriesHtml =
+    factories.length > 1
+      ? `<div style="margin-top: 15px; font-size: 13px; color: #666;">
+        <strong>关联/相似工厂推荐：</strong>
+        ${factories
+          .slice(1)
+          .map((f) => `<span style="margin-right:10px;">• ${f.name}</span>`)
+          .join("")}
+       </div>`
+      : "";
+
+  const items = inquiryData
+    .items!.map(
       (item) => `
     <tr>
       <td style="padding: 12px; border: 1px solid #ddd; background-color: #f8f9fa;">${item.productName}</td>
@@ -127,87 +143,57 @@ export function createSalesInquiryTemplate(
       <td style="padding: 12px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${item.skuQuantity}</td>
       <td style="padding: 12px; border: 1px solid #ddd; text-align: right;">${item.skuPrice ? `$${Number(item.skuPrice).toFixed(2)}` : "-"}</td>
       <td style="padding: 12px; border: 1px solid #ddd;">${item.customerRequirements || "-"}</td>
-    </tr>
-  `
+    </tr>`
     )
     .join("");
 
-  const text = `新的询价请求！询价单号: ${inquiryNo},业务员: ${factory.name}，客户: ${inquiryData.customerName}，邮箱: ${inquiryData.customerEmail}`;
+  const text = `新的询价请求！单号: ${inquiryNo}, 工厂: ${mainFactory.name}, 客户: ${inquiryData.customerName}`;
 
   const html = `
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>New Quotation Request</title>
-</head>
-<body
-  style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-  <div style="max-width: 800px; margin: 20px auto;">
-    <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-
-      <p style="margin: 0 0 10px 0;"><strong>TO:</strong> ${salser.name}</p>
-      <p style="margin: 0 0 15px 0;">
-        <strong>ATTN:</strong> Responsible Person &nbsp;&nbsp;|&nbsp;&nbsp;
-        <strong>EMAIL:</strong> ${salser.email || "sales@dongqishoes.com"}
-      </p>
-
-      <p style="margin: 0 0 15px 0;"><strong>RE:</strong> ITEM #</p>
-
-      <h4 style="margin: 0 0 15px 0; color: #333;">DEAR SIR,</h4>
-      <p style="margin: 0 0 15px 0;">
-        I visited your website and would appreciate your best offer for the attached item(s).
-      </p>
-      <p style="margin: 0 0 25px 0;">
-        Please send me your detailed quotation along with your product catalog to the email address below. Thank you.<br>
-      </p>
-
-      <!-- Quotation Item List -->
-      <h3 style="color: #333; font-size: 18px; margin: 25px 0 15px 0;">📋 Quotation Item List</h3>
-      <table
-        style="width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 5px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <thead>
-          <tr style="background-color: #343a40; color: white;">
-            <th style="padding: 15px; text-align: left; font-weight: bold;">Item Name</th>
-            <th style="padding: 15px; text-align: left; font-weight: bold;">Description</th>
-            <th style="padding: 15px; text-align: center; font-weight: bold;">Quantity</th>
-            <th style="padding: 15px; text-align: right; font-weight: bold;">Unit Price</th>
-            <th style="padding: 15px; text-align: left; font-weight: bold;">Customer Requirements</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${items}
-        </tbody>
-      </table>
-      <br>
-
-      <p style="margin: 0 0 25px 0;">
-        Best regards!
-      </p>
-
-      <!-- Customer Information -->
-      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-top: 25px;">
-        <div style="display: grid; gap: 8px;">
-          <p style="margin: 0; color: #555;"><strong>Name:</strong> ${inquiryData.customerName}</p>
-          <p style="margin: 0; color: #555;"><strong>Company:</strong> ${inquiryData.customerCompany || "-"}</p>
-          <p style="margin: 0; color: #555;"><strong>Email:</strong> ${inquiryData.customerEmail}</p>
-          <p style="margin: 0; color: #555;"><strong>Phone:</strong> ${inquiryData.customerPhone || "-"}</p>
-          <p style="margin: 0; color: #555;"><strong>WhatsApp:</strong> ${inquiryData.customerWhatsapp || "-"}</p>
-        </div>
-      </div>
-
+<head><meta charset="utf-8"></head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; color: #333;">
+  <div style="max-width: 800px; margin: 20px auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    
+    <div style="border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
+      <p style="margin: 0;"><strong>TO:</strong> ${salser.name}</p>
+      <p style="margin: 5px 0;"><strong>FROM:</strong> Inquiry System</p>
+      <p style="margin: 5px 0;"><strong>MAIN FACTORY:</strong> ${mainFactory.name}</p>
+      ${similarFactoriesHtml} 
     </div>
+
+    <h3 style="color: #2c3e50; border-left: 4px solid #4ca1af; padding-left: 10px;">📋 Quotation Request Detail</h3>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+      <thead>
+        <tr style="background-color: #343a40; color: white;">
+          <th style="padding: 12px; text-align: left;">Item Name</th>
+          <th style="padding: 12px; text-align: left;">Description</th>
+          <th style="padding: 12px; text-align: center;">Qty</th>
+          <th style="padding: 12px; text-align: right;">Price</th>
+          <th style="padding: 12px; text-align: left;">Special Requirements</th>
+        </tr>
+      </thead>
+      <tbody>${items}</tbody>
+    </table>
+
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-top: 25px;">
+      <h4 style="margin-top:0;">👤 Customer Information</h4>
+      <p style="margin: 5px 0;"><strong>Name:</strong> ${inquiryData.customerName}</p>
+      <p style="margin: 5px 0;"><strong>Company:</strong> ${inquiryData.customerCompany || "-"}</p>
+      <p style="margin: 5px 0;"><strong>WhatsApp:</strong> ${inquiryData.customerWhatsapp || "-"}</p>
+    </div>
+
+    <p style="font-size: 12px; color: #999; margin-top: 30px; text-align: center;">
+      System ID: ${inquiryNo} | Generated at: ${new Date().toLocaleString()}
+    </p>
   </div>
 </body>
-</html>
-
-
-
-  `;
+</html>`;
 
   return { subject, text, html };
 }
-
 /**
  * 创建询价附件
  */

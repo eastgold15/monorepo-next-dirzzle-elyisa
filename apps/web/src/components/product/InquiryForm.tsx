@@ -19,11 +19,7 @@ export const inquirySchema = z
   .object({
     company: z.string().min(1, "Company name is required"),
     phone: z.string().optional(),
-    email: z
-      .string()
-      .email("Invalid email address")
-      .optional()
-      .or(z.literal("")),
+    email: z.email("Invalid email address").optional().or(z.literal("")),
     whatsapp: z.string().optional(),
     remarks: z.string().optional(),
   })
