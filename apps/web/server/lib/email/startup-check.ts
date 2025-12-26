@@ -3,8 +3,6 @@
  * 在应用启动时验证邮件配置是否正确
  */
 
-
-
 import { verifyEmailConnection } from "./email";
 
 /**
@@ -83,7 +81,9 @@ export async function validateEmailConfig(): Promise<void> {
         console.log("• 适合开发和测试");
       } else {
         console.log("\n✅ 邮件服务连接成功！");
-        console.log(`📮 服务器: ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`);
+        console.log(
+          `📮 服务器: ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`
+        );
         console.log(`📨 发件人: ${process.env.EMAIL_FROM}`);
         console.log("🎉 系统已准备好发送询价通知邮件");
       }

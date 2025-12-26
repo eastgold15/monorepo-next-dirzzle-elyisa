@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import type { SiteCategoryTreeRes } from "@/hooks/api/category-hook";
+import type { SiteCategoryTreeRes } from "@/hooks/api/site-category-hook";
 import { useNavAction } from "./hook/useNavAction";
 import { DropdownIndicator, NAV_STYLES, NavLink } from "./NavParts";
 

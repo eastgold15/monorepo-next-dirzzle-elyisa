@@ -7,7 +7,7 @@
 import type { Elysia } from "elysia";
 import { adsController } from "./_custom/ads.controller";
 import { herocardsController } from "./_custom/herocards.controller";
-// import { inquiryController } from "./_custom/inquiry.controller";
+import { inquiryController } from "./_custom/inquiry.controller";
 import { mediaController } from "./_custom/media.controller";
 import { productsController } from "./_custom/products.controller";
 import { sitecategoriesController } from "./_custom/sitecategories.controller";
@@ -45,8 +45,6 @@ export const appRouter = (app: Elysia) =>
     // .use(accountController)
 
     // .use(dailyinquirycounterController)
-
-    // .use(inquiryController)
 
     // .use(permissionController)
 
@@ -86,4 +84,5 @@ export const appRouter = (app: Elysia) =>
     .use(siteproductsController)
     .use(sitesController)
     .use(skumediaController)
-    .use(skusController);
+    .use(skusController)
+    .use(inquiryController);

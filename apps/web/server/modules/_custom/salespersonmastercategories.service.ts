@@ -5,5 +5,5 @@
  * 🛡️ 脚本检测到文件存在时永远不会覆盖此处。
  * --------------------------------------------------------
  */
-import { AttributeGeneratedService } from "../_generated/attribute.service";
-export class AttributeService extends AttributeGeneratedService {}
+import { SalespersonMasterCategoriesGeneratedService } from "../_generated/salespersonmastercategories.service";
+export class SalespersonMasterCategoriesService extends SalespersonMasterCategoriesGeneratedService {}

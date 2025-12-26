@@ -25,11 +25,13 @@ interface Child {
   masterCategoryId?: any;
 }
 
-export function useCategoryQuery(id: string, options?: { enabled?: boolean }) {
+export function useSiteCategoryQuery(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.categories.list(),
     queryFn: async () => {
-      const result = handleEden(await rpc.api.v1.sitecategories.get()) as unknown as SiteCategoryTreeRes[]
+      const result = handleEden(
+        await rpc.api.v1.sitecategories.get()
+      ) as unknown as SiteCategoryTreeRes[];
       return result;
     },
     staleTime: 5 * 60 * 1000, // 5分钟
@@ -38,15 +40,6 @@ export function useCategoryQuery(id: string, options?: { enabled?: boolean }) {
     enabled: options?.enabled ?? true,
   });
 }
-
-// export function useUserQuery(userId: string) {
-//   return useQuery({
-//     queryKey: queryKeys.user(userId),
-//     enabled: false,
-//     queryFn: async () => handleEden(await rpc.api.user[userId].get()),
-//   });
-// }
-
 
 export interface SiteCategoryDetailRes {
   id: string;
@@ -67,7 +60,9 @@ export function useCategoryDetailQuery(
   return useQuery({
     queryKey: queryKeys.categories.desc(id),
     queryFn: async () => {
-      const result = handleEden(await rpc.api.v1.sitecategories[id].get()) as unknown as SiteCategoryDetailRes
+      const result = handleEden(
+        await rpc.api.v1.sitecategories[id].get()
+      ) as unknown as SiteCategoryDetailRes;
       return result;
     },
     enabled: options?.enabled ?? true,

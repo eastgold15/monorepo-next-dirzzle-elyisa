@@ -33,11 +33,15 @@ export function useCurrentAdsQuery() {
     // select: 数据清洗核心逻辑
     select: (data: any): AdsRes[] => {
       if (!Array.isArray(data)) return [];
-      return data
-        // 1. 过滤未激活的
-        .filter((ad: AdsRes) => ad.isActive !== false)
-        // 2. 按 sortOrder 排序
-        .sort((a: AdsRes, b: AdsRes) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      return (
+        data
+          // 1. 过滤未激活的
+          .filter((ad: AdsRes) => ad.isActive !== false)
+          // 2. 按 sortOrder 排序
+          .sort(
+            (a: AdsRes, b: AdsRes) => (a.sortOrder || 0) - (b.sortOrder || 0)
+          )
+      );
     },
     staleTime: 5 * 60 * 1000,
     retry: 2,

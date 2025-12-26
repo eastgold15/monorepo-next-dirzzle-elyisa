@@ -10,10 +10,8 @@ export const inquiryController = new Elysia({ prefix: "/inquiry" })
 
   .post(
     "/",
-    async ({ db, siteId, body }) => {
-      // 核心逻辑已下沉至 InquiryService.submit
-      return await inquiryService.submit(body, { db, siteId });
-    },
+    async ({ db, siteId, body }) =>
+      await inquiryService.submit(body, { db, siteId }),
     {
       body: InquiryContract.Create,
       detail: {

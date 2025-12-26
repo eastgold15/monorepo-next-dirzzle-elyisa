@@ -8,10 +8,10 @@ import {
 } from "@repo/contract";
 import { and, count, eq, exists, like, type SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { dbPlugin } from "@/server/db/connection";
-import { localeMiddleware } from "@/server/plugins/locale";
-import { commonRes } from "@/server/utils/Res";
-import { buildPageMeta, paginate } from "@/server/utils/services/pagination";
+import { dbPlugin } from "~/db/connection";
+import { localeMiddleware } from "~/middleware/locale";
+import { commonRes } from "~/utils/Res";
+import { buildPageMeta, paginate } from "~/utils/services";
 
 export const productRoute = new Elysia({ prefix: "product" })
   .use(localeMiddleware)
@@ -91,7 +91,7 @@ export const productRoute = new Elysia({ prefix: "product" })
           productMediaTable,
           eq(productsTable.id, productMediaTable.productId)
         )
-        .leftJoin(mediaTable, eq(productMediaTable.imageId, mediaTable.id))
+        .leftJoin(mediaTable, eq(productMediaTable.mediaId, mediaTable.id))
         .$dynamic();
 
       if (conditions.length > 0) {

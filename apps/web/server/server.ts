@@ -1,6 +1,5 @@
 import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
-import { env } from "@/env";
 import { appRouter } from "./controllers/app-router";
 import { db, dbPlugin } from "./db/connection";
 import { loggerPlugin } from "./middleware/logger";
@@ -48,7 +47,9 @@ export const server = new Elysia({ name: "server" })
         tags: [],
       },
       references: fromTypes(
-        process.env.NODE_ENV === "production" ? "dist/index.d.ts" : "server/server.ts",
+        process.env.NODE_ENV === "production"
+          ? "dist/index.d.ts"
+          : "server/server.ts",
         {
           // 关键：指定项目根目录，以便编译器能找到 tsconfig.json 和其他文件
           // 这里使用 import.meta.dir (Bun) 或 process.cwd()
@@ -68,7 +69,6 @@ export const server = new Elysia({ name: "server" })
   .use(siteMiddleware)
   // 自动挂载所有控制器（包括自定义和生成的）
   .group("/v1", (app) => app.use(appRouter));
-
 
 /**
  * Export the app type for use with RPC clients (e.g., edenTreaty)

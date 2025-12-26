@@ -25,7 +25,7 @@ export * from "./_generated/quotations.controller";
 export * from "./_generated/role.controller";
 export * from "./_generated/rolepermissions.controller";
 export * from "./_generated/salespersonaffiliations.controller";
-export * from "./_generated/salespersoncategories.controller";
+export * from "./_generated/salespersonmastercategories.controller";
 export * from "./_generated/salespersons.controller";
 export * from "./_generated/session.controller";
 export * from "./_generated/siteconfig.controller";

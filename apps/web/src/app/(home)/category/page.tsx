@@ -6,8 +6,8 @@ import CategoryGrid from "@/components/layout/CategoryGrid";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/Navbar/Navbar"; // 确认你的 Navbar 路径
 import { Skeleton } from "@/components/ui/skeleton"; // 导入我们封装的骨架屏
-import { useCategoryDetailQuery } from "@/hooks/api/category-hook";
 import { useProductListQuery } from "@/hooks/api/product-hook";
+import { useCategoryDetailQuery } from "@/hooks/api/site-category-hook";
 
 export default function CategoryPage() {
   // 1. 不再需要 useParams，只保留 searchParams 获取 ID

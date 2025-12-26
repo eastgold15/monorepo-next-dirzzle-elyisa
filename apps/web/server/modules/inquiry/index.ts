@@ -12,7 +12,7 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
 import { HttpError } from "elysia-http-problem-json";
-import { dbPlugin } from "@/server/db/connection";
+import { dbPlugin } from "~/db/connection";
 import { sendEmail } from "../../lib/email/email";
 import {
   type QuotationData,
@@ -263,12 +263,12 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
 
         // 去重 + 限3人
         const seen = new Set<string>();
-        const uniqueSalesReps = SalesReps.filter((rep) => {
+        const uniqueSalesReps = SalesReps.filter((rep: any) => {
           if (seen.has(rep.userId)) return false;
           seen.add(rep.userId);
           return true;
         })
-          .sort((a, b) => {
+          .sort((a: any, b: any) => {
             // 从未分配的排前面（null 视为最早）
             const aTime = a.lastAssignedAt?.getTime() ?? 0;
             const bTime = b.lastAssignedAt?.getTime() ?? 0;
@@ -283,8 +283,7 @@ export const inquiryRoute = new Elysia({ prefix: "inquiry" })
           customerPhone,
           customerWhatsapp: customerWhatsapp.toString(),
           status: "pending",
-          itemCount: 1,
-          createdAt: newInquiry.createdAt,
+
           items: [
             {
               createdAt: newInquiryItem.createdAt,

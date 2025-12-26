@@ -1,5 +1,5 @@
 "use client";
-import type { SiteCategoryTreeRes } from "@/hooks/api/category-hook";
+import type { SiteCategoryTreeRes } from "@/hooks/api/site-category-hook";
 import { useNavAction } from "./hook/useNavAction";
 import { NAV_STYLES, NavLink } from "./NavParts";
 

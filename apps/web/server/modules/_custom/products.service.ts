@@ -103,9 +103,6 @@ export class ProductsService extends ProductsGeneratedService {
     return { data, total };
   }
 
-
-
-
   /**
    * 🔍 获取商品详情 (使用 Relational Query)
    */
@@ -120,7 +117,7 @@ export class ProductsService extends ProductsGeneratedService {
         productMedia: { with: { media: true } },
         siteCategory: true,
         skus: { with: { media: true } },
-      }
+      },
     });
     if (!product) throw new Error("商品不存在");
     return product;

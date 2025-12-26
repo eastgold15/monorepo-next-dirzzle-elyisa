@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
-
 export interface ProductListRes {
   items: Item[];
   meta: Meta;
@@ -60,13 +59,6 @@ export function useProductListQuery(
     staleTime: 5 * 60 * 1000,
   });
 }
-
-
-
-
-
-
-
 
 export interface ProductDetailRes {
   id: string;
@@ -135,9 +127,6 @@ interface Media {
   siteId: string;
 }
 
-
-
-
 /**
  * 获取单个商品详情
  */
@@ -147,7 +136,7 @@ export function useProductQuery(id: string) {
     queryFn: async () => {
       if (!id) throw new Error("Product ID is required");
       const result = handleEden(await rpc.api.v1.products[id].get());
-      return result as unknown as ProductDetailRes
+      return result as unknown as ProductDetailRes;
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5分钟缓存
