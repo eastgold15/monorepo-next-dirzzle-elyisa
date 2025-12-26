@@ -14,6 +14,7 @@ export async function validateEmailConfig(): Promise<void> {
   console.log("=".repeat(60));
 
   // 检查必要的配置项
+
   const requiredConfigs = {
     EMAIL_HOST: process.env.EMAIL_HOST,
     EMAIL_PORT: Number(process.env.EMAIL_PORT),
@@ -21,7 +22,7 @@ export async function validateEmailConfig(): Promise<void> {
     EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
     EMAIL_FROM: process.env.EMAIL_FROM,
   };
-
+  console.log('requiredConfigs:', JSON.stringify(requiredConfigs, null, 2))
   const missingConfigs: string[] = [];
   let configValid = true;
 

@@ -2,10 +2,13 @@ import { fromTypes, openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { appRouter } from "./controllers/app-router";
 import { db, dbPlugin } from "./db/connection";
+import { validateEmailConfig } from "./lib/email/startup-check";
 import { loggerPlugin } from "./middleware/logger";
 import { siteMiddleware } from "./middleware/site";
 import { checkDatabase } from "./modules/_health/checkers/db";
 import { errorSuite } from "./utils/err/errorSuite.plugin";
+
+validateEmailConfig();
 /**
  * Main API router
  * Combines all routes under the '/api' prefix
