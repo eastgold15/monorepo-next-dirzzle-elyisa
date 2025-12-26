@@ -18,5 +18,5 @@ export const attributetemplateController = new Elysia({ prefix: "/attributetempl
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => attributeTemplateService.findAll(query, { db, siteId }), { query: AttributeTemplateContract.ListQuery })
   .post("/", ({ body, db, siteId }) => attributeTemplateService.create(body, { db, siteId }), { body: AttributeTemplateContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => attributeTemplateService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: AttributeTemplateContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => attributeTemplateService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: AttributeTemplateContract.Update })
   .delete("/:id", ({ params, db, siteId }) => attributeTemplateService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

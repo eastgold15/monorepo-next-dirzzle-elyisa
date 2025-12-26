@@ -18,5 +18,5 @@ export const quotationsController = new Elysia({ prefix: "/quotations" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => quotationsService.findAll(query, { db, siteId }), { query: QuotationsContract.ListQuery })
   .post("/", ({ body, db, siteId }) => quotationsService.create(body, { db, siteId }), { body: QuotationsContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => quotationsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: QuotationsContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => quotationsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: QuotationsContract.Update })
   .delete("/:id", ({ params, db, siteId }) => quotationsService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

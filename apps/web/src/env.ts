@@ -19,6 +19,8 @@ export const env = createEnv({
 
     AUTH_COOKIE: z.string().default("better-auth.session-token"),
     SERVER_URL_KEY: z.string().default("x-url"),
+
+
   },
 
   /**
@@ -46,5 +48,6 @@ export const env = createEnv({
 
     AUTH_COOKIE: process.env.AUTH_COOKIE,
     SERVER_URL_KEY: process.env.SERVER_URL_KEY,
+
   },
 });

@@ -18,5 +18,5 @@ export const skumediaController = new Elysia({ prefix: "/skumedia" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => skuMediaService.findAll(query, { db, siteId }), { query: SkuMediaContract.ListQuery })
   .post("/", ({ body, db, siteId }) => skuMediaService.create(body, { db, siteId }), { body: SkuMediaContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => skuMediaService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SkuMediaContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => skuMediaService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SkuMediaContract.Update })
   .delete("/:id", ({ params, db, siteId }) => skuMediaService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

@@ -18,5 +18,5 @@ export const inquiryitemsController = new Elysia({ prefix: "/inquiryitems" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => inquiryItemsService.findAll(query, { db, siteId }), { query: InquiryItemsContract.ListQuery })
   .post("/", ({ body, db, siteId }) => inquiryItemsService.create(body, { db, siteId }), { body: InquiryItemsContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => inquiryItemsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: InquiryItemsContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => inquiryItemsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: InquiryItemsContract.Update })
   .delete("/:id", ({ params, db, siteId }) => inquiryItemsService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

@@ -18,5 +18,5 @@ export const productsitecategoriesController = new Elysia({ prefix: "/productsit
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => productSiteCategoriesService.findAll(query, { db, siteId }), { query: ProductSiteCategoriesContract.ListQuery })
   .post("/", ({ body, db, siteId }) => productSiteCategoriesService.create(body, { db, siteId }), { body: ProductSiteCategoriesContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => productSiteCategoriesService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ProductSiteCategoriesContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => productSiteCategoriesService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ProductSiteCategoriesContract.Update })
   .delete("/:id", ({ params, db, siteId }) => productSiteCategoriesService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

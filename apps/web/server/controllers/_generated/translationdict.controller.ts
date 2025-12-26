@@ -18,5 +18,5 @@ export const translationdictController = new Elysia({ prefix: "/translationdict"
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => translationDictService.findAll(query, { db, siteId }), { query: TranslationDictContract.ListQuery })
   .post("/", ({ body, db, siteId }) => translationDictService.create(body, { db, siteId }), { body: TranslationDictContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => translationDictService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: TranslationDictContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => translationDictService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: TranslationDictContract.Update })
   .delete("/:id", ({ params, db, siteId }) => translationDictService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

@@ -18,5 +18,5 @@ export const masterController = new Elysia({ prefix: "/master" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => masterService.findAll(query, { db, siteId }), { query: MasterContract.ListQuery })
   .post("/", ({ body, db, siteId }) => masterService.create(body, { db, siteId }), { body: MasterContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => masterService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: MasterContract.Patch })
+  .patch("/:id", ({ params, body, db, siteId }) => masterService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: MasterContract.Update })
   .delete("/:id", ({ params, db, siteId }) => masterService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

@@ -295,10 +295,10 @@ export class InquiryService extends InquiryGeneratedService {
       clientEmail: inquiry.customerEmail,
       photoForRefer: photo
         ? {
-            buffer: photo.buffer,
-            mimeType: photo.mimeType,
-            name: `prod-${inquiry.id}`,
-          }
+          buffer: photo.buffer,
+          mimeType: photo.mimeType,
+          name: `prod-${inquiry.id}`,
+        }
         : null,
       termsCode1: item.id,
       termsDesc1: item.productDescription,

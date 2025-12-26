@@ -61,7 +61,7 @@ export const productRoute = new Elysia({ prefix: "product" })
               .where(
                 and(
                   eq(productMasterCategoriesTable.productId, productsTable.id),
-                  eq(productMasterCategoriesTable.categoryId, categoryId)
+                  eq(productMasterCategoriesTable.masterCategoryId, categoryId)
                 )
               )
           )
