@@ -18,5 +18,5 @@ export const salespersonaffiliationsController = new Elysia({ prefix: "/salesper
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => salespersonAffiliationsService.findAll(query, { db, siteId }), { query: SalespersonAffiliationsContract.ListQuery })
   .post("/", ({ body, db, siteId }) => salespersonAffiliationsService.create(body, { db, siteId }), { body: SalespersonAffiliationsContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => salespersonAffiliationsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SalespersonAffiliationsContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => salespersonAffiliationsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SalespersonAffiliationsContract.Update })
   .delete("/:id", ({ params, db, siteId }) => salespersonAffiliationsService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

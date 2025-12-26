@@ -2,8 +2,8 @@
 
 import { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useMasterCategoriesTree } from "@/hooks/api/master-categories";
-import { useMasterCategoryStore } from "@/stores/master-categories-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useMasterCategoryStore } from "@/stores/master-categories-store";
 
 // Context 类型定义
 interface MasterCategoryContextType {
@@ -25,7 +25,11 @@ export function MasterCategoriesProvider({
   const user = useAuthStore((s) => s.user);
 
   // 只在用户已登录时才获取数据
-  const { data: categories, isLoading, refetch } = useMasterCategoriesTree({
+  const {
+    data: categories,
+    isLoading,
+    refetch,
+  } = useMasterCategoriesTree({
     enabled: !!user, // 只有当 user 存在时才启用查询
   });
   const { setTreeData, setLoading } = useMasterCategoryStore();

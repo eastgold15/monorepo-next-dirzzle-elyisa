@@ -132,8 +132,7 @@ export class SiteCategoriesService extends SiteCategoriesGeneratedService {
         .set({ parentId: newParentId })
         .where(eq(table.id, id))
         .$dynamic()
-        .returning()
-      ,
+        .returning(),
       ctx
     );
 
@@ -189,8 +188,6 @@ export class SiteCategoriesService extends SiteCategoriesGeneratedService {
         .$dynamic(),
       ctx
     );
-
-
 
     return {
       id: updated.id,

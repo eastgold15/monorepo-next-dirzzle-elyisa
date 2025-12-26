@@ -290,7 +290,7 @@ export const ${lowName}Controller = new Elysia({ prefix: "/${lowName}" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => ${toCamelCase(capitalized)}Service.findAll(query, { db, siteId }), { query: ${capitalized}Contract.ListQuery })
   .post("/", ({ body, db, siteId }) => ${toCamelCase(capitalized)}Service.create(body, { db, siteId }), { body: ${capitalized}Contract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => ${toCamelCase(capitalized)}Service.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ${capitalized}Contract.Patch })
+  .put("/:id", ({ params, body, db, siteId }) => ${toCamelCase(capitalized)}Service.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ${capitalized}Contract.Update })
   .delete("/:id", ({ params, db, siteId }) => ${toCamelCase(capitalized)}Service.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });
 `.trim();
   }

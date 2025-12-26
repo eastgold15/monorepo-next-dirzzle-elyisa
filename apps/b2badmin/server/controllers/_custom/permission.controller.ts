@@ -19,8 +19,7 @@ export const permissionController = new Elysia({ prefix: "/permission" })
     "/",
     ({ query, auth, db }) => permissionService.findAll(query, { db, auth }),
     {
-
-      query: PermissionContract.ListQuery
+      query: PermissionContract.ListQuery,
     }
   )
   .post(

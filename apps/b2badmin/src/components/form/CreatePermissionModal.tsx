@@ -129,9 +129,7 @@ export function CreatePermissionModal({
             <Key className="h-5 w-5" />
             创建新权限
           </DialogTitle>
-          <DialogDescription>
-            创建系统权限，用于角色权限配置
-          </DialogDescription>
+          <DialogDescription>创建系统权限，用于角色权限配置</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

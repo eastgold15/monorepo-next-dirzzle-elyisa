@@ -10,13 +10,12 @@ import { SortParams } from "../../helper/query-types.model";
 import type { InferDTO } from "../../helper/utils";
 import { SkusBase } from "../_generated/skus.contract";
 
-
 const Create = t.Omit(t.Object(SkusBase.insertFields), [
   "id",
   "createdAt",
   "updatedAt",
   "siteId",
-])
+]);
 /**
  * Skus 契约定义
  * 你可以直接在此处添加或 Omit 字段
@@ -36,11 +35,32 @@ export const SkusContract = {
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
     t.Composite([
-      t.Omit(t.Object(SkusBase.insertFields), ["id", "createdAt", "updatedAt", "siteId"]),
+      t.Omit(t.Object(SkusBase.insertFields), [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "siteId",
+      ]),
       t.Object({
         mediaIds: t.Optional(t.Array(t.String())), // 该 SKU 的图片 ID 列表
-        mainImageId: t.Optional(t.String()),     // 指定哪张 ID 为主图
-      })
+        mainImageId: t.Optional(t.String()), // 指定哪张 ID 为主图
+      }),
+    ])
+  ),
+
+  // Patch 请求 (部分更新)
+  Patch: t.Partial(
+    t.Composite([
+      t.Omit(t.Object(SkusBase.insertFields), [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "siteId",
+      ]),
+      t.Object({
+        mediaIds: t.Optional(t.Array(t.String())),
+        mainImageId: t.Optional(t.String()),
+      }),
     ])
   ),
 

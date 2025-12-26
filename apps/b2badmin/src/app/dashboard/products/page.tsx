@@ -600,7 +600,7 @@ export default function ProductsPage() {
                                                   key={key}
                                                   variant="outline"
                                                 >
-                                                  {key}: {(value as any)}
+                                                  {key}: {value as any}
                                                 </Badge>
                                               ))}
                                             </div>

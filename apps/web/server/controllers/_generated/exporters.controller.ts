@@ -18,5 +18,5 @@ export const exportersController = new Elysia({ prefix: "/exporters" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => exportersService.findAll(query, { db, siteId }), { query: ExportersContract.ListQuery })
   .post("/", ({ body, db, siteId }) => exportersService.create(body, { db, siteId }), { body: ExportersContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => exportersService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ExportersContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => exportersService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ExportersContract.Update })
   .delete("/:id", ({ params, db, siteId }) => exportersService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

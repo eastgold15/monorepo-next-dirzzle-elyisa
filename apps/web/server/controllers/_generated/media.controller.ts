@@ -18,5 +18,5 @@ export const mediaController = new Elysia({ prefix: "/media" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => mediaService.findAll(query, { db, siteId }), { query: MediaContract.ListQuery })
   .post("/", ({ body, db, siteId }) => mediaService.create(body, { db, siteId }), { body: MediaContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => mediaService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: MediaContract.Patch })
+  .put("/:id", ({ params, body, db, siteId }) => mediaService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: MediaContract.Update })
   .delete("/:id", ({ params, db, siteId }) => mediaService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

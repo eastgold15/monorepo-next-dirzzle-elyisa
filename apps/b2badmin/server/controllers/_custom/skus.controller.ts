@@ -137,4 +137,4 @@ export const skusController = new Elysia({ prefix: "/skus", tags: ["SKUs"] })
         tags: ["SKUs"],
       },
     }
-  )
+  );

@@ -4,12 +4,17 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 
 // 站点配置相关 hooks
-export function useSiteConfigList(query: typeof SiteConfigContract.ListQuery.static = { page: 1, limit: 10 }) {
+export function useSiteConfigList(
+  query: typeof SiteConfigContract.ListQuery.static = { page: 1, limit: 10 }
+) {
   return useQuery({
     queryKey: ["site-config", "list", query],
-    queryFn: async () => await handleEden(rpc.api.v1.siteconfig.list.get({
-      query
-    })),
+    queryFn: async () =>
+      await handleEden(
+        rpc.api.v1.siteconfig.list.get({
+          query,
+        })
+      ),
     staleTime: 10 * 60 * 1000, // 10分钟
   });
 }

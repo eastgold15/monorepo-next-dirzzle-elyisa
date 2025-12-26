@@ -9,10 +9,11 @@ import { t } from "elysia";
 import type { InferDTO } from "../../helper/utils";
 import { SiteCategoriesBase } from "../_generated/sitecategories.contract";
 
-
-const Base = t.Omit(t.Object(SiteCategoriesBase.fields), ["siteId",
+const Base = t.Omit(t.Object(SiteCategoriesBase.fields), [
+  "siteId",
   "createdAt",
-  "updatedAt",]);
+  "updatedAt",
+]);
 /**
  * SiteCategories 契约定义
  * 你可以直接在此处添加或 Omit 字段
@@ -22,7 +23,6 @@ export const SiteCategoriesContract = {
   Response: t.Object({
     ...SiteCategoriesBase.fields,
   }),
-
 
   TreeResponse: t.Object({
     ...Base.properties,
@@ -40,6 +40,15 @@ export const SiteCategoriesContract = {
 
   // 更新请求 (精细化可选更新)
   Update: t.Partial(
+    t.Omit(t.Object(SiteCategoriesBase.insertFields), [
+      "createdAt",
+      "updatedAt",
+      "siteId",
+    ])
+  ),
+
+  // Patch 请求 (部分更新)
+  Patch: t.Partial(
     t.Omit(t.Object(SiteCategoriesBase.insertFields), [
       "createdAt",
       "updatedAt",

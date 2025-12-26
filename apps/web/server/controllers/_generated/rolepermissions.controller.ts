@@ -18,5 +18,5 @@ export const rolepermissionsController = new Elysia({ prefix: "/rolepermissions"
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => rolePermissionsService.findAll(query, { db, siteId }), { query: RolePermissionsContract.ListQuery })
   .post("/", ({ body, db, siteId }) => rolePermissionsService.create(body, { db, siteId }), { body: RolePermissionsContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => rolePermissionsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: RolePermissionsContract.Patch })
+  .put("/:id", ({ params, body, db, siteId }) => rolePermissionsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: RolePermissionsContract.Update })
   .delete("/:id", ({ params, db, siteId }) => rolePermissionsService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

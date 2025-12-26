@@ -270,19 +270,19 @@ export const salespersonAffiliationsTable = p.pgTable(
   }
 );
 
-export const salespersonCategoriesTable = p.pgTable(
+export const salespersonMasterCategoriesTable = p.pgTable(
   "salesperson_categories",
   {
     salespersonId: p
       .uuid("salesperson_id")
       .notNull()
       .references(() => salespersonsTable.id, { onDelete: "cascade" }),
-    categoryId: p
-      .uuid("category_id")
+    masterCategoryId: p
+      .uuid("master_category_id")
       .notNull()
       .references(() => masterTable.id, { onDelete: "cascade" }),
   },
-  (t) => [p.primaryKey({ columns: [t.salespersonId, t.categoryId] })]
+  (t) => [p.primaryKey({ columns: [t.salespersonId, t.masterCategoryId] })]
 );
 
 export const mediaTable = p.pgTable("media", {
@@ -347,7 +347,10 @@ export const heroCardsTable = p.pgTable("hero_cards", {
     .default("bg-blue-50"),
   sortOrder: p.integer("sort_order").default(0),
   isActive: p.boolean("is_active").default(true),
-  mediaId: p.uuid("media_id").references(() => mediaTable.id).notNull(),
+  mediaId: p
+    .uuid("media_id")
+    .references(() => mediaTable.id)
+    .notNull(),
   // 🔥 必须新增：属于哪个站点
   siteId: p
     .uuid("site_id")
@@ -362,7 +365,6 @@ export const productsTable = p.pgTable("products_table", {
   description: p.text("description"),
   status: p.integer("status").notNull().default(1),
   units: p.varchar("units", { length: 20 }),
-
   ...tenantCols,
 });
 
@@ -519,6 +521,7 @@ export const CustomerTable = p.pgTable("customer", {
 
 export const inquiryTable = p.pgTable("inquiries", {
   ...Audit,
+  inquiryNumber: p.varchar("inquiry_number", { length: 50 }).notNull(),
   customerName: p.varchar("customer_name", { length: 100 }),
   customerCompany: p.varchar("company_name", { length: 200 }).notNull(),
   customerEmail: p.varchar("email", { length: 255 }).notNull(),

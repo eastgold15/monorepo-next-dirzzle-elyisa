@@ -54,7 +54,8 @@ export function MasterCategorySelect({
   excludeId,
   showFullPath = false,
 }: MasterCategorySelectProps) {
-  const { treeData, isLoading, flatData, getCategoryById } = useMasterCategoryStore();
+  const { treeData, isLoading, flatData, getCategoryById } =
+    useMasterCategoryStore();
 
   // 统一处理值变化
   const handleChange = (newValue: string) => {

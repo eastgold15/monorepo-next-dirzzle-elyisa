@@ -66,8 +66,7 @@ export const herocardsController = new Elysia({
 
   .delete(
     "/:id",
-    ({ params, auth, db }) =>
-      heroCardsService.delete(params.id, { db, auth }),
+    ({ params, auth, db }) => heroCardsService.delete(params.id, { db, auth }),
     {
       allPermission: "HERO_CARDS_DELETE",
       params: t.Object({ id: t.String() }),
@@ -78,7 +77,6 @@ export const herocardsController = new Elysia({
       },
     }
   )
-
 
   // 批量更新排序
   .patch(
@@ -119,4 +117,4 @@ export const herocardsController = new Elysia({
         tags: ["HeroCards"],
       },
     }
-  )
+  );

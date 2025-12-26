@@ -66,9 +66,9 @@ export class HeroCardsService extends HeroCardsGeneratedService {
   }
 
   /**
- * 🛡️ 核心：创建 Hero Card
- * 自动关联媒体文件
- */
+   * 🛡️ 核心：创建 Hero Card
+   * 自动关联媒体文件
+   */
   async createHeroCard(data: any, mediaId: string | null, ctx: ServiceContext) {
     // 1. 创建基本的 Hero Card
     const card = await this.create(

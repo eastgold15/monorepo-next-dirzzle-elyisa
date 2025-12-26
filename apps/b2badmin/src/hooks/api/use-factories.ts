@@ -8,8 +8,8 @@ export function useFactoriesQuery() {
   return useQuery({
     queryKey: ["factories"],
     queryFn: async () => {
-      const data = await handleEden(rpc.api.v1.factories.list.get())
-      return data
+      const data = await handleEden(rpc.api.v1.factories.list.get());
+      return data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

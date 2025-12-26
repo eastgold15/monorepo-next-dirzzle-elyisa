@@ -2,7 +2,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 
 // 禁用静态预渲染，因为应用完全依赖客户端状态
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function RootLayout({
   children,

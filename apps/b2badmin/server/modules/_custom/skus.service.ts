@@ -439,21 +439,21 @@ export class SkusService extends SkusGeneratedService {
     const images =
       skuIds.length > 0
         ? await db
-          .select({
-            skuId: skuMediaTable.skuId,
-            mediaId: mediaTable.id,
-            url: mediaTable.url,
-            isMain: skuMediaTable.isMain,
-          })
-          .from(skuMediaTable)
-          .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
-          .where(inArray(skuMediaTable.skuId, skuIds))
-          .orderBy(skuMediaTable.sortOrder)
+            .select({
+              skuId: skuMediaTable.skuId,
+              mediaId: mediaTable.id,
+              url: mediaTable.url,
+              isMain: skuMediaTable.isMain,
+            })
+            .from(skuMediaTable)
+            .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+            .where(inArray(skuMediaTable.skuId, skuIds))
+            .orderBy(skuMediaTable.sortOrder)
         : [];
 
     // 图片按 SKU 分组 Map
     const imageMap = images.reduce(
-      (map: Record<string, typeof images[0][]>, img) => {
+      (map: Record<string, (typeof images)[0][]>, img) => {
         if (!map[img.skuId]) map[img.skuId] = [];
         map[img.skuId].push(img);
         return map;
@@ -532,9 +532,9 @@ export class SkusService extends SkusGeneratedService {
       ...sku,
       product: product
         ? {
-          id: sku.productId,
-          name: product.name,
-        }
+            id: sku.productId,
+            name: product.name,
+          }
         : null,
       values: [], // 暂时返回空数组
       images: images.filter((img: any) => img.url), // 过滤掉没有URL的图片
@@ -574,19 +574,19 @@ export class SkusService extends SkusGeneratedService {
     const images =
       skuIds.length > 0
         ? await db
-          .select({
-            skuId: skuMediaTable.skuId,
-            id: mediaTable.id,
-            url: mediaTable.url,
-            storageKey: mediaTable.storageKey,
-            category: mediaTable.category,
-            isMain: skuMediaTable.isMain,
-            sortOrder: skuMediaTable.sortOrder,
-          })
-          .from(skuMediaTable)
-          .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
-          .where(inArray(skuMediaTable.skuId, skuIds))
-          .orderBy(skuMediaTable.sortOrder)
+            .select({
+              skuId: skuMediaTable.skuId,
+              id: mediaTable.id,
+              url: mediaTable.url,
+              storageKey: mediaTable.storageKey,
+              category: mediaTable.category,
+              isMain: skuMediaTable.isMain,
+              sortOrder: skuMediaTable.sortOrder,
+            })
+            .from(skuMediaTable)
+            .leftJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+            .where(inArray(skuMediaTable.skuId, skuIds))
+            .orderBy(skuMediaTable.sortOrder)
         : [];
 
     // 将图片按 SKU ID 分组

@@ -76,7 +76,9 @@ export function CreateSKUModal({
   const { data: productsData } = useProductsForSKU();
 
   // 获取当前商品名称 - 处理可能为空的情况
-  const currentProduct = productsData?.data?.find((p: any) => p.id === productId);
+  const currentProduct = productsData?.data?.find(
+    (p: any) => p.id === productId
+  );
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

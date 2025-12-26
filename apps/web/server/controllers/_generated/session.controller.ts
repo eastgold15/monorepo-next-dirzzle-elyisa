@@ -18,5 +18,5 @@ export const sessionController = new Elysia({ prefix: "/session" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => sessionService.findAll(query, { db, siteId }), { query: SessionContract.ListQuery })
   .post("/", ({ body, db, siteId }) => sessionService.create(body, { db, siteId }), { body: SessionContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => sessionService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SessionContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => sessionService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SessionContract.Update })
   .delete("/:id", ({ params, db, siteId }) => sessionService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

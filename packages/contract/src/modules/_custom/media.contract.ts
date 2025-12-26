@@ -37,6 +37,16 @@ export const MediaContract = {
     ])
   ),
 
+  // Patch 请求 (部分更新)
+  Patch: t.Partial(
+    t.Omit(t.Object(MediaBase.insertFields), [
+      "id",
+      "createdAt",
+      "updatedAt",
+      "siteId",
+    ])
+  ),
+
   // 列表查询
   ListQuery: t.Object({
     ...t.Partial(t.Object(MediaBase.insertFields)).properties,

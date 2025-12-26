@@ -12,9 +12,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1, "DATABASE_URL 是必需的"),
     BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET 是必需的"),
 
-    BETTER_AUTH_BASE_URL: z
-      .url("BETTER_AUTH_BASE_URL 必须是有效的 URL"),
-
+    BETTER_AUTH_BASE_URL: z.url("BETTER_AUTH_BASE_URL 必须是有效的 URL"),
 
     GITHUB_CLIENT_ID: z.string().min(1, "GITHUB_CLIENT_ID 是必需的"),
     GITHUB_CLIENT_SECRET: z.string().min(1, "GITHUB_CLIENT_SECRET 是必需的"),
@@ -54,7 +52,6 @@ export const env = createEnv({
    * 注意：在这里直接传 process.env.XXX，Zod 的 coerce 会帮你转换类型。
    */
   runtimeEnv: {
-
     PORT: process.env.PORT,
     DATABASE_URL: process.env.DATABASE_URL,
 
@@ -62,7 +59,6 @@ export const env = createEnv({
 
     BETTER_AUTH_BASE_URL: process.env.BETTER_AUTH_BASE_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-
 
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
@@ -82,7 +78,6 @@ export const env = createEnv({
     REGION: process.env.REGION,
     ENDPOINT: process.env.ENDPOINT,
     DOMAIN: process.env.DOMAIN,
-
 
     AUTH_COOKIE: process.env.AUTH_COOKIE,
     SERVER_URL_KEY: process.env.SERVER_URL_KEY,

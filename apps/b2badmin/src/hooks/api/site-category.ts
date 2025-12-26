@@ -6,8 +6,6 @@ import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 import type { MyInferQuery } from "./utils";
 
-
-
 // 获取当前站点的分类树
 export function useSiteCategoriesTree(options?: { enabled?: boolean }) {
   return useQuery({
@@ -44,7 +42,8 @@ export function useSiteCategories(
 export function useCreateSiteCategory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: typeof SiteCategoriesContract.Create.static) => await handleEden(rpc.api.v1.sitecategories.post(data)),
+    mutationFn: async (data: typeof SiteCategoriesContract.Create.static) =>
+      await handleEden(rpc.api.v1.sitecategories.post(data)),
     onSuccess: () => {
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
@@ -62,7 +61,7 @@ export function useUpdateSiteCategory() {
       data,
     }: {
       id: string;
-      data: typeof SiteCategoriesContract.Update.static
+      data: typeof SiteCategoriesContract.Update.static;
     }) => await handleEden(rpc.api.v1.sitecategories({ id }).put(data)),
     onSuccess: () => {
       // 刷新分类树
@@ -138,8 +137,7 @@ export function getCategoryPath(
   allCategories: SiteCategoriesDTO["TreeResponse"][]
 ): string {
   const path: string[] = [];
-  let currentCategory: SiteCategoriesDTO["TreeResponse"] | undefined =
-    category;
+  let currentCategory: SiteCategoriesDTO["TreeResponse"] | undefined = category;
 
   while (currentCategory) {
     path.unshift(currentCategory.name);

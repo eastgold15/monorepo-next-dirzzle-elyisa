@@ -18,5 +18,5 @@ export const salespersonsController = new Elysia({ prefix: "/salespersons" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => salespersonsService.findAll(query, { db, siteId }), { query: SalespersonsContract.ListQuery })
   .post("/", ({ body, db, siteId }) => salespersonsService.create(body, { db, siteId }), { body: SalespersonsContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => salespersonsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SalespersonsContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => salespersonsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SalespersonsContract.Update })
   .delete("/:id", ({ params, db, siteId }) => salespersonsService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

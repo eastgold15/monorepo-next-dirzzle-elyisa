@@ -51,6 +51,21 @@ export const ProductsContract = {
     })
   ),
 
+  // Patch 请求 (部分更新)
+  Patch: t.Partial(
+    t.Object({
+      ...t.Omit(t.Object(ProductsBase.insertFields), [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "siteId",
+      ]).properties,
+      mediaIds: t.Optional(t.Array(t.String())),
+      mainImageId: t.Optional(t.String()),
+      videoIds: t.Optional(t.Array(t.String())),
+    })
+  ),
+
   // 列表查询
   ListQuery: t.Object({
     ...t.Partial(t.Object(ProductsBase.insertFields)).properties,

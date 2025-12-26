@@ -38,6 +38,16 @@ export const RolePermissionsContract = {
     ])
   ),
 
+  // Patch 请求 (部分更新)
+  Patch: t.Partial(
+    t.Omit(t.Object(RolePermissionsBase.insertFields), [
+      "id",
+      "createdAt",
+      "updatedAt",
+      "siteId",
+    ])
+  ),
+
   // 列表查询
   ListQuery: t.Object({
     roleId: t.String(),

@@ -18,5 +18,5 @@ export const adsController = new Elysia({ prefix: "/ads" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => adsService.findAll(query, { db, siteId }), { query: AdsContract.ListQuery })
   .post("/", ({ body, db, siteId }) => adsService.create(body, { db, siteId }), { body: AdsContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => adsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: AdsContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => adsService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: AdsContract.Update })
   .delete("/:id", ({ params, db, siteId }) => adsService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

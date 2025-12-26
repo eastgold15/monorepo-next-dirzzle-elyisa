@@ -6,8 +6,7 @@ import { handleEden } from "@/lib/utils/base";
 export function useUserSiteRolesList() {
   return useQuery({
     queryKey: ["usersiteroles", "list"],
-    queryFn: async () =>
-      await handleEden(rpc.api.v1.usersiteroles.admin.get()),
+    queryFn: async () => await handleEden(rpc.api.v1.usersiteroles.admin.get()),
   });
 }
 
@@ -72,8 +71,11 @@ export function useBatchAssignUsers() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { userIds: string[]; siteId: string; roleId: string }) =>
-      await handleEden(rpc.api.v1.usersiteroles.batch.assign.post(data)),
+    mutationFn: async (data: {
+      userIds: string[];
+      siteId: string;
+      roleId: string;
+    }) => await handleEden(rpc.api.v1.usersiteroles.batch.assign.post(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usersiteroles"] });
     },

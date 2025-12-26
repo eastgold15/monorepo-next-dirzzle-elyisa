@@ -18,5 +18,5 @@ export const skusController = new Elysia({ prefix: "/skus" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => skusService.findAll(query, { db, siteId }), { query: SkusContract.ListQuery })
   .post("/", ({ body, db, siteId }) => skusService.create(body, { db, siteId }), { body: SkusContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => skusService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SkusContract.Patch })
+  .put("/:id", ({ params, body, db, siteId }) => skusService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SkusContract.Update })
   .delete("/:id", ({ params, db, siteId }) => skusService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

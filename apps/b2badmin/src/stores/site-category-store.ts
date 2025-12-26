@@ -56,7 +56,7 @@ export const useSiteCategoryStore = create<SiteCategoryState>()(
       lastUpdated: null,
 
       // Actions
-      setTreeData: (data: SiteCategoriesDTO['TreeResponse'][]) => {
+      setTreeData: (data: SiteCategoriesDTO["TreeResponse"][]) => {
         set({
           treeData: data,
           flatData: treeToFlatMap(data),

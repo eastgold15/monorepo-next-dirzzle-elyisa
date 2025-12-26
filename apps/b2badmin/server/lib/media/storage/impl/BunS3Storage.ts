@@ -194,7 +194,7 @@ export class BunS3Storage extends AbstractImageStorage {
         expiresIn: options.expiresIn ?? 3600,
         method: options.method,
       })
-    )
+    );
   }
 
   /**
@@ -225,7 +225,7 @@ export class BunS3Storage extends AbstractImageStorage {
           | undefined,
         type: options.type,
       })
-    )
+    );
   }
 
   /**

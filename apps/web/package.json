@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
-    "type-check": "tsc --noEmit"
+    "check-type": "tsc --noEmit"
   },
   "dependencies": {
     "@elysiajs/eden": "1.4.5",

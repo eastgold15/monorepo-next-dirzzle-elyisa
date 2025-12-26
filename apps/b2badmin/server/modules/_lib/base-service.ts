@@ -26,7 +26,7 @@ export abstract class B2BBaseService<
   constructor(
     protected table: T,
     protected contract: C
-  ) { }
+  ) {}
 
   protected getScopeFilters(ctx: ServiceContext): SQL[] {
     const filters: SQL[] = [];
@@ -64,7 +64,10 @@ export abstract class B2BBaseService<
     if (search && tableAny.name)
       extra.push(ilike(tableAny.name, `%${search}%`));
 
-    const select = ctx.db.select().from((this.table as any)).$dynamic();
+    const select = ctx.db
+      .select()
+      .from(this.table as any)
+      .$dynamic();
     const data = await this.withScope(select, ctx, extra)
       .limit(limit)
       .offset((page - 1) * limit)

@@ -220,7 +220,6 @@ export const siteconfigController = new Elysia({
     }
   )
 
- 
   .put(
     "/:id",
     ({ params, body, auth, db }) =>

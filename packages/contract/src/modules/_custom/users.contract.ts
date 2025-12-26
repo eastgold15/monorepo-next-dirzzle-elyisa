@@ -41,6 +41,16 @@ export const UsersContract = {
     ])
   ),
 
+  // Patch 请求 (部分更新)
+  Patch: t.Partial(
+    t.Omit(t.Object(UsersBase.insertFields), [
+      "id",
+      "createdAt",
+      "updatedAt",
+      "siteId",
+    ])
+  ),
+
   // 列表查询
   ListQuery: t.Object({
     search: t.Optional(t.String()),

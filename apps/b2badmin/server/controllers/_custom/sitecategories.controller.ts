@@ -14,8 +14,7 @@ export const sitecategoriesController = new Elysia({
   // 获取树形结构的分类列表
   .get(
     "/tree",
-    async ({ db, auth }) =>
-      await siteCategoriesService.getTree({ db, auth }),
+    async ({ db, auth }) => await siteCategoriesService.getTree({ db, auth }),
     {
       allPermission: "SITE_CATEGORIES_VIEW",
       detail: {
@@ -25,7 +24,6 @@ export const sitecategoriesController = new Elysia({
       },
     }
   )
-
 
   // 标准的 CRUD 操作
   .get(
@@ -43,7 +41,6 @@ export const sitecategoriesController = new Elysia({
     }
   )
 
-
   // 创建分类（支持层级关系）
   .post(
     "/",
@@ -59,8 +56,6 @@ export const sitecategoriesController = new Elysia({
       },
     }
   )
-
-
 
   .put(
     "/:id",
@@ -78,7 +73,6 @@ export const sitecategoriesController = new Elysia({
     }
   )
 
-
   .delete(
     "/:id",
     ({ params, permissions, auth, db }) =>
@@ -93,7 +87,6 @@ export const sitecategoriesController = new Elysia({
       },
     }
   )
-
 
   // 批量更新排序
   .patch(
@@ -165,19 +158,12 @@ export const sitecategoriesController = new Elysia({
     }
   )
 
-  .get(
-    "/:id",
-    ({ params, auth, db }) =>
-      siteCategoriesService.findOne(),
-    {
-      allPermission: "SITE_CATEGORIES_VIEW",
-      params: t.Object({ id: t.String() }),
-      detail: {
-        summary: "获取分类详情",
-        description: "获取指定分类的详细信息（需要权限）",
-        tags: ["SiteCategories"],
-      },
-    }
-  )
-
-
+  .get("/:id", ({ params, auth, db }) => siteCategoriesService.findOne(), {
+    allPermission: "SITE_CATEGORIES_VIEW",
+    params: t.Object({ id: t.String() }),
+    detail: {
+      summary: "获取分类详情",
+      description: "获取指定分类的详细信息（需要权限）",
+      tags: ["SiteCategories"],
+    },
+  });

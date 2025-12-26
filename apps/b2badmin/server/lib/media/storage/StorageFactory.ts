@@ -128,7 +128,7 @@ class StorageFactory {
       "SECRET_ACCESS_KEY",
       "BUCKET",
       "ENDPOINT",
-    ] as const
+    ] as const;
 
     return requiredEnvVars.every((varName) => !!process.env[varName]);
   }

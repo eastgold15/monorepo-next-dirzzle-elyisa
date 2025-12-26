@@ -1,4 +1,7 @@
-import type { PermissionContract, RolePermissionsContract } from "@repo/contract";
+import type {
+  PermissionContract,
+  RolePermissionsContract,
+} from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
@@ -8,9 +11,12 @@ export function usePermissionsList(
 ) {
   return useQuery({
     queryKey: ["permissions", "list", query],
-    queryFn: async () => await handleEden(rpc.api.v1.permission.get({
-      query
-    })),
+    queryFn: async () =>
+      await handleEden(
+        rpc.api.v1.permission.get({
+          query,
+        })
+      ),
   });
 }
 
@@ -39,7 +45,9 @@ export function usePermissionDelete() {
 }
 
 // 角色权限关联 hooks
-export function useRolePermissionsList(query: typeof RolePermissionsContract.ListQuery.static) {
+export function useRolePermissionsList(
+  query: typeof RolePermissionsContract.ListQuery.static
+) {
   return useQuery({
     queryKey: ["rolepermissions", "list", query],
     queryFn: async () =>

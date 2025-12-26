@@ -18,5 +18,5 @@ export const permissionController = new Elysia({ prefix: "/permission" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => permissionService.findAll(query, { db, siteId }), { query: PermissionContract.ListQuery })
   .post("/", ({ body, db, siteId }) => permissionService.create(body, { db, siteId }), { body: PermissionContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => permissionService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: PermissionContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => permissionService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: PermissionContract.Update })
   .delete("/:id", ({ params, db, siteId }) => permissionService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

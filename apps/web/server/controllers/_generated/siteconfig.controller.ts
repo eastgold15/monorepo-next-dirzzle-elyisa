@@ -18,5 +18,5 @@ export const siteconfigController = new Elysia({ prefix: "/siteconfig" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => siteConfigService.findAll(query, { db, siteId }), { query: SiteConfigContract.ListQuery })
   .post("/", ({ body, db, siteId }) => siteConfigService.create(body, { db, siteId }), { body: SiteConfigContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => siteConfigService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SiteConfigContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => siteConfigService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: SiteConfigContract.Update })
   .delete("/:id", ({ params, db, siteId }) => siteConfigService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

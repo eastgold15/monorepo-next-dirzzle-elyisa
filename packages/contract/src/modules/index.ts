@@ -26,7 +26,7 @@ export * from "./_custom/quotations.contract";
 export * from "./_custom/role.contract";
 export * from "./_custom/rolepermissions.contract";
 export * from "./_custom/salespersonaffiliations.contract";
-export * from "./_custom/salespersoncategories.contract";
+export * from "./_custom/salespersonmastercategories.contract";
 export * from "./_custom/salespersons.contract";
 export * from "./_custom/session.contract";
 export * from "./_custom/sitecategories.contract";

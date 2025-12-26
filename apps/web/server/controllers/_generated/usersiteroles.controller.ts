@@ -18,5 +18,5 @@ export const usersiterolesController = new Elysia({ prefix: "/usersiteroles" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => userSiteRolesService.findAll(query, { db, siteId }), { query: UserSiteRolesContract.ListQuery })
   .post("/", ({ body, db, siteId }) => userSiteRolesService.create(body, { db, siteId }), { body: UserSiteRolesContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => userSiteRolesService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: UserSiteRolesContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => userSiteRolesService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: UserSiteRolesContract.Update })
   .delete("/:id", ({ params, db, siteId }) => userSiteRolesService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

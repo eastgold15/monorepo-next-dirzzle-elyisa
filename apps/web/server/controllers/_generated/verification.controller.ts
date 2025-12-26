@@ -18,5 +18,5 @@ export const verificationController = new Elysia({ prefix: "/verification" })
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => verificationService.findAll(query, { db, siteId }), { query: VerificationContract.ListQuery })
   .post("/", ({ body, db, siteId }) => verificationService.create(body, { db, siteId }), { body: VerificationContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => verificationService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: VerificationContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => verificationService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: VerificationContract.Update })
   .delete("/:id", ({ params, db, siteId }) => verificationService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });

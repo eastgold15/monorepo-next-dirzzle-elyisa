@@ -2,7 +2,6 @@
 import chalk from "chalk";
 import { Elysia } from "elysia";
 import { HttpError, httpProblemJsonPlugin } from "elysia-http-problem-json";
-import { env } from "@/env";
 import { mapDatabaseError } from "./database-error-mapper";
 import {
   filterStack,
@@ -155,7 +154,7 @@ export const errorLoggerPlugin = new Elysia({
   });
 
   // ========== 2. 开发环境精简美化打印 ==========
-  if (env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === "development") {
     const isVal = errorSource === "validation";
     const displayMsg = isVal
       ? getValidationSummary(error)

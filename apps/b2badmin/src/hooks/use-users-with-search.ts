@@ -5,7 +5,6 @@ import { useManageableUsers } from "./api/user";
 export function useUsersWithSearch() {
   const [searchQuery, setSearchQuery] = useState("");
 
-
   // 查询参数
   const queryParams = {
     ...(searchQuery && { search: searchQuery }),
@@ -23,8 +22,6 @@ export function useUsersWithSearch() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
-
-
 
   return {
     // 数据

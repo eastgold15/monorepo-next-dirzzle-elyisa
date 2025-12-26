@@ -346,17 +346,17 @@ export class ProductsService extends ProductsGeneratedService {
       const skuImages =
         skuIds.length > 0
           ? await ctx.db
-            .select({
-              skuId: skuMediaTable.skuId,
-              id: mediaTable.id,
-              url: mediaTable.url,
-              isMain: skuMediaTable.isMain,
-              sortOrder: skuMediaTable.sortOrder,
-            })
-            .from(skuMediaTable)
-            .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
-            .where(inArray(skuMediaTable.skuId, skuIds))
-            .orderBy(asc(skuMediaTable.sortOrder))
+              .select({
+                skuId: skuMediaTable.skuId,
+                id: mediaTable.id,
+                url: mediaTable.url,
+                isMain: skuMediaTable.isMain,
+                sortOrder: skuMediaTable.sortOrder,
+              })
+              .from(skuMediaTable)
+              .innerJoin(mediaTable, eq(skuMediaTable.mediaId, mediaTable.id))
+              .where(inArray(skuMediaTable.skuId, skuIds))
+              .orderBy(asc(skuMediaTable.sortOrder))
           : [];
 
       // 将图片按 SKU ID 分组

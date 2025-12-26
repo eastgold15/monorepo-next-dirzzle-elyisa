@@ -133,6 +133,13 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.masterTable.parentId,
       alias: "children",
     }),
+
+    sites: r.many.sitesTable({
+      from: r.masterTable.id.through(r.siteCategoriesTable.masterCategoryId),
+      to: r.sitesTable.id.through(r.siteCategoriesTable.siteId),
+      alias: "sites",
+    }),
+
     // factoryCategories: r.many.factoryCategoryTable({
     //   from: r.MasterTable.id,
     //   to: r.factoryCategoryTable.categoryId,
@@ -218,13 +225,20 @@ export const relations = defineRelations(schema, (r) => ({
   // --- Products (资源层) ---
   productsTable: {
     siteProducts: r.many.siteProductsTable(), // 产品被多个站点引用
-    // categories: r.many.MasterTable({
-    //   from: r.productsTable.id.through(r.productCategoriesTable.productId),
-    //   to: r.MasterTable.id.through(r.productCategoriesTable.categoryId),
-    // }),
+    masterCategories: r.many.masterTable({
+      //一个产品只有一个主分类
+      from: r.productsTable.id.through(
+        r.productMasterCategoriesTable.productId
+      ),
+      to: r.masterTable.id.through(
+        r.productMasterCategoriesTable.masterCategoryId
+      ),
+    }),
     siteCategory: r.many.siteCategoriesTable({
       from: r.productsTable.id.through(r.productSiteCategoriesTable.productId),
-      to: r.siteCategoriesTable.id.through(r.productSiteCategoriesTable.siteCategoryId),
+      to: r.siteCategoriesTable.id.through(
+        r.productSiteCategoriesTable.siteCategoryId
+      ),
     }),
     productMedia: r.many.productMediaTable(),
     // productCategories: r.many.productCategoriesTable({
@@ -298,6 +312,7 @@ export const relations = defineRelations(schema, (r) => ({
       alias: "user",
     }),
 
+    // 从属分类
     affiliations: r.many.salespersonAffiliationsTable({
       from: r.salespersonsTable.id,
       to: r.salespersonAffiliationsTable.salespersonId,
@@ -308,10 +323,14 @@ export const relations = defineRelations(schema, (r) => ({
     //   to: r.factoriesTable.id,
     //   alias: 'factory',
     // }),
-    // categories: r.many.MasterTable({
-    //   from: r.salespersonsTable.id.through(r.salespersonCategoriesTable.salespersonId),
-    //   to: r.MasterTable.id.through(r.salespersonCategoriesTable.categoryId),
-    // }),
+    masterCategories: r.many.masterTable({
+      from: r.salespersonsTable.id.through(
+        r.salespersonMasterCategoriesTable.salespersonId
+      ),
+      to: r.masterTable.id.through(
+        r.salespersonMasterCategoriesTable.masterCategoryId
+      ),
+    }),
     // assignedCategories: r.many.salespersonCategoriesTable({
     //   alias: 'assigned_categories',
     // }),

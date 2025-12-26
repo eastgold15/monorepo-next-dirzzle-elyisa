@@ -64,8 +64,7 @@ export const adsController = new Elysia({
 
   .delete(
     "/:id",
-    ({ params, auth, db }) =>
-      adsService.delete(params.id, { db, auth }),
+    ({ params, auth, db }) => adsService.delete(params.id, { db, auth }),
     {
       allPermission: "ADVERTISEMENTS_DELETE",
       params: t.Object({ id: t.String() }),

@@ -6,10 +6,10 @@
  * --------------------------------------------------------
  */
 import { t } from "elysia";
-import { skusTable } from "../../table.schema";
+import { salespersonMasterCategoriesTable } from "../../table.schema";
 import { spread } from "../../helper/utils"; 
 
-export const SkusBase = {
-  fields: spread(skusTable, 'select'),
-  insertFields: spread(skusTable, 'insert'),
+export const SalespersonMasterCategoriesBase = {
+  fields: spread(salespersonMasterCategoriesTable, 'select'),
+  insertFields: spread(salespersonMasterCategoriesTable, 'insert'),
 } as const;

@@ -78,8 +78,9 @@ import { SalespersonAffiliationsService } from "./_custom/salespersonaffiliation
 export const salespersonAffiliationsService =
   new SalespersonAffiliationsService();
 
-import { SalespersonCategoriesService } from "./_custom/salespersoncategories.service";
-export const salespersonCategoriesService = new SalespersonCategoriesService();
+import { SalespersonMasterCategoriesService } from "./_custom/salespersonmastercategories.service";
+export const salespersonMasterCategoriesService =
+  new SalespersonMasterCategoriesService();
 
 import { SalespersonsService } from "./_custom/salespersons.service";
 export const salespersonsService = new SalespersonsService();

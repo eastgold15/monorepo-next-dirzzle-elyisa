@@ -7,8 +7,8 @@ import { appRouter } from "./controllers/app-router";
 import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 import { authGuardMid } from "./middleware/auth";
-import { errorSuite } from "./utils/err/errorSuite.plugin";
 import { loggerPlugin } from "./middleware/logger";
+import { errorSuite } from "./utils/err/errorSuite.plugin";
 /**
  * Main API router
  * Combines auth and user routes under the '/api' prefix
@@ -68,7 +68,6 @@ export const server = new Elysia({ name: "server" })
         "http://localhost:9012", // 前端开发服务器
         "http://localhost:9001", // Vite 默认端口
         "http://localhost:4000",
-
       ],
       credentials: true,
     })

@@ -93,7 +93,9 @@ export class AdsService extends AdsGeneratedService {
         type: data.type ?? "banner",
         link: data.link ?? "#",
         position: data.position ?? "home-top",
-        startDate: (data.startDate ? new Date(data.startDate) : new Date()) as any,
+        startDate: (data.startDate
+          ? new Date(data.startDate)
+          : new Date()) as any,
         endDate: (data.endDate ? new Date(data.endDate) : new Date()) as any,
         sortOrder: data.sortOrder ?? 0,
         isActive: data.isActive ?? true,

@@ -18,5 +18,5 @@ export const producttemplateController = new Elysia({ prefix: "/producttemplate"
   .use(siteMiddleware)
   .get("/", ({ query, db, siteId }) => productTemplateService.findAll(query, { db, siteId }), { query: ProductTemplateContract.ListQuery })
   .post("/", ({ body, db, siteId }) => productTemplateService.create(body, { db, siteId }), { body: ProductTemplateContract.Create })
-  .patch("/:id", ({ params, body, db, siteId }) => productTemplateService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ProductTemplateContract.Update })
+  .put("/:id", ({ params, body, db, siteId }) => productTemplateService.update(params.id, body, { db, siteId }), { params: t.Object({ id: t.String() }), body: ProductTemplateContract.Update })
   .delete("/:id", ({ params, db, siteId }) => productTemplateService.delete(params.id, { db, siteId }), { params: t.Object({ id: t.String() }) });
