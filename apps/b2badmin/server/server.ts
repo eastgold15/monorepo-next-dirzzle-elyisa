@@ -8,6 +8,7 @@ import { dbPlugin } from "./db/connection";
 import { auth } from "./lib/auth";
 import { authGuardMid } from "./middleware/auth";
 import { errorSuite } from "./utils/err/errorSuite.plugin";
+import { loggerPlugin } from "./middleware/logger";
 /**
  * Main API router
  * Combines auth and user routes under the '/api' prefix
@@ -19,7 +20,7 @@ export const server = new Elysia({ name: "server" })
         components: await OpenAPI.components,
         paths: await OpenAPI.getPaths(),
         info: {
-          title: "Gina Shopping API",
+          title: "Gin Shopping API",
           version: "1.0.71",
           description: "基于 Elysia + Drizzle + TypeScript 的电商后端 API",
         },
@@ -65,14 +66,15 @@ export const server = new Elysia({ name: "server" })
     cors({
       origin: [
         "http://localhost:9012", // 前端开发服务器
-        "http://localhost:9013", // Vite 默认端口
+        "http://localhost:9001", // Vite 默认端口
         "http://localhost:4000",
+
       ],
       credentials: true,
     })
   )
   // 1. 日志插件 (注入 ctx.log 和自动记录 HTTP 响应)
-  // .use(loggerPlugin)
+  .use(loggerPlugin)
   // 2. 核心错误处理插件 (拦截所有错误，进行转换和手动日志记录)
   .use(errorSuite)
   .use(dbPlugin)

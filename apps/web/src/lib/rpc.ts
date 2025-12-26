@@ -14,6 +14,6 @@ import { env } from "@/env";
  */
 export const rpc = edenTreaty<App>(
   typeof window === "undefined"
-    ? `http://localhost:${env.APP_PORT || 3000}`
+    ? `http://localhost:${env.PORT || 3000}`
     : window.location.origin
 );

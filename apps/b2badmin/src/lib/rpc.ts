@@ -17,7 +17,7 @@ const siteId =
 
 export const rpc = treaty<App>(
   typeof window === "undefined"
-    ? `http://localhost:${env.APP_PORT || 3000}`
+    ? `http://localhost:${env.PORT || 3000}`
     : window.location.origin,
   {
     headers: siteId ? { "X-Site-Id": siteId } : {},

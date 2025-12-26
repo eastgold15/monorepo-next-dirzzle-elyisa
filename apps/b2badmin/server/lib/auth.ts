@@ -70,7 +70,7 @@ export const auth = betterAuth({
   },
   trustedOrigins: [
     "http://localhost:9012", // 前端开发服务器
-    "http://localhost:9013", // Vite 默认端口
+    "http://localhost:9001", // Vite 默认端口
     "http://localhost:4000",
   ],
 

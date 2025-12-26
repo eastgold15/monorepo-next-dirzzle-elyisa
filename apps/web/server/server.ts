@@ -35,7 +35,7 @@ export const server = new Elysia({ name: "server" })
   .decorate("myProperty", "myValue")
   .state({
     version: "1.0.0",
-    environment: env.NODE_ENV || "development",
+    environment: process.env.NODE_ENV || "development",
   })
   .use(
     openapi({
@@ -48,7 +48,7 @@ export const server = new Elysia({ name: "server" })
         tags: [],
       },
       references: fromTypes(
-        env.NODE_ENV === "production" ? "dist/index.d.ts" : "server/server.ts",
+        process.env.NODE_ENV === "production" ? "dist/index.d.ts" : "server/server.ts",
         {
           // 关键：指定项目根目录，以便编译器能找到 tsconfig.json 和其他文件
           // 这里使用 import.meta.dir (Bun) 或 process.cwd()
@@ -69,7 +69,7 @@ export const server = new Elysia({ name: "server" })
   // 自动挂载所有控制器（包括自定义和生成的）
   .group("/v1", (app) => app.use(appRouter));
 
-console.log("env.NODE_ENV", env.NODE_ENV);
+
 /**
  * Export the app type for use with RPC clients (e.g., edenTreaty)
  */
