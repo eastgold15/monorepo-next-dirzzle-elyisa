@@ -36,27 +36,19 @@ export function SiteCategoryTreeSelect({
   const flattenedOptions = useMemo(() => {
     const flatten = (
       cats: SiteCategoriesDTO["TreeResponse"][],
-      level = 0,
-      prefix = ""
+      level = 0
     ): Array<{ value: string; label: string }> => {
       const result: Array<{ value: string; label: string }> = [];
       cats.forEach((cat) => {
         // 排除指定的ID
         if (cat.id !== excludeId) {
-          const label = prefix ? `${prefix} > ${cat.name}` : cat.name;
           result.push({
             value: cat.id,
             label: "  ".repeat(level) + cat.name,
           });
         }
         if (cat.children && cat.children.length > 0) {
-          result.push(
-            ...flatten(
-              cat.children,
-              level + 1,
-              prefix ? `${prefix} > ${cat.name}` : cat.name
-            )
-          );
+          result.push(...flatten(cat.children, level + 1));
         }
       });
       return result;
@@ -75,6 +67,9 @@ export function SiteCategoryTreeSelect({
   // 处理值变化
   const handleValueChange = (newValue: string) => {
     if (allowClear && newValue === "none") {
+      onChange?.("");
+    } else if (newValue === "root") {
+      // 选择 root 时视为空值（顶级分类）
       onChange?.("");
     } else {
       onChange?.(newValue);

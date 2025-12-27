@@ -2,6 +2,7 @@
 
 import type { SiteCategoriesContract, SiteCategoriesDTO } from "@repo/contract";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 import type { MyInferQuery } from "./utils";
@@ -45,8 +46,11 @@ export function useCreateSiteCategory() {
     mutationFn: async (data: typeof SiteCategoriesContract.Create.static) =>
       await handleEden(rpc.api.v1.sitecategories.post(data)),
     onSuccess: () => {
-      // 刷新分类树
+      toast.success("站点分类创建成功");
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "创建站点分类失败");
     },
   });
 }
@@ -64,8 +68,11 @@ export function useUpdateSiteCategory() {
       data: typeof SiteCategoriesContract.Update.static;
     }) => await handleEden(rpc.api.v1.sitecategories({ id }).put(data)),
     onSuccess: () => {
-      // 刷新分类树
+      toast.success("站点分类更新成功");
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "更新站点分类失败");
     },
   });
 }
@@ -78,8 +85,11 @@ export function useDeleteSiteCategory() {
     mutationFn: async (id: string) =>
       await handleEden(rpc.api.v1.sitecategories({ id }).delete()),
     onSuccess: () => {
-      // 刷新分类树
+      toast.success("站点分类删除成功");
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "删除站点分类失败");
     },
   });
 }
@@ -100,7 +110,11 @@ export function useMoveCategory() {
         rpc.api.v1.sitecategories({ id }).move.patch({ newParentId })
       ),
     onSuccess: () => {
+      toast.success("分类移动成功");
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "移动分类失败");
     },
   });
 }
@@ -113,7 +127,11 @@ export function useUpdateCategoriesSort() {
     mutationFn: async (items: Array<{ id: string; sortOrder: number }>) =>
       await handleEden(rpc.api.v1.sitecategories.sort.patch({ items })),
     onSuccess: () => {
+      toast.success("排序更新成功");
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "更新排序失败");
     },
   });
 }
@@ -126,7 +144,11 @@ export function useToggleCategoryStatus() {
     mutationFn: async (id: string) =>
       await handleEden(rpc.api.v1.sitecategories({ id }).toggle.patch()),
     onSuccess: () => {
+      toast.success("状态更新成功");
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "更新状态失败");
     },
   });
 }
@@ -211,8 +233,12 @@ export function useBatchDeleteSiteCategories() {
       return ids; // 返回删除的ID列表
     },
     onSuccess: () => {
+      toast.success("批量删除成功");
       // 刷新分类树
       queryClient.invalidateQueries({ queryKey: ["site-categories"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "批量删除失败");
     },
   });
 }

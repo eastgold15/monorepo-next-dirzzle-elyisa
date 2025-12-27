@@ -91,16 +91,20 @@ export function CreateSiteCategoryModal({
 
   const onSubmit = async (data: FormData) => {
     try {
+      // 将空字符串的 parentId 转换为 null
+      const submitData = {
+        ...data,
+        parentId: data.parentId || null,
+        sortOrder: data.sortOrder || 0,
+      };
+
       if (isEdit && editingCategory) {
         await updateSiteCategory.mutateAsync({
           id: editingCategory.id,
-          data,
+          data: submitData,
         });
       } else {
-        await createSiteCategory.mutateAsync({
-          ...data,
-          sortOrder: data.sortOrder || 0,
-        });
+        await createSiteCategory.mutateAsync(submitData);
       }
       onSuccess?.();
       form.reset();
