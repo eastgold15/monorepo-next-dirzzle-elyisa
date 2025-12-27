@@ -17,18 +17,11 @@ bun add drizzle-kit@beta -D
 
 支持的数据库：
 - PostgreSQL  
-- SQLite  
-- MySQL  
-- SingleStore  
-
 ---
 
 Drizzle ORM 的设计理念是成为 **SQL 之上的轻量级类型化层**。我们相信，Drizzle 提供了在 TypeScript 中操作 SQL 数据库的最佳方式，而现在我们要让它变得更好。
 
 **关系查询（Relational Queries）** 旨在为你提供卓越的开发体验，让你能轻松地从 SQL 数据库中查询嵌套的关系数据，而无需手动编写复杂的 JOIN 或进行繁琐的数据映射。
-
-它是对现有 Schema 定义和查询构建器的**扩展功能**。你可以根据需要选择是否使用它。我们确保你在获得顶级开发体验的同时，也拥有出色的性能。
-
 ---
 
 ## 基础用法

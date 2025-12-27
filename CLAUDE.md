@@ -108,52 +108,55 @@ tools to resolve library id and get library docs without me having to explicitly
 使用契约层的 *Contract 类型，而不是 *TModel 类型
 ### 根目录命令
 - `bun dev` - 启动所有应用的开发服务器
-- `bun build` - 构建所有应用
 
 ### 数据库命令（在 packages/contract 目录）
 - `bun db:push` - 推送 schema 到数据库
 
-
 ## 项目架构
 
 ### Monorepo 结构
-- `apps/web` - Next.js 前端应用
-- `apps/b2badmin` - Elysia 后端 API 应用（也包含前端管理界面）
+- `apps/web` - Next.js 前端客户端应用
+- `apps/b2badmin` - Next.js后台管理应用
 - `packages/contract` - 共享的类型定义和数据库 Schema
 - `packages/tsconfig` - 共享的 TypeScript 配置
 
 ### 后端架构（Elysia）
 
 #### 核心技术栈
-- **框架**: Elysia (基于 Bun 的高性能 Web 框架)
-- **数据库**: PostgreSQL + Drizzle ORM
+- **框架**: Elysia (基于 Bun 的高性能 Web 框架) +Nextjs
+- **数据库**: PostgreSQL + Drizzle ORM 1.0（!!查询使用where 对象语法）
 - **认证**: Better Auth（支持邮箱密码登录和 GitHub OAuth）
-- **验证**: Zod
+- **验证**: Zod+typebox（后端|契约层）
 - **API 文档**: OpenAPI (Swagger)
-- **文件存储**: 阿里云 OSS + 本地存储
+- **文件存储**: 阿里云 OSS
 
-#### 目录结构
+- [dirzzle findmany查询语法](./docs/dirzzleV1.0查询.md)
+> 如果不会写dirzzle就看文档
+
+#### 后端目录结构
 ```
 apps/b2badmin/src/server/
-├── modules/          # 业务模块
-│   ├── auth/        # 认证模块
-│   ├── product/     # 商品管理
-│   ├── category/    # 分类管理
-│   ├── media/       # 媒体文件管理
+├── controllers/          #  controller· 路由模块
+├── modules/          # service模块
+│   ├── _customer/        # 自定义的所有模块
+│   ├── _generated/     # 脚本生成的所有模块
+│   ├── _lib/    # base server 库
+│   ├── 一些模块文件
 │   └── ...
 ├── db/              # 数据库相关
 │   ├── connection.ts
-│   └── schema.ts
 ├── lib/             # 核心库
 ├── plugins/         # Elysia 插件
 └── utils/           # 工具函数
 ```
 
-#### 模块化设计
-每个业务模块通常包含：
-- `.ts` - 控制器文件（路由和请求处理）
-- `.service.ts` - 服务层文件（业务逻辑）
-- 在 `packages/contract/src/modules/` 中对应的 schema 定义
+#### 分层架构设计
+- `.table` - 存放所有的drizzle 数据库schema 
+- `.relation.ts` - 存放所有的关系定义
+- `.contract.ts` - 存放所有的契约定义
+- `.service.ts` - 存放所有业务逻辑
+- `.controller.ts` - 存放所有业务模块的控制器文件（路由和请求处理）
+
 
 ### 前端架构（Next.js）
 
@@ -189,8 +192,6 @@ apps/b2badmin/src/server/
 - 使用 PostgreSQL
 - 通过 Drizzle Kit 管理 Schema 迁移
 - 数据库连接通过环境变量配置
-
-
 
 ## 代码规范
 
@@ -254,8 +255,6 @@ packages/contract/src/modules/
 
 - 数据库改变，只准运行bun db:push，有问题就重置数据库
 - 数据库使用远程数据库
-
-
 - 前后端的类型都定义到契约层，这是必须！！！！！
 
 
@@ -274,7 +273,6 @@ userResourceRolesTable - 用户资源角色关联表
 ```
 
 - 更多实体信息请看 [实体关系图](./docs/实体.md)
-
 - 当前项目状态 请看 [项目状态](./docs/status.md)
 
 # 最重要的部分
@@ -307,3 +305,19 @@ export const [xxx]Route = new Elysia({
 - 以后创建新的 API hooks 时，应该放在 /hooks/api/ 文件夹中
 - 文件名应该与 server/modules 中的模块名对应
 - UI 相关的 hooks 放在 /hooks/ui/ 文件夹中
+
+项目采用dirzzle1.0版本，下面是正确写法，where接收的是一个对象，对象的属性是数据库表的字段，值是要查询的值。
+[dirzzle findmany查询语法](./docs/dirzzleV1.0查询.md)
+```ts
+// `debs1.0`
+  const result = await db.query.userSiteRolesTable.findMany({
+        where: {
+          userId: user.id,
+        },
+        with: {
+          role: true,
+          site: true,
+        },
+      });
+```
+

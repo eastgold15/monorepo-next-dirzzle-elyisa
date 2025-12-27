@@ -75,3 +75,67 @@ export function useUpdateUserStatus() {
     },
   });
 }
+
+// 更新当前用户个人资料
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      name?: string;
+      phone?: string;
+      address?: string;
+      city?: string;
+    }) =>
+      await handleEden(
+        rpc.api.v1.users.me.profile.put({
+          name: data.name,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+        })
+      ),
+    onSuccess: () => {
+      toast.success("个人资料更新成功");
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "settings"] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "更新个人资料失败");
+    },
+  });
+}
+
+// 更新当前用户的站点和公司信息
+export function useUpdateSiteInfo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      siteName?: string;
+      domain?: string;
+      companyName?: string;
+      companyCode?: string;
+      companyAddress?: string;
+      website?: string;
+      contactPhone?: string;
+    }) => await handleEden(rpc.api.v1.users.me.site.put(data)),
+    onSuccess: () => {
+      toast.success("站点和公司信息更新成功");
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "settings"] });
+    },
+    onError: (error) => {
+      toast.error(error.message || "更新站点信息失败");
+    },
+  });
+}
+
+// 获取账号设置信息
+export function useAccountSettings() {
+  return useQuery({
+    queryKey: ["user", "settings"],
+    queryFn: async () => await handleEden(rpc.api.v1.users.me.settings.get()),
+    staleTime: 1000 * 60 * 5,
+  });
+}

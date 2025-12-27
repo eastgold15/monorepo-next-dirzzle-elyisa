@@ -1,3 +1,4 @@
+"use strict";
 /**
  * PM2 生态系统配置文件
  *
@@ -15,6 +16,7 @@
  * 开机自启: pm2 startup
  */
 
+// ecosystem.config.cjs
 module.exports = {
   apps: [
     {
@@ -23,25 +25,19 @@ module.exports = {
       cwd: "./apps/b2badmin",
       args: "start",
       instances: 1,
-      exec_mode: "cluster",
+      exec_mode: "fork", // 更安全
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
       env: {
         NODE_ENV: "production",
-        PORT: 3001,
-      },
-      env_production: {
-        NODE_ENV: "production",
-        PORT: 9001,
+        PORT: 9001, // 统一使用生产端口
       },
       error_file: "./logs/b2badmin-error.log",
       out_file: "./logs/b2badmin-out.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
       merge_logs: true,
-      // 确保使用 Bun 运行时（如果服务器已安装 Bun）
-      interpreter: "bun",
-      interpreter_args: "--bun",
+      interpreter: "bun", // Bun 运行时
     },
     {
       name: "web",
@@ -49,15 +45,11 @@ module.exports = {
       cwd: "./apps/web",
       args: "start",
       instances: 1,
-      exec_mode: "cluster",
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
       env: {
-        NODE_ENV: "production",
-        PORT: 4000,
-      },
-      env_production: {
         NODE_ENV: "production",
         PORT: 9003,
       },
@@ -65,9 +57,7 @@ module.exports = {
       out_file: "./logs/web-out.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
       merge_logs: true,
-      // 确保使用 Bun 运行时（如果服务器已安装 Bun）
       interpreter: "bun",
-      interpreter_args: "--bun",
     },
   ],
 };

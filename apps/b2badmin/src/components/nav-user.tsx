@@ -127,7 +127,10 @@ export function NavUser() {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => router.push("/dashboard/settings")}
+              >
                 <BadgeCheck className="mr-2 size-4" />
                 账号设置
               </DropdownMenuItem>
