@@ -5,6 +5,6 @@
  * 🛡️ 自动化脚本永远不会覆盖此文件。
  * --------------------------------------------------------
  */
-import { SalespersonCategoriesGeneratedService } from "../_generated/salespersoncategories.service";
+import { SalespersonMasterCategoriesGeneratedService } from "../_generated/salespersoncategories.service";
 
-export class SalespersonCategoriesService extends SalespersonCategoriesGeneratedService {}
+export class SalespersonMasterCategoriesService extends SalespersonMasterCategoriesGeneratedService { }

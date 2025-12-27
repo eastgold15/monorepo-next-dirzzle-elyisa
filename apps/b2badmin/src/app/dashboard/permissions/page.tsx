@@ -125,7 +125,7 @@ export default function PermissionsPage() {
   }
 
   const filteredPermissions =
-    permissionsData?.data?.filter(
+    permissionsData?.filter(
       (permission: any) =>
         permission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         permission.description?.toLowerCase().includes(searchTerm.toLowerCase())

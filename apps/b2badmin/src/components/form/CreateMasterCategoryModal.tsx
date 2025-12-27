@@ -41,7 +41,7 @@ const formSchema = z.object({
   description: z.string().min(1, "描述不能为空"),
   parentId: z.string().optional(),
   sortOrder: z.number().optional().default(0),
-  isVisible: z.boolean().optional().default(true),
+  isActive: z.boolean().optional().default(true),
   icon: z.string().optional(),
 });
 
@@ -74,7 +74,7 @@ export function CreateMasterCategoryModal({
       description: "",
       parentId: undefined,
       sortOrder: 0,
-      isVisible: true,
+      isActive: true,
       icon: "",
     },
   });
@@ -87,8 +87,8 @@ export function CreateMasterCategoryModal({
         slug: editingCategory.slug,
         description: editingCategory.description || "",
         parentId: editingCategory.parentId || undefined,
-        sortOrder: editingCategory.sortOrder,
-        isVisible: editingCategory.isActive,
+        sortOrder: editingCategory.sortOrder!,
+        isActive: editingCategory.isActive!,
         icon: editingCategory.icon || "",
       });
     } else {
@@ -98,7 +98,7 @@ export function CreateMasterCategoryModal({
         description: "",
         parentId: undefined,
         sortOrder: 0,
-        isVisible: true,
+        isActive: true,
         icon: "",
       });
     }
@@ -276,7 +276,7 @@ export function CreateMasterCategoryModal({
 
             <FormField
               control={form.control}
-              name="isVisible"
+              name="isActive"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
