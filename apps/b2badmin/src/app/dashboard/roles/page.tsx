@@ -4,6 +4,7 @@ import { Shield } from "lucide-react";
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateRoleModal } from "@/components/form/CreateRoleModal";
+import { EditRolePermissionsModal } from "@/components/form/EditRolePermissionsModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,11 @@ export default function RolesPage() {
   const { data: rolesData, isLoading, refetch } = useRolesList({});
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditPermissionsOpen, setIsEditPermissionsOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -293,7 +299,8 @@ export default function RolesPage() {
                       <div className="flex items-center gap-2">
                         <Button
                           onClick={() => {
-                            // TODO: 打开编辑模态框
+                            setSelectedRole({ id: role.id, name: role.name });
+                            setIsEditPermissionsOpen(true);
                           }}
                           size="sm"
                           variant="outline"
@@ -347,6 +354,25 @@ export default function RolesPage() {
         }}
         open={isCreateModalOpen}
       />
+
+      {/* 编辑角色权限对话框 */}
+      {selectedRole && (
+        <EditRolePermissionsModal
+          onOpenChange={(open) => {
+            setIsEditPermissionsOpen(open);
+            if (!open) {
+              setSelectedRole(null);
+              refetch();
+            }
+          }}
+          onSuccess={() => {
+            refetch();
+          }}
+          open={isEditPermissionsOpen}
+          roleId={selectedRole.id}
+          roleName={selectedRole.name}
+        />
+      )}
     </SidebarProvider>
   );
 }

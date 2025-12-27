@@ -5,6 +5,13 @@
  * 🛡️ 自动化脚本永远不会覆盖此文件。
  * --------------------------------------------------------
  */
+import { db } from "~/db/connection";
 import { PermissionGeneratedService } from "../_generated/permission.service";
+import type { ServiceContext } from "../_lib/base-service";
 
-export class PermissionService extends PermissionGeneratedService {}
+export class PermissionService extends PermissionGeneratedService {
+    async list(ctx: ServiceContext, query: any) {
+        const res = await db.query.permissionTable.findMany()
+        return res
+    }
+}

@@ -17,9 +17,14 @@ export const permissionController = new Elysia({ prefix: "/permission" })
   .use(authGuardMid)
   .get(
     "/",
-    ({ query, auth, db }) => permissionService.findAll(query, { db, auth }),
+    ({ query, auth, db }) => permissionService.list({ db, auth }, query),
     {
+      allPermission: "PERMISSIONS_VIEW",
       query: PermissionContract.ListQuery,
+      detail: {
+        tags: ["权限"],
+        summary: "查询权限列表",
+      },
     }
   )
   .post(

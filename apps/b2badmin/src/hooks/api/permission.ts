@@ -79,3 +79,19 @@ export function useRolePermissionDelete() {
     },
   });
 }
+
+// 批量更新角色权限
+export function useBatchUpdateRolePermissions() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: typeof RolePermissionsContract.BatchUpdate.static) =>
+      await handleEden(rpc.api.v1.rolepermissions.batch.update.post(data)),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["rolepermissions", variables.roleId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+}

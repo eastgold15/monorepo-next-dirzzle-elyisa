@@ -58,6 +58,12 @@ export const RolePermissionsContract = {
     data: t.Array(t.Object(RolePermissionsBase.fields)),
     total: t.Number(),
   }),
+
+  // 批量更新角色权限
+  BatchUpdate: t.Object({
+    roleId: t.String(),
+    permissionIds: t.Array(t.String()),
+  }),
 } as const;
 
 // ✨ DTO 类型直接在此导出，方便外部引用

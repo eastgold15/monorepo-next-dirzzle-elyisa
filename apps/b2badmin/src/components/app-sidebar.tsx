@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BarChart3,
   Building2,
   FileBox,
   Frame,
@@ -13,7 +12,6 @@ import {
   PieChart,
   Settings,
   Shield,
-  ShieldCheck,
   ShoppingBag,
   SquareTerminal,
   Tags,
@@ -86,7 +84,7 @@ const SIDEBAR_CONFIG: NavSection[] = [
         permission: PERMISSIONS.MEDIA_VIEW,
       },
       {
-        title: "产品管理",
+        title: "商品管理",
         url: "/dashboard/products",
         icon: ShoppingBag,
         permission: PERMISSIONS.PRODUCTS_TABLE_VIEW,
@@ -103,28 +101,22 @@ const SIDEBAR_CONFIG: NavSection[] = [
     title: "站点管理",
     items: [
       {
-        title: "Advertisements",
+        title: "广告管理",
         url: "/dashboard/ads",
         icon: PieChart,
         permission: PERMISSIONS.ADVERTISEMENTS_VIEW,
       },
       {
-        title: "Hero Cards",
+        title: "爆款商品卡片",
         url: "/dashboard/hero-cards",
         icon: Frame,
         permission: PERMISSIONS.HERO_CARDS_VIEW,
       },
       {
-        title: "Site Config",
+        title: "站点配置",
         url: "/dashboard/site-config",
         icon: Settings,
         permission: PERMISSIONS.SITE_CONFIG_VIEW,
-      },
-      {
-        title: "Master Categories",
-        url: "/dashboard/master-categories",
-        icon: Layers,
-        permission: PERMISSIONS.MASTER_CATEGORIES_VIEW,
       },
     ],
   },
@@ -132,36 +124,42 @@ const SIDEBAR_CONFIG: NavSection[] = [
     title: "组织管理",
     items: [
       {
-        title: "Factories",
+        title: "工厂管理",
         url: "/dashboard/factories",
         icon: Building2,
         permission: PERMISSIONS.FACTORIES_VIEW,
       },
       {
-        title: "Users",
+        title: "用户管理",
         url: "/dashboard/users",
         icon: Users,
         permission: PERMISSIONS.USERS_VIEW,
       },
-    ],
-  },
-  {
-    title: "数据分析",
-    items: [
       {
-        title: "Analytics",
-        url: "/dashboard/analytics",
-        icon: BarChart3,
-        permission: PERMISSIONS.DAILY_INQUIRY_COUNTER_VIEW,
-      },
-      {
-        title: "Product Statistics",
-        url: "/dashboard/product-statistics",
-        icon: ShieldCheck,
-        permission: "PRODUCTS_TABLE_VIEW",
+        title: "全局分类",
+        url: "/dashboard/master-categories",
+        icon: Layers,
+        permission: PERMISSIONS.MASTER_CATEGORIES_VIEW,
       },
     ],
   },
+  // {
+  //   title: "数据分析",
+  //   items: [
+  //     {
+  //       title: "Analytics",
+  //       url: "/dashboard/analytics",
+  //       icon: BarChart3,
+  //       permission: PERMISSIONS.DAILY_INQUIRY_COUNTER_VIEW,
+  //     },
+  //     {
+  //       title: "Product Statistics",
+  //       url: "/dashboard/product-statistics",
+  //       icon: ShieldCheck,
+  //       permission: "PRODUCTS_TABLE_VIEW",
+  //     },
+  //   ],
+  // },
   {
     title: "权限管理",
     items: [

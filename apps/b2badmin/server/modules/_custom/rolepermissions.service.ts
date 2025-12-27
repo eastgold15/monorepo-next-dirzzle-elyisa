@@ -5,6 +5,27 @@
  * 🛡️ 自动化脚本永远不会覆盖此文件。
  * --------------------------------------------------------
  */
+import type { RolePermissionsContract } from "@repo/contract";
+import { db } from "~/db/connection";
 import { RolePermissionsGeneratedService } from "../_generated/rolepermissions.service";
+import type { ServiceContext } from "../_lib/base-service";
 
-export class RolePermissionsService extends RolePermissionsGeneratedService {}
+export class RolePermissionsService extends RolePermissionsGeneratedService {
+    async list(
+        ctx: ServiceContext,
+        query: typeof RolePermissionsContract.ListQuery.static
+    ) {
+        const res = await db.query.rolePermissionsTable.findMany({
+            where: {
+                ...(query?.roleId ? { roleId: query.roleId } : {}),
+                ...(query?.search ? { permissionId: query.search } : {}),
+            },
+
+            with: {
+                permission: true,
+                role: true,
+            }
+        });
+        return res
+    }
+}
