@@ -421,6 +421,7 @@ export default function SiteCategoryManager() {
 
       {/* 创建/编辑分类对话框 */}
       <CreateSiteCategoryModal
+        editingCategory={editingCategory}
         onOpenChange={(open) => {
           setIsCreateModalOpen(open);
           if (!open) {
@@ -428,8 +429,7 @@ export default function SiteCategoryManager() {
           }
         }}
         onSuccess={() => {
-          // 刷新数据
-          window.location.reload();
+          // 数据会通过 React Query 自动刷新
         }}
         open={isCreateModalOpen}
       />

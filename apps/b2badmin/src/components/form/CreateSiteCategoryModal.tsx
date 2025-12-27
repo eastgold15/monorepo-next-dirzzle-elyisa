@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { SiteCategoriesDTO } from "@repo/contract";
 import { FolderPlus, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -24,8 +26,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { SiteCategoryTreeSelect } from "@/components/ui/site-category-tree-select";
-import { useCreateSiteCategory } from "@/hooks/api/site-category";
-import { useMasterCategoryStore } from "@/stores/master-categories-store";
+import {
+  useCreateSiteCategory,
+  useUpdateSiteCategory,
+} from "@/hooks/api/site-category";
+
+type SiteCategory = SiteCategoriesDTO["TreeResponse"];
 
 const formSchema = z.object({
   name: z.string().min(1, "分类名称不能为空"),
@@ -40,15 +46,19 @@ interface CreateSiteCategoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  editingCategory?: SiteCategory;
 }
 
 export function CreateSiteCategoryModal({
   open,
   onOpenChange,
   onSuccess,
+  editingCategory,
 }: CreateSiteCategoryModalProps) {
   const createSiteCategory = useCreateSiteCategory();
-  const { flatData } = useMasterCategoryStore();
+  const updateSiteCategory = useUpdateSiteCategory();
+
+  const isEdit = !!editingCategory;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -60,12 +70,38 @@ export function CreateSiteCategoryModal({
     },
   });
 
+  // 当编辑的分类变化时，重置表单
+  useEffect(() => {
+    if (editingCategory) {
+      form.reset({
+        name: editingCategory.name,
+        parentId: editingCategory.parentId || undefined,
+        // sortOrder: editingCategory.sortOrder,
+        masterCategoryId: editingCategory.masterCategoryId || undefined,
+      });
+    } else {
+      form.reset({
+        name: "",
+        parentId: undefined,
+        sortOrder: 0,
+        masterCategoryId: undefined,
+      });
+    }
+  }, [editingCategory, form]);
+
   const onSubmit = async (data: FormData) => {
     try {
-      await createSiteCategory.mutateAsync({
-        ...data,
-        sortOrder: data.sortOrder || 0,
-      });
+      if (isEdit && editingCategory) {
+        await updateSiteCategory.mutateAsync({
+          id: editingCategory.id,
+          data,
+        });
+      } else {
+        await createSiteCategory.mutateAsync({
+          ...data,
+          sortOrder: data.sortOrder || 0,
+        });
+      }
       onSuccess?.();
       form.reset();
       onOpenChange(false);
@@ -81,16 +117,19 @@ export function CreateSiteCategoryModal({
     onOpenChange(isOpen);
   };
 
+  const isLoading =
+    createSiteCategory.isPending || updateSiteCategory.isPending;
+
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FolderPlus className="h-5 w-5" />
-            创建站点分类
+            {isEdit ? "编辑站点分类" : "创建站点分类"}
           </DialogTitle>
           <DialogDescription>
-            创建新的站点分类，支持树形结构组织
+            {isEdit ? "修改站点分类信息" : "创建新的站点分类，支持树形结构组织"}
           </DialogDescription>
         </DialogHeader>
 
@@ -170,19 +209,21 @@ export function CreateSiteCategoryModal({
 
             <DialogFooter>
               <Button
-                disabled={createSiteCategory.isPending}
+                disabled={isLoading}
                 onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
               >
                 取消
               </Button>
-              <Button disabled={createSiteCategory.isPending} type="submit">
-                {createSiteCategory.isPending ? (
+              <Button disabled={isLoading} type="submit">
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    创建中...
+                    {isEdit ? "保存中..." : "创建中..."}
                   </>
+                ) : isEdit ? (
+                  "保存修改"
                 ) : (
                   "创建分类"
                 )}
