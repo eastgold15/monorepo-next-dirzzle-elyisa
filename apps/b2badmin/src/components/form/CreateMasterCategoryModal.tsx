@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { MasterDTO } from "@repo/contract";
 import { FolderOpen, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,10 @@ import { Input } from "@/components/ui/input";
 import { MasterCategorySelect } from "@/components/ui/master-category-select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateMasterCategory } from "@/hooks/api/master-categories";
+import {
+  useCreateMasterCategory,
+  useUpdateMasterCategory,
+} from "@/hooks/api/master-categories";
 
 const formSchema = z.object({
   name: z.string().min(1, "分类名称不能为空"),
@@ -41,19 +46,25 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+type MasterCategory = MasterDTO["Response"];
 
 interface CreateMasterCategoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  editingCategory?: MasterCategory;
 }
 
 export function CreateMasterCategoryModal({
   open,
   onOpenChange,
   onSuccess,
+  editingCategory,
 }: CreateMasterCategoryModalProps) {
   const createMasterCategory = useCreateMasterCategory();
+  const updateMasterCategory = useUpdateMasterCategory();
+
+  const isEdit = !!editingCategory;
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -68,12 +79,44 @@ export function CreateMasterCategoryModal({
     },
   });
 
+  // 当编辑的分类变化时，重置表单
+  useEffect(() => {
+    if (editingCategory) {
+      form.reset({
+        name: editingCategory.name,
+        slug: editingCategory.slug,
+        description: editingCategory.description || "",
+        parentId: editingCategory.parentId || undefined,
+        sortOrder: editingCategory.sortOrder,
+        isVisible: editingCategory.isActive,
+        icon: editingCategory.icon || "",
+      });
+    } else {
+      form.reset({
+        name: "",
+        slug: "",
+        description: "",
+        parentId: undefined,
+        sortOrder: 0,
+        isVisible: true,
+        icon: "",
+      });
+    }
+  }, [editingCategory, form]);
+
   const onSubmit = async (data: FormData) => {
     try {
-      await createMasterCategory.mutateAsync({
-        ...data,
-        sortOrder: data.sortOrder || 0,
-      });
+      if (isEdit && editingCategory) {
+        await updateMasterCategory.mutateAsync({
+          id: editingCategory.id,
+          data,
+        });
+      } else {
+        await createMasterCategory.mutateAsync({
+          ...data,
+          sortOrder: data.sortOrder || 0,
+        });
+      }
       onSuccess?.();
       form.reset();
       onOpenChange(false);
@@ -89,6 +132,9 @@ export function CreateMasterCategoryModal({
     onOpenChange(isOpen);
   };
 
+  const isLoading =
+    createMasterCategory.isPending || updateMasterCategory.isPending;
+
   // 生成 slug
   const generateSlug = (name: string) =>
     name
@@ -102,10 +148,12 @@ export function CreateMasterCategoryModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FolderOpen className="h-5 w-5" />
-            创建Master分类
+            {isEdit ? "编辑Master分类" : "创建Master分类"}
           </DialogTitle>
           <DialogDescription>
-            创建全局Master分类，用于跨站点的分类标准化管理
+            {isEdit
+              ? "修改全局Master分类信息"
+              : "创建全局Master分类，用于跨站点的分类标准化管理"}
           </DialogDescription>
         </DialogHeader>
 
@@ -249,19 +297,21 @@ export function CreateMasterCategoryModal({
 
             <DialogFooter>
               <Button
-                disabled={createMasterCategory.isPending}
+                disabled={isLoading}
                 onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
               >
                 取消
               </Button>
-              <Button disabled={createMasterCategory.isPending} type="submit">
-                {createMasterCategory.isPending ? (
+              <Button disabled={isLoading} type="submit">
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    创建中...
+                    {isEdit ? "保存中..." : "创建中..."}
                   </>
+                ) : isEdit ? (
+                  "保存修改"
                 ) : (
                   "创建分类"
                 )}

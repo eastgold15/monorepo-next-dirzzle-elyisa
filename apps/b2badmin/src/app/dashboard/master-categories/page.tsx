@@ -508,6 +508,7 @@ export default function MasterCategoryManager() {
 
       {/* 创建/编辑主分类对话框 */}
       <CreateMasterCategoryModal
+        editingCategory={editingCategory}
         onOpenChange={(open) => {
           setIsCreateModalOpen(open);
           if (!open) {
@@ -515,8 +516,7 @@ export default function MasterCategoryManager() {
           }
         }}
         onSuccess={() => {
-          // 刷新数据
-          window.location.reload();
+          // 数据会通过 React Query 自动刷新
         }}
         open={isCreateModalOpen}
       />

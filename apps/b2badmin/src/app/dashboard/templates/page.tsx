@@ -102,13 +102,6 @@ export default function TemplateManager() {
   };
 
   // 渲染逻辑
-  if (isLoading)
-    return (
-      <div className="p-10 text-center text-slate-500">
-        Loading templates...
-      </div>
-    );
-
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -122,7 +115,14 @@ export default function TemplateManager() {
         />
 
         <main className="p-6">
-          {view === "list" ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600" />
+                <p className="mt-4 text-slate-500">加载中...</p>
+              </div>
+            </div>
+          ) : view === "list" ? (
             <TemplateListView
               onCreate={() => {
                 resetForm();
