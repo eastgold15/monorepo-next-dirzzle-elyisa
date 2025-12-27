@@ -7,4 +7,4 @@
  */
 import { SalespersonMasterCategoriesGeneratedService } from "../_generated/salespersoncategories.service";
 
-export class SalespersonMasterCategoriesService extends SalespersonMasterCategoriesGeneratedService { }
+export class SalespersonMasterCategoriesService extends SalespersonMasterCategoriesGeneratedService {}

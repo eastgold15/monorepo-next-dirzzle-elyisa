@@ -10,8 +10,8 @@ import { PermissionGeneratedService } from "../_generated/permission.service";
 import type { ServiceContext } from "../_lib/base-service";
 
 export class PermissionService extends PermissionGeneratedService {
-    async list(ctx: ServiceContext, query: any) {
-        const res = await db.query.permissionTable.findMany()
-        return res
-    }
+  async list(ctx: ServiceContext, query: any) {
+    const res = await db.query.permissionTable.findMany();
+    return res;
+  }
 }

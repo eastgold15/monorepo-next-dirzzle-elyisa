@@ -20,8 +20,7 @@ export const rolepermissionsController = new Elysia({
   .use(authGuardMid)
   .get(
     "/",
-    ({ query, auth, db }) =>
-      rolePermissionsService.list({ db, auth }, query),
+    ({ query, auth, db }) => rolePermissionsService.list({ db, auth }, query),
     { query: RolePermissionsContract.ListQuery }
   )
   .post(

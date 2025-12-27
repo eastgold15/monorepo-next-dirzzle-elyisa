@@ -11,21 +11,21 @@ import { RolePermissionsGeneratedService } from "../_generated/rolepermissions.s
 import type { ServiceContext } from "../_lib/base-service";
 
 export class RolePermissionsService extends RolePermissionsGeneratedService {
-    async list(
-        ctx: ServiceContext,
-        query: typeof RolePermissionsContract.ListQuery.static
-    ) {
-        const res = await db.query.rolePermissionsTable.findMany({
-            where: {
-                ...(query?.roleId ? { roleId: query.roleId } : {}),
-                ...(query?.search ? { permissionId: query.search } : {}),
-            },
+  async list(
+    ctx: ServiceContext,
+    query: typeof RolePermissionsContract.ListQuery.static
+  ) {
+    const res = await db.query.rolePermissionsTable.findMany({
+      where: {
+        ...(query?.roleId ? { roleId: query.roleId } : {}),
+        ...(query?.search ? { permissionId: query.search } : {}),
+      },
 
-            with: {
-                permission: true,
-                role: true,
-            }
-        });
-        return res
-    }
+      with: {
+        permission: true,
+        role: true,
+      },
+    });
+    return res;
+  }
 }

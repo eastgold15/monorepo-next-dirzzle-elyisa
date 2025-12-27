@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useDeleteSalesperson, useSalespersons } from "@/hooks/api/salesperson";
 
-export default function UsersPage() {
+export default function SalespersonsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 

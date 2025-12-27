@@ -22,7 +22,7 @@ export async function validateEmailConfig(): Promise<void> {
     EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
     EMAIL_FROM: process.env.EMAIL_FROM,
   };
-  console.log('requiredConfigs:', JSON.stringify(requiredConfigs, null, 2))
+  console.log("requiredConfigs:", JSON.stringify(requiredConfigs, null, 2));
   const missingConfigs: string[] = [];
   let configValid = true;
 
