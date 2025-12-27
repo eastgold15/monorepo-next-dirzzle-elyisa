@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { rpc } from "@/lib/rpc";
 import { handleEden } from "@/lib/utils/base";
 // 主要的 useUser hook（支持站点参数）
-export function useMe(options?: { siteId?: string }) {
+export function useMe(options?: { siteId?: string; enabled?: boolean }) {
   return useQuery({
     queryKey: ["user", "me", options?.siteId],
     queryFn: async () => {
@@ -14,6 +14,7 @@ export function useMe(options?: { siteId?: string }) {
     },
     staleTime: 1000 * 60 * 5,
     retry: false,
+    enabled: options?.enabled ?? true,
   });
 }
 

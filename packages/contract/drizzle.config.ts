@@ -6,8 +6,8 @@ export default defineConfig({
   dialect: "postgresql",
   casing: "snake_case",
   dbCredentials: {
-    url: "postgres://gina_user:gina_password@localhost:5432/gina_dev",
+    // url: "postgres://gina_user:gina_password@localhost:5432/gina_dev",
 
-    // url: "postgres://user_yDBAhF:password_FXwrTE@139.196.30.42:5432/gina",
+    url: "postgres://user_yDBAhF:password_FXwrTE@139.196.30.42:5432/gina",
   },
 });

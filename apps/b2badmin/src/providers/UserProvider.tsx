@@ -13,8 +13,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const isPublicPage = pathname === "/login" || pathname === "/signup";
 
-  // 1. 发起请求
-  const { data, error, isLoading } = useMe();
+  // 1. 发起请求（仅在非公共页面时才查询用户信息）
+  const { data, error, isLoading } = useMe({
+    enabled: !isPublicPage,
+  });
 
   const setAuth = useAuthStore((s) => s.setAuth);
   const clearAuth = useAuthStore((s) => s.clearAuth);
