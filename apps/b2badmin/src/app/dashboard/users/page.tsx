@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { HasRole } from "@/components/auth";
 import { CreateSalespersonModal } from "@/components/form/CreateSalespersonModal";
+import { EditSalespersonModal } from "@/components/form/EditSalespersonModal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -22,9 +23,14 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useDeleteSalesperson, useSalespersons } from "@/hooks/api/salesperson";
+import type { SalespersonWithDetails } from "@repo/contract";
 
 export default function UsersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingSalesperson, setEditingSalesperson] = useState<
+    SalespersonWithDetails | null
+  >(null);
   const [isMounted, setIsMounted] = useState(false);
 
   // 避免hydration错误
@@ -233,7 +239,8 @@ export default function UsersPage() {
                           <button
                             className="font-medium text-indigo-600 text-sm hover:text-indigo-700"
                             onClick={() => {
-                              // TODO: 实现编辑功能
+                              setEditingSalesperson(salesperson);
+                              setIsEditModalOpen(true);
                             }}
                           >
                             编辑
@@ -267,6 +274,16 @@ export default function UsersPage() {
           refetch();
         }}
         open={isCreateModalOpen}
+      />
+
+      {/* 编辑业务员弹窗 */}
+      <EditSalespersonModal
+        onOpenChange={setIsEditModalOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+        open={isEditModalOpen}
+        salesperson={editingSalesperson}
       />
     </SidebarProvider>
   );

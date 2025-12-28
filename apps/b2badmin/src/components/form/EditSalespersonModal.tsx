@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -25,65 +26,89 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useMasterCategories } from "@/hooks/api/master-categories";
-import { useCreateSalesperson } from "@/hooks/api/salesperson";
-import { useAuthStore } from "@/stores/auth-store";
+import { useUpdateSalesperson } from "@/hooks/api/salesperson";
+import { useUpdateSalespersonMasterCategories } from "@/hooks/api/salesperson";
+import type { SalespersonWithDetails } from "@repo/contract";
 
 const formSchema = z.object({
-  // 用户信息
-  email: z.string().email("请输入有效的邮箱地址"),
-  password: z.string().min(6, "密码至少6个字符"),
-  name: z.string().min(1, "姓名不能为空"),
-  // 业务员信息
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
   position: z.string().optional(),
   department: z.string().optional(),
   avatar: z.string().optional(),
-  // 主分类
-  masterCategoryIds: z.array(z.string()).optional(),
+  isActive: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-interface CreateSalespersonModalProps {
+interface EditSalespersonModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  salesperson: SalespersonWithDetails | null;
 }
 
-export function CreateSalespersonModal({
+export function EditSalespersonModal({
   open,
   onOpenChange,
   onSuccess,
-}: CreateSalespersonModalProps) {
-  const createSalesperson = useCreateSalesperson();
+  salesperson,
+}: EditSalespersonModalProps) {
+  const updateSalesperson = useUpdateSalesperson();
+  const updateMasterCategories = useUpdateSalespersonMasterCategories();
   const { data: masterCategoriesResponse } = useMasterCategories({
     page: 1,
     limit: 100,
   });
   const masterCategories = masterCategoriesResponse || [];
-  const currentSite = useAuthStore((state) => state.currentSite);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      name: "",
       phone: "",
       whatsapp: "",
       position: "",
       department: "",
       avatar: "",
-      masterCategoryIds: [],
+      isActive: true,
     },
   });
 
+  // 当 salesperson 变化时，填充表单
+  useEffect(() => {
+    if (salesperson) {
+      form.reset({
+        phone: salesperson.phone || "",
+        whatsapp: salesperson.whatsapp || "",
+        position: salesperson.position || "",
+        department: salesperson.department || "",
+        avatar: salesperson.avatar || "",
+        isActive: salesperson.user?.isActive ?? true,
+      });
+    }
+  }, [salesperson, form]);
+
+  // 当前已选择的主分类 ID
+  const selectedMasterCategoryIds =
+    salesperson?.masterCategories?.map((mc) => mc.masterCategoryId) || [];
+
   const onSubmit = async (data: FormData) => {
+    if (!salesperson) return;
+
     try {
-      await createSalesperson.mutateAsync(data);
+      // 更新业务员基本信息
+      await updateSalesperson.mutateAsync({
+        id: salesperson.id,
+        data,
+      });
+
+      // 更新主分类
+      await updateMasterCategories.mutateAsync({
+        id: salesperson.id,
+        masterCategoryIds: selectedMasterCategoryIds,
+      });
+
       onSuccess?.();
-      form.reset();
       onOpenChange(false);
     } catch (error) {
       // 错误已在 mutation 中处理
@@ -97,78 +122,21 @@ export function CreateSalespersonModal({
     onOpenChange(isOpen);
   };
 
-  const isLoading = createSalesperson.isPending;
+  const isLoading =
+    updateSalesperson.isPending || updateMasterCategories.isPending;
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>创建业务员</DialogTitle>
+          <DialogTitle>编辑业务员</DialogTitle>
           <DialogDescription>
-            创建新的业务员账号，设置归属关系和负责的主分类
+            修改业务员的基本信息和负责的主分类
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-            {/* 用户账号信息 */}
-            <div className="space-y-4">
-              <div className="border-slate-200 border-b pb-2">
-                <h3 className="font-semibold text-slate-900">账号信息</h3>
-                <p className="text-slate-500 text-sm">
-                  设置业务员的登录账号和密码
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>姓名 *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="请输入姓名" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>邮箱 *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="example@company.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>密码 *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="至少6个字符"
-                        type="password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             {/* 业务员信息 */}
             <div className="space-y-4">
               <div className="border-slate-200 border-b pb-2">
@@ -254,22 +222,28 @@ export function CreateSalespersonModal({
                   </FormItem>
                 )}
               />
-            </div>
 
-            {/* 当前归属信息展示 */}
-            {currentSite && (
-              <div className="rounded-md bg-blue-50 p-3">
-                <p className="font-medium text-blue-900 text-sm">
-                  归属信息：
-                  {currentSite.siteType === "exporter"
-                    ? " 出口商"
-                    : " 工厂"}
-                </p>
-                <p className="text-blue-700 text-xs">
-                  业务员将自动归属到当前登录用户的站点
-                </p>
-              </div>
-            )}
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>账号状态</FormLabel>
+                      <p className="text-slate-500 text-xs">
+                        启用后业务员可以登录系统
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* 主分类分配 */}
             <div className="space-y-4">
@@ -280,45 +254,48 @@ export function CreateSalespersonModal({
                 </p>
               </div>
 
-              <FormField
-                control={form.control}
-                name="masterCategoryIds"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="mb-2 block">
-                      <Label>负责的主分类</Label>
-                    </div>
-                    <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-3">
-                      {masterCategories.length === 0 ? (
-                        <p className="text-slate-500 text-sm">暂无主分类</p>
-                      ) : (
-                        masterCategories.map((category) => (
-                          <div
-                            className="flex items-center space-x-2"
-                            key={category.id}
-                          >
-                            <Switch
-                              checked={field.value?.includes(category.id)}
-                              onCheckedChange={(checked) => {
-                                const newValue = checked
-                                  ? [...(field.value || []), category.id]
-                                  : (field.value || []).filter(
-                                      (id) => id !== category.id
-                                    );
-                                field.onChange(newValue);
-                              }}
-                            />
-                            <label className="text-slate-700 text-sm">
-                              {category.name}
-                            </label>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <div className="mb-2 block">
+                  <Label>负责的主分类</Label>
+                </div>
+                <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-3">
+                  {masterCategories.length === 0 ? (
+                    <p className="text-slate-500 text-sm">暂无主分类</p>
+                  ) : (
+                    masterCategories.map((category) => {
+                      const isSelected =
+                        selectedMasterCategoryIds.includes(category.id);
+                      return (
+                        <div
+                          className="flex items-center space-x-2"
+                          key={category.id}
+                        >
+                          <Switch
+                            checked={isSelected}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                selectedMasterCategoryIds.push(category.id);
+                              } else {
+                                const index = selectedMasterCategoryIds.indexOf(
+                                  category.id
+                                );
+                                if (index > -1) {
+                                  selectedMasterCategoryIds.splice(index, 1);
+                                }
+                              }
+                              // 强制重新渲染
+                              form.setValue("phone", form.getValues("phone"));
+                            }}
+                          />
+                          <label className="text-slate-700 text-sm">
+                            {category.name}
+                          </label>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
 
             <DialogFooter>
@@ -334,10 +311,10 @@ export function CreateSalespersonModal({
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    创建中...
+                    保存中...
                   </>
                 ) : (
-                  "创建业务员"
+                  "保存修改"
                 )}
               </Button>
             </DialogFooter>

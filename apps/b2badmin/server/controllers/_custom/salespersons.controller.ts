@@ -20,22 +20,8 @@ export const salespersonsController = new Elysia({
   .get(
     "/",
     async ({ query, db, currentSite }) => {
-      // 构建查询条件
-      const whereCondition: Record<string, unknown> = {};
-
-      // 根据站点类型过滤
-      if (currentSite?.siteType === "exporter" && currentSite.exporterId) {
-        // 出口商站点：显示该出口商的业务员
-        whereCondition.exporterId = currentSite.exporterId;
-      } else if (currentSite?.siteType === "factory" && currentSite.factoryId) {
-        // 工厂站点：只显示该工厂的业务员
-        whereCondition.factoryId = currentSite.factoryId;
-      }
-
-      // 获取业务员列表
-      const salespersons = await db.query.salespersonsTable.findMany({
-        where:
-          Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
+      // 获取所有业务员列表（包含关联数据）
+      const allSalespersons = await db.query.salespersonsTable.findMany({
         with: {
           user: true,
           affiliations: {
@@ -46,21 +32,44 @@ export const salespersonsController = new Elysia({
           },
           masterCategories: true,
         },
-        limit: query.limit ? Number(query.limit) : undefined,
-        offset: query.page
-          ? Number(query.page) * Number(query.limit || 10)
-          : undefined,
       });
 
-      // 获取总数
-      const total = await db.query.salespersonsTable.findMany({
-        where:
-          Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
-      });
+      // 根据站点类型在内存中过滤
+      let filteredSalespersons = allSalespersons;
+
+      if (currentSite?.siteType === "exporter" && currentSite.exporterId) {
+        // 出口商站点：显示该出口商的业务员
+        filteredSalespersons = allSalespersons.filter((sp) =>
+          sp.affiliations?.some(
+            (aff) =>
+              aff.entityType === "exporter" &&
+              aff.exporterId === currentSite.exporterId
+          )
+        );
+      } else if (currentSite?.siteType === "factory" && currentSite.factoryId) {
+        // 工厂站点：只显示该工厂的业务员
+        filteredSalespersons = allSalespersons.filter((sp) =>
+          sp.affiliations?.some(
+            (aff) =>
+              aff.entityType === "factory" &&
+              aff.factoryId === currentSite.factoryId
+          )
+        );
+      }
+
+      // 分页（page 从 1 开始，所以需要减 1）
+      const limit = query.limit ? Number(query.limit) : 10;
+      const page = query.page ? Number(query.page) : 1;
+      const offset = (page - 1) * limit;
+
+      const paginatedSalespersons = filteredSalespersons.slice(
+        offset,
+        offset + limit
+      );
 
       return {
-        data: salespersons,
-        total: total.length,
+        data: paginatedSalespersons,
+        total: filteredSalespersons.length,
       };
     },
     {
@@ -78,8 +87,8 @@ export const salespersonsController = new Elysia({
   .post(
     "/",
     async ({ body, db, currentSite }) => {
-      // 1. 创建用户账号（使用 signUp 而不是 signIn）
-      const user = await authserver.api.signUpEmail({
+      // 1. 使用 Better Auth 的 signUp.email 创建用户账号
+      const res = await authserver.api.signUpEmail({
         body: {
           email: body.email,
           password: body.password,
@@ -87,11 +96,17 @@ export const salespersonsController = new Elysia({
         },
       });
 
+      if (!res?.user) {
+        throw new Error("用户创建失败");
+      }
+
+      const userId = res.user.id;
+
       // 2. 创建业务员记录
       const [salesperson] = await db
         .insert(salespersonsTable)
         .values({
-          userId: user.user.id,
+          userId,
           phone: body.phone,
           whatsapp: body.whatsapp,
           position: body.position,
@@ -100,18 +115,18 @@ export const salespersonsController = new Elysia({
         })
         .returning();
 
-      // 3. 创建归属关系
-      if (body.entityType === "exporter" && body.exporterId) {
+      // 3. 自动创建归属关系（基于当前登录用户的站点）
+      if (currentSite?.siteType === "exporter" && currentSite.exporterId) {
         await db.insert(salespersonAffiliationsTable).values({
           salespersonId: salesperson.id,
           entityType: "exporter",
-          exporterId: body.exporterId,
+          exporterId: currentSite.exporterId,
         });
-      } else if (body.entityType === "factory" && body.factoryId) {
+      } else if (currentSite?.siteType === "factory" && currentSite.factoryId) {
         await db.insert(salespersonAffiliationsTable).values({
           salespersonId: salesperson.id,
           entityType: "factory",
-          factoryId: body.factoryId,
+          factoryId: currentSite.factoryId,
         });
       }
 
@@ -187,7 +202,9 @@ export const salespersonsController = new Elysia({
   .delete(
     "/:id",
     async ({ params, db }) => {
-      await db.delete(salespersonsTable).where(eq(salespersonsTable.id, params.id));
+      await db
+        .delete(salespersonsTable)
+        .where(eq(salespersonsTable.id, params.id));
 
       return { success: true };
     },
@@ -215,7 +232,7 @@ export const salespersonsController = new Elysia({
               exporter: true,
             },
           },
-          masterCategories: true
+          masterCategories: true,
         },
       });
 
